@@ -4,8 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<link rel="icon" type="image/svg+xml" href="favicon.svg">
-<link rel="shortcut icon" href="favicon.svg">
+<!-- Tasky V12: inline favicon + robust paid workspace branding -->
+<link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
+<meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -1997,36 +1998,61 @@ async function saveWorkspaceLogo(e){
 
   const submit = e.submitter;
   if(submit){ submit.disabled=true; submit.textContent = lang==='ar'?'جارٍ الحفظ...':'Saving...'; }
-  const path = `${currentWorkspaceId}/logo`;
+  const extMap = {
+    'image/png':'png', 'image/jpeg':'jpg', 'image/webp':'webp', 'image/svg+xml':'svg'
+  };
+  const ext = extMap[file.type] || (file.name.split('.').pop() || 'png').toLowerCase();
+  // Use a fresh object path for every logo. This avoids overwrite/upsert edge cases
+  // and makes browser/CDN cache invalidation deterministic.
+  const path = `${currentWorkspaceId}/logo-${Date.now()}.${ext}`;
   const { error: uploadError } = await sb.storage.from('workspace-logos').upload(path, file, {
-    upsert:true,
+    upsert:false,
     contentType:file.type || 'image/png',
     cacheControl:'3600'
   });
   if(uploadError){
-    console.error(uploadError);
-    alert(lang==='ar'?'تعذّر رفع الشعار. تأكد من تشغيل Migration الخاص بالهوية.':'Could not upload the logo. Make sure the branding migration is installed.');
-    if(submit) submit.disabled=false;
+    console.error('workspace logo upload failed', uploadError);
+    const detail = uploadError.message || uploadError.error || String(uploadError);
+    alert((lang==='ar'?'تعذّر رفع الشعار: ':'Could not upload the logo: ') + detail);
+    if(submit){ submit.disabled=false; submit.textContent = lang==='ar'?'حفظ الشعار':'Save logo'; }
     return;
   }
   const { data: publicData } = sb.storage.from('workspace-logos').getPublicUrl(path);
-  const logoUrl = `${publicData.publicUrl}?v=${Date.now()}`;
+  const logoUrl = publicData.publicUrl;
+  const previousLogoUrl = currentWorkspaceLogoUrl;
   const { error: saveError } = await sb.rpc('set_workspace_logo', { p_workspace_id: currentWorkspaceId, p_logo_url: logoUrl });
   if(saveError){
-    console.error(saveError);
-    alert(lang==='ar'?'تم رفع الملف لكن تعذّر حفظه لمساحة العمل':'File uploaded, but could not attach it to the workspace');
-    if(submit) submit.disabled=false;
+    console.error('workspace logo save failed', saveError);
+    await sb.storage.from('workspace-logos').remove([path]).catch(()=>{});
+    alert((lang==='ar'?'تم رفع الملف لكن تعذّر ربطه بمساحة العمل: ':'File uploaded, but could not attach it to the workspace: ') + (saveError.message || String(saveError)));
+    if(submit){ submit.disabled=false; submit.textContent = lang==='ar'?'حفظ الشعار':'Save logo'; }
     return;
   }
   currentWorkspaceLogoUrl = logoUrl;
   renderWorkspaceBrand();
   closeAddModal();
+
+  // Best-effort cleanup of the previous Tasky workspace logo after the new one is live.
+  const previousPath = workspaceLogoStoragePath(previousLogoUrl);
+  if(previousPath && previousPath !== path){
+    sb.storage.from('workspace-logos').remove([previousPath]).catch(()=>{});
+  }
+}
+function workspaceLogoStoragePath(url){
+  if(!url) return null;
+  try{
+    const decoded = decodeURIComponent(url.split('?')[0]);
+    const marker = '/storage/v1/object/public/workspace-logos/';
+    const i = decoded.indexOf(marker);
+    return i >= 0 ? decoded.slice(i + marker.length) : null;
+  }catch(_){ return null; }
 }
 async function removeWorkspaceLogo(){
   if(!currentWorkspaceId || currentUserRole !== 'admin' || !isPaidPlan()) return;
+  const previousPath = workspaceLogoStoragePath(currentWorkspaceLogoUrl);
   const { error: saveError } = await sb.rpc('set_workspace_logo', { p_workspace_id: currentWorkspaceId, p_logo_url: null });
-  if(saveError){ console.error(saveError); alert(lang==='ar'?'تعذّرت إزالة الشعار':'Could not remove logo'); return; }
-  await sb.storage.from('workspace-logos').remove([`${currentWorkspaceId}/logo`]);
+  if(saveError){ console.error(saveError); alert((lang==='ar'?'تعذّرت إزالة الشعار: ':'Could not remove logo: ') + (saveError.message || String(saveError))); return; }
+  if(previousPath) await sb.storage.from('workspace-logos').remove([previousPath]);
   currentWorkspaceLogoUrl = null;
   renderWorkspaceBrand();
   closeAddModal();
