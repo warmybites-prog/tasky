@@ -389,99 +389,196 @@
     font-family:var(--font-en-ui) !important;
   }
 
-  /* ---------------- FIXED TOPBAR SIZING (V8) ---------------- */
-  /* Keep the header controls identical in size when breadcrumb text changes. */
+  /* ---------------- LOCKED TOPBAR GEOMETRY (V9) ---------------- */
+  /*
+     The breadcrumb gets a fixed slot and may only truncate — never wrap.
+     The action controls keep fixed heights/widths. The search field is the
+     only control allowed to shrink, so navigating between modules cannot
+     change the header geometry.
+  */
   .topbar{
-    height:66px;
-    min-height:66px;
-    padding:0 18px;
-    gap:14px;
+    height:68px;
+    min-height:68px;
+    max-height:68px;
+    padding:0 16px;
+    gap:10px;
+    overflow:hidden;
   }
 
   .breadcrumb{
-    flex:1 1 auto;
-    min-width:0;
-    max-width:210px;
+    flex:0 0 155px;
+    width:155px;
+    min-width:155px;
+    max-width:155px;
     height:40px;
-    white-space:nowrap;
+    display:grid;
+    grid-template-columns:auto auto minmax(0,1fr);
+    align-items:center;
+    gap:7px;
     overflow:hidden;
+    white-space:nowrap;
   }
-  .breadcrumb > span{flex:none;}
+  .breadcrumb > span{
+    min-width:0;
+    white-space:nowrap;
+    flex:none;
+  }
   .breadcrumb b{
     display:block;
     min-width:0;
+    max-width:100%;
     overflow:hidden;
     text-overflow:ellipsis;
-    white-space:nowrap;
-    line-height:40px;
+    white-space:nowrap !important;
+    line-height:1.35;
   }
 
   .topbar-right{
-    flex:0 0 auto;
-    flex-wrap:nowrap;
-    gap:10px;
+    flex:1 1 auto;
     min-width:0;
+    height:40px;
+    display:flex;
+    align-items:center;
+    justify-content:flex-start;
+    flex-wrap:nowrap !important;
+    gap:8px;
+    overflow:visible;
   }
 
   .topbar .search-box{
-    flex:0 0 260px;
-    width:260px;
+    flex:1 1 220px;
+    width:auto;
+    min-width:180px;
+    max-width:240px;
     height:40px;
     min-height:40px;
-    padding:0 13px;
+    max-height:40px;
+    padding:0 12px;
+    flex-wrap:nowrap;
+  }
+  .topbar .search-box input{
+    min-width:0;
+    white-space:nowrap;
   }
 
   .topbar .icon-btn{
-    flex:0 0 40px;
-    width:40px;
+    flex:0 0 38px;
+    width:38px;
+    min-width:38px;
+    max-width:38px;
     height:40px;
+    min-height:40px;
+    max-height:40px;
   }
 
   .topbar .lang-btn{
-    flex:0 0 auto;
-    height:40px;
+    flex:0 0 44px;
+    width:44px;
     min-width:44px;
-    padding:0 11px;
+    max-width:44px;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+    padding:0;
+    justify-content:center;
     white-space:nowrap;
   }
 
   .topbar .primary-btn{
-    flex:0 0 auto;
-    width:auto;
-    min-width:122px;
+    flex:0 0 116px;
+    width:116px;
+    min-width:116px;
+    max-width:116px;
     height:40px;
     min-height:40px;
     max-height:40px;
-    padding:0 14px;
-    white-space:nowrap;
+    padding:0 11px;
+    justify-content:center;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
     line-height:1;
+    overflow:hidden;
   }
-  .topbar .primary-btn span{white-space:nowrap;}
+  .topbar .primary-btn svg{flex:0 0 15px;}
+  .topbar .primary-btn span{
+    display:block;
+    min-width:0;
+    white-space:nowrap !important;
+    overflow:hidden;
+    text-overflow:clip;
+  }
 
-  /* The sidebar action should never grow to two lines either. */
+  /* Sidebar task action keeps one invariant footprint as well. */
   .sidebar .new-task-btn{
-    height:38px;
-    min-height:38px;
-    max-height:38px;
-    white-space:nowrap;
+    width:100%;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+    padding:0 12px;
+    flex-wrap:nowrap !important;
+    white-space:nowrap !important;
   }
-  .sidebar .new-task-btn span{white-space:nowrap;}
+  .sidebar .new-task-btn span{white-space:nowrap !important;}
 
-  /* Preserve the same control sizes at laptop widths; shrink only the search field. */
-  @media(max-width:1250px){
-    .topbar .search-box{flex-basis:230px;width:230px;}
-    .breadcrumb{max-width:180px;}
+  /* At narrower main-content widths, only the search/breadcrumb slots contract. */
+  @media(max-width:900px){
+    .breadcrumb{
+      flex-basis:135px;
+      width:135px;
+      min-width:135px;
+      max-width:135px;
+    }
+    .topbar .search-box{
+      min-width:160px;
+      max-width:200px;
+      flex-basis:190px;
+    }
   }
 
-  @media(max-width:1050px){
-    .topbar{padding-inline:14px;gap:10px;}
-    .topbar-right{gap:8px;}
-    .topbar .search-box{flex-basis:200px;width:200px;}
-    .breadcrumb{max-width:150px;}
+  @media(max-width:760px){
+    .topbar{padding-inline:12px;gap:8px;}
+    .breadcrumb{
+      flex-basis:115px;
+      width:115px;
+      min-width:115px;
+      max-width:115px;
+      gap:5px;
+    }
+    .topbar .search-box{
+      min-width:145px;
+      max-width:180px;
+      flex-basis:170px;
+    }
+    .topbar .primary-btn{
+      flex-basis:110px;
+      width:110px;
+      min-width:110px;
+      max-width:110px;
+    }
   }
 
-  @media(max-width:700px){
-    .sidebar .new-task-btn{min-width:118px;padding:0 11px;font-size:12.5px;}
+  @media(max-width:650px){
+    .breadcrumb{
+      flex-basis:88px;
+      width:88px;
+      min-width:88px;
+      max-width:88px;
+      grid-template-columns:minmax(0,1fr);
+    }
+    .breadcrumb > span{display:none;}
+    .topbar .search-box{
+      min-width:130px;
+      max-width:155px;
+      flex-basis:145px;
+    }
+    .topbar .primary-btn{
+      flex-basis:104px;
+      width:104px;
+      min-width:104px;
+      max-width:104px;
+      font-size:12.5px;
+      padding-inline:8px;
+    }
   }
 
   @media(max-width:1100px){
