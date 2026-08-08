@@ -2,7 +2,7 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
 <!-- Tasky V16: inline favicon + secure branding + themed dialogs + toast notifications -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
@@ -692,6 +692,275 @@
   .auth-brand-mark{width:54px;height:54px;margin:0 auto 12px;display:block;filter:drop-shadow(0 5px 10px rgba(18,41,26,.08));}
   .auth-brand-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:2px;}
 
+
+
+  /* ---------------- COLLAPSIBLE SIDEBAR / MOBILE DRAWER (V19) ---------------- */
+  .sidebar{transition:width .22s ease,padding .22s ease,transform .24s ease,box-shadow .24s ease;}
+  .sidebar-brand-row{display:flex;align-items:center;gap:8px;min-height:38px;}
+  .sidebar-brand-row .brand{flex:1;min-width:0;}
+  .sidebar-close-btn{
+    width:34px;height:34px;border:0;border-radius:9px;background:rgba(255,255,255,.06);
+    color:#C9D8C6;display:none;align-items:center;justify-content:center;flex:none;
+  }
+  .sidebar-close-btn:hover{background:rgba(255,255,255,.11);color:#fff;}
+  .sidebar-close-btn svg{width:17px;height:17px;}
+
+  .sidebar-toggle-btn{
+    flex:0 0 40px;width:40px;height:40px;border-radius:10px;border:1px solid var(--border);
+    background:var(--card);color:var(--ink-soft);display:flex;align-items:center;justify-content:center;
+    transition:background .18s,border-color .18s,transform .18s;
+  }
+  .sidebar-toggle-btn:hover{background:var(--paper);border-color:#D7DDD3;}
+  .sidebar-toggle-btn:active{transform:scale(.96);}
+  .sidebar-toggle-btn svg{width:18px;height:18px;}
+
+  .sidebar-backdrop{
+    position:fixed;inset:0;background:rgba(7,17,10,.42);backdrop-filter:blur(2px);
+    z-index:1190;opacity:0;pointer-events:none;transition:opacity .22s ease;
+  }
+
+  /* Desktop: completely hide the sidebar and let content use the space. */
+  @media(min-width:821px){
+    body.sidebar-collapsed .sidebar{
+      width:0 !important;min-width:0 !important;padding-left:0 !important;padding-right:0 !important;
+      gap:0;overflow:hidden;border:0;opacity:0;pointer-events:none;
+    }
+    body.sidebar-collapsed .sidebar > *{visibility:hidden;}
+  }
+
+  /* Mobile/tablet: sidebar becomes an off-canvas drawer, closed by default. */
+  @media(max-width:820px){
+    .app{position:relative;}
+    .sidebar{
+      position:fixed;top:0;bottom:0;z-index:1200;width:min(304px,88vw) !important;
+      max-width:88vw;padding:18px 15px 20px;box-shadow:none;opacity:1 !important;pointer-events:auto !important;
+    }
+    html[dir="rtl"] .sidebar{right:0;left:auto;transform:translateX(105%);}
+    html[dir="ltr"] .sidebar{left:0;right:auto;transform:translateX(-105%);}
+    body.mobile-sidebar-open .sidebar{transform:translateX(0);box-shadow:0 20px 55px rgba(0,0,0,.25);}
+    body.mobile-sidebar-open .sidebar-backdrop{opacity:1;pointer-events:auto;}
+    .sidebar-close-btn{display:flex;}
+    body.mobile-sidebar-open{overflow:hidden;}
+
+    .main{width:100%;min-width:0;}
+    .topbar{padding-inline:10px;gap:7px;}
+    .sidebar-toggle-btn{display:flex;flex-basis:40px;width:40px;min-width:40px;max-width:40px;}
+    .topbar-right{gap:6px;}
+  }
+
+  @media(max-width:560px){
+    .topbar{height:62px;min-height:62px;max-height:62px;}
+    .sidebar-toggle-btn{width:38px;height:38px;min-width:38px;max-width:38px;flex-basis:38px;}
+    .topbar .search-box{display:none;}
+    .topbar .primary-btn{flex-basis:94px;width:94px;min-width:94px;max-width:94px;}
+    .breadcrumb{flex:1 1 auto;width:auto;min-width:0;max-width:none;}
+    .topbar.title-long .breadcrumb,.topbar.title-xlong .breadcrumb{
+      flex:1 1 auto;width:auto;min-width:0;max-width:none;
+    }
+  }
+
+
+
+  /* ---------------- MOBILE UX HARDENING (V20) ---------------- */
+  html{-webkit-text-size-adjust:100%;text-size-adjust:100%;}
+  .app{height:100dvh;min-height:100dvh;}
+  .content{overscroll-behavior:contain;scrollbar-gutter:stable;}
+  .content > *,#taskArea,#tasksOnly,#moduleArea{min-width:0;max-width:100%;}
+  img,svg{max-width:100%;}
+  button,.nav-item,.project-item,.create-project-item{-webkit-tap-highlight-color:transparent;}
+
+  @media(max-width:820px){
+    /* Comfortable page rhythm on tablets and phones */
+    .content{
+      padding:18px 16px calc(30px + env(safe-area-inset-bottom));
+      gap:17px;
+      width:100%;
+      min-width:0;
+      overflow-x:hidden;
+    }
+    .sidebar{
+      padding-top:calc(18px + env(safe-area-inset-top));
+      padding-bottom:calc(20px + env(safe-area-inset-bottom));
+    }
+    .topbar{
+      padding-top:env(safe-area-inset-top);
+      height:calc(64px + env(safe-area-inset-top));
+      min-height:calc(64px + env(safe-area-inset-top));
+      max-height:calc(64px + env(safe-area-inset-top));
+    }
+
+    /* KPI cards remain readable instead of becoming tiny desktop cards */
+    .stats-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .stat-card{padding:15px 16px;min-width:0;}
+    .stat-card .value{font-size:21px;}
+
+    /* Kanban becomes swipeable lanes on touch screens */
+    .board{
+      display:grid;
+      grid-template-columns:none;
+      grid-auto-flow:column;
+      grid-auto-columns:minmax(280px,78vw);
+      gap:12px;
+      width:calc(100% + 16px);
+      margin-inline-end:-16px;
+      padding-inline-end:16px;
+      overflow-x:auto;
+      overflow-y:visible;
+      scroll-snap-type:x proximity;
+      overscroll-behavior-inline:contain;
+      scrollbar-width:none;
+      -webkit-overflow-scrolling:touch;
+    }
+    .board::-webkit-scrollbar{display:none;}
+    .column{scroll-snap-align:start;padding:4px;}
+    .task-card{touch-action:pan-x pan-y;}
+
+    .board-header{align-items:stretch;gap:10px;}
+    .view-tabs{flex:1 1 100%;width:100%;}
+    .view-tab{flex:1;min-height:40px;padding-inline:9px;}
+    .board-actions{width:100%;gap:8px;overflow-x:auto;flex-wrap:nowrap;padding-bottom:2px;scrollbar-width:none;}
+    .board-actions::-webkit-scrollbar{display:none;}
+    .board-actions > *{flex:none;}
+    .chip-btn{min-height:40px;white-space:nowrap;}
+
+    .ai-banner{align-items:flex-start;padding:14px 15px;gap:11px;flex-wrap:wrap;}
+    .ai-banner p{flex:1;min-width:0;font-size:13px;line-height:1.75;}
+    .ai-banner .link{margin-inline-start:45px;margin-inline-end:0;white-space:normal;text-align:start;}
+
+    /* Grids scale down intentionally */
+    .event-grid,.int-grid,.bplan-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;}
+    .campaign-grid{grid-template-columns:1fr;gap:12px;}
+    .event-card,.campaign-card,.int-card,.bplan-card{padding:16px;min-width:0;}
+
+    /* Data tables scroll inside their card rather than pushing the whole page */
+    .section-card:has(table){overflow-x:auto;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch;}
+    .section-card:has(table) table{min-width:640px;}
+    th,td{padding:11px 13px;}
+
+    /* Inline analytics two-column block */
+    #moduleArea [style*="grid-template-columns:1.3fr 1fr"]{grid-template-columns:1fr !important;}
+    .donut-wrap{justify-content:center;}
+    .chart-bars{min-width:500px;}
+    .section-card:has(.chart-bars){overflow-x:auto;}
+
+    .budget-row-top{gap:8px;flex-wrap:wrap;}
+    .int-card-actions{gap:8px;flex-wrap:wrap;}
+    .security-banner{padding:13px 14px;}
+    .live-note{padding:11px 13px;line-height:1.6;}
+
+    /* Touch-friendly controls */
+    .field input,.field select,.field textarea{min-height:44px;}
+    .submit-btn{min-height:46px;}
+    .modal-close{width:40px;height:40px;display:grid;place-items:center;border-radius:10px;}
+    .dropdown button{min-height:42px;}
+    .nav-item,.project-item,.create-project-item{min-height:42px;}
+
+    /* List view compresses secondary desktop-only columns */
+    .list-row{padding:12px 13px;gap:10px;flex-wrap:wrap;}
+    .list-row .title{min-width:calc(100% - 22px);}
+    .list-row .col-label{width:auto;min-width:0;}
+    .empty-view{padding:36px 18px;}
+  }
+
+  @media(max-width:560px){
+    .content{padding-inline:12px;gap:14px;}
+
+    /* Header fits 320–430px phones without wrapping */
+    .topbar{padding-inline:8px;gap:5px;overflow:visible;}
+    .topbar-right{gap:5px;height:40px;}
+    .breadcrumb{flex:1 1 auto !important;width:auto !important;min-width:0 !important;max-width:none !important;height:40px;}
+    .breadcrumb b{font-size:13.5px;}
+    .sidebar-toggle-btn{flex:0 0 38px;width:38px;min-width:38px;max-width:38px;height:40px;}
+    .topbar .icon-btn{flex-basis:38px;width:38px;min-width:38px;max-width:38px;height:40px;}
+    .topbar .lang-btn{flex-basis:40px;width:40px;min-width:40px;max-width:40px;height:40px;font-size:11.5px;}
+    .topbar .primary-btn{flex:0 0 42px;width:42px;min-width:42px;max-width:42px;height:40px;padding:0;}
+    .topbar .primary-btn span{display:none;}
+    .topbar .primary-btn svg{width:17px;height:17px;flex-basis:17px;}
+
+    /* Topbar dropdowns become viewport-safe sheets */
+    .topbar .dropdown{
+      position:fixed !important;
+      top:calc(58px + env(safe-area-inset-top)) !important;
+      inset-inline:10px !important;
+      left:auto !important;
+      right:auto !important;
+      width:auto !important;
+      min-width:0 !important;
+      max-width:none !important;
+      max-height:min(60dvh,430px);
+      overflow:auto;
+      border-radius:14px;
+      z-index:1500;
+    }
+
+    .stats-row{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;}
+    .stat-card{padding:14px 15px;}
+    .stat-card .top{margin-bottom:6px;}
+    .stat-card .value{font-size:20px;}
+
+    .board{grid-auto-columns:minmax(270px,88vw);width:calc(100% + 12px);margin-inline-end:-12px;padding-inline-end:12px;}
+    .event-grid,.int-grid,.bplan-grid{grid-template-columns:1fr;}
+
+    .modal{
+      width:calc(100vw - 24px);
+      max-width:calc(100vw - 24px);
+      max-height:calc(100dvh - 28px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+      padding:18px;
+      border-radius:18px;
+    }
+    .overlay{padding:calc(12px + env(safe-area-inset-top)) 12px calc(12px + env(safe-area-inset-bottom));}
+    .modal-head h3{font-size:16px;}
+
+    /* 16px form controls prevent Safari from zooming inputs */
+    .field input,.field select,.field textarea,.search-mini input{font-size:16px;}
+    .field{font-size:12.5px;margin-bottom:12px;}
+
+    .branding-preview{align-items:flex-start;}
+    .branding-preview-logo{width:52px;height:52px;border-radius:13px;}
+    .bplan-toggle{width:100%;display:flex;}
+    .bplan-toggle button{flex:1;padding-inline:8px;}
+    .bplan-card{padding:19px;}
+    .bplan-price{font-size:24px;}
+
+    .tasky-dialog-backdrop{padding:12px;align-items:flex-end;}
+    .tasky-dialog{width:100%;border-radius:22px 22px 18px 18px;}
+    .tasky-dialog-head{padding:20px 18px 8px;}
+    .tasky-dialog-icon{width:46px;height:46px;border-radius:15px;}
+    .tasky-dialog-title{font-size:21px;}
+    .tasky-dialog-actions{padding-bottom:calc(18px + env(safe-area-inset-bottom));}
+
+    .tasky-toast-stack{top:calc(10px + env(safe-area-inset-top));inset-inline-start:10px;width:calc(100vw - 20px);}
+    .tasky-toast{padding:11px 12px;gap:10px;}
+
+    #authScreen>div,#invitePasswordScreen>div{
+      width:calc(100vw - 24px) !important;
+      max-width:420px !important;
+      padding:24px 18px !important;
+      border-radius:18px !important;
+    }
+    .auth-brand-mark{width:50px;height:50px;margin-bottom:10px;}
+  }
+
+  @media(max-width:360px){
+    .stats-row{grid-template-columns:1fr;}
+  }
+
+  @media(max-width:380px){
+    .topbar .lang-btn{flex-basis:36px;width:36px;min-width:36px;max-width:36px;}
+    .topbar .icon-btn{flex-basis:36px;width:36px;min-width:36px;max-width:36px;}
+    .sidebar-toggle-btn{flex-basis:36px;width:36px;min-width:36px;max-width:36px;}
+    .topbar .primary-btn{flex-basis:38px;width:38px;min-width:38px;max-width:38px;}
+    .breadcrumb b{font-size:13px;}
+    .board{grid-auto-columns:minmax(258px,90vw);}
+  }
+
+  @media(max-height:520px) and (orientation:landscape){
+    .topbar{height:56px;min-height:56px;max-height:56px;}
+    .content{padding-top:12px;padding-bottom:16px;}
+    .sidebar{padding-top:12px;padding-bottom:12px;}
+    .modal{max-height:92dvh;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -780,9 +1049,14 @@
 <div class="app" style="display:none">
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
-    <div class="brand">
-      <svg class="brand-mark" aria-hidden="true"><use href="#tasky-mark"/></svg>
-      <span class="name">تاسكي</span>
+    <div class="sidebar-brand-row">
+      <div class="brand">
+        <svg class="brand-mark" aria-hidden="true"><use href="#tasky-mark"/></svg>
+        <span class="name">تاسكي</span>
+      </div>
+      <button class="sidebar-close-btn" type="button" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">
+        <svg><use href="#i-x"/></svg>
+      </button>
     </div>
     <div class="workspace" onclick="openWorkspaceBrandingModal()" id="workspaceSwitcher" title="إعدادات مساحة العمل">
       <div class="workspace-main">
@@ -808,12 +1082,18 @@
       <button onclick="signOutUser()" style="background:none;border:none;color:#8FA089;font-size:11.5px;text-align:center;cursor:pointer;padding:4px;">تسجيل الخروج</button>
     </div>
   </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()" aria-hidden="true"></div>
 
   <!-- ============ MAIN ============ -->
   <main class="main">
     <header class="topbar">
       <div class="breadcrumb"><span id="breadcrumbRoot"></span> <span>/</span> <b id="breadcrumbLabel">حملة العيد الوطني</b></div>
       <div class="topbar-right">
+        <button class="sidebar-toggle-btn" type="button" onclick="toggleSidebar()" id="sidebarToggleBtn" aria-label="إظهار أو إخفاء القائمة الجانبية" aria-expanded="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
+            <path d="M4 7h16M4 12h16M4 17h16"/>
+          </svg>
+        </button>
         <div class="search-box"><svg><use href="#i-search"/></svg><input id="topSearch" oninput="onSearch(this.value)"></div>
         <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
         <div style="position:relative">
@@ -2210,6 +2490,7 @@ function renderRoleToggle(){
 function toggleLang(){
   lang = lang === 'ar' ? 'en' : 'ar';
   applyChrome();
+  syncSidebarAria();
   renderNav();
   renderViewTabs();
   renderModule();
@@ -3552,6 +3833,63 @@ if(breadcrumbTitleEl){
 }
 
 
+
+/* ================= RESPONSIVE SIDEBAR ================= */
+const SIDEBAR_BREAKPOINT = 820;
+function isMobileSidebar(){ return window.innerWidth <= SIDEBAR_BREAKPOINT; }
+function syncSidebarAria(){
+  const btn = document.getElementById('sidebarToggleBtn');
+  const backdrop = document.getElementById('sidebarBackdrop');
+  if(!btn) return;
+  const open = isMobileSidebar()
+    ? document.body.classList.contains('mobile-sidebar-open')
+    : !document.body.classList.contains('sidebar-collapsed');
+  btn.setAttribute('aria-expanded', String(open));
+  btn.setAttribute('aria-label', lang==='ar'
+    ? (open ? 'إخفاء القائمة الجانبية' : 'إظهار القائمة الجانبية')
+    : (open ? 'Hide sidebar' : 'Show sidebar'));
+  if(backdrop) backdrop.setAttribute('aria-hidden', String(!document.body.classList.contains('mobile-sidebar-open')));
+}
+function toggleSidebar(){
+  if(isMobileSidebar()){
+    document.body.classList.toggle('mobile-sidebar-open');
+  }else{
+    document.body.classList.toggle('sidebar-collapsed');
+    localStorage.setItem('tasky_sidebar_collapsed', document.body.classList.contains('sidebar-collapsed') ? '1' : '0');
+  }
+  syncSidebarAria();
+}
+function closeMobileSidebar(){
+  document.body.classList.remove('mobile-sidebar-open');
+  syncSidebarAria();
+}
+function initResponsiveSidebar(){
+  if(isMobileSidebar()){
+    document.body.classList.remove('sidebar-collapsed');
+    document.body.classList.remove('mobile-sidebar-open');
+  }else{
+    document.body.classList.remove('mobile-sidebar-open');
+    document.body.classList.toggle('sidebar-collapsed', localStorage.getItem('tasky_sidebar_collapsed') === '1');
+  }
+  syncSidebarAria();
+}
+let sidebarWasMobile = isMobileSidebar();
+window.addEventListener('resize', () => {
+  const nowMobile = isMobileSidebar();
+  if(nowMobile !== sidebarWasMobile){
+    sidebarWasMobile = nowMobile;
+    initResponsiveSidebar();
+  }else{
+    syncSidebarAria();
+  }
+});
+// On phones, choosing anything from the navigation closes the drawer automatically.
+document.addEventListener('click', (e) => {
+  if(!isMobileSidebar()) return;
+  const actionable = e.target.closest('.sidebar .nav-item, .sidebar .project-item, .sidebar .create-project-item');
+  if(actionable) setTimeout(closeMobileSidebar, 60);
+});
+
 /* ================= THEMED DIALOGS ================= */
 const taskyDialogState = { resolve:null, lastFocused:null };
 function getDialogIconSvg(tone='info'){
@@ -3684,6 +4022,7 @@ sb.auth.onAuthStateChange((event, session) => {
   }
 });
 
+initResponsiveSidebar();
 applyChrome();
 applyTheme();
 renderNav();
