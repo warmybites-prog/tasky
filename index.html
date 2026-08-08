@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>تاسكي V5 — دعوات البريد</title>
+<title>تاسكي — منصة إدارة الأعمال</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
@@ -280,6 +280,118 @@
   .mode-toggle button.active{background:var(--card);color:var(--ink);box-shadow:0 1px 2px rgba(0,0,0,.06);}
 
   input[type=range]{accent-color:var(--blue-deep);width:100%;margin-top:8px;}
+
+
+  /* ---------------- TASKY TYPOGRAPHY & SIDEBAR POLISH (V7) ---------------- */
+  :root{
+    --font-ar-body:"IBM Plex Sans Arabic",sans-serif;
+    --font-ar-display:"Almarai",sans-serif;
+    --font-en-ui:"Inter",sans-serif;
+  }
+
+  /* Compact primary action in the sidebar */
+  .sidebar .new-task-btn{
+    align-self:flex-start;
+    width:auto;
+    min-width:126px;
+    min-height:38px;
+    padding:7px 13px;
+    gap:7px;
+    border-radius:9px;
+    font-size:13px;
+    font-weight:700;
+    line-height:1.35;
+    box-shadow:none;
+  }
+  .sidebar .new-task-btn svg{width:14px;height:14px;flex:none;}
+
+  /* Arabic hierarchy mirrors the cleaner Billing / Plans typography */
+  html[dir="rtl"] body,
+  html[dir="rtl"] button,
+  html[dir="rtl"] input,
+  html[dir="rtl"] select,
+  html[dir="rtl"] textarea,
+  html[dir="rtl"] table{
+    font-family:var(--font-ar-body);
+  }
+
+  html[dir="rtl"] h1,
+  html[dir="rtl"] h2,
+  html[dir="rtl"] h3,
+  html[dir="rtl"] h4,
+  html[dir="rtl"] .brand .name,
+  html[dir="rtl"] .breadcrumb b,
+  html[dir="rtl"] .stat-card .value,
+  html[dir="rtl"] .bplan-name,
+  html[dir="rtl"] .bplan-price,
+  html[dir="rtl"] .modal-head h3,
+  html[dir="rtl"] .empty-view b{
+    font-family:var(--font-ar-display) !important;
+    letter-spacing:0;
+  }
+
+  /* Remove the technical mono look from normal product UI text */
+  html[dir="rtl"] .nav-group-label,
+  html[dir="rtl"] .nav-label,
+  html[dir="rtl"] .projects-inline-head,
+  html[dir="rtl"] .theme-panel .section-label,
+  html[dir="rtl"] .stat-card .trend,
+  html[dir="rtl"] .column-head .count,
+  html[dir="rtl"] .task-meta .due,
+  html[dir="rtl"] .event-date-badge,
+  html[dir="rtl"] .budget-numbers,
+  html[dir="rtl"] [style*="IBM Plex Mono"]{
+    font-family:var(--font-ar-body) !important;
+    letter-spacing:0;
+  }
+
+  html[dir="rtl"] .nav-group-label,
+  html[dir="rtl"] .nav-label,
+  html[dir="rtl"] .projects-inline-head,
+  html[dir="rtl"] .theme-panel .section-label{
+    text-transform:none;
+    letter-spacing:0;
+    font-weight:500;
+  }
+
+  /* Consistent weights across the application */
+  html[dir="rtl"] .nav-item,
+  html[dir="rtl"] .project-item,
+  html[dir="rtl"] .task-title,
+  html[dir="rtl"] td,
+  html[dir="rtl"] .field,
+  html[dir="rtl"] .bplan-features li{font-weight:400;}
+
+  html[dir="rtl"] .nav-item.active,
+  html[dir="rtl"] .primary-btn,
+  html[dir="rtl"] .submit-btn,
+  html[dir="rtl"] .new-task-btn,
+  html[dir="rtl"] .view-tab.active,
+  html[dir="rtl"] .chip-btn.on{font-weight:700;}
+
+  /* Keep English consistently in Inter, including metadata that used Mono */
+  html[dir="ltr"] body,
+  html[dir="ltr"] button,
+  html[dir="ltr"] input,
+  html[dir="ltr"] select,
+  html[dir="ltr"] textarea,
+  html[dir="ltr"] table,
+  html[dir="ltr"] .nav-group-label,
+  html[dir="ltr"] .nav-label,
+  html[dir="ltr"] .projects-inline-head,
+  html[dir="ltr"] .theme-panel .section-label,
+  html[dir="ltr"] .stat-card .trend,
+  html[dir="ltr"] .column-head .count,
+  html[dir="ltr"] .task-meta .due,
+  html[dir="ltr"] .event-date-badge,
+  html[dir="ltr"] .budget-numbers,
+  html[dir="ltr"] [style*="IBM Plex Mono"]{
+    font-family:var(--font-en-ui) !important;
+  }
+
+  @media(max-width:700px){
+    .sidebar .new-task-btn{min-width:118px;padding:7px 11px;font-size:12.5px;}
+  }
 
   @media(max-width:1100px){
     .event-grid{grid-template-columns:repeat(2,1fr);}
