@@ -508,6 +508,33 @@
     text-overflow:clip;
   }
 
+  /* Dynamic title/search balance (V10): when the page title grows,
+     give the breadcrumb more room and shrink only the search box. */
+  .topbar.title-long .breadcrumb{
+    flex-basis:215px;
+    width:215px;
+    min-width:215px;
+    max-width:215px;
+  }
+  .topbar.title-long .search-box{
+    flex:0 1 185px;
+    width:185px;
+    min-width:150px;
+    max-width:185px;
+  }
+  .topbar.title-xlong .breadcrumb{
+    flex-basis:265px;
+    width:265px;
+    min-width:265px;
+    max-width:265px;
+  }
+  .topbar.title-xlong .search-box{
+    flex:0 1 145px;
+    width:145px;
+    min-width:120px;
+    max-width:145px;
+  }
+
   /* Sidebar task action keeps one invariant footprint as well. */
   .sidebar .new-task-btn{
     width:100%;
@@ -3220,6 +3247,26 @@ function openAiModal(){
 }
 function closeAiModal(){ document.getElementById('aiModalOverlay').classList.add('hidden'); }
 
+/* ================= TOPBAR TITLE BALANCE ================= */
+function updateTopbarTitleBalance(){
+  const topbar = document.querySelector('.topbar');
+  const label = document.getElementById('breadcrumbLabel');
+  if(!topbar || !label) return;
+
+  const text = (label.textContent || '').trim();
+  // Arabic/English titles are balanced by visible character count.
+  // Long titles get more breadcrumb room; the search box gives up space first.
+  topbar.classList.remove('title-long','title-xlong');
+  if(text.length >= 22) topbar.classList.add('title-xlong');
+  else if(text.length >= 12) topbar.classList.add('title-long');
+}
+
+const breadcrumbTitleObserver = new MutationObserver(updateTopbarTitleBalance);
+const breadcrumbTitleEl = document.getElementById('breadcrumbLabel');
+if(breadcrumbTitleEl){
+  breadcrumbTitleObserver.observe(breadcrumbTitleEl, { childList:true, characterData:true, subtree:true });
+}
+
 /* ================= MASTER RENDER ================= */
 function renderAll(){
   renderHomeStats();
@@ -3241,6 +3288,7 @@ applyTheme();
 renderNav();
 renderViewTabs();
 setActiveNav('tasks');
+updateTopbarTitleBalance();
 checkSession();
 </script>
 </body>
