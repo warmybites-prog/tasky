@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V12: inline favicon + robust paid workspace branding -->
+<!-- Tasky V14: inline favicon + DB-backed workspace branding via secured RPC; no Storage dependency -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -819,6 +819,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
+window.TASKY_BUILD = 'V14'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1967,7 +1968,7 @@ function openWorkspaceBrandingModal(){
       <div class="branding-file">
         <label style="display:block;font-size:12.5px;font-weight:700;margin-bottom:8px">${lang==='ar'?'اختر الشعار':'Choose logo'}</label>
         <input id="workspaceLogoFile" type="file" accept="image/png,image/jpeg,image/webp,image/svg+xml" onchange="previewWorkspaceLogoFile(this)">
-        <div style="font-size:11px;color:var(--muted);margin-top:7px">PNG, JPG, WEBP أو SVG · ${lang==='ar'?'حد أقصى 2MB':'Max 2MB'}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:7px">PNG, JPG, WEBP أو SVG · ${lang==='ar'?'يتم تحسين الحجم تلقائيًا':'Automatically optimized'}</div>
       </div>
       <div style="display:flex;gap:8px;margin-top:14px">
         <button type="submit" class="submit-btn" style="flex:1">${lang==='ar'?'حفظ الشعار':'Save logo'}</button>
@@ -1980,83 +1981,94 @@ function previewWorkspaceLogoFile(input){
   const file = input?.files?.[0];
   const preview = document.getElementById('workspaceLogoPreview');
   if(!file || !preview) return;
-  if(file.size > 2 * 1024 * 1024){
-    alert(lang==='ar'?'حجم الشعار يجب ألا يتجاوز 2MB':'Logo must be 2MB or smaller');
+  if(file.size > 5 * 1024 * 1024){
+    alert(lang==='ar'?'حجم ملف الشعار يجب ألا يتجاوز 5MB':'Logo file must be 5MB or smaller');
     input.value=''; return;
   }
   const reader = new FileReader();
   reader.onload = () => { preview.innerHTML = `<img src="${reader.result}" alt="">`; };
   reader.readAsDataURL(file);
 }
+async function fileToOptimizedLogoDataUrl(file){
+  if(!file) throw new Error('No file selected');
+  if(file.size > 5 * 1024 * 1024) throw new Error(lang==='ar'?'حجم الملف أكبر من 5MB':'File is larger than 5MB');
+  const sourceDataUrl = await new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error(lang==='ar'?'تعذّرت قراءة ملف الشعار':'Could not read the logo file'));
+    reader.onload = () => resolve(reader.result);
+    reader.readAsDataURL(file);
+  });
+  const img = await new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error(lang==='ar'?'صيغة الصورة غير مدعومة':'Unsupported image format'));
+    image.src = sourceDataUrl;
+  });
+  const maxSide = 512;
+  const ratio = Math.min(1, maxSide / Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height));
+  const w = Math.max(1, Math.round((img.naturalWidth || img.width) * ratio));
+  const h = Math.max(1, Math.round((img.naturalHeight || img.height) * ratio));
+  const canvas = document.createElement('canvas');
+  canvas.width = w; canvas.height = h;
+  const ctx = canvas.getContext('2d', { alpha:true });
+  ctx.clearRect(0,0,w,h);
+  ctx.drawImage(img,0,0,w,h);
+  // WebP preserves transparency and keeps the DB payload compact.
+  let out = canvas.toDataURL('image/webp', 0.90);
+  // Very old browsers may silently return PNG when WebP is unavailable; either is fine.
+  if(!out || !out.startsWith('data:image/')) out = sourceDataUrl;
+  if(out.length > 950000){
+    // One more compact pass for unusually detailed logos.
+    out = canvas.toDataURL('image/webp', 0.78);
+  }
+  if(out.length > 1200000) throw new Error(lang==='ar'?'الشعار ما زال كبيرًا بعد التحسين؛ جرّب صورة أبسط':'Logo is still too large after optimization');
+  return out;
+}
+
 async function saveWorkspaceLogo(e){
   e.preventDefault();
   if(!currentWorkspaceId || currentUserRole !== 'admin' || !isPaidPlan()) return;
   const input = document.getElementById('workspaceLogoFile');
   const file = input?.files?.[0];
   if(!file){ alert(lang==='ar'?'اختر ملف الشعار أولًا':'Choose a logo file first'); return; }
-  if(file.size > 2 * 1024 * 1024){ alert(lang==='ar'?'حجم الشعار يجب ألا يتجاوز 2MB':'Logo must be 2MB or smaller'); return; }
 
   const submit = e.submitter;
   if(submit){ submit.disabled=true; submit.textContent = lang==='ar'?'جارٍ الحفظ...':'Saving...'; }
-  const extMap = {
-    'image/png':'png', 'image/jpeg':'jpg', 'image/webp':'webp', 'image/svg+xml':'svg'
-  };
-  const ext = extMap[file.type] || (file.name.split('.').pop() || 'png').toLowerCase();
-  // Use a fresh object path for every logo. This avoids overwrite/upsert edge cases
-  // and makes browser/CDN cache invalidation deterministic.
-  const path = `${currentWorkspaceId}/logo-${Date.now()}.${ext}`;
-  const { error: uploadError } = await sb.storage.from('workspace-logos').upload(path, file, {
-    upsert:false,
-    contentType:file.type || 'image/png',
-    cacheControl:'3600'
-  });
-  if(uploadError){
-    console.error('workspace logo upload failed', uploadError);
-    const detail = uploadError.message || uploadError.error || String(uploadError);
-    alert((lang==='ar'?'تعذّر رفع الشعار: ':'Could not upload the logo: ') + detail);
-    if(submit){ submit.disabled=false; submit.textContent = lang==='ar'?'حفظ الشعار':'Save logo'; }
-    return;
-  }
-  const { data: publicData } = sb.storage.from('workspace-logos').getPublicUrl(path);
-  const logoUrl = publicData.publicUrl;
-  const previousLogoUrl = currentWorkspaceLogoUrl;
-  const { error: saveError } = await sb.rpc('set_workspace_logo', { p_workspace_id: currentWorkspaceId, p_logo_url: logoUrl });
-  if(saveError){
-    console.error('workspace logo save failed', saveError);
-    await sb.storage.from('workspace-logos').remove([path]).catch(()=>{});
-    alert((lang==='ar'?'تم رفع الملف لكن تعذّر ربطه بمساحة العمل: ':'File uploaded, but could not attach it to the workspace: ') + (saveError.message || String(saveError)));
-    if(submit){ submit.disabled=false; submit.textContent = lang==='ar'?'حفظ الشعار':'Save logo'; }
-    return;
-  }
-  currentWorkspaceLogoUrl = logoUrl;
-  renderWorkspaceBrand();
-  closeAddModal();
-
-  // Best-effort cleanup of the previous Tasky workspace logo after the new one is live.
-  const previousPath = workspaceLogoStoragePath(previousLogoUrl);
-  if(previousPath && previousPath !== path){
-    sb.storage.from('workspace-logos').remove([previousPath]).catch(()=>{});
-  }
-}
-function workspaceLogoStoragePath(url){
-  if(!url) return null;
   try{
-    const decoded = decodeURIComponent(url.split('?')[0]);
-    const marker = '/storage/v1/object/public/workspace-logos/';
-    const i = decoded.indexOf(marker);
-    return i >= 0 ? decoded.slice(i + marker.length) : null;
-  }catch(_){ return null; }
+    const logoDataUrl = await fileToOptimizedLogoDataUrl(file);
+    const { error: saveError } = await sb.rpc('set_workspace_logo', {
+      p_workspace_id: currentWorkspaceId,
+      p_logo_url: logoDataUrl
+    });
+    if(saveError) throw saveError;
+
+    currentWorkspaceLogoUrl = logoDataUrl;
+    renderWorkspaceBrand();
+    closeAddModal();
+  }catch(err){
+    console.error('workspace logo save failed', err);
+    const detail = err?.message || err?.error_description || err?.error || String(err);
+    alert((lang==='ar'?'تعذّر حفظ الشعار: ':'Could not save logo: ') + detail);
+    if(submit){ submit.disabled=false; submit.textContent = lang==='ar'?'حفظ الشعار':'Save logo'; }
+  }
 }
+
 async function removeWorkspaceLogo(){
   if(!currentWorkspaceId || currentUserRole !== 'admin' || !isPaidPlan()) return;
-  const previousPath = workspaceLogoStoragePath(currentWorkspaceLogoUrl);
-  const { error: saveError } = await sb.rpc('set_workspace_logo', { p_workspace_id: currentWorkspaceId, p_logo_url: null });
-  if(saveError){ console.error(saveError); alert((lang==='ar'?'تعذّرت إزالة الشعار: ':'Could not remove logo: ') + (saveError.message || String(saveError))); return; }
-  if(previousPath) await sb.storage.from('workspace-logos').remove([previousPath]);
+  const { error: saveError } = await sb.rpc('set_workspace_logo', {
+    p_workspace_id: currentWorkspaceId,
+    p_logo_url: null
+  });
+  if(saveError){
+    console.error(saveError);
+    alert((lang==='ar'?'تعذّرت إزالة الشعار: ':'Could not remove logo: ') + (saveError.message || String(saveError)));
+    return;
+  }
   currentWorkspaceLogoUrl = null;
   renderWorkspaceBrand();
   closeAddModal();
 }
+
 function currentProject(){ return projects.find(p => p.id === activeProjectId) || null; }
 function visibleTasks(){
   let list = tasks.filter(x =>
