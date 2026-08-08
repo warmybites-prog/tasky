@@ -389,8 +389,99 @@
     font-family:var(--font-en-ui) !important;
   }
 
+  /* ---------------- FIXED TOPBAR SIZING (V8) ---------------- */
+  /* Keep the header controls identical in size when breadcrumb text changes. */
+  .topbar{
+    height:66px;
+    min-height:66px;
+    padding:0 18px;
+    gap:14px;
+  }
+
+  .breadcrumb{
+    flex:1 1 auto;
+    min-width:0;
+    max-width:210px;
+    height:40px;
+    white-space:nowrap;
+    overflow:hidden;
+  }
+  .breadcrumb > span{flex:none;}
+  .breadcrumb b{
+    display:block;
+    min-width:0;
+    overflow:hidden;
+    text-overflow:ellipsis;
+    white-space:nowrap;
+    line-height:40px;
+  }
+
+  .topbar-right{
+    flex:0 0 auto;
+    flex-wrap:nowrap;
+    gap:10px;
+    min-width:0;
+  }
+
+  .topbar .search-box{
+    flex:0 0 260px;
+    width:260px;
+    height:40px;
+    min-height:40px;
+    padding:0 13px;
+  }
+
+  .topbar .icon-btn{
+    flex:0 0 40px;
+    width:40px;
+    height:40px;
+  }
+
+  .topbar .lang-btn{
+    flex:0 0 auto;
+    height:40px;
+    min-width:44px;
+    padding:0 11px;
+    white-space:nowrap;
+  }
+
+  .topbar .primary-btn{
+    flex:0 0 auto;
+    width:auto;
+    min-width:122px;
+    height:40px;
+    min-height:40px;
+    max-height:40px;
+    padding:0 14px;
+    white-space:nowrap;
+    line-height:1;
+  }
+  .topbar .primary-btn span{white-space:nowrap;}
+
+  /* The sidebar action should never grow to two lines either. */
+  .sidebar .new-task-btn{
+    height:38px;
+    min-height:38px;
+    max-height:38px;
+    white-space:nowrap;
+  }
+  .sidebar .new-task-btn span{white-space:nowrap;}
+
+  /* Preserve the same control sizes at laptop widths; shrink only the search field. */
+  @media(max-width:1250px){
+    .topbar .search-box{flex-basis:230px;width:230px;}
+    .breadcrumb{max-width:180px;}
+  }
+
+  @media(max-width:1050px){
+    .topbar{padding-inline:14px;gap:10px;}
+    .topbar-right{gap:8px;}
+    .topbar .search-box{flex-basis:200px;width:200px;}
+    .breadcrumb{max-width:150px;}
+  }
+
   @media(max-width:700px){
-    .sidebar .new-task-btn{min-width:118px;padding:7px 11px;font-size:12.5px;}
+    .sidebar .new-task-btn{min-width:118px;padding:0 11px;font-size:12.5px;}
   }
 
   @media(max-width:1100px){
