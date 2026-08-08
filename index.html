@@ -463,7 +463,7 @@
 </div>
 
 <script>
-// Tasky V5 — real Supabase Auth email invitations via Edge Function
+// Tasky V6 — strict invite setup + database-enforced UI roles
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -473,30 +473,64 @@ let currentUserId = null;
 let projects = [];
 let activeProjectId = null;
 
-async function loadWorkspaceAndData(){
+async function loadWorkspaceAndData(authoritativeUser = null){
   const { data: { session } } = await sb.auth.getSession();
-  if(!session) return;
+  if(!session) return false;
 
-  // لو هذا المستخدم دخل بعد استلام دعوة، فعّل عضويته أولاً ثم حمّل مساحة العمل.
-  // هذا يجعل قبول الدعوة يعمل أيضًا بعد تأكيد البريد وتسجيل الدخول لاحقًا.
-  if(session.user?.email){
-    await claimPendingInvite(session.user.id, session.user.email.trim().toLowerCase());
+  const user = authoritativeUser || session.user;
+  if(!user) return false;
+
+  // Never activate invitations here. An invited user must finish password setup first.
+  // Also prefer the workspace carried by the invite metadata when it exists.
+  const preferredWorkspaceId = user.user_metadata?.tasky_workspace_id || null;
+
+  let membershipQuery = sb
+    .from('workspace_members')
+    .select('workspace_id, role, status, workspaces(name)')
+    .eq('user_id', user.id)
+    .eq('status', 'active');
+
+  if(preferredWorkspaceId){
+    membershipQuery = membershipQuery.eq('workspace_id', preferredWorkspaceId);
   }
 
-  const { data: member, error } = await sb
-    .from('workspace_members')
-    .select('workspace_id, role, workspaces(name)')
-    .eq('user_id', session.user.id)
-    .eq('status', 'active')
+  let { data: member, error } = await membershipQuery
     .limit(1)
     .maybeSingle();
-  if(error || !member){ console.error('تعذّر إيجاد مساحة عمل لهذا الحساب', error); return; }
-  currentUserId = session.user.id;
+
+  // Fallback for normal users who may later belong to multiple workspaces and
+  // whose old invite metadata no longer points to a current workspace.
+  if(!member && preferredWorkspaceId && !error){
+    const fallback = await sb
+      .from('workspace_members')
+      .select('workspace_id, role, status, workspaces(name)')
+      .eq('user_id', user.id)
+      .eq('status', 'active')
+      .limit(1)
+      .maybeSingle();
+    member = fallback.data;
+    error = fallback.error;
+  }
+
+  if(error || !member){
+    console.error('تعذّر إيجاد عضوية نشطة لهذا الحساب', error);
+    currentUserId = null;
+    currentWorkspaceId = null;
+    currentWorkspaceName = null;
+    currentUserRole = null;
+    renderRoleToggle();
+    renderNav();
+    return false;
+  }
+
+  currentUserId = user.id;
   currentWorkspaceId = member.workspace_id;
-  currentUserRole = member.role;
+  currentUserRole = member.role === 'admin' ? 'admin' : 'member';
   currentWorkspaceName = member.workspaces ? member.workspaces.name : null;
+
   const wsLabel = document.getElementById('workspaceLabel');
   if(wsLabel && currentWorkspaceName) wsLabel.textContent = currentWorkspaceName;
+
   await fetchProjects();
   await fetchTeamMembers();
   await fetchTasks();
@@ -505,6 +539,7 @@ async function loadWorkspaceAndData(){
   renderRoleToggle();
   renderNav();
   renderAll();
+  return true;
 }
 
 async function fetchProjects(){
@@ -578,11 +613,39 @@ async function claimPendingInvite(userId, email){
   return Number(data || 0) > 0;
 }
 
-function showInviteSetupIfNeeded(session){
-  const invited = session?.user?.user_metadata?.tasky_invited === true;
+function inviteLinkMarkerPresent(){
+  const hash = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+  const search = new URLSearchParams(window.location.search);
+  return hash.get('type') === 'invite' || search.get('type') === 'invite';
+}
+
+async function getAuthoritativeInviteState(session){
+  const { data: { user }, error } = await sb.auth.getUser();
+  const resolvedUser = (!error && user) ? user : session?.user || null;
+  const meta = resolvedUser?.user_metadata || {};
+  return {
+    user: resolvedUser,
+    invited: meta.tasky_invited === true || inviteLinkMarkerPresent(),
+    workspaceId: meta.tasky_workspace_id || null
+  };
+}
+
+function showInviteSetup(show){
   const overlay = document.getElementById('inviteSetupScreen');
-  if(!overlay) return;
-  overlay.style.display = invited ? 'flex' : 'none';
+  if(overlay) overlay.style.display = show ? 'flex' : 'none';
+}
+
+async function hasActiveMembershipForInvite(user){
+  if(!user) return false;
+  const workspaceId = user.user_metadata?.tasky_workspace_id || null;
+  let q = sb
+    .from('workspace_members')
+    .select('id')
+    .eq('user_id', user.id)
+    .eq('status', 'active');
+  if(workspaceId) q = q.eq('workspace_id', workspaceId);
+  const { data, error } = await q.limit(1).maybeSingle();
+  return !error && !!data;
 }
 
 async function finishInviteSetup(){
@@ -605,23 +668,55 @@ async function finishInviteSetup(){
 
   btn.disabled = true;
   btn.textContent = 'جاري التفعيل...';
-  const { data: { user: currentUser } } = await sb.auth.getUser();
-  const currentMeta = currentUser?.user_metadata || {};
-  const { error } = await sb.auth.updateUser({
-    password,
-    data: { ...currentMeta, tasky_invited: false, tasky_invite_completed_at: new Date().toISOString() }
-  });
-  if(error){
-    errBox.textContent = error.message || 'تعذّر حفظ كلمة المرور.';
+
+  // Step 1: set the password while the account is still marked as invited.
+  const { error: passwordError } = await sb.auth.updateUser({ password });
+  if(passwordError){
+    errBox.textContent = passwordError.message || 'تعذّر حفظ كلمة المرور.';
     errBox.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'تفعيل الحساب والدخول';
     return;
   }
 
-  await claimPendingInvite();
-  document.getElementById('inviteSetupScreen').style.display = 'none';
-  await loadWorkspaceAndData();
+  // Step 2: only after a password exists, activate the pending workspace membership.
+  const claimed = await claimPendingInvite();
+  const { data: { user: verifiedUser } } = await sb.auth.getUser();
+  const alreadyActive = await hasActiveMembershipForInvite(verifiedUser);
+
+  if(!claimed && !alreadyActive){
+    errBox.textContent = 'تم حفظ كلمة المرور، لكن تعذّر تفعيل عضوية الفريق. أعد فتح رابط الدعوة أو تواصل مع مسؤول مساحة العمل.';
+    errBox.style.display = 'block';
+    btn.disabled = false;
+    btn.textContent = 'إعادة محاولة التفعيل';
+    return;
+  }
+
+  // Step 3: clear the invite flag only after membership activation succeeds.
+  const currentMeta = verifiedUser?.user_metadata || {};
+  const { error: metadataError } = await sb.auth.updateUser({
+    data: {
+      ...currentMeta,
+      tasky_invited: false,
+      tasky_invite_completed_at: new Date().toISOString()
+    }
+  });
+
+  if(metadataError){
+    console.warn('تم التفعيل لكن تعذّر تحديث علامة الدعوة', metadataError);
+  }
+
+  // Remove invite tokens/type markers from the address bar after Supabase has persisted the session.
+  try{
+    window.history.replaceState({}, document.title, window.location.pathname);
+  }catch(_){}
+
+  document.getElementById('inviteNewPassword').value = '';
+  document.getElementById('inviteConfirmPassword').value = '';
+  showInviteSetup(false);
+  btn.disabled = false;
+  btn.textContent = 'تفعيل الحساب والدخول';
+  await checkSession();
 }
 
 async function handleAuthSubmit(){
@@ -654,6 +749,7 @@ async function signOutUser(){
   await sb.auth.signOut();
   currentWorkspaceId = null;
   currentUserId = null;
+  currentUserRole = null;
   projects = [];
   activeProjectId = null;
   tasks = [];
@@ -667,16 +763,46 @@ async function signOutUser(){
 async function checkSession(){
   const { data: { session } } = await sb.auth.getSession();
   const appEl = document.querySelector('.app');
-  if(session && session.user){
-    document.getElementById('authScreen').style.display = 'none';
-    appEl.style.display = 'flex';
-    await loadWorkspaceAndData();
-    showInviteSetupIfNeeded(session);
-  } else {
-    document.getElementById('authScreen').style.display = 'flex';
+  const authScreen = document.getElementById('authScreen');
+
+  if(!session || !session.user){
+    currentUserId = null;
+    currentWorkspaceId = null;
+    currentWorkspaceName = null;
+    currentUserRole = null;
+    authScreen.style.display = 'flex';
     appEl.style.display = 'none';
-    const inviteSetup = document.getElementById('inviteSetupScreen');
-    if(inviteSetup) inviteSetup.style.display = 'none';
+    showInviteSetup(false);
+    renderRoleToggle();
+    renderNav();
+    return;
+  }
+
+  // Do not expose the application until invite setup and membership resolution are complete.
+  authScreen.style.display = 'none';
+  appEl.style.display = 'none';
+
+  const inviteState = await getAuthoritativeInviteState(session);
+  if(inviteState.invited){
+    showInviteSetup(true);
+    return;
+  }
+
+  showInviteSetup(false);
+  const loaded = await loadWorkspaceAndData(inviteState.user);
+  if(loaded){
+    appEl.style.display = 'flex';
+    return;
+  }
+
+  // A valid Auth session without an active Tasky membership must never fall back to admin UI.
+  await sb.auth.signOut();
+  authScreen.style.display = 'flex';
+  appEl.style.display = 'none';
+  const errBox = document.getElementById('authError');
+  if(errBox){
+    errBox.textContent = 'هذا الحساب لا يملك عضوية نشطة في مساحة عمل تاسكي.';
+    errBox.style.display = 'block';
   }
 }
 
@@ -1403,7 +1529,7 @@ function assignableMembers(){
 let activeNav = "tasks";
 let activeView = "board";
 let currentPlan = "pro";
-let currentUserRole = "admin"; // "admin" | "member" — preview toggle in sidebar
+let currentUserRole = null; // authoritative value loaded only from workspace_members
 let query = "";
 let filterTag = null;
 let urgentFirst = false;
@@ -1457,16 +1583,19 @@ function applyChrome(){
   renderRoleToggle();
 }
 function renderRoleToggle(){
-  document.getElementById('previewAsLabel').textContent = lang==='ar' ? 'معاينة كـ' : 'Preview as';
-  document.getElementById('roleToggle').innerHTML = `
-    <button class="${currentUserRole==='admin'?'active':''}" onclick="setUserRole('admin')">${t('role_admin')}</button>
-    <button class="${currentUserRole==='member'?'active':''}" onclick="setUserRole('member')">${t('role_member')}</button>`;
-}
-function setUserRole(role){
-  currentUserRole = role;
-  if(role==='member' && (activeNav==='team' || activeNav==='billing')) activeNav = 'tasks';
-  renderRoleToggle();
-  setActiveNav(activeNav);
+  const label = document.getElementById('previewAsLabel');
+  const box = document.getElementById('roleToggle');
+  if(!label || !box) return;
+
+  label.textContent = lang==='ar' ? 'صلاحيتك' : 'Your role';
+
+  if(currentUserRole !== 'admin' && currentUserRole !== 'member'){
+    box.innerHTML = `<button class="active" disabled style="opacity:.65;cursor:default">${lang==='ar'?'جارٍ التحقق...':'Checking...'}</button>`;
+    return;
+  }
+
+  const roleLabel = currentUserRole === 'admin' ? t('role_admin') : t('role_member');
+  box.innerHTML = `<button class="active" disabled style="cursor:default">${roleLabel}</button>`;
 }
 function toggleLang(){
   lang = lang === 'ar' ? 'en' : 'ar';
@@ -2438,12 +2567,14 @@ function teamTemplate(){
     <div class="security-banner"><svg><use href="#i-shield"/></svg><span><b>${t('role_admin')}:</b> ${t('roleAdminDesc')}<br><b>${t('role_member')}:</b> ${t('roleMemberDesc')}</span></div>`;
 }
 async function changeRole(id, role){
+  if(currentUserRole !== 'admin') return;
   teamMembers = teamMembers.map(m => m.id===id ? {...m, role} : m);
   renderModule();
   const { error } = await sb.from('workspace_members').update({ role }).eq('id', id);
   if(error) console.error('تعذّر تحديث الصلاحية', error);
 }
 async function removeMember(id){
+  if(currentUserRole !== 'admin') return;
   const m = teamMembers.find(x=>x.id===id);
   const label = m?.fullName || m?.email || '';
   const prompt = m?.status==='invited'
@@ -2456,6 +2587,7 @@ async function removeMember(id){
   renderModule();
 }
 function openInviteModal(){
+  if(currentUserRole !== 'admin') return;
   const plan = PLANS[currentPlan];
   const reservedSeats = teamMembers.filter(m=>m.status==='active' || m.status==='invited').length;
   if(plan.seats!==Infinity && reservedSeats>=plan.seats){ alert(t('seatsLimitReached')); return; }
@@ -2473,6 +2605,7 @@ function openInviteModal(){
 }
 async function submitInvite(e){
   e.preventDefault();
+  if(currentUserRole !== 'admin') return;
   const name = document.getElementById('inviteName').value.trim();
   const email = document.getElementById('inviteEmail').value.trim().toLowerCase();
   const role = document.getElementById('inviteRole').value;
