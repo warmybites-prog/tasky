@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V14: inline favicon + DB-backed workspace branding via secured RPC; no Storage dependency -->
+<!-- Tasky V16: inline favicon + secure branding + themed dialogs + toast notifications -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -633,6 +633,60 @@
     .event-grid{grid-template-columns:repeat(2,1fr);}
     .campaign-grid{grid-template-columns:1fr;}
   }
+
+  /* ---------------- THEMED DIALOGS ---------------- */
+  .tasky-dialog-backdrop{position:fixed;inset:0;background:rgba(8,18,11,.42);backdrop-filter:blur(4px);display:none;align-items:center;justify-content:center;z-index:4000;padding:18px;}
+  .tasky-dialog-backdrop.show{display:flex;animation:fadeIn .16s ease-out;}
+  .tasky-dialog{width:min(520px,100%);background:var(--card);border:1px solid color-mix(in srgb, var(--border) 84%, transparent);border-radius:28px;box-shadow:0 28px 70px rgba(13,24,15,.18), 0 8px 24px rgba(13,24,15,.10);overflow:hidden;transform:translateY(8px) scale(.985);opacity:0;animation:dialogIn .18s ease-out forwards;}
+  .tasky-dialog-head{display:flex;align-items:flex-start;gap:14px;padding:26px 26px 10px;}
+  .tasky-dialog-icon{width:54px;height:54px;border-radius:18px;display:grid;place-items:center;flex:none;background:var(--violet-tint);color:var(--violet);}
+  .tasky-dialog-icon svg{width:24px;height:24px;}
+  .tasky-dialog[data-tone="success"] .tasky-dialog-icon{background:var(--green-tint);color:var(--green);}
+  .tasky-dialog[data-tone="warning"] .tasky-dialog-icon{background:var(--amber-tint);color:#946b14;}
+  .tasky-dialog[data-tone="error"] .tasky-dialog-icon{background:var(--danger-tint);color:var(--danger);}
+  .tasky-dialog-body{flex:1;min-width:0;padding-top:2px;}
+  .tasky-dialog-title{font:800 28px/1.15 "Almarai",sans-serif;color:var(--ink);margin:0 0 10px;letter-spacing:-.02em;}
+  html[dir="ltr"] .tasky-dialog-title{font-family:"Inter",sans-serif;}
+  .tasky-dialog-message{font-size:15.5px;line-height:1.95;color:var(--ink-soft);word-break:break-word;white-space:pre-wrap;}
+  .tasky-dialog-actions{display:flex;justify-content:flex-end;gap:10px;padding:16px 26px 24px;}
+  .tasky-dialog-btn{min-width:112px;height:46px;padding:0 18px;border-radius:15px;border:1px solid var(--border);background:transparent;color:var(--ink);font-size:14px;font-weight:700;transition:.18s ease;}
+  .tasky-dialog-btn:hover{transform:translateY(-1px);background:color-mix(in srgb,var(--paper) 72%, transparent);}
+  .tasky-dialog-btn.primary{border-color:var(--violet);background:var(--violet);color:#fff;box-shadow:0 8px 18px rgba(91,75,138,.22);}
+  .tasky-dialog-btn.primary:hover{background:#66549a;}
+  .tasky-dialog-btn.warn{border-color:#946b14;background:#946b14;color:#fff;box-shadow:0 8px 18px rgba(148,107,20,.22);}
+  .tasky-dialog-btn.warn:hover{background:#a77814;}
+  .tasky-dialog-btn.danger{border-color:var(--danger);background:var(--danger);color:#fff;box-shadow:0 8px 18px rgba(192,69,61,.22);}
+  .tasky-dialog-btn.danger:hover{background:#d2534c;}
+  @keyframes fadeIn{from{opacity:0}to{opacity:1}}
+  @keyframes dialogIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @media (max-width:640px){
+    .tasky-dialog{border-radius:22px;}
+    .tasky-dialog-head{padding:20px 18px 8px;gap:12px;}
+    .tasky-dialog-actions{padding:14px 18px 20px;flex-direction:column-reverse;}
+    .tasky-dialog-btn{width:100%;}
+    .tasky-dialog-title{font-size:24px;}
+    .tasky-dialog-message{font-size:14px;line-height:1.85;}
+  }
+
+
+  /* ---------------- TOAST NOTIFICATIONS ---------------- */
+  .tasky-toast-stack{position:fixed;top:18px;inset-inline-start:18px;z-index:4200;display:flex;flex-direction:column;gap:10px;width:min(380px,calc(100vw - 36px));pointer-events:none;}
+  .tasky-toast{pointer-events:auto;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;padding:13px 14px;background:color-mix(in srgb,var(--card) 96%, transparent);border:1px solid var(--border);border-radius:16px;box-shadow:0 18px 40px rgba(13,24,15,.14),0 5px 16px rgba(13,24,15,.08);backdrop-filter:blur(12px);transform:translateY(-10px);opacity:0;animation:toastIn .22s ease-out forwards;}
+  .tasky-toast.leaving{animation:toastOut .18s ease-in forwards;}
+  .tasky-toast-icon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:var(--green-tint);color:var(--green);flex:none;}
+  .tasky-toast-icon svg{width:19px;height:19px;}
+  .tasky-toast[data-tone="info"] .tasky-toast-icon{background:var(--blue-tint);color:var(--blue);}
+  .tasky-toast[data-tone="success"] .tasky-toast-icon{background:var(--green-tint);color:var(--green);}
+  .tasky-toast-title{font:700 13px/1.4 "Almarai",sans-serif;color:var(--ink);margin-bottom:2px;}
+  html[dir="ltr"] .tasky-toast-title{font-family:"Inter",sans-serif;}
+  .tasky-toast-message{font-size:12.5px;line-height:1.65;color:var(--ink-soft);word-break:break-word;}
+  .tasky-toast-close{width:30px;height:30px;border:0;border-radius:9px;background:transparent;color:var(--muted);display:grid;place-items:center;padding:0;}
+  .tasky-toast-close:hover{background:var(--paper);color:var(--ink);}
+  .tasky-toast-close svg{width:15px;height:15px;}
+  @keyframes toastIn{from{opacity:0;transform:translateY(-10px) scale(.985)}to{opacity:1;transform:translateY(0) scale(1)}}
+  @keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-8px) scale(.985)}}
+  @media (max-width:640px){.tasky-toast-stack{top:12px;inset-inline-start:12px;width:calc(100vw - 24px)}.tasky-toast{border-radius:14px}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -815,6 +869,29 @@
 
 <div id="eventModalOverlay" class="overlay hidden" onclick="if(event.target===this) closeEventModal()">
   <div class="modal" onclick="event.stopPropagation()" id="eventModalBody"></div>
+</div>
+
+
+<div id="taskyToastStack" class="tasky-toast-stack" aria-live="polite" aria-atomic="false"></div>
+
+<div id="taskyDialogBackdrop" class="tasky-dialog-backdrop" aria-hidden="true">
+  <div id="taskyDialog" class="tasky-dialog" data-tone="info" role="dialog" aria-modal="true" aria-labelledby="taskyDialogTitle" aria-describedby="taskyDialogMessage">
+    <div class="tasky-dialog-head">
+      <div class="tasky-dialog-icon" id="taskyDialogIcon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle>
+        </svg>
+      </div>
+      <div class="tasky-dialog-body">
+        <h3 id="taskyDialogTitle" class="tasky-dialog-title">تاسكي</h3>
+        <div id="taskyDialogMessage" class="tasky-dialog-message"></div>
+      </div>
+    </div>
+    <div class="tasky-dialog-actions">
+      <button id="taskyDialogCancel" type="button" class="tasky-dialog-btn" style="display:none"></button>
+      <button id="taskyDialogConfirm" type="button" class="tasky-dialog-btn primary"></button>
+    </div>
+  </div>
 </div>
 
 <script>
@@ -3102,7 +3179,7 @@ async function removeMember(id){
   const prompt = m?.status==='invited'
     ? (lang==='ar' ? `إلغاء دعوة ${label}؟` : `Cancel ${label}'s invite?`)
     : t('teamRemoveConfirm')(label);
-  if(!confirm(prompt)) return;
+  if(!(await taskyConfirm(prompt, { title: m?.status==='invited' ? (lang==='ar'?'إلغاء الدعوة':'Cancel invite') : (lang==='ar'?'إزالة عضو':'Remove member'), tone: m?.status==='invited' ? 'warning' : 'danger', confirmText: m?.status==='invited' ? (lang==='ar'?'إلغاء الدعوة':'Cancel invite') : (lang==='ar'?'إزالة':'Remove') }))) return;
   const { error } = await sb.from('workspace_members').delete().eq('id', id);
   if(error){ console.error(error); alert(lang==='ar'?'تعذّر تنفيذ العملية':'Could not complete the action'); return; }
   teamMembers = teamMembers.filter(x=>x.id!==id);
@@ -3462,6 +3539,123 @@ const breadcrumbTitleEl = document.getElementById('breadcrumbLabel');
 if(breadcrumbTitleEl){
   breadcrumbTitleObserver.observe(breadcrumbTitleEl, { childList:true, characterData:true, subtree:true });
 }
+
+
+/* ================= THEMED DIALOGS ================= */
+const taskyDialogState = { resolve:null, lastFocused:null };
+function getDialogIconSvg(tone='info'){
+  if(tone==='success') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="m7 12 3 3 7-7"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+  if(tone==='warning') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v5"></path><path d="M12 16h.01"></path><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"></path></svg>';
+  if(tone==='error' || tone==='danger') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="m15 9-6 6"></path><path d="m9 9 6 6"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+}
+function inferDialogTone(message=''){
+  const m = String(message || '').toLowerCase();
+  if(m.includes('تعذ') || m.includes('خطأ') || m.includes('could not') || m.includes('error') || m.includes('violates') || m.includes('requires') || m.includes('فشل') || m.includes('failed')) return 'error';
+  if(m.includes('إلغاء') || m.includes('حذف') || m.includes('remove') || m.includes('delete') || m.includes('حد المقاعد') || m.includes('seats limit') || m.includes('غير متاح') || m.includes('not available')) return 'warning';
+  if(m.includes('نجاح') || m.includes('تم ') || m.includes('success') || m.includes('saved') || m.includes('activated') || m.includes('sent') || m.includes('أُرسل') || m.includes('تم إرسال') || m.includes('تم تفعيل')) return 'success';
+  return 'info';
+}
+function getToastIconSvg(tone='success'){
+  if(tone==='success') return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="m7 12 3 3 7-7"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+  return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.15" stroke-linecap="round" stroke-linejoin="round"><path d="M12 8v4"></path><path d="M12 16h.01"></path><circle cx="12" cy="12" r="9"></circle></svg>';
+}
+function taskyToast(message, {tone='success', title, duration=3600}={}){
+  const stack = document.getElementById('taskyToastStack');
+  if(!stack) return;
+  const item = document.createElement('div');
+  item.className = 'tasky-toast';
+  item.dataset.tone = tone;
+  const safeTitle = title || (tone==='success' ? (lang==='ar'?'تم بنجاح':'Done') : (lang==='ar'?'إشعار':'Notice'));
+  item.innerHTML = `
+    <div class="tasky-toast-icon">${getToastIconSvg(tone)}</div>
+    <div><div class="tasky-toast-title"></div><div class="tasky-toast-message"></div></div>
+    <button class="tasky-toast-close" type="button" aria-label="${lang==='ar'?'إغلاق':'Close'}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m18 6-12 12"></path><path d="m6 6 12 12"></path></svg></button>`;
+  item.querySelector('.tasky-toast-title').textContent = safeTitle;
+  item.querySelector('.tasky-toast-message').textContent = String(message ?? '');
+  const remove = () => {
+    if(!item.isConnected) return;
+    item.classList.add('leaving');
+    setTimeout(()=>item.remove(),180);
+  };
+  item.querySelector('.tasky-toast-close').onclick = remove;
+  stack.prepend(item);
+  while(stack.children.length > 4) stack.lastElementChild?.remove();
+  if(duration > 0) setTimeout(remove,duration);
+}
+function closeTaskyDialog(result=false){
+  const backdrop = document.getElementById('taskyDialogBackdrop');
+  if(!backdrop) return;
+  backdrop.classList.remove('show');
+  backdrop.setAttribute('aria-hidden', 'true');
+  const resolve = taskyDialogState.resolve;
+  taskyDialogState.resolve = null;
+  if(taskyDialogState.lastFocused && typeof taskyDialogState.lastFocused.focus === 'function'){
+    setTimeout(() => taskyDialogState.lastFocused.focus(), 10);
+  }
+  if(resolve) resolve(result);
+}
+function showTaskyDialog({ title, message, tone='info', confirmText, cancelText, showCancel=false }={}){
+  const backdrop = document.getElementById('taskyDialogBackdrop');
+  const dialog = document.getElementById('taskyDialog');
+  const titleEl = document.getElementById('taskyDialogTitle');
+  const messageEl = document.getElementById('taskyDialogMessage');
+  const iconEl = document.getElementById('taskyDialogIcon');
+  const cancelBtn = document.getElementById('taskyDialogCancel');
+  const confirmBtn = document.getElementById('taskyDialogConfirm');
+  if(!backdrop || !dialog) return Promise.resolve(false);
+  taskyDialogState.lastFocused = document.activeElement;
+  dialog.dataset.tone = tone;
+  iconEl.innerHTML = getDialogIconSvg(tone);
+  titleEl.textContent = title || (lang==='ar' ? 'تاسكي' : 'Tasky');
+  messageEl.textContent = String(message ?? '');
+  cancelBtn.textContent = cancelText || (lang==='ar' ? 'إلغاء' : 'Cancel');
+  confirmBtn.textContent = confirmText || (lang==='ar' ? 'موافق' : 'OK');
+  cancelBtn.style.display = showCancel ? 'inline-flex' : 'none';
+  confirmBtn.className = 'tasky-dialog-btn primary';
+  if(tone==='warning') confirmBtn.className = 'tasky-dialog-btn warn';
+  if(tone==='danger' || tone==='error') confirmBtn.className = 'tasky-dialog-btn danger';
+  return new Promise(resolve => {
+    taskyDialogState.resolve = resolve;
+    backdrop.classList.add('show');
+    backdrop.setAttribute('aria-hidden', 'false');
+    confirmBtn.onclick = () => closeTaskyDialog(true);
+    cancelBtn.onclick = () => closeTaskyDialog(false);
+    backdrop.onclick = (e) => { if(e.target === backdrop) closeTaskyDialog(false); };
+    requestAnimationFrame(() => (showCancel ? cancelBtn : confirmBtn).focus());
+  });
+}
+window.taskyConfirm = function(message, opts={}){
+  return showTaskyDialog({
+    title: opts.title || (lang==='ar' ? 'تأكيد الإجراء' : 'Confirm action'),
+    message,
+    tone: opts.tone || 'warning',
+    confirmText: opts.confirmText || (lang==='ar' ? 'تأكيد' : 'Confirm'),
+    cancelText: opts.cancelText || (lang==='ar' ? 'إلغاء' : 'Cancel'),
+    showCancel: true
+  });
+};
+window.taskyToast = taskyToast;
+window.alert = function(message){
+  const tone = inferDialogTone(message);
+  if(tone==='success' || tone==='info'){
+    taskyToast(message, {tone, duration: tone==='success' ? 3400 : 4200});
+    return;
+  }
+  showTaskyDialog({
+    title: tone==='error' ? (lang==='ar'?'تعذّر تنفيذ العملية':'Action failed') : (lang==='ar'?'تنبيه':'Notice'),
+    message,
+    tone,
+    confirmText: lang==='ar' ? 'موافق' : 'OK',
+    showCancel: false
+  });
+};
+document.addEventListener('keydown', (e) => {
+  const backdrop = document.getElementById('taskyDialogBackdrop');
+  if(!backdrop || backdrop.getAttribute('aria-hidden') === 'true') return;
+  if(e.key === 'Escape') closeTaskyDialog(false);
+});
+
 
 /* ================= MASTER RENDER ================= */
 function renderAll(){
