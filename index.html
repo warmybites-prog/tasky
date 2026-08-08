@@ -687,13 +687,24 @@
   @keyframes toastOut{from{opacity:1;transform:translateY(0) scale(1)}to{opacity:0;transform:translateY(-8px) scale(.985)}}
   @media (max-width:640px){.tasky-toast-stack{top:12px;inset-inline-start:12px;width:calc(100vw - 24px)}.tasky-toast{border-radius:14px}}
 
+
+  /* ---------------- AUTH BRAND ---------------- */
+  .auth-brand-mark{width:54px;height:54px;margin:0 auto 12px;display:block;filter:drop-shadow(0 5px 10px rgba(18,41,26,.08));}
+  .auth-brand-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:2px;}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
 <div id="authScreen" style="position:fixed;inset:0;background:var(--paper);z-index:200;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans Arabic',sans-serif;">
   <div style="width:360px;max-width:90vw;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;">
-    <h2 style="font-family:'Almarai';font-size:20px;margin-bottom:6px;">تاسكي</h2>
+    <div class="auth-brand-lockup">
+      <svg class="auth-brand-mark" viewBox="1240 1320 1440 1360" aria-label="شعار تاسكي" role="img">
+        <path fill="#2A6C2E" fill-rule="evenodd" d="M1923.4,1377.41c85.11,0,166.28,17.02,240.92,48.44l-187.23,206.87c-18.33-2.62-35.35-3.93-53.68-3.93-161.05,0-298.53,103.44-349.59,247.46-13.09,37.97-20.95,79.87-20.95,124.39,0,204.26,166.29,370.54,370.54,370.54,191.16,0,346.97-144.03,369.23-328.64l219.97-246.15c20.95,64.16,34.04,132.24,34.04,204.26,0,343.04-278.89,621.93-623.24,621.93s-621.93-278.89-621.93-621.93,278.89-623.24,621.93-623.24h0Z"/>
+        <path fill="#82AF21" fill-rule="evenodd" d="M1715.44,1876.27h202.38c16.06,0,31.37-6.79,42.15-18.7l416.55-460.15c10.78-11.91,26.09-18.7,42.15-18.7h153.07c49.09,0,75.11,58.02,42.46,94.68l-633.27,711.06c-21.42,24.05-58.52,25.53-81.78,3.26l-223.04-213.51c-37.03-35.45-11.94-97.93,39.32-97.93Z"/>
+      </svg>
+      <h2 style="font-family:'Almarai';font-size:22px;margin-bottom:6px;">تاسكي</h2>
+    </div>
     <p id="authSubtitle" style="font-size:13px;color:var(--muted);margin-bottom:20px;">سجّل دخولك لمتابعة العمل</p>
     <div id="authError" style="display:none;background:var(--danger-tint);color:var(--danger);font-size:12.5px;padding:10px;border-radius:8px;margin-bottom:14px;text-align:right;"></div>
     <div id="signupOnlyFields" style="display:none;">
