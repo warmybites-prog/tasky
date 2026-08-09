@@ -1293,10 +1293,11 @@
   }
 
 
-  /* V29.1 — nested event task editor */
+  /* V29.2 — dedicated event task modal */
   #eventModalOverlay{z-index:70;}
   #addModalOverlay{z-index:95;}
   #detailModalOverlay{z-index:100;}
+  #eventTaskModalOverlay{z-index:125;}
   .modal.event-task-create-modal{width:min(720px,94vw);max-width:94vw;overflow-x:hidden;}
   .event-task-create-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;}
   .event-task-create-grid .field.full{grid-column:1/-1;}
@@ -1499,6 +1500,10 @@
   <div class="modal" onclick="event.stopPropagation()" id="addModalBody"></div>
 </div>
 
+<div id="eventTaskModalOverlay" class="overlay hidden" onclick="if(event.target===this) closeEventTaskModal()">
+  <div class="modal event-task-create-modal" onclick="event.stopPropagation()" id="eventTaskModalBody"></div>
+</div>
+
 <div id="detailModalOverlay" class="overlay hidden" onclick="if(event.target===this) closeDetailModal()">
   <div class="modal" onclick="event.stopPropagation()" id="detailModalBody"></div>
 </div>
@@ -1536,7 +1541,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V29.1'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V29.2'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -3594,33 +3599,55 @@ function syncEventTaskLeadFromAssignees(){
   if(previous && checked.includes(previous)) select.value=previous;
   else if(checked.length) select.value=checked[0];
 }
+function closeEventTaskModal(){
+  const overlay=document.getElementById('eventTaskModalOverlay');
+  const body=document.getElementById('eventTaskModalBody');
+  if(overlay) overlay.classList.add('hidden');
+  if(body) body.innerHTML='';
+}
 function openEventTaskModal(eventId){
-  const ev=workspaceEvents.find(x=>x.id===eventId); if(!ev)return;
-  const editable=projects.filter(p=>canCreateTaskInProject(p.id));
-  if(!editable.length){showTaskyDialog({title:lang==='ar'?'لا توجد صلاحية لإنشاء مهمة':'No permission to create a task',message:lang==='ar'?'تحتاج صلاحية محرر أو مدير على مشروع واحد على الأقل.':'You need Editor or Manager access to at least one project.',tone:'warning'});return;}
-  const projectId=editable.some(p=>p.id===activeProjectId)?activeProjectId:editable[0].id;
-  const statusOptions=COLUMNS.map(c=>`<option value="${c.id}" ${c.id==='todo'?'selected':''}>${t(c.key)}</option>`).join('');
-  const tagOptions=Object.keys(TAG_META).map(tg=>`<option value="${tg}" ${tg==='events'?'selected':''}>${t('tag_'+tg)}</option>`).join('');
-  const body=document.getElementById('addModalBody');
-  body.classList.add('event-task-create-modal');
-  body.innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة جديدة للفعالية':'New event task'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
-  <form onsubmit="submitEventTask(event,'${eventId}')">
-    <div class="event-task-create-grid">
-      <div class="field full"><label>${lang==='ar'?'عنوان المهمة':'Task title'}</label><input id="eventTaskTitle" required maxlength="220" placeholder="${lang==='ar'?'مثال: تجهيز منصة التسجيل والاستقبال':'e.g. Prepare registration and reception desk'}"></div>
-      <div class="field full"><label>${lang==='ar'?'الوصف والمخرجات المطلوبة':'Description & expected outcome'}</label><textarea id="eventTaskDescription" placeholder="${lang==='ar'?'اشرح المطلوب، نطاق العمل، المخرجات أو أي تعليمات مهمة...':'Describe the scope, expected outcome, deliverables, or important instructions...'}"></textarea></div>
-      <div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="eventTaskProject" onchange="refreshEventTaskAssignees(this.value)">${editable.map(p=>`<option value="${p.id}" ${p.id===projectId?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
-      <div class="field"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="eventTaskStatus">${statusOptions}</select></div>
-      <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="eventTaskPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
-      <div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><select id="eventTaskTag">${tagOptions}</select></div>
-      <div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="eventTaskStart" type="date"></div>
-      <div class="field"><label>${lang==='ar'?'تاريخ الاستحقاق':'Due date'}</label><input id="eventTaskDue" type="date"></div>
-      <div class="field"><label>${lang==='ar'?'تكلفة المهمة':'Task cost'}</label><input id="eventTaskCost" type="number" min="0" step="0.01" value="0"><div class="event-task-form-note">${lang==='ar'?'تُخصم تلقائيًا من ميزانية الفعالية في ملخص التكاليف.':'Automatically counted against the event budget.'}</div></div>
-      <div class="field"><label>${lang==='ar'?'المسؤول الرئيسي':'Lead assignee'}</label><select id="eventTaskLead"><option value="">${lang==='ar'?'اختر المسؤولين أولًا':'Select assignees first'}</option></select><div class="event-task-form-note">${lang==='ar'?'اختياري، ويجب أن يكون ضمن المسؤولين المحددين.':'Optional and must be one of the selected assignees.'}</div></div>
-      <div class="field full event-task-form-section"><div class="event-task-form-section-title">${lang==='ar'?'المسؤولون عن المهمة':'Task assignees'}</div><div id="eventTaskAssignees">${createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId),onChange:'syncEventTaskLeadFromAssignees'})}</div><div class="event-task-form-note">${lang==='ar'?'يمكن تحديد أكثر من مسؤول. بعد إنشاء المهمة يمكنك إضافة مهام فرعية ومرفقات وتعليقات من تفاصيلها.':'You can assign multiple people. After creation, add subtasks, files, and comments from the task details.'}</div></div>
-    </div>
-    <button class="submit-btn" type="submit">${lang==='ar'?'إضافة المهمة':'Add task'}</button>
-  </form>`;
-  document.getElementById('addModalOverlay').classList.remove('hidden');
+  try{
+    const ev=workspaceEvents.find(x=>String(x.id)===String(eventId));
+    if(!ev){
+      showTaskyDialog({title:lang==='ar'?'تعذّر فتح نافذة المهمة':'Could not open task window',message:lang==='ar'?'لم يتم العثور على الفعالية الحالية. أغلق الفعالية وافتحها مرة أخرى.':'The current event could not be found. Close and reopen the event.',tone:'error'});
+      return;
+    }
+    const editable=projects.filter(p=>canCreateTaskInProject(p.id));
+    if(!editable.length){
+      showTaskyDialog({title:lang==='ar'?'لا توجد صلاحية لإنشاء مهمة':'No permission to create a task',message:lang==='ar'?'تحتاج صلاحية محرر أو مدير على مشروع واحد على الأقل.':'You need Editor or Manager access to at least one project.',tone:'warning'});
+      return;
+    }
+    const projectId=editable.some(p=>String(p.id)===String(activeProjectId))?activeProjectId:editable[0].id;
+    const statusOptions=COLUMNS.map(c=>`<option value="${c.id}" ${c.id==='todo'?'selected':''}>${t(c.key)}</option>`).join('');
+    const tagOptions=Object.keys(TAG_META).map(tg=>`<option value="${tg}" ${tg==='events'?'selected':''}>${t('tag_'+tg)}</option>`).join('');
+    const members=projectAssignableMembers(projectId);
+    const body=document.getElementById('eventTaskModalBody');
+    const overlay=document.getElementById('eventTaskModalOverlay');
+    if(!body || !overlay) throw new Error('event task modal container is missing');
+
+    body.innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة جديدة للفعالية':'New event task'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button type="button" class="modal-close" onclick="closeEventTaskModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    <form onsubmit="submitEventTask(event,'${eventId}')">
+      <div class="event-task-create-grid">
+        <div class="field full"><label>${lang==='ar'?'عنوان المهمة':'Task title'}</label><input id="eventTaskTitle" required maxlength="220" placeholder="${lang==='ar'?'مثال: تجهيز منصة التسجيل والاستقبال':'e.g. Prepare registration and reception desk'}"></div>
+        <div class="field full"><label>${lang==='ar'?'الوصف والمخرجات المطلوبة':'Description & expected outcome'}</label><textarea id="eventTaskDescription" placeholder="${lang==='ar'?'اشرح المطلوب، نطاق العمل، المخرجات أو أي تعليمات مهمة...':'Describe the scope, expected outcome, deliverables, or important instructions...'}"></textarea></div>
+        <div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="eventTaskProject" onchange="refreshEventTaskAssignees(this.value)">${editable.map(p=>`<option value="${p.id}" ${String(p.id)===String(projectId)?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+        <div class="field"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="eventTaskStatus">${statusOptions}</select></div>
+        <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="eventTaskPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
+        <div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><select id="eventTaskTag">${tagOptions}</select></div>
+        <div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="eventTaskStart" type="date"></div>
+        <div class="field"><label>${lang==='ar'?'تاريخ الاستحقاق':'Due date'}</label><input id="eventTaskDue" type="date"></div>
+        <div class="field"><label>${lang==='ar'?'تكلفة المهمة':'Task cost'}</label><input id="eventTaskCost" type="number" min="0" step="0.01" value="0"><div class="event-task-form-note">${lang==='ar'?'تُخصم تلقائيًا من ميزانية الفعالية في ملخص التكاليف.':'Automatically counted against the event budget.'}</div></div>
+        <div class="field"><label>${lang==='ar'?'المسؤول الرئيسي':'Lead assignee'}</label><select id="eventTaskLead"><option value="">${lang==='ar'?'اختر المسؤولين أولًا':'Select assignees first'}</option></select><div class="event-task-form-note">${lang==='ar'?'اختياري، ويجب أن يكون ضمن المسؤولين المحددين.':'Optional and must be one of the selected assignees.'}</div></div>
+        <div class="field full event-task-form-section"><div class="event-task-form-section-title">${lang==='ar'?'المسؤولون عن المهمة':'Task assignees'}</div><div id="eventTaskAssignees">${createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members,onChange:'syncEventTaskLeadFromAssignees'})}</div><div class="event-task-form-note">${lang==='ar'?'يمكن تحديد أكثر من مسؤول. بعد إنشاء المهمة يمكنك إضافة مهام فرعية ومرفقات وتعليقات من تفاصيلها.':'You can assign multiple people. After creation, add subtasks, files, and comments from the task details.'}</div></div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;margin-top:14px"><button class="submit-btn" type="submit" style="flex:1">${lang==='ar'?'إضافة المهمة':'Add task'}</button><button class="chip-btn" type="button" onclick="closeEventTaskModal()">${lang==='ar'?'إلغاء':'Cancel'}</button></div>
+    </form>`;
+    overlay.classList.remove('hidden');
+    requestAnimationFrame(()=>document.getElementById('eventTaskTitle')?.focus());
+  }catch(err){
+    console.error('openEventTaskModal failed',err);
+    showTaskyDialog({title:lang==='ar'?'تعذّر فتح نافذة المهمة':'Could not open task window',message:err?.message||String(err),tone:'error'});
+  }
 }
 function refreshEventTaskAssignees(projectId){
   const box=document.getElementById('eventTaskAssignees');
@@ -3650,7 +3677,7 @@ async function submitEventTask(e,eventId){
     const r=await sb.from('task_assignees').insert(rows); if(r.error) console.warn(r.error);
   }
   await logTaskActivity(data.id,'task_created',{title,event_id:eventId,cost,priority,status:col,start_date:startDate,due_date:dueDate,assignee_count:assigneeIds.length});
-  closeAddModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة الفعالية بكامل التفاصيل':'Event task added with details',{tone:'success'});
+  closeEventTaskModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة الفعالية بكامل التفاصيل':'Event task added with details',{tone:'success'});
 }
 function openEventSubtaskModal(eventId,taskId){
   const task=tasks.find(t=>t.id===taskId); if(!task||!canEditTaskClient(task))return;
