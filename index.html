@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V32.1 RFQ supplier portal + email / WhatsApp invitations + direct supplier quotes -->
+<!-- Tasky V32.2 RFQ email hotfix + diagnostic errors -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1639,7 +1639,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V32.1'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V32.2'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 const sb = window.supabase.createClient(TASKY_SUPABASE_URL, TASKY_SUPABASE_PUBLISHABLE_KEY);
@@ -4287,13 +4287,43 @@ function rfqInviteState(rfq,rv,q){
 function rfqInviteStatusLabel(state){const ar={invited:'لم يُرسل',sent:'تم الإرسال',opened:'تم فتح الدعوة',responded:'تم تقديم العرض',declined:'اعتذر المورد',expired:'انتهت المهلة'};const en={invited:'Not sent',sent:'Sent',opened:'Invitation opened',responded:'Quote submitted',declined:'Vendor declined',expired:'Deadline passed'};return (lang==='ar'?ar:en)[state]||state;}
 function buildVendorQuotePortalUrl(token){const u=new URL(window.location.href);u.search='';u.hash='';u.searchParams.set('quote',token);return u.toString();}
 async function getRfqVendorInvite(rfqId,vendorId){const {data,error}=await sb.rpc('tasky_get_or_create_rfq_invitation',{p_rfq_id:rfqId,p_vendor_id:vendorId});if(error)throw error;return data;}
+async function taskyEdgeFunctionErrorDetails(err){
+  let message=String(err?.message||err||'Unknown error');
+  let stage='';
+  try{
+    const response=err?.context;
+    if(response&&typeof response.clone==='function'){
+      const cloned=response.clone();
+      const type=cloned.headers?.get?.('content-type')||'';
+      if(type.includes('application/json')){
+        const body=await cloned.json();
+        if(body?.error)message=String(body.error);
+        if(body?.stage)stage=String(body.stage);
+        if(body?.providerStatus)message+=` (HTTP ${body.providerStatus})`;
+        if(body?.code)message+=` [${body.code}]`;
+      }else{
+        const text=await cloned.text();
+        if(text?.trim())message=text.trim();
+      }
+    }
+  }catch(_){/* keep original SDK error */}
+  return {message,stage};
+}
 async function sendRfqInviteEmail(rfqId,vendorId,opts={}){
   const v=vendorById(vendorId);if(!v?.contactEmail){if(!opts.silent)taskyToast(lang==='ar'?'لا يوجد بريد إلكتروني مسجل للمورد':'Vendor email is missing',{tone:'warning'});return false;}
   try{
     const {data,error}=await sb.functions.invoke('send-rfq-invite',{body:{rfqId,vendorId}});
-    if(error)throw error;if(data?.error)throw new Error(data.error);
+    if(error)throw error;if(data?.error)throw Object.assign(new Error(data.error),{taskyStage:data.stage||''});
     if(!opts.silent){taskyToast(lang==='ar'?`تم إرسال الدعوة إلى ${v.contactEmail}`:`Invitation sent to ${v.contactEmail}`,{tone:'success'});await fetchProcurementData();if(currentProcurementId===rfqId)openRfqDetail(rfqId);}return true;
-  }catch(err){if(!opts.silent)showTaskyDialog({title:lang==='ar'?'تعذّر إرسال البريد':'Could not send email',message:String(err?.message||err)+(lang==='ar'?'\n\nتأكد من نشر Edge Function وإعداد RESEND_API_KEY و TASKY_RFQ_FROM.':'\n\nMake sure the Edge Function is deployed and RESEND_API_KEY / TASKY_RFQ_FROM are configured.'),tone:'error'});return false;}
+  }catch(err){
+    const detail=await taskyEdgeFunctionErrorDetails(err);
+    if(!opts.silent){
+      const stageHint=detail.stage?`\n\n${lang==='ar'?'مرحلة الخطأ':'Error stage'}: ${detail.stage}`:'';
+      showTaskyDialog({title:lang==='ar'?'تعذّر إرسال البريد':'Could not send email',message:detail.message+stageHint,tone:'error'});
+    }
+    console.error('Tasky RFQ email error',detail,err);
+    return false;
+  }
 }
 async function sendAllRfqInvites(rfqId){
   const rfq=rfqById(rfqId);if(!rfq||!canManageRfqClient(rfq))return;const rows=rfqVendorRows(rfqId).filter(rv=>!['responded','declined'].includes(rv.status));const emailRows=rows.filter(rv=>vendorById(rv.vendorId)?.contactEmail);
