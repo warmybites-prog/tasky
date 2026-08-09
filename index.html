@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V25: project-level permissions + project managers + task access control -->
+<!-- Tasky V25.1: project-level permissions + project managers + task access control -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1375,7 +1375,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V25'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V25.1'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1619,7 +1619,12 @@ async function createWorkspaceForNewUser(userId, companyName, email){
   const { data: ws, error: wsError } = await sb.from('workspaces').insert({ name: companyName, slug, plan_id: 'free' }).select().single();
   if(wsError){ console.error(wsError); return; }
   await sb.from('workspace_members').insert({ workspace_id: ws.id, user_id: userId, role: 'admin', status: 'active', joined_at: new Date().toISOString(), invited_email: email });
-  const { error: projectError } = await sb.from('projects').insert({ workspace_id: ws.id, name: 'المهام العامة', position: 0 });
+  const { error: projectError } = await sb.rpc('tasky_create_project', {
+    p_workspace_id: ws.id,
+    p_name: 'المهام العامة',
+    p_description: null,
+    p_position: 0
+  });
   if(projectError) console.warn('تعذّر إنشاء المشروع الافتراضي', projectError);
 }
 async function claimPendingInvite(userId, email){
@@ -4302,13 +4307,18 @@ async function submitAddProject(e){
   const description = document.getElementById('newProjectDescription').value.trim() || null;
   if(!name || !currentWorkspaceId) return;
   const nextPosition = projects.length ? Math.max(...projects.map(p => Number(p.position) || 0)) + 1 : 0;
-  const { data, error } = await sb.from('projects').insert({
-    workspace_id: currentWorkspaceId,
-    name,
-    description,
-    position: nextPosition
-  }).select().single();
-  if(error){ console.error('تعذّر إنشاء المشروع', error); alert(lang==='ar'?'تعذّر إنشاء المشروع، حاول مرة ثانية':'Could not create project. Please try again.'); return; }
+  const { data, error } = await sb.rpc('tasky_create_project', {
+    p_workspace_id: currentWorkspaceId,
+    p_name: name,
+    p_description: description,
+    p_position: nextPosition
+  });
+  if(error){
+    console.error('تعذّر إنشاء المشروع', error);
+    const detail = error.message || String(error);
+    alert((lang==='ar'?'تعذّر إنشاء المشروع: ':'Could not create project: ') + detail);
+    return;
+  }
   closeAddModal();
   await fetchProjects();
   await fetchProjectMemberships();
