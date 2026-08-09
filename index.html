@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V29: event guest invitations + RSVP + QR check-in + branded reports -->
+<!-- Tasky V29.1: event guest invitations + RSVP + QR check-in + branded reports -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1292,6 +1292,25 @@
     .event-guest-form-row{grid-template-columns:1fr!important;}
   }
 
+
+  /* V29.1 — nested event task editor */
+  #eventModalOverlay{z-index:70;}
+  #addModalOverlay{z-index:95;}
+  #detailModalOverlay{z-index:100;}
+  .modal.event-task-create-modal{width:min(720px,94vw);max-width:94vw;overflow-x:hidden;}
+  .event-task-create-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px 12px;}
+  .event-task-create-grid .field.full{grid-column:1/-1;}
+  .event-task-create-modal textarea{width:100%;min-height:92px;resize:vertical;border:1px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);padding:10px 11px;font:inherit;font-size:13px;line-height:1.7;outline:none;}
+  .event-task-create-modal textarea:focus{border-color:color-mix(in srgb,var(--green) 60%,var(--border));box-shadow:0 0 0 3px color-mix(in srgb,var(--green-tint) 70%,transparent);}
+  .event-task-form-note{font-size:11px;color:var(--muted);line-height:1.7;margin-top:5px;}
+  .event-task-form-section{border-top:1px solid var(--border);padding-top:12px;margin-top:2px;}
+  .event-task-form-section-title{font-size:12px;font-weight:800;margin-bottom:8px;color:var(--ink-soft);}
+  @media (max-width:640px){
+    .modal.event-task-create-modal{width:calc(100vw - 24px);max-width:calc(100vw - 24px);}
+    .event-task-create-grid{grid-template-columns:1fr;}
+    .event-task-create-grid .field.full{grid-column:auto;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
@@ -1517,7 +1536,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V29'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V29.1'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -3561,23 +3580,77 @@ async function submitEvent(e,id){
   if(participantSave.error){showTaskyDialog({title:lang==='ar'?'تم حفظ الفعالية لكن تعذّر حفظ المشاركين':'Event saved, participants failed',message:participantSave.error.message,tone:'warning'});}
   closeEventModal(); await fetchEvents(); renderModule(); taskyToast(id?(lang==='ar'?'تم تحديث الفعالية':'Event updated'):(lang==='ar'?'تمت إضافة الفعالية':'Event added'),{tone:'success'});
 }
+function eventTaskLeadOptionsHtml(selected=''){
+  const checkedIds=[...document.querySelectorAll('[data-assignee-box="eventTaskAssignee"]:checked')].map(x=>x.value);
+  const members=checkedIds.map(id=>taskMemberById(id)).filter(Boolean);
+  return `<option value="">${lang==='ar'?'بدون مسؤول رئيسي':'No lead assignee'}</option>${members.map(m=>`<option value="${m.userId}" ${m.userId===selected?'selected':''}>${escapeHtml(m.fullName)}</option>`).join('')}`;
+}
+function syncEventTaskLeadFromAssignees(){
+  const select=document.getElementById('eventTaskLead');
+  if(!select)return;
+  const previous=select.value;
+  select.innerHTML=eventTaskLeadOptionsHtml(previous);
+  const checked=[...document.querySelectorAll('[data-assignee-box="eventTaskAssignee"]:checked')].map(x=>x.value);
+  if(previous && checked.includes(previous)) select.value=previous;
+  else if(checked.length) select.value=checked[0];
+}
 function openEventTaskModal(eventId){
-  const ev=eventById(eventId); if(!ev)return;
+  const ev=workspaceEvents.find(x=>x.id===eventId); if(!ev)return;
   const editable=projects.filter(p=>canCreateTaskInProject(p.id));
-  if(!editable.length){ taskyToast(lang==='ar'?'لا توجد مشاريع لديك صلاحية إنشاء مهام فيها':'You do not have task creation access in any project',{tone:'warning'}); return; }
-  const projectId=editable[0].id;
-  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة جديدة للفعالية':'New event task'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitEventTask(event,'${eventId}')"><div class="field"><label>${lang==='ar'?'عنوان المهمة':'Task title'}</label><input id="eventTaskTitle" required maxlength="220"></div><div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="eventTaskProject" onchange="refreshEventTaskAssignees(this.value)">${editable.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="eventTaskPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div><div class="field"><label>${lang==='ar'?'تكلفة المهمة':'Task cost'}</label><input id="eventTaskCost" type="number" min="0" step="0.01" value="0"></div></div><div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label><div id="eventTaskAssignees">${createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId)})}</div></div><button class="submit-btn" type="submit">${lang==='ar'?'إضافة المهمة':'Add task'}</button></form>`;
+  if(!editable.length){showTaskyDialog({title:lang==='ar'?'لا توجد صلاحية لإنشاء مهمة':'No permission to create a task',message:lang==='ar'?'تحتاج صلاحية محرر أو مدير على مشروع واحد على الأقل.':'You need Editor or Manager access to at least one project.',tone:'warning'});return;}
+  const projectId=editable.some(p=>p.id===activeProjectId)?activeProjectId:editable[0].id;
+  const statusOptions=COLUMNS.map(c=>`<option value="${c.id}" ${c.id==='todo'?'selected':''}>${t(c.key)}</option>`).join('');
+  const tagOptions=Object.keys(TAG_META).map(tg=>`<option value="${tg}" ${tg==='events'?'selected':''}>${t('tag_'+tg)}</option>`).join('');
+  const body=document.getElementById('addModalBody');
+  body.classList.add('event-task-create-modal');
+  body.innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة جديدة للفعالية':'New event task'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+  <form onsubmit="submitEventTask(event,'${eventId}')">
+    <div class="event-task-create-grid">
+      <div class="field full"><label>${lang==='ar'?'عنوان المهمة':'Task title'}</label><input id="eventTaskTitle" required maxlength="220" placeholder="${lang==='ar'?'مثال: تجهيز منصة التسجيل والاستقبال':'e.g. Prepare registration and reception desk'}"></div>
+      <div class="field full"><label>${lang==='ar'?'الوصف والمخرجات المطلوبة':'Description & expected outcome'}</label><textarea id="eventTaskDescription" placeholder="${lang==='ar'?'اشرح المطلوب، نطاق العمل، المخرجات أو أي تعليمات مهمة...':'Describe the scope, expected outcome, deliverables, or important instructions...'}"></textarea></div>
+      <div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="eventTaskProject" onchange="refreshEventTaskAssignees(this.value)">${editable.map(p=>`<option value="${p.id}" ${p.id===projectId?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="eventTaskStatus">${statusOptions}</select></div>
+      <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="eventTaskPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
+      <div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><select id="eventTaskTag">${tagOptions}</select></div>
+      <div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="eventTaskStart" type="date"></div>
+      <div class="field"><label>${lang==='ar'?'تاريخ الاستحقاق':'Due date'}</label><input id="eventTaskDue" type="date"></div>
+      <div class="field"><label>${lang==='ar'?'تكلفة المهمة':'Task cost'}</label><input id="eventTaskCost" type="number" min="0" step="0.01" value="0"><div class="event-task-form-note">${lang==='ar'?'تُخصم تلقائيًا من ميزانية الفعالية في ملخص التكاليف.':'Automatically counted against the event budget.'}</div></div>
+      <div class="field"><label>${lang==='ar'?'المسؤول الرئيسي':'Lead assignee'}</label><select id="eventTaskLead"><option value="">${lang==='ar'?'اختر المسؤولين أولًا':'Select assignees first'}</option></select><div class="event-task-form-note">${lang==='ar'?'اختياري، ويجب أن يكون ضمن المسؤولين المحددين.':'Optional and must be one of the selected assignees.'}</div></div>
+      <div class="field full event-task-form-section"><div class="event-task-form-section-title">${lang==='ar'?'المسؤولون عن المهمة':'Task assignees'}</div><div id="eventTaskAssignees">${createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId),onChange:'syncEventTaskLeadFromAssignees'})}</div><div class="event-task-form-note">${lang==='ar'?'يمكن تحديد أكثر من مسؤول. بعد إنشاء المهمة يمكنك إضافة مهام فرعية ومرفقات وتعليقات من تفاصيلها.':'You can assign multiple people. After creation, add subtasks, files, and comments from the task details.'}</div></div>
+    </div>
+    <button class="submit-btn" type="submit">${lang==='ar'?'إضافة المهمة':'Add task'}</button>
+  </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
-function refreshEventTaskAssignees(projectId){ const box=document.getElementById('eventTaskAssignees'); if(box) box.innerHTML=createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId)}); }
+function refreshEventTaskAssignees(projectId){
+  const box=document.getElementById('eventTaskAssignees');
+  if(box) box.innerHTML=createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId),onChange:'syncEventTaskLeadFromAssignees'});
+  const lead=document.getElementById('eventTaskLead'); if(lead) lead.innerHTML=`<option value="">${lang==='ar'?'اختر المسؤولين أولًا':'Select assignees first'}</option>`;
+}
 async function submitEventTask(e,eventId){
-  e.preventDefault(); const title=document.getElementById('eventTaskTitle').value.trim(); if(!title)return;
-  const projectId=document.getElementById('eventTaskProject').value, priority=document.getElementById('eventTaskPriority').value, cost=Math.max(0,Number(document.getElementById('eventTaskCost').value||0));
-  const assigneeIds=[...document.querySelectorAll('[data-assignee-box="eventTaskAssignee"]:checked')].map(x=>x.value); const lead=taskMemberById(assigneeIds[0]);
-  const payload={workspace_id:currentWorkspaceId,project_id:projectId,event_id:eventId,col:'todo',tag:'events',title_ar:title,title_en:title,description:null,priority,cost,assignee_id:lead?.userId||null,assignee_initials:lead?.initials||null,assignee_color:lead?.color||null,comments_count:0,subtasks_done:0,subtasks_total:0};
-  const {data,error}=await sb.from('tasks').insert(payload).select().single(); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',message:error.message,tone:'error'});return;}
-  if(assigneeIds.length){const rows=assigneeIds.map((userId,i)=>({task_id:data.id,workspace_id:currentWorkspaceId,user_id:userId,is_lead:i===0,assigned_by:currentUserId}));const r=await sb.from('task_assignees').insert(rows);if(r.error) console.warn(r.error);}
-  await logTaskActivity(data.id,'task_created',{title,event_id:eventId,cost}); closeAddModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة للفعالية':'Event task added',{tone:'success'});
+  e.preventDefault();
+  const title=document.getElementById('eventTaskTitle').value.trim(); if(!title)return;
+  const description=document.getElementById('eventTaskDescription').value.trim()||null;
+  const projectId=document.getElementById('eventTaskProject').value;
+  const col=document.getElementById('eventTaskStatus').value||'todo';
+  const priority=document.getElementById('eventTaskPriority').value;
+  const tag=document.getElementById('eventTaskTag').value||'events';
+  const startDate=document.getElementById('eventTaskStart').value||null;
+  const dueDate=document.getElementById('eventTaskDue').value||null;
+  const cost=Math.max(0,Number(document.getElementById('eventTaskCost').value||0));
+  let assigneeIds=[...document.querySelectorAll('[data-assignee-box="eventTaskAssignee"]:checked')].map(x=>x.value);
+  const leadId=document.getElementById('eventTaskLead').value||null;
+  if(leadId && !assigneeIds.includes(leadId)) assigneeIds.unshift(leadId);
+  const lead=taskMemberById(leadId || assigneeIds[0]);
+  const payload={workspace_id:currentWorkspaceId,project_id:projectId,event_id:eventId,col,tag,title_ar:title,title_en:title,description,priority,cost,start_date:startDate,due_date:dueDate,due_ar:dueDate,due_en:dueDate,assignee_id:lead?.userId||null,assignee_initials:lead?.initials||null,assignee_color:lead?.color||null,comments_count:0,subtasks_done:0,subtasks_total:0};
+  const {data,error}=await sb.from('tasks').insert(payload).select().single();
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',message:error.message,tone:'error'});return;}
+  if(assigneeIds.length){
+    const rows=assigneeIds.map((user_id,index)=>({task_id:data.id,workspace_id:currentWorkspaceId,user_id,is_lead:lead?.userId===user_id || (!lead && index===0),assigned_by:currentUserId}));
+    const r=await sb.from('task_assignees').insert(rows); if(r.error) console.warn(r.error);
+  }
+  await logTaskActivity(data.id,'task_created',{title,event_id:eventId,cost,priority,status:col,start_date:startDate,due_date:dueDate,assignee_count:assigneeIds.length});
+  closeAddModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة الفعالية بكامل التفاصيل':'Event task added with details',{tone:'success'});
 }
 function openEventSubtaskModal(eventId,taskId){
   const task=tasks.find(t=>t.id===taskId); if(!task||!canEditTaskClient(task))return;
@@ -4964,7 +5037,7 @@ function openAddModal(){
     </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
-function closeAddModal(){ if(eventQrScanner) stopEventQrScanner(); document.getElementById('addModalOverlay').classList.add('hidden'); document.getElementById('addModalBody').classList.remove('inventory-modal'); }
+function closeAddModal(){ if(eventQrScanner) stopEventQrScanner(); document.getElementById('addModalOverlay').classList.add('hidden'); document.getElementById('addModalBody').classList.remove('inventory-modal','event-task-create-modal'); }
 async function submitAddTask(e){
   e.preventDefault();
   const title = document.getElementById('newTitle').value.trim();
