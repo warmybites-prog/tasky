@@ -1541,7 +1541,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V29.2'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V29.3'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -3607,7 +3607,7 @@ function closeEventTaskModal(){
 }
 function openEventTaskModal(eventId){
   try{
-    const ev=workspaceEvents.find(x=>String(x.id)===String(eventId));
+    const ev=eventById(eventId);
     if(!ev){
       showTaskyDialog({title:lang==='ar'?'تعذّر فتح نافذة المهمة':'Could not open task window',message:lang==='ar'?'لم يتم العثور على الفعالية الحالية. أغلق الفعالية وافتحها مرة أخرى.':'The current event could not be found. Close and reopen the event.',tone:'error'});
       return;
