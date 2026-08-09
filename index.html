@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V28: advanced events + costs + PDF reports + transparent avatars + manager access fix -->
+<!-- Tasky V29: event guest invitations + RSVP + QR check-in + branded reports -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1242,8 +1242,60 @@
     .event-task-actions{grid-column:1/-1;justify-content:flex-end;}
   }
 
+
+  /* ---------------- V29 EVENT GUESTS / RSVP / QR ---------------- */
+  .event-guest-summary{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:10px 0 12px;}
+  .event-guest-stat{border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:10px;min-width:0;}
+  .event-guest-stat span{display:block;color:var(--muted);font-size:10px;margin-bottom:4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .event-guest-stat b{display:block;font-size:16px;}
+  .event-guest-list{display:flex;flex-direction:column;gap:7px;margin-top:8px;}
+  .event-guest-row{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,.8fr) auto;gap:10px;align-items:center;border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:10px 11px;}
+  .event-guest-main{min-width:0;}
+  .event-guest-main b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .event-guest-main span{display:block;font-size:10.5px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .event-guest-status-wrap{display:flex;flex-wrap:wrap;gap:5px;align-items:center;}
+  .event-rsvp-pill{display:inline-flex;align-items:center;gap:4px;border-radius:999px;padding:4px 8px;font-size:10px;font-weight:800;white-space:nowrap;}
+  .event-rsvp-pill.invited{background:var(--blue-tint);color:var(--blue);}
+  .event-rsvp-pill.confirmed{background:var(--green-tint);color:var(--green);}
+  .event-rsvp-pill.maybe{background:var(--amber-tint);color:#8A6A1E;}
+  .event-rsvp-pill.declined,.event-rsvp-pill.cancelled{background:var(--danger-tint);color:var(--danger);}
+  .event-rsvp-pill.checked{background:#E6F4EE;color:#167454;}
+  .event-guest-actions{display:flex;gap:5px;align-items:center;justify-content:flex-end;flex-wrap:wrap;}
+  .event-guest-actions .chip-btn{padding:5px 8px;font-size:10px;}
+  .event-invite-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+  .event-capacity-note{font-size:10.5px;color:var(--muted);line-height:1.6;margin-top:5px;}
+  .event-capacity-over{color:var(--danger);font-weight:700;}
+  .event-qr-wrap{display:flex;flex-direction:column;align-items:center;gap:12px;text-align:center;padding:8px 0 2px;}
+  #eventGuestQr{background:#fff;padding:12px;border-radius:16px;border:1px solid #e5e8e1;box-shadow:0 8px 22px rgba(18,41,26,.08);}
+  #eventGuestQr img,#eventGuestQr canvas{display:block!important;max-width:220px;width:100%!important;height:auto!important;}
+  .event-qr-link{width:100%;border:1px solid var(--border);background:var(--paper);border-radius:10px;padding:9px 10px;font-size:10.5px;color:var(--muted);direction:ltr;overflow-wrap:anywhere;}
+  .event-scanner-box{border:1px solid var(--border);border-radius:14px;overflow:hidden;background:#000;min-height:260px;}
+  #eventQrReader{width:100%;min-height:260px;}
+  .public-event-invite-screen{position:fixed;inset:0;z-index:10000;background:linear-gradient(180deg,#F4F6F2 0%,#E8EEE5 100%);display:flex;align-items:center;justify-content:center;padding:18px;font-family:"IBM Plex Sans Arabic",sans-serif;}
+  .public-event-invite-card{width:min(540px,100%);max-height:94dvh;overflow:auto;background:#fff;border:1px solid #E5E8E1;border-radius:28px;padding:26px;box-shadow:0 26px 70px rgba(18,41,26,.15);text-align:center;}
+  .public-event-invite-brand{display:inline-flex;align-items:center;justify-content:center;background:#0F3B1D;border-radius:16px;padding:9px 13px;margin-bottom:16px;}
+  .public-event-invite-brand svg{height:30px!important;width:auto!important;}
+  .public-event-invite-card h1{font-size:23px;margin:4px 0 8px;}
+  .public-event-invite-card .invite-name{font-weight:800;color:#2A6C2E;font-size:16px;margin:12px 0 4px;}
+  .public-event-invite-meta{display:grid;grid-template-columns:1fr 1fr;gap:8px;text-align:start;margin:16px 0;}
+  .public-event-invite-meta div{background:#F4F6F2;border-radius:12px;padding:10px 11px;font-size:11.5px;color:#4B534C;}
+  .public-event-invite-actions{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:16px;}
+  .public-event-invite-actions button{height:44px;border:0;border-radius:12px;font-weight:800;cursor:pointer;}
+  .public-event-invite-actions .yes{background:#2A6C2E;color:#fff;}.public-event-invite-actions .maybe{background:#F7ECD8;color:#7a5b16;}.public-event-invite-actions .no{background:#F7E4E2;color:#C0453D;}
+  @media(max-width:700px){
+    .event-guest-summary{grid-template-columns:1fr 1fr;}
+    .event-guest-row{grid-template-columns:1fr;gap:7px;}
+    .event-guest-actions{justify-content:flex-start;}
+    .public-event-invite-card{border-radius:22px;padding:20px 16px;}
+    .public-event-invite-meta{grid-template-columns:1fr;}
+    .public-event-invite-actions{grid-template-columns:1fr;}
+    .event-guest-form-row{grid-template-columns:1fr!important;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
 <body>
 <div id="authScreen" style="position:fixed;inset:0;background:var(--paper);z-index:200;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans Arabic',sans-serif;">
@@ -1465,7 +1517,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V28'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V29'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1585,6 +1637,7 @@ function initTaskRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'inventory_supply_requests',filter},scheduleInventoryRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'workspace_events',filter},scheduleEventsRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'event_participants',filter},scheduleEventsRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'event_invitations',filter},scheduleEventsRefresh)
     .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
 }
 function scheduleTaskRealtimeRefresh(){
@@ -2447,7 +2500,9 @@ let contentItems = [
 
 let events = [];
 let eventParticipantRows = [];
+let eventInvitationRows = [];
 let eventsRealtimeTimer = null;
+let eventQrScanner = null;
 
 let budgets = [
   { id: 1, ar:"التسويق الرقمي", en:"Digital Marketing", allocated: 200000, spent: 138000, color: "var(--blue)" },
@@ -3344,6 +3399,59 @@ function eventTaskCosts(eventId){ return eventLinkedTasks(eventId).reduce((sum,t
 function eventRemainingBudget(ev){ return Number(ev?.budget||0)-eventTaskCosts(ev?.id); }
 function eventTaskStatusLabel(task){ const c=COLUMNS.find(x=>x.id===task.col); return c?t(c.key):(task.col||''); }
 function eventBudgetPct(ev){ const b=Number(ev?.budget||0), c=eventTaskCosts(ev?.id); return b>0?Math.min(100,Math.round(c/b*100)):(c>0?100:0); }
+function eventInvitations(eventId){ return eventInvitationRows.filter(x=>String(x.eventId)===String(eventId)); }
+function eventGuestSeats(eventId,statuses=null){
+  const rows=eventInvitations(eventId).filter(x=>!statuses || statuses.includes(x.status));
+  return rows.reduce((sum,x)=>sum+Number(x.partySize||1),0);
+}
+function eventCheckedInSeats(eventId){ return eventInvitations(eventId).filter(x=>x.checkedInAt).reduce((sum,x)=>sum+Number(x.partySize||1),0); }
+function eventGuestStats(eventId){
+  return {
+    invited:eventGuestSeats(eventId,['invited']),
+    confirmed:eventGuestSeats(eventId,['confirmed']),
+    maybe:eventGuestSeats(eventId,['maybe']),
+    declined:eventGuestSeats(eventId,['declined','cancelled']),
+    checkedIn:eventCheckedInSeats(eventId),
+    total:eventGuestSeats(eventId)
+  };
+}
+function canManageEventClient(ev){ return !!ev && (currentUserRole==='admin' || ev.createdBy===currentUserId || (ev.participantIds||[]).includes(currentUserId)); }
+function eventInvitationStatusLabel(status){
+  const ar={invited:'بانتظار الرد',confirmed:'مؤكدة',maybe:'ربما',declined:'معتذر',cancelled:'ملغاة'};
+  const en={invited:'Awaiting reply',confirmed:'Confirmed',maybe:'Maybe',declined:'Declined',cancelled:'Cancelled'};
+  return (lang==='ar'?ar:en)[status]||status;
+}
+function eventInvitationContact(inv){ return [inv.guestEmail,inv.guestPhone,inv.guestCompany].filter(Boolean).join(' · '); }
+function buildEventInviteUrl(token){
+  const u=new URL(window.location.href); u.search=''; u.hash=''; u.searchParams.set('invite',token); return u.toString();
+}
+function eventInvitationMessage(inv,ev){
+  const title=L(ev,''); const when=formatEventDate(ev.startAt); const url=buildEventInviteUrl(inv.qrToken);
+  return lang==='ar'
+    ? `مرحبًا ${inv.guestName}،\nندعوك لحضور «${title}» بتاريخ ${when}${ev.location?` في ${ev.location}`:''}.\nيرجى تأكيد حضورك من الرابط التالي:\n${url}`
+    : `Hello ${inv.guestName},\nYou are invited to “${title}” on ${when}${ev.location?` at ${ev.location}`:''}.\nPlease RSVP using this link:\n${url}`;
+}
+function eventGuestSummaryHtml(ev){
+  const s=eventGuestStats(ev.id); const cap=Number(ev.capacity||0); const remaining=cap?cap-s.confirmed:null;
+  return `<div class="event-guest-summary">
+    <div class="event-guest-stat"><span>${lang==='ar'?'السعة المتوقعة للضيوف':'Expected guest capacity'}</span><b>${cap||'—'}</b></div>
+    <div class="event-guest-stat"><span>${lang==='ar'?'الحضور المؤكد':'Confirmed guests'}</span><b>${s.confirmed}</b></div>
+    <div class="event-guest-stat"><span>${lang==='ar'?'تم تسجيل حضورهم':'Checked in'}</span><b>${s.checkedIn}</b></div>
+    <div class="event-guest-stat"><span>${lang==='ar'?'المتبقي من السعة':'Capacity remaining'}</span><b class="${remaining!==null&&remaining<0?'event-capacity-over':''}">${remaining===null?'—':remaining}</b></div>
+  </div><div class="event-capacity-note">${lang==='ar'?'السعة المتوقعة تخص الضيوف المدعوين فقط ولا تشمل أعضاء فريق العمل المشاركين.':'Expected capacity counts invited guests only and excludes participating team members.'}</div>`;
+}
+function eventInvitationRowHtml(inv,ev){
+  const checked=!!inv.checkedInAt; const canManage=canManageEventClient(ev); const contact=eventInvitationContact(inv);
+  return `<div class="event-guest-row">
+    <div class="event-guest-main"><b>${escapeHtml(inv.guestName)}${inv.partySize>1?` · ${inv.partySize} ${lang==='ar'?'أشخاص':'people'}`:''}</b><span>${escapeHtml(contact|| (lang==='ar'?'بدون بيانات تواصل':'No contact details'))}</span></div>
+    <div class="event-guest-status-wrap"><span class="event-rsvp-pill ${inv.status}">${eventInvitationStatusLabel(inv.status)}</span>${checked?`<span class="event-rsvp-pill checked">✓ ${lang==='ar'?'تم الحضور':'Checked in'}</span>`:''}</div>
+    <div class="event-guest-actions">
+      <button type="button" class="chip-btn" onclick="openEventInvitationQr('${inv.id}')">QR</button>
+      <button type="button" class="chip-btn" onclick="shareEventInvitation('${inv.id}')">${lang==='ar'?'مشاركة':'Share'}</button>
+      ${canManage?`<button type="button" class="chip-btn" onclick="openEventInvitationModal('${ev.id}','${inv.id}')">${lang==='ar'?'تعديل':'Edit'}</button>${checked?`<button type="button" class="chip-btn" onclick="undoEventCheckIn('${inv.id}','${ev.id}')">${lang==='ar'?'إلغاء الحضور':'Undo'}</button>`:`<button type="button" class="chip-btn" onclick="checkInInvitationDirect('${inv.id}','${ev.id}')">${lang==='ar'?'تسجيل حضور':'Check in'}</button>`}`:''}
+    </div>
+  </div>`;
+}
 function eventContactHtml(ev){
   if(!ev?.contactName && !ev?.contactPhone && !ev?.contactEmail) return '';
   return `<div class="event-info-box"><svg><use href="#i-users"/></svg><div><b>${escapeHtml(ev.contactName|| (lang==='ar'?'جهة التواصل':'Contact'))}</b>${ev.contactPhone?`<a href="tel:${escapeHtml(ev.contactPhone)}">${escapeHtml(ev.contactPhone)}</a>`:''}${ev.contactEmail?`<a href="mailto:${escapeHtml(ev.contactEmail)}">${escapeHtml(ev.contactEmail)}</a>`:''}<span>${lang==='ar'?'بيانات التواصل':'Contact details'}</span></div></div>`;
@@ -3389,8 +3497,8 @@ function eventsTemplate(){
           ${ev.googleMapsUrl?`<div class="event-meta-row"><a href="${escapeHtml(ev.googleMapsUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--green);text-decoration:none;font-weight:700">Google Maps ↗</a></div>`:''}
           <div class="event-meta-row"><svg style="width:13px;height:13px"><use href="#i-wallet"/></svg>${fmtMoney(costs)} / ${fmtMoney(ev.budget)} · ${lang==='ar'?'متبقي':'left'} ${fmtMoney(remaining)}</div>
           <div class="event-budget-progress ${remaining<0?'over':''}"><span style="width:${pct}%"></span></div>
-          ${ev.capacity?`<div><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px"><span>${lang==='ar'?'الفريق المشارك / السعة':'Team / capacity'}</span><span>${participants.length} / ${ev.capacity}</span></div><div class="progress-bar"><span style="width:${Math.min(100,(participants.length/Math.max(1,ev.capacity))*100)}%;background:var(--blue-light)"></span></div></div>`:''}
-          <div class="event-participant-row"><div>${assigneeStackHtml(participants,25,4)}</div><span class="event-task-count"><svg style="width:13px;height:13px"><use href="#i-check"/></svg>${linked.length} ${lang==='ar'?'مهمة':'tasks'}</span></div>
+          ${ev.capacity?(()=>{const gs=eventGuestStats(ev.id);const pctGuests=Math.min(100,(gs.confirmed/Math.max(1,ev.capacity))*100);return `<div><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px"><span>${lang==='ar'?'الحضور المؤكد / السعة المتوقعة':'Confirmed guests / capacity'}</span><span>${gs.confirmed} / ${ev.capacity}</span></div><div class="progress-bar"><span style="width:${pctGuests}%;background:${gs.confirmed>ev.capacity?'var(--danger)':'var(--blue-light)'}"></span></div><div class="event-capacity-note">${lang==='ar'?'لا تشمل أعضاء فريق العمل':'Team members are excluded'}</div></div>`})():''}
+          <div class="event-participant-row"><div>${assigneeStackHtml(participants,25,4)}</div><span class="event-task-count"><svg style="width:13px;height:13px"><use href="#i-users"/></svg>${participants.length} ${lang==='ar'?'من فريق العمل':'team members'} · <svg style="width:13px;height:13px"><use href="#i-check"/></svg>${linked.length} ${lang==='ar'?'مهمة':'tasks'}</span></div>
         </div>`;
       }).join('') || `<div class="section-card" style="grid-column:1/-1;text-align:center;padding:34px;color:var(--muted)">${lang==='ar'?'لا توجد فعاليات بعد. أنشئ أول فعالية للبدء.':'No events yet. Create your first event to get started.'}</div>`}
     </div>`;
@@ -3403,6 +3511,8 @@ function openEventModal(id=null){
   const costs=ev?eventTaskCosts(ev.id):0;
   const remaining=ev?eventRemainingBudget(ev):0;
   const pct=ev?eventBudgetPct(ev):0;
+  const canManage=!!ev && canManageEventClient(ev);
+  const invitations=ev?eventInvitations(ev.id):[];
   const canDelete=!!ev && (currentUserRole==='admin' || ev.createdBy===currentUserId);
   document.getElementById('eventModalBody').innerHTML=`
     <div class="modal-head"><div><h3>${ev?(lang==='ar'?'تفاصيل الفعالية':'Event details'):t('eventModalTitle')}</h3>${ev?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${linked.length} ${lang==='ar'?'مهمة مرتبطة':'linked tasks'}</div>`:''}</div><button class="modal-close" onclick="closeEventModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
@@ -3420,10 +3530,11 @@ function openEventModal(id=null){
         <div class="field"><label>${lang==='ar'?'رقم التواصل':'Contact phone'}</label><input id="evContactPhone" type="tel" dir="ltr" value="${escapeHtml(ev?.contactPhone||'')}" placeholder="+966..."></div>
         <div class="field full"><label>${lang==='ar'?'بريد التواصل':'Contact email'}</label><input id="evContactEmail" type="email" dir="ltr" value="${escapeHtml(ev?.contactEmail||'')}" placeholder="name@example.com"></div>
         <div class="field"><label>${t('fieldEventBudget')}</label><input id="evBudget" type="number" min="0" step="0.01" value="${ev?.budget??0}"></div>
-        <div class="field"><label>${t('fieldEventCapacity')}</label><input id="evCapacity" type="number" min="0" step="1" value="${ev?.capacity??0}"></div>
+        <div class="field"><label>${lang==='ar'?'السعة المتوقعة للضيوف':'Expected guest capacity'}</label><input id="evCapacity" type="number" min="0" step="1" value="${ev?.capacity??0}"><div class="event-capacity-note">${lang==='ar'?'لا تشمل أعضاء فريق العمل المشاركين':'Excludes participating team members'}</div></div>
         <div class="field full"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="evStatus"><option value="preparing" ${ev?.status==='preparing'?'selected':''}>${lang==='ar'?'قيد التحضير':'In preparation'}</option><option value="confirmed" ${ev?.status==='confirmed'?'selected':''}>${lang==='ar'?'مؤكدة':'Confirmed'}</option><option value="completed" ${ev?.status==='completed'?'selected':''}>${lang==='ar'?'مكتملة':'Completed'}</option><option value="cancelled" ${ev?.status==='cancelled'?'selected':''}>${lang==='ar'?'ملغاة':'Cancelled'}</option></select></div>
         <div class="field full"><label>${lang==='ar'?'أعضاء الفريق المشاركون':'Participating team members'}</label><div class="event-participants-picker">${members.map(m=>`<label class="event-participant-option">${memberAvatarHtml(m,29)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" data-event-participant value="${m.userId}" ${selected.has(m.userId)?'checked':''}></label>`).join('') || `<div style="color:var(--muted);font-size:12px">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active members'}</div>`}</div></div>
       </div>
+      ${ev?`<div class="event-section-head"><div><h4>${lang==='ar'?'دعوات الحضور':'Guest invitations'}</h4><div class="event-capacity-note">${lang==='ar'?'الحضور الخارجي منفصل عن أعضاء فريق العمل المشاركين.':'External guests are tracked separately from participating team members.'}</div></div>${canManage?`<div class="event-invite-tools"><button type="button" class="chip-btn" onclick="openEventInvitationModal('${ev.id}')">+ ${lang==='ar'?'دعوة حضور':'Invite guest'}</button><button type="button" class="chip-btn" onclick="openEventQrScanner('${ev.id}')"><svg style="width:14px;height:14px"><use href="#i-camera"/></svg>${lang==='ar'?'مسح QR':'Scan QR'}</button></div>`:''}</div>${eventGuestSummaryHtml(ev)}<div class="event-guest-list">${invitations.map(inv=>eventInvitationRowHtml(inv,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد دعوات حضور بعد':'No guest invitations yet'}</div>`}</div>`:''}
       ${ev?`<div class="event-section-head"><h4>${lang==='ar'?'مهام الفعالية':'Event tasks'}</h4><button type="button" class="chip-btn" onclick="openEventTaskModal('${ev.id}')">+ ${lang==='ar'?'إضافة مهمة':'Add task'}</button></div><div>${linked.map(task=>eventTaskCardHtml(task,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد مهام مرتبطة بعد':'No linked tasks yet'}</div>`}</div>`:''}
       <div class="event-modal-actions"><button type="submit" class="submit-btn">${ev?(lang==='ar'?'حفظ التغييرات':'Save changes'):t('submitAddEvent')}</button>${ev?`<button type="button" class="chip-btn event-report-btn" onclick="exportEventPdf('${ev.id}')"><svg style="width:15px;height:15px"><use href="#i-download"/></svg>${lang==='ar'?'تقرير PDF':'PDF report'}</button>`:''}${canDelete?`<button type="button" class="chip-btn" style="color:var(--danger)" onclick="deleteEvent('${ev.id}')">${lang==='ar'?'حذف الفعالية':'Delete event'}</button>`:''}</div>
     </form>`;
@@ -3480,13 +3591,98 @@ async function submitEventSubtask(e,eventId,taskId){
   const ids=[...document.querySelectorAll('[data-assignee-box="eventSubtaskAssignee"]:checked')].map(x=>x.value); if(ids.length){const rows=ids.map(user_id=>({subtask_id:data.id,workspace_id:currentWorkspaceId,user_id,assigned_by:currentUserId}));const r=await sb.from('subtask_assignees').insert(rows);if(r.error) console.warn(r.error);}
   await logTaskActivity(taskId,'subtask_added',{title,from_event:true}); closeAddModal(); await fetchTasks(); openEventModal(eventId); taskyToast(lang==='ar'?'تمت إضافة المهمة الفرعية':'Subtask added',{tone:'success'});
 }
+
+function openEventInvitationModal(eventId,invitationId=null){
+  const ev=eventById(eventId); if(!ev||!canManageEventClient(ev)) return;
+  const inv=invitationId?eventInvitationRows.find(x=>x.id===invitationId):null;
+  document.getElementById('addModalBody').innerHTML=`
+    <div class="modal-head"><div><h3>${inv?(lang==='ar'?'تعديل دعوة الحضور':'Edit guest invitation'):(lang==='ar'?'دعوة حضور جديدة':'New guest invitation')}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    <form onsubmit="submitEventInvitation(event,'${eventId}','${inv?.id||''}')">
+      <div class="field"><label>${lang==='ar'?'اسم الضيف':'Guest name'}</label><input id="guestName" required maxlength="160" value="${escapeHtml(inv?.guestName||'')}"></div>
+      <div class="event-guest-form-row" style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'البريد الإلكتروني':'Email'}</label><input id="guestEmail" type="email" dir="ltr" value="${escapeHtml(inv?.guestEmail||'')}"></div><div class="field"><label>${lang==='ar'?'رقم الجوال':'Phone'}</label><input id="guestPhone" type="tel" dir="ltr" value="${escapeHtml(inv?.guestPhone||'')}"></div></div>
+      <div class="event-guest-form-row" style="display:grid;grid-template-columns:1fr 120px;gap:10px"><div class="field"><label>${lang==='ar'?'الجهة / الشركة':'Company / organization'}</label><input id="guestCompany" value="${escapeHtml(inv?.guestCompany||'')}"></div><div class="field"><label>${lang==='ar'?'عدد الأشخاص':'Party size'}</label><input id="guestPartySize" type="number" min="1" max="20" step="1" value="${inv?.partySize||1}"></div></div>
+      ${inv?`<div class="field"><label>${lang==='ar'?'حالة المشاركة':'RSVP status'}</label><select id="guestStatus"><option value="invited" ${inv.status==='invited'?'selected':''}>${eventInvitationStatusLabel('invited')}</option><option value="confirmed" ${inv.status==='confirmed'?'selected':''}>${eventInvitationStatusLabel('confirmed')}</option><option value="maybe" ${inv.status==='maybe'?'selected':''}>${eventInvitationStatusLabel('maybe')}</option><option value="declined" ${inv.status==='declined'?'selected':''}>${eventInvitationStatusLabel('declined')}</option><option value="cancelled" ${inv.status==='cancelled'?'selected':''}>${eventInvitationStatusLabel('cancelled')}</option></select></div>`:''}
+      <div class="field"><label>${lang==='ar'?'ملاحظات داخلية':'Internal notes'}</label><textarea id="guestNotes" style="width:100%;min-height:75px;resize:vertical">${escapeHtml(inv?.notes||'')}</textarea></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="submit-btn" type="submit" style="flex:1">${inv?(lang==='ar'?'حفظ التعديلات':'Save changes'):(lang==='ar'?'إنشاء الدعوة':'Create invitation')}</button>${inv?`<button class="chip-btn" type="button" style="color:var(--danger)" onclick="deleteEventInvitation('${inv.id}','${eventId}')">${lang==='ar'?'حذف الدعوة':'Delete invitation'}</button>`:''}</div>
+    </form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function submitEventInvitation(e,eventId,invitationId){
+  e.preventDefault();
+  const args={p_event_id:eventId,p_invitation_id:invitationId||null,p_guest_name:document.getElementById('guestName').value.trim(),p_guest_email:document.getElementById('guestEmail').value.trim()||null,p_guest_phone:document.getElementById('guestPhone').value.trim()||null,p_guest_company:document.getElementById('guestCompany').value.trim()||null,p_party_size:Number(document.getElementById('guestPartySize').value||1),p_notes:document.getElementById('guestNotes').value.trim()||null};
+  const {data,error}=await sb.rpc('tasky_save_event_invitation',args);
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الدعوة':'Could not save invitation',message:error.message,tone:'error'});return;}
+  if(invitationId && document.getElementById('guestStatus')){
+    const status=document.getElementById('guestStatus').value;
+    if(status!==data.status){const r=await sb.rpc('tasky_set_event_invitation_status',{p_invitation_id:invitationId,p_status:status});if(r.error){showTaskyDialog({title:lang==='ar'?'تم حفظ البيانات لكن تعذّر تحديث الحالة':'Saved, but status update failed',message:r.error.message,tone:'warning'});}}
+  }
+  closeAddModal(); await fetchEvents(); openEventModal(eventId); taskyToast(invitationId?(lang==='ar'?'تم تحديث الدعوة':'Invitation updated'):(lang==='ar'?'تم إنشاء الدعوة مع QR فريد':'Invitation created with a unique QR'),{tone:'success'});
+  if(!invitationId && data?.id) setTimeout(()=>openEventInvitationQr(data.id),120);
+}
+async function deleteEventInvitation(invitationId,eventId){
+  const ok=await taskyConfirm(lang==='ar'?'حذف دعوة الحضور نهائيًا؟':'Delete this guest invitation?',{title:lang==='ar'?'حذف الدعوة':'Delete invitation',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
+  const {error}=await sb.rpc('tasky_delete_event_invitation',{p_invitation_id:invitationId});
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حذف الدعوة':'Could not delete invitation',message:error.message,tone:'error'});return;}
+  closeAddModal(); await fetchEvents(); openEventModal(eventId); taskyToast(lang==='ar'?'تم حذف الدعوة':'Invitation deleted',{tone:'success'});
+}
+function openEventInvitationQr(invitationId){
+  const inv=eventInvitationRows.find(x=>x.id===invitationId); if(!inv)return; const ev=eventById(inv.eventId); if(!ev)return;
+  const url=buildEventInviteUrl(inv.qrToken);
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'بطاقة دعوة الحضور':'Guest invitation QR'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(inv.guestName)} · ${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="event-qr-wrap"><div id="eventGuestQr"></div><span class="event-rsvp-pill ${inv.status}">${eventInvitationStatusLabel(inv.status)}</span><div class="event-qr-link">${escapeHtml(url)}</div><div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center"><button type="button" class="primary-btn" onclick="shareEventInvitation('${inv.id}')">${lang==='ar'?'مشاركة الدعوة':'Share invitation'}</button>${inv.guestEmail?`<button type="button" class="chip-btn" onclick="emailEventInvitation('${inv.id}')">${lang==='ar'?'البريد':'Email'}</button>`:''}${inv.guestPhone?`<button type="button" class="chip-btn" onclick="whatsappEventInvitation('${inv.id}')">WhatsApp</button>`:''}<button type="button" class="chip-btn" onclick="copyEventInvitationLink('${inv.id}')">${lang==='ar'?'نسخ الرابط':'Copy link'}</button></div><div class="event-capacity-note">${lang==='ar'?'هذا الكود خاص بهذه الدعوة فقط. يستخدمه المنظم لتسجيل الحضور عند الوصول.':'This code is unique to this invitation and can be scanned by organizers at check-in.'}</div></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+  requestAnimationFrame(()=>{const el=document.getElementById('eventGuestQr');if(el&&window.QRCode){el.innerHTML='';new QRCode(el,{text:url,width:210,height:210,colorDark:'#12291A',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});}});
+}
+async function markInvitationShared(invitationId){ try{await sb.rpc('tasky_mark_event_invitation_shared',{p_invitation_id:invitationId});}catch{} }
+async function shareEventInvitation(invitationId){
+  const inv=eventInvitationRows.find(x=>x.id===invitationId); if(!inv)return; const ev=eventById(inv.eventId); if(!ev)return; const text=eventInvitationMessage(inv,ev); const url=buildEventInviteUrl(inv.qrToken);
+  await markInvitationShared(invitationId);
+  if(navigator.share){ try{await navigator.share({title:L(ev,''),text,url});return;}catch(err){if(err?.name==='AbortError')return;} }
+  try{await navigator.clipboard.writeText(text);taskyToast(lang==='ar'?'تم نسخ نص الدعوة والرابط':'Invitation text copied',{tone:'success'});}catch{window.prompt(lang==='ar'?'انسخ الدعوة':'Copy invitation',text);}
+}
+function emailEventInvitation(invitationId){const inv=eventInvitationRows.find(x=>x.id===invitationId);if(!inv?.guestEmail)return;const ev=eventById(inv.eventId);const body=eventInvitationMessage(inv,ev);markInvitationShared(invitationId);window.location.href=`mailto:${encodeURIComponent(inv.guestEmail)}?subject=${encodeURIComponent(lang==='ar'?`دعوة: ${L(ev,'')}`:`Invitation: ${L(ev,'')}`)}&body=${encodeURIComponent(body)}`;}
+function whatsappEventInvitation(invitationId){const inv=eventInvitationRows.find(x=>x.id===invitationId);if(!inv)return;const ev=eventById(inv.eventId);const phone=(inv.guestPhone||'').replace(/\D/g,'');markInvitationShared(invitationId);window.open(`https://wa.me/${phone}?text=${encodeURIComponent(eventInvitationMessage(inv,ev))}`,'_blank','noopener');}
+async function copyEventInvitationLink(invitationId){const inv=eventInvitationRows.find(x=>x.id===invitationId);if(!inv)return;const url=buildEventInviteUrl(inv.qrToken);await markInvitationShared(invitationId);try{await navigator.clipboard.writeText(url);taskyToast(lang==='ar'?'تم نسخ رابط الدعوة':'Invitation link copied',{tone:'success'});}catch{window.prompt(lang==='ar'?'انسخ الرابط':'Copy link',url);}}
+function parseEventInviteToken(value){
+  const raw=String(value||'').trim(); if(!raw)return null;
+  try{const u=new URL(raw);const token=u.searchParams.get('invite');if(token)return token;}catch{}
+  const m=raw.match(/[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}/i);return m?m[0]:null;
+}
+async function checkInEventToken(token,eventId){
+  const pub=await sb.rpc('tasky_get_event_invitation_public',{p_token:token});
+  if(pub.error||!pub.data){showTaskyDialog({title:lang==='ar'?'رمز غير صالح':'Invalid QR',message:pub.error?.message||(lang==='ar'?'لم يتم العثور على الدعوة':'Invitation not found'),tone:'error'});return false;}
+  if(String(pub.data.event_id)!==String(eventId)){showTaskyDialog({title:lang==='ar'?'دعوة لفعالية أخرى':'Different event',message:lang==='ar'?'رمز QR هذا لا يخص الفعالية المفتوحة.':'This QR belongs to another event.',tone:'warning'});return false;}
+  const {data,error}=await sb.rpc('tasky_check_in_event_invitation',{p_token:token});
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر تسجيل الحضور':'Check-in failed',message:error.message,tone:'error'});return false;}
+  taskyToast(data?.checked_in_at?(lang==='ar'?`تم تسجيل حضور ${data.guest_name}`:`${data.guest_name} checked in`):(lang==='ar'?'تم تسجيل الحضور':'Checked in'),{tone:'success'});
+  await fetchEvents(); return true;
+}
+async function checkInInvitationDirect(invitationId,eventId){const inv=eventInvitationRows.find(x=>x.id===invitationId);if(!inv)return;if(await checkInEventToken(inv.qrToken,eventId))openEventModal(eventId);}
+async function undoEventCheckIn(invitationId,eventId){const {error}=await sb.rpc('tasky_undo_event_check_in',{p_invitation_id:invitationId});if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إلغاء تسجيل الحضور':'Could not undo check-in',message:error.message,tone:'error'});return;}await fetchEvents();openEventModal(eventId);taskyToast(lang==='ar'?'تم إلغاء تسجيل الحضور':'Check-in undone',{tone:'success'});}
+async function stopEventQrScanner(){if(eventQrScanner){try{await eventQrScanner.stop();}catch{}try{await eventQrScanner.clear();}catch{}eventQrScanner=null;}}
+function openEventQrScanner(eventId){
+  const ev=eventById(eventId);if(!ev||!canManageEventClient(ev))return;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مسح QR للحضور':'Guest QR check-in'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="stopEventQrScanner();closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="event-scanner-box"><div id="eventQrReader"></div></div><div class="event-capacity-note" style="margin:10px 0">${lang==='ar'?'وجّه الكاميرا إلى QR الخاص بالضيف. يمكن أيضًا إدخال رابط أو رمز الدعوة يدويًا.':'Point the camera at the guest QR. You can also paste the invitation link or token manually.'}</div><div style="display:flex;gap:8px"><input id="eventManualQr" style="flex:1;border:1px solid var(--border);border-radius:10px;padding:10px;min-width:0" dir="ltr" placeholder="QR / token"><button class="primary-btn" type="button" onclick="manualEventCheckIn('${eventId}')">${lang==='ar'?'تحقق':'Check'}</button></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+  if(!window.Html5Qrcode){taskyToast(lang==='ar'?'ماسح الكاميرا غير متاح؛ استخدم الإدخال اليدوي':'Camera scanner unavailable; use manual entry',{tone:'warning'});return;}
+  eventQrScanner=new Html5Qrcode('eventQrReader');
+  let busy=false;
+  eventQrScanner.start({facingMode:'environment'},{fps:10,qrbox:{width:230,height:230}},async decoded=>{if(busy)return;busy=true;const token=parseEventInviteToken(decoded);if(!token){busy=false;return;}const ok=await checkInEventToken(token,eventId);if(ok){await stopEventQrScanner();closeAddModal();openEventModal(eventId);}else{setTimeout(()=>busy=false,1000);}},()=>{}).catch(()=>taskyToast(lang==='ar'?'تعذّر تشغيل الكاميرا. اسمح بالوصول أو استخدم الإدخال اليدوي.':'Could not start the camera. Allow camera access or use manual entry.',{tone:'warning'}));
+}
+async function manualEventCheckIn(eventId){const token=parseEventInviteToken(document.getElementById('eventManualQr')?.value);if(!token){taskyToast(lang==='ar'?'أدخل رابط دعوة أو رمز QR صالح':'Enter a valid invitation link or QR token',{tone:'warning'});return;}if(await checkInEventToken(token,eventId)){await stopEventQrScanner();closeAddModal();openEventModal(eventId);}}
+
 function exportEventPdf(eventId){
-  const ev=eventById(eventId); if(!ev)return; const linked=eventLinkedTasks(eventId), participants=eventParticipants(ev), costs=eventTaskCosts(eventId), remaining=eventRemainingBudget(ev);
+  const ev=eventById(eventId); if(!ev)return;
+  const linked=eventLinkedTasks(eventId), participants=eventParticipants(ev), costs=eventTaskCosts(eventId), remaining=eventRemainingBudget(ev), invitations=eventInvitations(eventId), guestStats=eventGuestStats(eventId);
   const dir=lang==='ar'?'rtl':'ltr'; const localeTitle=escapeHtml(L(ev,''));
+  const useWorkspaceBrand=isPaidPlan() && !!currentWorkspaceLogoUrl;
+  const brandHtml=useWorkspaceBrand
+    ? `<div class="report-org-brand"><img src="${escapeHtml(currentWorkspaceLogoUrl)}" alt="${escapeHtml(currentWorkspaceName||'Organization')}"><div><b>${escapeHtml(currentWorkspaceName||'')}</b><span>${lang==='ar'?'تقرير فعالية':'Event report'}</span></div></div>`
+    : `<div class="report-tasky-brand">${getTaskyWordmarkMarkup(lang)}</div>`;
   const taskRows=linked.map((t,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(taskTitle(t))}</td><td>${escapeHtml((t.assignees||[]).map(x=>x.fullName).join('، ')||'—')}</td><td>${fmtMoney(Number(t.cost||0))}</td><td>${escapeHtml(eventTaskStatusLabel(t))}</td></tr><tr class="sub"><td></td><td colspan="4">${(t.subtaskItems||[]).length?(t.subtaskItems||[]).map(s=>`${s.is_completed?'✓':'○'} ${escapeHtml(s.title)}${s.assignees?.length?' - '+escapeHtml(s.assignees.map(a=>a.fullName).join('، ')):''}`).join('<br>'):(lang==='ar'?'لا توجد مهام فرعية':'No subtasks')}</td></tr>`).join('');
+  const guestRows=invitations.map((inv,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(inv.guestName)}</td><td>${inv.partySize}</td><td>${escapeHtml(eventInvitationStatusLabel(inv.status))}</td><td>${inv.checkedInAt?(lang==='ar'?'تم الحضور':'Checked in'):'—'}</td><td>${escapeHtml(eventInvitationContact(inv)||'—')}</td></tr>`).join('');
   const w=window.open('','_blank'); if(!w){taskyToast(lang==='ar'?'اسمح بالنوافذ المنبثقة لتصدير التقرير':'Allow pop-ups to export the report',{tone:'warning'});return;}
-  w.document.write(`<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><title>${localeTitle}</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font-family:Arial,"Tahoma",sans-serif;color:#182018;margin:0;font-size:11px;line-height:1.55}.brand{font-size:22px;font-weight:800;color:#2A6C2E;margin-bottom:4px}.muted{color:#6b746c}.head{border-bottom:2px solid #2A6C2E;padding-bottom:12px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.card{border:1px solid #dfe5dd;border-radius:8px;padding:9px}.card span{display:block;color:#6b746c;font-size:9px}.card b{font-size:13px}.section{margin-top:17px}.section h2{font-size:14px;margin:0 0 8px;color:#2A6C2E}.info{border:1px solid #e1e6df;border-radius:8px;padding:10px;margin:7px 0}table{width:100%;border-collapse:collapse;margin-top:7px}th,td{border:1px solid #dfe5dd;padding:7px;text-align:${dir==='rtl'?'right':'left'};vertical-align:top}th{background:#f2f5f0}.sub td{color:#5f685f;font-size:9.5px;background:#fafbf9}.footer{margin-top:18px;padding-top:9px;border-top:1px solid #dfe5dd;color:#7a8079;font-size:9px}@media print{button{display:none}}</style></head><body><div class="head"><div class="brand">${lang==='ar'?'تاسكي':'Tasky'}</div><div class="muted">${lang==='ar'?'تقرير الفعالية':'Event Report'}</div><h1 style="font-size:20px;margin:8px 0 3px">${localeTitle}</h1><div class="muted">${escapeHtml(formatEventDate(ev.startAt))}${ev.endAt?' - '+escapeHtml(formatEventDate(ev.endAt)):''}</div></div><div class="grid"><div class="card"><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="card"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b></div></div>${ev.description?`<div class="section"><h2>${lang==='ar'?'الوصف':'Description'}</h2><div class="info">${escapeHtml(ev.description)}</div></div>`:''}<div class="section"><h2>${lang==='ar'?'الموقع والتواصل':'Location & Contact'}</h2><div class="info">${ev.location?`<b>${lang==='ar'?'الموقع':'Location'}:</b> ${escapeHtml(ev.location)}<br>`:''}${ev.googleMapsUrl?`<b>Google Maps:</b> ${escapeHtml(ev.googleMapsUrl)}<br>`:''}${ev.contactName?`<b>${lang==='ar'?'شخص التواصل':'Contact'}:</b> ${escapeHtml(ev.contactName)}<br>`:''}${ev.contactPhone?`<b>${lang==='ar'?'الهاتف':'Phone'}:</b> ${escapeHtml(ev.contactPhone)}<br>`:''}${ev.contactEmail?`<b>${lang==='ar'?'البريد':'Email'}:</b> ${escapeHtml(ev.contactEmail)}`:''}</div></div><div class="section"><h2>${lang==='ar'?'المشاركون':'Participants'}</h2><div class="info">${escapeHtml(participants.map(p=>p.fullName).join('، ')||'—')}</div></div><div class="section"><h2>${lang==='ar'?'المهام والتكاليف':'Tasks & Costs'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'المهمة':'Task'}</th><th>${lang==='ar'?'المسؤولون':'Assignees'}</th><th>${lang==='ar'?'التكلفة':'Cost'}</th><th>${lang==='ar'?'الحالة':'Status'}</th></tr></thead><tbody>${taskRows||`<tr><td colspan="5">${lang==='ar'?'لا توجد مهام':'No tasks'}</td></tr>`}</tbody></table></div><div class="footer">${lang==='ar'?'تم إنشاء التقرير من منصة تاسكي':'Generated by Tasky'} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div></body></html>`);
-  w.document.close(); w.focus(); setTimeout(()=>w.print(),350);
+  w.document.write(`<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><title>${localeTitle}</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font-family:Arial,"Tahoma",sans-serif;color:#182018;margin:0;font-size:10.5px;line-height:1.55}.head{border-bottom:2px solid #2A6C2E;padding-bottom:12px;margin-bottom:14px}.report-tasky-brand{display:inline-flex;align-items:center;justify-content:center;background:#0F3B1D;border-radius:11px;padding:7px 11px;margin-bottom:8px}.report-tasky-brand svg{height:30px!important;width:auto!important;max-width:150px}.report-org-brand{display:flex;align-items:center;gap:10px;margin-bottom:9px}.report-org-brand img{width:58px;height:58px;object-fit:contain;border:1px solid #E5E8E1;border-radius:12px;padding:5px;background:#fff}.report-org-brand b{display:block;font-size:14px}.report-org-brand span{display:block;color:#6b746c;font-size:9.5px;margin-top:2px}.muted{color:#6b746c}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.grid.four{grid-template-columns:repeat(4,1fr)}.card{border:1px solid #dfe5dd;border-radius:8px;padding:8px}.card span{display:block;color:#6b746c;font-size:8.5px}.card b{font-size:12.5px}.section{margin-top:15px;break-inside:avoid}.section h2{font-size:13px;margin:0 0 7px;color:#2A6C2E}.info{border:1px solid #e1e6df;border-radius:8px;padding:9px;margin:6px 0}.note{font-size:8.5px;color:#6b746c;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9px}th,td{border:1px solid #dfe5dd;padding:6px;text-align:${dir==='rtl'?'right':'left'};vertical-align:top}th{background:#f2f5f0}.sub td{color:#5f685f;font-size:8.5px;background:#fafbf9}.footer{margin-top:16px;padding-top:8px;border-top:1px solid #dfe5dd;color:#7a8079;font-size:8.5px}@media print{button{display:none}.section{break-inside:avoid-page}}</style></head><body><div class="head">${brandHtml}<div class="muted">${lang==='ar'?'تقرير الفعالية':'Event Report'}</div><h1 style="font-size:19px;margin:6px 0 2px">${localeTitle}</h1><div class="muted">${escapeHtml(formatEventDate(ev.startAt))}${ev.endAt?' - '+escapeHtml(formatEventDate(ev.endAt)):''}</div></div><div class="grid"><div class="card"><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="card"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b></div></div><div class="grid four"><div class="card"><span>${lang==='ar'?'السعة المتوقعة للضيوف':'Expected guest capacity'}</span><b>${ev.capacity||'—'}</b></div><div class="card"><span>${lang==='ar'?'الحضور المؤكد':'Confirmed guests'}</span><b>${guestStats.confirmed}</b></div><div class="card"><span>${lang==='ar'?'تم تسجيل حضورهم':'Checked in'}</span><b>${guestStats.checkedIn}</b></div><div class="card"><span>${lang==='ar'?'فريق العمل المشارك':'Participating team'}</span><b>${participants.length}</b></div></div><div class="note">${lang==='ar'?'السعة المتوقعة للحضور تخص الضيوف المدعوين ولا تشمل أعضاء فريق العمل المشاركين.':'Expected attendance capacity applies to invited guests and excludes participating team members.'}</div>${ev.description?`<div class="section"><h2>${lang==='ar'?'الوصف':'Description'}</h2><div class="info">${escapeHtml(ev.description)}</div></div>`:''}<div class="section"><h2>${lang==='ar'?'الموقع والتواصل':'Location & Contact'}</h2><div class="info">${ev.location?`<b>${lang==='ar'?'الموقع':'Location'}:</b> ${escapeHtml(ev.location)}<br>`:''}${ev.googleMapsUrl?`<b>Google Maps:</b> ${escapeHtml(ev.googleMapsUrl)}<br>`:''}${ev.contactName?`<b>${lang==='ar'?'شخص التواصل':'Contact'}:</b> ${escapeHtml(ev.contactName)}<br>`:''}${ev.contactPhone?`<b>${lang==='ar'?'الهاتف':'Phone'}:</b> ${escapeHtml(ev.contactPhone)}<br>`:''}${ev.contactEmail?`<b>${lang==='ar'?'البريد':'Email'}:</b> ${escapeHtml(ev.contactEmail)}`:''}</div></div><div class="section"><h2>${lang==='ar'?'فريق العمل المشارك':'Participating Team'}</h2><div class="info">${escapeHtml(participants.map(p=>p.fullName).join('، ')||'—')}</div></div><div class="section"><h2>${lang==='ar'?'دعوات الحضور وحالة المشاركة':'Guest Invitations & RSVP'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'الضيف':'Guest'}</th><th>${lang==='ar'?'العدد':'Party'}</th><th>${lang==='ar'?'حالة المشاركة':'RSVP'}</th><th>${lang==='ar'?'الحضور':'Check-in'}</th><th>${lang==='ar'?'التواصل':'Contact'}</th></tr></thead><tbody>${guestRows||`<tr><td colspan="6">${lang==='ar'?'لا توجد دعوات حضور':'No guest invitations'}</td></tr>`}</tbody></table></div><div class="section"><h2>${lang==='ar'?'المهام والتكاليف':'Tasks & Costs'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'المهمة':'Task'}</th><th>${lang==='ar'?'المسؤولون':'Assignees'}</th><th>${lang==='ar'?'التكلفة':'Cost'}</th><th>${lang==='ar'?'الحالة':'Status'}</th></tr></thead><tbody>${taskRows||`<tr><td colspan="5">${lang==='ar'?'لا توجد مهام':'No tasks'}</td></tr>`}</tbody></table></div><div class="footer">${lang==='ar'?'تم إنشاء التقرير من منصة تاسكي':'Generated by Tasky'} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div></body></html>`);
+  w.document.close(); w.focus(); setTimeout(()=>w.print(),700);
 }
 async function deleteEvent(id){
   const ev=eventById(id); if(!ev)return;
@@ -4574,13 +4770,18 @@ function scheduleInventoryRefresh(){
 }
 
 async function fetchEvents(){
-  if(!currentWorkspaceId){ events=[]; eventParticipantRows=[]; return; }
-  const [eventsRes,participantsRes]=await Promise.all([
+  if(!currentWorkspaceId){ events=[]; eventParticipantRows=[]; eventInvitationRows=[]; return; }
+  const [eventsRes,participantsRes,invitationsRes]=await Promise.all([
     sb.from('workspace_events').select('id,workspace_id,title_ar,title_en,description,start_at,end_at,location,google_maps_url,contact_name,contact_phone,contact_email,budget,capacity,status,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('start_at',{ascending:true,nullsFirst:false}),
-    sb.from('event_participants').select('id,event_id,workspace_id,user_id,created_by,created_at').eq('workspace_id',currentWorkspaceId)
+    sb.from('event_participants').select('id,event_id,workspace_id,user_id,created_by,created_at').eq('workspace_id',currentWorkspaceId),
+    sb.from('event_invitations').select('id,workspace_id,event_id,guest_name,guest_email,guest_phone,guest_company,party_size,status,qr_token,notes,shared_at,responded_at,checked_in_at,checked_in_by,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:true})
   ]);
-  if(eventsRes.error){ console.warn('V27 events unavailable; run V27 migration',eventsRes.error); events=[]; eventParticipantRows=[]; return; }
+  if(eventsRes.error){ console.warn('V27 events unavailable; run V27 migration',eventsRes.error); events=[]; eventParticipantRows=[]; eventInvitationRows=[]; return; }
   eventParticipantRows=participantsRes.error?[]:(participantsRes.data||[]);
+  eventInvitationRows=invitationsRes.error?[]:(invitationsRes.data||[]).map(row=>({
+    id:row.id,workspaceId:row.workspace_id,eventId:row.event_id,guestName:row.guest_name||'',guestEmail:row.guest_email||'',guestPhone:row.guest_phone||'',guestCompany:row.guest_company||'',partySize:Number(row.party_size||1),status:row.status||'invited',qrToken:row.qr_token,notes:row.notes||'',sharedAt:row.shared_at||null,respondedAt:row.responded_at||null,checkedInAt:row.checked_in_at||null,checkedInBy:row.checked_in_by||null,createdBy:row.created_by||null,createdAt:row.created_at,updatedAt:row.updated_at
+  }));
+  if(invitationsRes.error) console.warn('V29 event invitations unavailable; run V29 migration',invitationsRes.error);
   events=(eventsRes.data||[]).map(row=>({
     id:row.id,
     ar:row.title_ar||row.title_en||'',
@@ -4763,7 +4964,7 @@ function openAddModal(){
     </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
-function closeAddModal(){ document.getElementById('addModalOverlay').classList.add('hidden'); document.getElementById('addModalBody').classList.remove('inventory-modal'); }
+function closeAddModal(){ if(eventQrScanner) stopEventQrScanner(); document.getElementById('addModalOverlay').classList.add('hidden'); document.getElementById('addModalBody').classList.remove('inventory-modal'); }
 async function submitAddTask(e){
   e.preventDefault();
   const title = document.getElementById('newTitle').value.trim();
@@ -5342,6 +5543,33 @@ document.addEventListener('keydown', (e) => {
 });
 
 
+
+/* ================= PUBLIC EVENT INVITATION / RSVP ================= */
+async function showPublicEventInvitation(token){
+  document.getElementById('authScreen').style.display='none';
+  document.querySelector('.app').style.display='none';
+  let screen=document.getElementById('publicEventInviteScreen');
+  if(!screen){screen=document.createElement('div');screen.id='publicEventInviteScreen';screen.className='public-event-invite-screen';document.body.appendChild(screen);}
+  screen.innerHTML=`<div class="public-event-invite-card"><div class="public-event-invite-brand">${getTaskyWordmarkMarkup(lang)}</div><div style="padding:28px;color:#7A8079">${lang==='ar'?'جارٍ تحميل الدعوة...':'Loading invitation...'}</div></div>`;
+  const {data,error}=await sb.rpc('tasky_get_event_invitation_public',{p_token:token});
+  if(error||!data){screen.innerHTML=`<div class="public-event-invite-card"><div class="public-event-invite-brand">${getTaskyWordmarkMarkup(lang)}</div><h1>${lang==='ar'?'الدعوة غير متاحة':'Invitation unavailable'}</h1><p style="color:#7A8079">${escapeHtml(error?.message||(lang==='ar'?'الرابط غير صحيح أو انتهت صلاحية الدعوة.':'The invitation link is invalid or unavailable.'))}</p></div>`;return;}
+  renderPublicEventInvitation(token,data);
+}
+function renderPublicEventInvitation(token,data){
+  const screen=document.getElementById('publicEventInviteScreen'); if(!screen)return;
+  const title=lang==='ar'?(data.title_ar||data.title_en):(data.title_en||data.title_ar);
+  const status=eventInvitationStatusLabel(data.status);
+  const date=data.start_at?formatEventDate(data.start_at):(lang==='ar'?'بدون موعد':'No date');
+  screen.innerHTML=`<div class="public-event-invite-card"><div class="public-event-invite-brand">${getTaskyWordmarkMarkup(lang)}</div><div style="font-size:12px;color:#7A8079">${escapeHtml(data.workspace_name||'')}</div><h1>${escapeHtml(title||'')}</h1><div class="invite-name">${lang==='ar'?`مرحبًا ${escapeHtml(data.guest_name)}`:`Hello ${escapeHtml(data.guest_name)}`}</div><p style="font-size:13px;color:#4B534C;line-height:1.8;margin:5px 0 0">${escapeHtml(data.description|| (lang==='ar'?'يسعدنا حضورك لهذه الفعالية.':'We would be delighted to have you at this event.'))}</p><div class="public-event-invite-meta"><div><b>${lang==='ar'?'الموعد':'Date'}</b><br>${escapeHtml(date)}</div><div><b>${lang==='ar'?'عدد الأشخاص':'Party size'}</b><br>${Number(data.party_size||1)}</div>${data.location?`<div><b>${lang==='ar'?'الموقع':'Location'}</b><br>${escapeHtml(data.location)}</div>`:''}<div><b>${lang==='ar'?'حالة المشاركة':'RSVP'}</b><br>${escapeHtml(status)}</div></div>${data.google_maps_url?`<a href="${escapeHtml(data.google_maps_url)}" target="_blank" rel="noopener" style="display:inline-flex;align-items:center;justify-content:center;text-decoration:none;color:#2A6C2E;font-weight:800;margin:2px 0 8px">${lang==='ar'?'فتح الموقع في Google Maps':'Open in Google Maps'} ↗</a>`:''}${data.checked_in_at?`<div style="background:#E7F0DD;color:#2A6C2E;border-radius:12px;padding:10px 12px;font-weight:800;margin:8px 0">✓ ${lang==='ar'?'تم تسجيل حضورك':'You are checked in'}</div>`:''}${data.status==='cancelled'?`<div style="background:#F7E4E2;color:#C0453D;border-radius:12px;padding:10px 12px;font-weight:800;margin-top:10px">${lang==='ar'?'تم إلغاء هذه الدعوة':'This invitation has been cancelled'}</div>`:`<div class="public-event-invite-actions"><button class="yes" onclick="publicEventRsvp('${token}','confirmed')">${lang==='ar'?'سأحضر':'Going'}</button><button class="maybe" onclick="publicEventRsvp('${token}','maybe')">${lang==='ar'?'ربما':'Maybe'}</button><button class="no" onclick="publicEventRsvp('${token}','declined')">${lang==='ar'?'أعتذر':'Decline'}</button></div>`}${data.contact_name||data.contact_phone||data.contact_email?`<div style="margin-top:18px;padding-top:14px;border-top:1px solid #E5E8E1;color:#7A8079;font-size:11px;line-height:1.7">${lang==='ar'?'للتواصل':'Contact'}: ${escapeHtml([data.contact_name,data.contact_phone,data.contact_email].filter(Boolean).join(' · '))}</div>`:''}</div>`;
+}
+async function publicEventRsvp(token,status){
+  const {error}=await sb.rpc('tasky_rsvp_event_invitation',{p_token:token,p_status:status});
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الرد':'Could not save RSVP',message:error.message,tone:'error'});return;}
+  const fresh=await sb.rpc('tasky_get_event_invitation_public',{p_token:token});
+  if(fresh.data)renderPublicEventInvitation(token,fresh.data);
+  taskyToast(lang==='ar'?'تم حفظ ردك، شكرًا لك':'Your RSVP has been saved',{tone:'success'});
+}
+
 /* ================= MASTER RENDER ================= */
 function renderAll(){
   renderHomeStats();
@@ -5353,7 +5581,8 @@ function renderAll(){
 // Auth invitation links can establish the session after the page starts loading.
 // Re-check the app state when Supabase reports a signed-in session.
 sb.auth.onAuthStateChange((event, session) => {
-  if(event === 'SIGNED_IN' && session){
+  const publicInviteToken=new URLSearchParams(window.location.search).get('invite');
+  if(!publicInviteToken && event === 'SIGNED_IN' && session){
     setTimeout(() => checkSession(), 0);
   }
 });
@@ -5365,7 +5594,8 @@ renderNav();
 renderViewTabs();
 setActiveNav('tasks');
 updateTopbarTitleBalance();
-checkSession();
+const taskyPublicInviteToken=new URLSearchParams(window.location.search).get('invite');
+if(taskyPublicInviteToken) showPublicEventInvitation(taskyPublicInviteToken); else checkSession();
 </script>
 </body>
 </html>
