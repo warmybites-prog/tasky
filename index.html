@@ -3559,7 +3559,7 @@ function openEventModal(id=null){
         <div class="field full"><label>${lang==='ar'?'أعضاء الفريق المشاركون':'Participating team members'}</label><div class="event-participants-picker">${members.map(m=>`<label class="event-participant-option">${memberAvatarHtml(m,29)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" data-event-participant value="${m.userId}" ${selected.has(m.userId)?'checked':''}></label>`).join('') || `<div style="color:var(--muted);font-size:12px">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active members'}</div>`}</div></div>
       </div>
       ${ev?`<div class="event-section-head"><div><h4>${lang==='ar'?'دعوات الحضور':'Guest invitations'}</h4><div class="event-capacity-note">${lang==='ar'?'الحضور الخارجي منفصل عن أعضاء فريق العمل المشاركين.':'External guests are tracked separately from participating team members.'}</div></div>${canManage?`<div class="event-invite-tools"><button type="button" class="chip-btn" onclick="openEventInvitationModal('${ev.id}')">+ ${lang==='ar'?'دعوة حضور':'Invite guest'}</button><button type="button" class="chip-btn" onclick="openEventQrScanner('${ev.id}')"><svg style="width:14px;height:14px"><use href="#i-camera"/></svg>${lang==='ar'?'مسح QR':'Scan QR'}</button></div>`:''}</div>${eventGuestSummaryHtml(ev)}<div class="event-guest-list">${invitations.map(inv=>eventInvitationRowHtml(inv,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد دعوات حضور بعد':'No guest invitations yet'}</div>`}</div>`:''}
-      ${ev?`<div class="event-section-head"><h4>${lang==='ar'?'مهام الفعالية':'Event tasks'}</h4><button type="button" class="chip-btn" onclick="openEventTaskModal('${ev.id}')">+ ${lang==='ar'?'إضافة مهمة':'Add task'}</button></div><div>${linked.map(task=>eventTaskCardHtml(task,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد مهام مرتبطة بعد':'No linked tasks yet'}</div>`}</div>`:''}
+      ${ev?`<div class="event-section-head"><h4>${lang==='ar'?'مهام الفعالية':'Event tasks'}</h4>${canManage&&canCreateAnyTask()?`<button type="button" class="chip-btn" onclick="openEventTaskModal('${ev.id}')">+ ${lang==='ar'?'إضافة مهمة':'Add task'}</button>`:''}</div><div>${linked.map(task=>eventTaskCardHtml(task,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد مهام مرتبطة بعد':'No linked tasks yet'}</div>`}</div>`:''}
       <div class="event-modal-actions"><button type="submit" class="submit-btn">${ev?(lang==='ar'?'حفظ التغييرات':'Save changes'):t('submitAddEvent')}</button>${ev?`<button type="button" class="chip-btn event-report-btn" onclick="exportEventPdf('${ev.id}')"><svg style="width:15px;height:15px"><use href="#i-download"/></svg>${lang==='ar'?'تقرير PDF':'PDF report'}</button>`:''}${canDelete?`<button type="button" class="chip-btn" style="color:var(--danger)" onclick="deleteEvent('${ev.id}')">${lang==='ar'?'حذف الفعالية':'Delete event'}</button>`:''}</div>
     </form>`;
   document.getElementById('eventModalOverlay').classList.remove('hidden');
@@ -3610,6 +3610,10 @@ function openEventTaskModal(eventId){
     const ev=eventById(eventId);
     if(!ev){
       showTaskyDialog({title:lang==='ar'?'تعذّر فتح نافذة المهمة':'Could not open task window',message:lang==='ar'?'لم يتم العثور على الفعالية الحالية. أغلق الفعالية وافتحها مرة أخرى.':'The current event could not be found. Close and reopen the event.',tone:'error'});
+      return;
+    }
+    if(!canManageEventClient(ev)){
+      showTaskyDialog({title:lang==='ar'?'لا توجد صلاحية لإدارة الفعالية':'No permission to manage event',message:lang==='ar'?'إنشاء مهام الفعالية متاح لمدير مساحة العمل أو منشئ الفعالية أو أحد أعضاء فريق الفعالية المشاركين.':'Event tasks can be created by a workspace manager, the event creator, or a participating event team member.',tone:'warning'});
       return;
     }
     const editable=projects.filter(p=>canCreateTaskInProject(p.id));
@@ -3669,12 +3673,38 @@ async function submitEventTask(e,eventId){
   const leadId=document.getElementById('eventTaskLead').value||null;
   if(leadId && !assigneeIds.includes(leadId)) assigneeIds.unshift(leadId);
   const lead=taskMemberById(leadId || assigneeIds[0]);
-  const payload={workspace_id:currentWorkspaceId,project_id:projectId,event_id:eventId,col,tag,title_ar:title,title_en:title,description,priority,cost,start_date:startDate,due_date:dueDate,due_ar:dueDate,due_en:dueDate,assignee_id:lead?.userId||null,assignee_initials:lead?.initials||null,assignee_color:lead?.color||null,comments_count:0,subtasks_done:0,subtasks_total:0};
-  const {data,error}=await sb.from('tasks').insert(payload).select().single();
-  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',message:error.message,tone:'error'});return;}
-  if(assigneeIds.length){
-    const rows=assigneeIds.map((user_id,index)=>({task_id:data.id,workspace_id:currentWorkspaceId,user_id,is_lead:lead?.userId===user_id || (!lead && index===0),assigned_by:currentUserId}));
-    const r=await sb.from('task_assignees').insert(rows); if(r.error) console.warn(r.error);
+  const {data:rpcData,error}=await sb.rpc('tasky_create_event_task',{
+    p_event_id:eventId,
+    p_project_id:projectId,
+    p_title:title,
+    p_description:description,
+    p_col:col,
+    p_tag:tag,
+    p_priority:priority,
+    p_start_date:startDate,
+    p_due_date:dueDate,
+    p_cost:cost,
+    p_assignee_ids:assigneeIds,
+    p_lead_user_id:leadId||null,
+    p_assignee_initials:lead?.initials||null,
+    p_assignee_color:lead?.color||null
+  });
+  if(error){
+    const msg=error.message||String(error);
+    const migrationMissing=/tasky_create_event_task|function .* does not exist|schema cache/i.test(msg);
+    showTaskyDialog({
+      title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',
+      message:migrationMissing
+        ? (lang==='ar'?'يلزم تشغيل إصلاح V29.4 في Supabase أولًا.':'Run the V29.4 Supabase migration first.')
+        : msg,
+      tone:'error'
+    });
+    return;
+  }
+  const data=Array.isArray(rpcData)?rpcData[0]:rpcData;
+  if(!data?.id){
+    showTaskyDialog({title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',message:lang==='ar'?'لم تُرجع قاعدة البيانات معرف المهمة الجديدة.':'The database did not return the new task id.',tone:'error'});
+    return;
   }
   await logTaskActivity(data.id,'task_created',{title,event_id:eventId,cost,priority,status:col,start_date:startDate,due_date:dueDate,assignee_count:assigneeIds.length});
   closeEventTaskModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة الفعالية بكامل التفاصيل':'Event task added with details',{tone:'success'});
