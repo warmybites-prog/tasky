@@ -1414,6 +1414,7 @@
 
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 </head>
@@ -1654,9 +1655,13 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V36'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V36.1'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
+if(!window.supabase){
+  document.addEventListener('DOMContentLoaded',()=>{const s=document.getElementById('authSubtitle');if(s)s.textContent=lang==='ar'?'تعذّر تحميل الاتصال. حدّث الصفحة أو جرّب شبكة أخرى.':'Connection library failed to load. Refresh or try another network.';});
+  throw new Error('Supabase client library failed to load');
+}
 const sb = window.supabase.createClient(TASKY_SUPABASE_URL, TASKY_SUPABASE_PUBLISHABLE_KEY);
 
 let authMode = 'signin';
@@ -6739,11 +6744,58 @@ async function submitMarketingCampaign(e,id){e.preventDefault();const btn=e.subm
 function openMarketingCampaignDetail(id){const c=marketingCampaignById(id);if(!c)return;const owner=marketingMember(c.ownerUserId),budget=budgets.find(b=>String(b.id)===String(c.budgetId||'')),ev=eventById(c.eventId),project=projects.find(p=>String(p.id)===String(c.projectId||'')),items=contentItems.filter(x=>String(x.campaignId||'')===String(c.id));document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><span class="mkt-code">${escapeHtml(c.code||'')}</span><h3 style="margin-top:4px">${escapeHtml(L(c,''))}</h3></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="mkt-detail-grid"><div><span>${lang==='ar'?'الحالة':'Status'}</span><b>${marketingStatusBadge(marketingCampaignStatusLabel(c.status),marketingCampaignStatusTone(c.status))}</b></div><div><span>${lang==='ar'?'المالك':'Owner'}</span><b>${escapeHtml(owner?.fullName||'—')}</b></div><div><span>${lang==='ar'?'الفترة':'Period'}</span><b>${escapeHtml((c.startDate||'—')+' → '+(c.endDate||'—'))}</b></div><div><span>${lang==='ar'?'الجمهور':'Audience'}</span><b>${escapeHtml(c.targetAudience||'—')}</b></div><div><span>${lang==='ar'?'المشروع':'Project'}</span><b>${escapeHtml(project?.name||'—')}</b></div><div><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${escapeHtml(budget?L(budget,''):'—')}</b></div><div><span>${lang==='ar'?'الفعالية':'Event'}</span><b>${escapeHtml(ev?L(ev,''):'—')}</b></div><div><span>${lang==='ar'?'مؤشر الأداء':'KPI'}</span><b>${escapeHtml(c.kpiLabel||'—')}${c.kpiTarget!==null&&c.kpiTarget!==undefined?` · ${c.kpiTarget}`:''}</b></div></div>${c.objective?`<div class="mkt-detail-section"><h4>${lang==='ar'?'الهدف':'Objective'}</h4><p>${escapeHtml(c.objective)}</p></div>`:''}<div class="mkt-detail-section"><h4>${lang==='ar'?'القنوات':'Channels'}</h4><div class="mkt-channel-row">${c.channels?.length?marketingPlatformBadges(c.channels):'—'}</div></div><div class="mkt-detail-section"><h4>${lang==='ar'?'المحتوى المرتبط':'Linked content'} · ${items.length}</h4><div class="mkt-linked-list">${items.slice(0,8).map(x=>`<button onclick="openMarketingContentDetail('${x.id}')"><span>${escapeHtml(L(x,''))}</span>${marketingStatusBadge(marketingContentStatusLabel(x.stage),marketingContentStatusTone(x.stage))}</button>`).join('')||`<div class="mkt-empty">${lang==='ar'?'لا يوجد محتوى مرتبط':'No linked content'}</div>`}</div></div><div class="mkt-detail-actions">${marketingCanManageCampaign(c)?`<button class="primary-btn" onclick="openMarketingCampaignModal('${c.id}')">${lang==='ar'?'تعديل الحملة':'Edit campaign'}</button>`:''}<button class="chip-btn" onclick="marketingContentView='board';closeAddModal();setActiveNav('content')">${lang==='ar'?'فتح المحتوى':'Open content'}</button></div>`;document.getElementById('addModalBody').classList.add('marketing-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
 
 function openMarketingContentEditor(id=null){const c=id?marketingContentById(id):null;if(c&&!marketingCanEditContent(c))return openMarketingContentDetail(id);const selectedPlatforms=marketingPlatformsFromValue(c?.platform||'instagram');document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><h3>${c?(lang==='ar'?'تعديل المحتوى':'Edit content'):(lang==='ar'?'محتوى جديد':'New content')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitMarketingContent(event,'${c?.id||''}')" class="mkt-form"><div class="field"><label>${lang==='ar'?'العنوان بالعربية':'Arabic title'}</label><input id="mktContentAr" required value="${escapeHtml(c?.ar||'')}"></div><div class="field"><label>${lang==='ar'?'العنوان بالإنجليزية':'English title'}</label><input id="mktContentEn" value="${escapeHtml(c?.en&&c.en!==c.ar?c.en:'')}"></div><div class="field"><label>${lang==='ar'?'نوع المحتوى':'Content type'}</label><select id="mktContentType">${['post','story','video','reel','article','email','banner','design','other'].map(x=>`<option value="${x}" ${x===(c?.type||'post')?'selected':''}>${marketingContentTypeLabel(x)}</option>`).join('')}</select></div><div class="field"><label>${lang==='ar'?'الحملة':'Campaign'}</label><select id="mktContentCampaign">${marketingCampaignOptions(c?.campaignId)}</select></div><div class="field full"><label>${lang==='ar'?'المنصات':'Platforms'}</label><div class="mkt-check-grid">${marketingPlatformChoices('data-mkt-content-platform',selectedPlatforms)}</div><div class="mkt-help">${lang==='ar'?'يمكن اختيار أكثر من منصة لهذا المحتوى، وستظهر كل منصة بلونها المناسب.':'Choose one or more platforms for this content.'}</div></div><div class="field"><label>${lang==='ar'?'طلب التسويق':'Marketing request'}</label><select id="mktContentRequest">${marketingRequestOptions(c?.requestId)}</select></div><div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="mktContentProject">${marketingProjectOptions(c?.projectId)}</select></div><div class="field"><label>${lang==='ar'?'المسؤول':'Owner'}</label><select id="mktContentOwner">${marketingUserOptions(c?.ownerUserId||currentUserId)}</select></div><div class="field"><label>${lang==='ar'?'المراجع':'Reviewer'}</label><select id="mktContentReviewer"><option value="">${lang==='ar'?'مدير مساحة العمل / بدون مراجع محدد':'Workspace admin / no specific reviewer'}</option>${marketingUserOptions(c?.reviewerUserId)}</select></div><div class="field"><label>${lang==='ar'?'موعد النشر المقترح':'Proposed publish time'}</label><input id="mktContentPublishAt" type="datetime-local" value="${marketingToDatetimeLocal(c?.publishAt)}"></div><div class="field full"><label>${lang==='ar'?'النص / وصف المحتوى':'Copy / content brief'}</label><textarea id="mktContentCopy" rows="5">${escapeHtml(c?.copyText||'')}</textarea></div><div class="field full"><label>${lang==='ar'?'رابط المنشور (اختياري)':'Published URL (optional)'}</label><input id="mktContentUrl" value="${escapeHtml(c?.externalUrl||'')}"></div><div class="full mkt-form-actions"><button class="submit-btn" type="submit">${lang==='ar'?'حفظ المسودة':'Save draft'}</button></div></form>`;document.getElementById('addModalBody').classList.add('marketing-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
-async function submitMarketingContent(e,id){e.preventDefault();const btn=e.submitter;if(btn){btn.disabled=true;btn.textContent=lang==='ar'?'جارٍ الحفظ...':'Saving...';}const platforms=[...document.querySelectorAll('[data-mkt-content-platform]:checked')].map(x=>x.value);if(!platforms.length){showTaskyDialog({title:lang==='ar'?'اختر منصة واحدة على الأقل':'Select at least one platform',message:lang==='ar'?'لا يمكن حفظ المحتوى بدون تحديد منصة النشر.':'Content cannot be saved without at least one publishing platform.',tone:'warning'});if(btn)btn.disabled=false;return;}let payload={p_workspace_id:currentWorkspaceId,p_content_id:id||null,p_campaign_id:document.getElementById('mktContentCampaign').value||null,p_request_id:document.getElementById('mktContentRequest').value||null,p_project_id:document.getElementById('mktContentProject').value||null,p_title_ar:document.getElementById('mktContentAr').value.trim(),p_title_en:document.getElementById('mktContentEn').value.trim()||null,p_content_type:document.getElementById('mktContentType').value,p_platform:marketingPlatformsToValue(platforms),p_copy_text:document.getElementById('mktContentCopy').value.trim()||null,p_publish_at:document.getElementById('mktContentPublishAt').value?new Date(document.getElementById('mktContentPublishAt').value).toISOString():null,p_external_url:document.getElementById('mktContentUrl').value.trim()||null,p_owner_user_id:document.getElementById('mktContentOwner').value||currentUserId,p_reviewer_user_id:document.getElementById('mktContentReviewer').value||null};let {error}=await sb.rpc('tasky_save_marketing_content',payload);if(error&&/invalid platform/i.test(error.message||'')){payload.p_platform=platforms[0];({error}=await sb.rpc('tasky_save_marketing_content',payload));if(!error){taskyToast(lang==='ar'?'تم الحفظ بأول منصة فقط مؤقتًا. لتفعيل تعدد المنصات شغّل ترقية قاعدة البيانات.':'Saved with the first platform only temporarily. Run the DB upgrade to enable true multi-platform saving.',{tone:'warning',duration:4800});}}if(error){const extra=/invalid platform/i.test(error.message||'')?(lang==='ar'?'
+async function submitMarketingContent(e,id){
+  e.preventDefault();
+  const btn=e.submitter;
+  if(btn){btn.disabled=true;btn.textContent=lang==='ar'?'جارٍ الحفظ...':'Saving...';}
 
-يلزم تشغيل تحديث قاعدة البيانات الخاص بتعدد المنصات.':'
+  const platforms=[...document.querySelectorAll('[data-mkt-content-platform]:checked')].map(x=>x.value);
+  if(!platforms.length){
+    showTaskyDialog({
+      title:lang==='ar'?'اختر منصة واحدة على الأقل':'Select at least one platform',
+      message:lang==='ar'?'لا يمكن حفظ المحتوى بدون تحديد منصة النشر.':'Content cannot be saved without at least one publishing platform.',
+      tone:'warning'
+    });
+    if(btn)btn.disabled=false;
+    return;
+  }
 
-The database upgrade for multi-platform content is required.'):'';showTaskyDialog({title:lang==='ar'?'تعذّر حفظ المحتوى':'Could not save content',message:error.message+extra,tone:'error'});if(btn)btn.disabled=false;return;}closeAddModal();await fetchMarketingData();renderModule();taskyToast(lang==='ar'?'تم حفظ المسودة':'Draft saved',{tone:'success'});}
+  const payload={
+    p_workspace_id:currentWorkspaceId,
+    p_content_id:id||null,
+    p_campaign_id:document.getElementById('mktContentCampaign').value||null,
+    p_request_id:document.getElementById('mktContentRequest').value||null,
+    p_project_id:document.getElementById('mktContentProject').value||null,
+    p_title_ar:document.getElementById('mktContentAr').value.trim(),
+    p_title_en:document.getElementById('mktContentEn').value.trim()||null,
+    p_content_type:document.getElementById('mktContentType').value,
+    p_platform:marketingPlatformsToValue(platforms),
+    p_copy_text:document.getElementById('mktContentCopy').value.trim()||null,
+    p_publish_at:document.getElementById('mktContentPublishAt').value?new Date(document.getElementById('mktContentPublishAt').value).toISOString():null,
+    p_external_url:document.getElementById('mktContentUrl').value.trim()||null,
+    p_owner_user_id:document.getElementById('mktContentOwner').value||currentUserId,
+    p_reviewer_user_id:document.getElementById('mktContentReviewer').value||null
+  };
+
+  const {error}=await sb.rpc('tasky_save_marketing_content',payload);
+  if(error){
+    const extra=/invalid platform/i.test(error.message||'')
+      ? (lang==='ar'?' — شغّل تحديث SQL الخاص بتعدد المنصات أولًا.':' — Run the multi-platform SQL update first.')
+      : '';
+    showTaskyDialog({
+      title:lang==='ar'?'تعذّر حفظ المحتوى':'Could not save content',
+      message:(error.message||String(error))+extra,
+      tone:'error'
+    });
+    if(btn)btn.disabled=false;
+    return;
+  }
+
+  closeAddModal();
+  await fetchMarketingData();
+  renderModule();
+  taskyToast(lang==='ar'?'تم حفظ المسودة':'Draft saved',{tone:'success'});
+}
 function openMarketingContentDetail(id){const c=marketingContentById(id);if(!c)return;const owner=marketingMember(c.ownerUserId),reviewer=marketingMember(c.reviewerUserId),approver=marketingMember(c.approvedBy),campaign=marketingCampaignById(c.campaignId),request=marketingRequestById(c.requestId);document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><div class="mkt-platform-stack">${marketingPlatformBadges(c.platform)}</div><h3 style="margin-top:8px">${escapeHtml(L(c,''))}</h3></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="mkt-detail-grid"><div><span>${lang==='ar'?'الحالة':'Status'}</span><b>${marketingStatusBadge(marketingContentStatusLabel(c.stage),marketingContentStatusTone(c.stage))}</b></div><div><span>${lang==='ar'?'النوع':'Type'}</span><b>${escapeHtml(marketingContentTypeLabel(c.type))}</b></div><div><span>${lang==='ar'?'المسؤول':'Owner'}</span><b>${escapeHtml(owner?.fullName||'—')}</b></div><div><span>${lang==='ar'?'المراجع':'Reviewer'}</span><b>${escapeHtml(reviewer?.fullName||(lang==='ar'?'مدير مساحة العمل':'Workspace admin'))}</b></div><div><span>${lang==='ar'?'موعد النشر':'Publish time'}</span><b>${escapeHtml(marketingDate(c.publishAt,true))}</b></div><div><span>${lang==='ar'?'الحملة':'Campaign'}</span><b>${escapeHtml(campaign?L(campaign,''):'—')}</b></div><div><span>${lang==='ar'?'طلب التسويق':'Marketing request'}</span><b>${escapeHtml(request?request.ref:'—')}</b></div><div><span>${lang==='ar'?'اعتمد بواسطة':'Approved by'}</span><b>${escapeHtml(approver?.fullName||'—')}</b></div></div>${c.copyText?`<div class="mkt-detail-section"><h4>${lang==='ar'?'النص / الوصف':'Copy / brief'}</h4><p style="white-space:pre-wrap">${escapeHtml(c.copyText)}</p></div>`:''}${c.reviewNote?`<div class="mkt-review-note ${c.stage==='changes_requested'?'danger':''}"><b>${lang==='ar'?'ملاحظة المراجعة':'Review note'}</b><br>${escapeHtml(c.reviewNote)}</div>`:''}${c.externalUrl?`<div class="mkt-detail-section"><a href="${escapeHtml(c.externalUrl)}" target="_blank" rel="noopener">${lang==='ar'?'فتح رابط المنشور':'Open published link'} ↗</a></div>`:''}<div class="mkt-detail-actions">${marketingContentActionHtml(c)}${marketingCanEditContent(c)?`<button class="chip-btn" onclick="openMarketingContentEditor('${c.id}')">${lang==='ar'?'فتح المحرر':'Open editor'}</button>`:''}</div>`;document.getElementById('addModalBody').classList.add('marketing-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
 async function submitMarketingContentForReview(id){const {error}=await sb.rpc('tasky_submit_marketing_content_for_review',{p_content_id:id});if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إرسال المحتوى للمراجعة':'Could not submit for review',message:error.message,tone:'error'});return;}await Promise.all([fetchMarketingData(),fetchNotifications()]);renderModule();openMarketingContentDetail(id);taskyToast(lang==='ar'?'تم إرسال المحتوى للمراجعة':'Content submitted for review',{tone:'success'});}
 function openMarketingReviewModal(id,status){const c=marketingContentById(id);if(!c)return;document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><h3>${status==='approved'?(lang==='ar'?'اعتماد المحتوى':'Approve content'):(lang==='ar'?'طلب تعديلات':'Request changes')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitMarketingContentReview(event,'${id}','${status}')"><div class="field"><label>${lang==='ar'?'ملاحظة المراجعة':'Review note'}</label><textarea id="mktReviewNote" rows="4" ${status==='changes_requested'?'required':''}></textarea></div><button class="submit-btn" type="submit">${status==='approved'?(lang==='ar'?'اعتماد':'Approve'):(lang==='ar'?'إرسال التعديلات':'Send changes')}</button></form>`;document.getElementById('addModalOverlay').classList.remove('hidden');}
