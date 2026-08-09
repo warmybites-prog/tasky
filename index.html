@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V16: inline favicon + secure branding + themed dialogs + toast notifications -->
+<!-- Tasky V21: updated Arabic/English wordmarks + mobile ready + branding -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -39,9 +39,9 @@
 
   /* ---------------- SIDEBAR ---------------- */
   .sidebar{width:264px;flex:none;background:#12291A;color:#EAF1E6;display:flex;flex-direction:column;padding:20px 16px;gap:16px;overflow-y:auto;}
-  .brand{display:flex;align-items:center;gap:9px;padding:0 4px;min-height:38px;}
-  .brand-mark{width:34px;height:34px;display:block;flex:none;}
-  .brand .name{font-family:"Almarai",sans-serif;font-weight:800;font-size:21px;line-height:1;color:#fff;}
+  .brand{display:flex;align-items:center;padding:0 4px;min-height:38px;min-width:0;}
+  .brand-wordmark{display:block;height:34px;width:auto;max-width:100%;}
+  .brand[data-lang="en"] .brand-wordmark{height:31px;}
   .workspace{display:flex;align-items:center;justify-content:space-between;gap:9px;background:rgba(255,255,255,.06);border-radius:10px;padding:8px 10px;font-size:13px;color:#CBD9C8;cursor:pointer;min-height:46px;}
   .workspace:hover{background:rgba(255,255,255,.09);}
   .workspace-main{display:flex;align-items:center;gap:9px;min-width:0;flex:1;}
@@ -689,8 +689,9 @@
 
 
   /* ---------------- AUTH BRAND ---------------- */
-  .auth-brand-mark{width:54px;height:54px;margin:0 auto 12px;display:block;filter:drop-shadow(0 5px 10px rgba(18,41,26,.08));}
-  .auth-brand-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:2px;}
+  .auth-brand-lockup{display:flex;flex-direction:column;align-items:center;justify-content:center;margin-bottom:6px;}
+  .auth-brand-shell{display:inline-flex;align-items:center;justify-content:center;background:linear-gradient(180deg,#10401f 0%, #0a3017 100%);padding:10px 14px;border-radius:18px;box-shadow:0 10px 24px rgba(18,41,26,.12);margin:0 auto 10px;}
+  .auth-brand-logo{display:block;height:38px;width:auto;max-width:min(250px,70vw);filter:drop-shadow(0 3px 8px rgba(0,0,0,.08));}
 
 
 
@@ -938,7 +939,8 @@
       padding:24px 18px !important;
       border-radius:18px !important;
     }
-    .auth-brand-mark{width:50px;height:50px;margin-bottom:10px;}
+    .auth-brand-shell{padding:9px 12px;border-radius:16px;margin-bottom:9px;}
+    .auth-brand-logo{height:34px;max-width:min(220px,72vw);}
   }
 
   @media(max-width:360px){
@@ -968,11 +970,9 @@
 <div id="authScreen" style="position:fixed;inset:0;background:var(--paper);z-index:200;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans Arabic',sans-serif;">
   <div style="width:360px;max-width:90vw;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;">
     <div class="auth-brand-lockup">
-      <svg class="auth-brand-mark" viewBox="1240 1320 1440 1360" aria-label="شعار تاسكي" role="img">
-        <path fill="#2A6C2E" fill-rule="evenodd" d="M1923.4,1377.41c85.11,0,166.28,17.02,240.92,48.44l-187.23,206.87c-18.33-2.62-35.35-3.93-53.68-3.93-161.05,0-298.53,103.44-349.59,247.46-13.09,37.97-20.95,79.87-20.95,124.39,0,204.26,166.29,370.54,370.54,370.54,191.16,0,346.97-144.03,369.23-328.64l219.97-246.15c20.95,64.16,34.04,132.24,34.04,204.26,0,343.04-278.89,621.93-623.24,621.93s-621.93-278.89-621.93-621.93,278.89-623.24,621.93-623.24h0Z"/>
-        <path fill="#82AF21" fill-rule="evenodd" d="M1715.44,1876.27h202.38c16.06,0,31.37-6.79,42.15-18.7l416.55-460.15c10.78-11.91,26.09-18.7,42.15-18.7h153.07c49.09,0,75.11,58.02,42.46,94.68l-633.27,711.06c-21.42,24.05-58.52,25.53-81.78,3.26l-223.04-213.51c-37.03-35.45-11.94-97.93,39.32-97.93Z"/>
-      </svg>
-      <h2 style="font-family:'Almarai';font-size:22px;margin-bottom:6px;">تاسكي</h2>
+      <div class="auth-brand-shell">
+        <div id="authWordmark" aria-label="Tasky logo"></div>
+      </div>
     </div>
     <p id="authSubtitle" style="font-size:13px;color:var(--muted);margin-bottom:20px;">سجّل دخولك لمتابعة العمل</p>
     <div id="authError" style="display:none;background:var(--danger-tint);color:var(--danger);font-size:12.5px;padding:10px;border-radius:8px;margin-bottom:14px;text-align:right;"></div>
@@ -1050,10 +1050,7 @@
   <!-- ============ SIDEBAR ============ -->
   <aside class="sidebar">
     <div class="sidebar-brand-row">
-      <div class="brand">
-        <svg class="brand-mark" aria-hidden="true"><use href="#tasky-mark"/></svg>
-        <span class="name">تاسكي</span>
-      </div>
+      <div class="brand" id="sidebarWordmark" data-lang="ar" aria-label="Tasky logo"></div>
       <button class="sidebar-close-btn" type="button" onclick="closeMobileSidebar()" aria-label="إغلاق القائمة">
         <svg><use href="#i-x"/></svg>
       </button>
@@ -1187,7 +1184,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V14'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V21'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -2450,11 +2447,32 @@ function visibleTasks(){
 function taskTitle(x){ return lang==='en' ? x.en : x.ar; }
 function taskDue(x){ return lang==='en' ? x.due_en : x.due_ar; }
 
+
+const TASKY_LOGO_AR = `<svg class="brand-wordmark" viewBox="0 0 100.08 47.32" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="تاسكي"><g><g><g><path fill="#ffffff" d="M30.56,4.73l-1.57,3.92-4.62,5.19c2.5,1.18,4.46,2.77,5.9,4.79,1.37,1.87,2.2,4,2.48,6.37.02.1.05.42.07.97.02.22.04.35.04.4h1.15v4.64h-.72l-1.33-1.69h-.11c-.91,1.13-2.08,1.69-3.49,1.69h-3.67c-.26,2.86-1.45,5.03-3.56,6.52-1.92,1.39-4.31,2.09-7.16,2.09h-3.17c-2.78,0-5.12-.65-7.02-1.94-2.52-1.78-3.78-4.45-3.78-8.03v-2.66l2.81-2.23h2.74v4.21c0,2.21.52,3.76,1.55,4.66,1.03.9,2.8,1.35,5.29,1.35,2.14,0,3.7-.29,4.7-.88,1-.59,1.65-1.61,1.96-3.08h-1.8l-2.38-2.95v-1.69h11.88c.33,0,.5-.18.5-.54,0-1.51-.68-3.06-2.05-4.64-1.95-2.23-3.6-3.18-5.09-4.75-.03-.03-.08-.06-.11-.09-.85-1.04-1.23-1.16-1.78-1.69l1.24-1.39,11.1-8.53ZM8.96,41.7c.77,0,1.43.28,1.98.83s.84,1.25.83,2.05c0,.69-.29,1.37-.77,1.86-.56.58-1.24.87-2.04.87s-1.52-.3-2.08-.89c-.47-.5-.73-1.18-.73-1.87,0-.8.27-1.47.81-2.03s1.21-.83,2-.83ZM15.41,41.7c.77,0,1.43.28,1.98.83.56.56.84,1.25.83,2.06,0,.69-.29,1.37-.77,1.86-.56.58-1.24.87-2.04.87s-1.52-.3-2.08-.89c-.47-.5-.73-1.18-.73-1.87,0-.8.27-1.48.81-2.03s1.21-.83,2-.83Z"/><path fill="#ffffff" d="M75.42,14.45v12.1c0,1.22-.44,2.27-1.31,3.15-.88.88-1.93,1.31-3.15,1.31h-8.1l-1.51-1.69h-.11c-.89,1.13-2.05,1.69-3.49,1.69h-8.1l-1.51-1.69h-.11c-.89,1.13-2.05,1.69-3.49,1.69h-10.8v-4.64h9.22c.28,0,.5-.23.5-.5v-7.27h5.54v5.65c0,.36.01.92.04,1.69v.43h7.13c.28,0,.5-.23.5-.5v-9.36h5.54v8.35c0,.41.01.91.04,1.51h7.13c.28,0,.5-.23.5-.5v-11.41h5.54Z"/><path fill="#ffffff" d="M85.97,5.23v20.63s.01.12.04.22l.04.04c.07.17.22.25.43.25h1.33v4.64h-2.92c-1.18,0-2.21-.42-3.1-1.26-.91-.89-1.37-1.96-1.37-3.2V5.23h5.54Z"/><path fill="#ffffff" d="M99.54,14.45v12.1c0,1.06-.35,2-1.04,2.84-.91,1.08-2.06,1.62-3.46,1.62h-7.52v-4.64h5.94c.14,0,.26-.04.36-.11.12-.1.18-.23.18-.4v-11.41h5.54ZM90.83,6.53c.77,0,1.43.28,1.98.83.55.55.83,1.21.83,1.98s-.28,1.43-.83,1.98c-.55.55-1.21.83-1.98.83-1.04,0-1.87-.48-2.47-1.43-.15-.23-.25-.5-.29-.77-.17-1.06.09-1.93.76-2.61.54-.54,1.21-.81,2-.81ZM97.27,6.53c.77,0,1.43.28,1.98.83.55.55.83,1.21.83,1.98s-.28,1.43-.83,1.98c-.55.55-1.21.83-1.98.83-1.04,0-1.87-.48-2.47-1.44-.15-.23-.24-.5-.29-.76-.17-1.06.09-1.93.76-2.61.54-.54,1.21-.81,2-.81Z"/></g><path fill="#82af21" fill-rule="evenodd" stroke="#fff" stroke-miterlimit="10" stroke-width=".25px" d="M17.39,10.91h4.39c.35,0,.68-.15.91-.41L31.72.53c.23-.26.57-.41.91-.41h3.32c1.06,0,1.63,1.26.92,2.05l-13.73,15.41c-.46.52-1.27.55-1.77.07l-4.83-4.63c-.8-.77-.26-2.12.85-2.12h0Z"/></g></g></svg>`;
+const TASKY_LOGO_EN = `<svg class="brand-wordmark" viewBox="0 0 113.43 48.06" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Tasky"><g><text x="6.46" y="30.89" fill="#ffffff" font-family="Almarai, sans-serif" font-size="36" font-weight="700">Tasky</text><path fill="#82af21" fill-rule="evenodd" stroke="#fff" stroke-miterlimit="10" stroke-width=".25px" d="M70.02,17.89h4.55c.36,0,.71-.15.95-.42l9.37-10.35c.24-.27.59-.42.95-.42h3.44c1.1,0,1.69,1.31.96,2.13l-14.25,16c-.48.54-1.32.57-1.84.07l-5.02-4.8c-.83-.8-.27-2.2.88-2.2h0Z"/></g></svg>`;
+function getTaskyWordmarkMarkup(locale='ar'){
+  return locale === 'en' ? TASKY_LOGO_EN : TASKY_LOGO_AR;
+}
+function renderTaskyWordmarks(){
+  const sidebar = document.getElementById('sidebarWordmark');
+  if(sidebar){
+    sidebar.dataset.lang = lang;
+    sidebar.innerHTML = getTaskyWordmarkMarkup(lang);
+  }
+  const auth = document.getElementById('authWordmark');
+  if(auth){
+    auth.innerHTML = getTaskyWordmarkMarkup(lang);
+    const svg = auth.querySelector('svg');
+    if(svg) svg.classList.add('auth-brand-logo');
+  }
+}
+
 /* ================= CHROME (static text) ================= */
 function applyChrome(){
   document.getElementById('htmlRoot').setAttribute('dir', lang==='ar' ? 'rtl':'ltr');
   document.getElementById('htmlRoot').setAttribute('lang', lang);
   document.title = lang==='ar' ? 'تاسكي — منصة إدارة الأعمال' : 'Tasky — Business Management Platform';
+  renderTaskyWordmarks();
   document.getElementById('workspaceLabel').textContent = currentWorkspaceName || t('workspace');
   renderWorkspaceBrand();
   document.getElementById('newTaskBtnLabel1').textContent = t('newTask');
