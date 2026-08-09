@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V24: settings center + database-authoritative plan requests + V23 tasks -->
+<!-- Tasky V25: project-level permissions + project managers + task access control -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1120,6 +1120,38 @@
     .attachment-upload{align-items:flex-start;flex-direction:column;}
   }
 
+
+  /* ---------------- V25 PROJECT PERMISSIONS ---------------- */
+  .project-access-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:12px;}
+  .project-access-card{border:1px solid var(--border);background:var(--card);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;min-width:0;}
+  .project-access-icon{width:42px;height:42px;border-radius:12px;background:var(--blue-tint);color:var(--blue);display:grid;place-items:center;flex:none;}
+  .project-access-icon svg{width:18px;height:18px;}
+  .project-access-copy{min-width:0;flex:1;}
+  .project-access-copy b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .project-access-copy span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px;}
+  .project-role-pill{display:inline-flex!important;width:max-content;align-items:center;gap:5px;padding:4px 8px;border-radius:999px;background:var(--green-tint);color:var(--green)!important;font-size:10.5px!important;font-weight:700;margin-top:7px!important;}
+  .project-access-actions{display:flex;gap:7px;align-items:center;flex:none;}
+  .access-modal-project{padding:12px 14px;border-radius:12px;background:var(--paper);border:1px solid var(--border);margin-bottom:12px;}
+  .access-modal-project b{display:block;font-size:14px;}
+  .access-modal-project span{display:block;color:var(--muted);font-size:11.5px;margin-top:3px;line-height:1.6;}
+  .project-member-list{display:flex;flex-direction:column;gap:7px;max-height:390px;overflow:auto;padding-inline-end:2px;}
+  .project-member-row{display:grid;grid-template-columns:minmax(0,1fr) 150px;gap:10px;align-items:center;border:1px solid var(--border);border-radius:12px;padding:10px 11px;background:var(--card);}
+  .project-member-person{display:flex;align-items:center;gap:9px;min-width:0;}
+  .project-member-person-copy{min-width:0;flex:1;}
+  .project-member-person-copy b{display:block;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .project-member-person-copy span{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .project-role-select{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:8px 9px;font-size:12px;}
+  .permission-note{display:flex;gap:9px;align-items:flex-start;background:var(--blue-tint);color:var(--blue-deep);border-radius:11px;padding:10px 12px;font-size:11.5px;line-height:1.7;margin-top:12px;}
+  .permission-note svg{width:16px;height:16px;flex:none;margin-top:2px;}
+  .readonly-banner{display:flex;align-items:center;gap:8px;background:var(--blue-tint);color:var(--blue-deep);border-radius:10px;padding:9px 11px;font-size:11.5px;margin-bottom:10px;}
+  .readonly-banner svg{width:15px;height:15px;flex:none;}
+  button:disabled,.primary-btn:disabled,.new-task-btn:disabled{opacity:.48;cursor:not-allowed;transform:none!important;box-shadow:none!important;}
+  @media(max-width:760px){
+    .project-access-grid{grid-template-columns:1fr;}
+    .project-member-row{grid-template-columns:1fr;}
+    .project-role-select{min-height:44px;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1221,7 +1253,7 @@
       </div>
       <span class="workspace-action" id="workspaceBrandAction"><svg><use href="#i-camera"/></svg></span>
     </div>
-    <button class="new-task-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel1"></span></button>
+    <button id="sideNewTaskBtn" class="new-task-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel1"></span></button>
     <div class="search-mini"><svg style="width:15px;height:15px"><use href="#i-search"/></svg><input id="sideSearch" oninput="onSearch(this.value)"></div>
 
     <nav class="main-nav" id="mainNav"></nav>
@@ -1260,7 +1292,7 @@
           <button class="icon-btn" onclick="toggleNotif()"><svg><use href="#i-bell"/></svg><span class="badge" id="notifBadge" style="display:none">0</span></button>
           <div id="notifDropdown" class="dropdown hidden" style="left:0;top:44px;width:280px;"></div>
         </div>
-        <button class="primary-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel2"></span></button>
+        <button id="topNewTaskBtn" class="primary-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel2"></span></button>
       </div>
     </header>
 
@@ -1343,7 +1375,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V24'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V25'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1355,6 +1387,7 @@ let currentUserEmail = null;
 let pendingPlanRequest = null;
 let settingsSection = 'profile';
 let projects = [];
+let projectMemberships = [];
 let activeProjectId = null;
 
 async function loadWorkspaceAndData(authoritativeUser = null){
@@ -1427,6 +1460,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
 
   await fetchProjects();
   await fetchTeamMembers();
+  await fetchProjectMemberships();
   await fetchTasks();
   await fetchNotifications();
   await fetchPendingPlanRequest();
@@ -1452,6 +1486,8 @@ function initTaskRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'task_attachments',filter},scheduleTaskRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'task_activity',filter},scheduleTaskRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'notifications',filter:`user_id=eq.${currentUserId}`},async()=>{ await fetchNotifications(); })
+    .on('postgres_changes',{event:'*',schema:'public',table:'project_members',filter},scheduleProjectAccessRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'projects',filter},scheduleProjectAccessRefresh)
     .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
 }
 function scheduleTaskRealtimeRefresh(){
@@ -1461,6 +1497,22 @@ function scheduleTaskRealtimeRefresh(){
     if(currentDetailTaskId){ await fetchTaskDetailExtras(currentDetailTaskId); renderTaskDetailModal(currentDetailTaskId); }
     renderAll();
   },220);
+}
+
+async function scheduleProjectAccessRefresh(){
+  clearTimeout(taskRealtimeTimer);
+  taskRealtimeTimer=setTimeout(async()=>{
+    await fetchProjects();
+    await fetchProjectMemberships();
+    await fetchTasks();
+    renderNav();
+    renderAll();
+    if(activeNav==='team') renderModule();
+    if(currentDetailTaskId){
+      const stillVisible=tasks.some(t=>t.id===currentDetailTaskId);
+      if(!stillVisible) closeDetailModal(); else { await fetchTaskDetailExtras(currentDetailTaskId); renderTaskDetailModal(currentDetailTaskId); }
+    }
+  },180);
 }
 
 async function fetchProjects(){
@@ -1475,6 +1527,16 @@ async function fetchProjects(){
   if(error){ console.error('تعذّر تحميل المشاريع', error); projects = []; activeProjectId = null; return; }
   projects = data || [];
   if(!projects.some(p => p.id === activeProjectId)) activeProjectId = projects[0]?.id || null;
+}
+
+async function fetchProjectMemberships(){
+  if(!currentWorkspaceId){ projectMemberships=[]; return; }
+  const {data,error}=await sb.from('project_members')
+    .select('project_id,workspace_id,user_id,role,added_by,created_at,updated_at')
+    .eq('workspace_id',currentWorkspaceId);
+  if(error){ console.warn('V25 project_members unavailable; run V25 migration',error); projectMemberships=[]; return; }
+  projectMemberships=data||[];
+  syncNewTaskButtons();
 }
 
 async function fetchTasks(){
@@ -2225,7 +2287,7 @@ const NAV_ITEMS = [
   { id: "assets", key:"nav_assets", icon: "i-layers", group:"grp_other" },
   { id: "reports", key:"nav_reports", icon: "i-download", group:"grp_other" },
   { id: "settings", key:"nav_settings", icon: "i-settings", group:"grp_account", always:true },
-  { id: "team", key:"nav_team", icon: "i-users", group:"grp_account", adminOnly:true },
+  { id: "team", key:"nav_team", icon: "i-users", group:"grp_account" },
   { id: "billing", key:"nav_billing", icon: "i-crown", group:"grp_account", adminOnly:true },
 ];
 const NOTIFICATIONS = [
@@ -2503,6 +2565,43 @@ function renderTeamAvatarStack(){
 function assignableMembers(){
   return teamMembers.filter(m => m.status === 'active' && m.userId);
 }
+function projectMembershipFor(projectId,userId=currentUserId){
+  return projectMemberships.find(pm=>pm.project_id===projectId && pm.user_id===userId) || null;
+}
+function workspaceMemberByUserId(userId){
+  return teamMembers.find(m=>m.userId===userId) || null;
+}
+function projectRoleFor(projectId,userId=currentUserId){
+  const wm=workspaceMemberByUserId(userId);
+  if((userId===currentUserId && currentUserRole==='admin') || wm?.role==='admin') return 'admin';
+  return projectMembershipFor(projectId,userId)?.role || null;
+}
+function projectRoleLabel(role){
+  const ar={admin:'مسؤول مساحة العمل',manager:'مدير المشروع',editor:'محرر',viewer:'مشاهد'};
+  const en={admin:'Workspace admin',manager:'Project manager',editor:'Editor',viewer:'Viewer'};
+  return (lang==='ar'?ar:en)[role] || (lang==='ar'?'بدون وصول':'No access');
+}
+function canManageProjectClient(projectId){ return ['admin','manager'].includes(projectRoleFor(projectId)); }
+function canCreateTaskInProject(projectId){ return ['admin','manager','editor'].includes(projectRoleFor(projectId)); }
+function canEditTaskClient(task){ return !!task && canCreateTaskInProject(task.projectId); }
+function canDeleteTaskClient(task){ return !!task && ['admin','manager'].includes(projectRoleFor(task.projectId)); }
+function canCreateAnyTask(){ return projects.some(p=>canCreateTaskInProject(p.id)); }
+function projectAssignableMembers(projectId){
+  return assignableMembers().filter(m=>projectRoleFor(projectId,m.userId));
+}
+function projectMemberCount(projectId){
+  const ids=new Set(projectMemberships.filter(pm=>pm.project_id===projectId).map(pm=>pm.user_id));
+  teamMembers.filter(m=>m.status==='active' && m.role==='admin' && m.userId).forEach(m=>ids.add(m.userId));
+  return ids.size;
+}
+function syncNewTaskButtons(){
+  const allowed=canCreateAnyTask();
+  ['sideNewTaskBtn','topNewTaskBtn'].forEach(id=>{
+    const btn=document.getElementById(id); if(!btn)return;
+    btn.disabled=!allowed;
+    btn.title=allowed?'':(lang==='ar'?'لا تملك صلاحية إنشاء مهام في المشاريع المتاحة':'You do not have permission to create tasks in available projects');
+  });
+}
 
 /* ================= STATE ================= */
 let activeNav = "tasks";
@@ -2750,6 +2849,7 @@ function applyChrome(){
   renderWorkspaceBrand();
   document.getElementById('newTaskBtnLabel1').textContent = t('newTask');
   document.getElementById('newTaskBtnLabel2').textContent = t('newTask');
+  syncNewTaskButtons();
   document.getElementById('sideSearch').placeholder = t('quickSearch');
   document.getElementById('topSearch').placeholder = t('searchTop');
   applyCurrentUserProfile();
@@ -3705,6 +3805,63 @@ function disconnectIntegration(id){
 }
 
 /* ================= TEAM & PERMISSIONS MODULE ================= */
+function projectAccessSectionHtml(){
+  const cards=projects.map(p=>{
+    const role=projectRoleFor(p.id);
+    const canManage=canManageProjectClient(p.id);
+    return `<div class="project-access-card">
+      <div class="project-access-icon"><svg><use href="#i-layers"/></svg></div>
+      <div class="project-access-copy"><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.description|| (lang==='ar'?'إدارة وصول الفريق وصلاحيات المهام':'Manage team access and task permissions'))}</span><span class="project-role-pill"><svg style="width:11px;height:11px"><use href="#i-shield"/></svg>${projectRoleLabel(role)}</span></div>
+      <div class="project-access-actions">${canManage?`<button class="chip-btn" style="padding:7px 10px;font-size:11.5px" onclick="openProjectAccessModal('${p.id}')">${lang==='ar'?'إدارة الوصول':'Manage access'}</button>`:''}</div>
+    </div>`;
+  }).join('');
+  return `<div class="section-card" style="padding:16px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px"><div><h3 style="font-size:15px">${lang==='ar'?'صلاحيات المشاريع':'Project permissions'}</h3><p style="font-size:12px;color:var(--muted);margin:5px 0 0;line-height:1.7">${lang==='ar'?'كل مشروع يحدد من يستطيع رؤيته، إنشاء وتعديل المهام، ومن يملك صلاحية الإدارة والحذف.':'Each project controls who can see it, create/edit tasks, and who can manage access or delete tasks.'}</p></div></div>
+    <div class="project-access-grid">${cards||`<div class="empty-mini">${lang==='ar'?'لا توجد مشاريع متاحة':'No accessible projects'}</div>`}</div>
+    <div class="permission-note"><svg><use href="#i-shield"/></svg><span>${lang==='ar'?'<b>مدير المشروع:</b> إدارة الأعضاء وإنشاء وتعديل وحذف المهام. <b>المحرر:</b> إنشاء وتعديل المهام. <b>المشاهد:</b> عرض المهام والتعليق فقط.':'<b>Project manager:</b> manages members and can create, edit, and delete tasks. <b>Editor:</b> creates and edits tasks. <b>Viewer:</b> views tasks and comments only.'}</span></div>
+  </div>`;
+}
+function projectAccessModalHtml(projectId){
+  const p=projects.find(x=>x.id===projectId); if(!p)return '';
+  const actorAdmin=currentUserRole==='admin';
+  const actorManager=canManageProjectClient(projectId);
+  const rows=assignableMembers().map(m=>{
+    const workspaceAdmin=m.role==='admin';
+    const role=projectRoleFor(projectId,m.userId);
+    const protectedManager=!actorAdmin && role==='manager';
+    const disabled=workspaceAdmin || !actorManager || protectedManager;
+    let options=`<option value="" ${!role?'selected':''}>${lang==='ar'?'بدون وصول':'No access'}</option><option value="viewer" ${role==='viewer'?'selected':''}>${projectRoleLabel('viewer')}</option><option value="editor" ${role==='editor'?'selected':''}>${projectRoleLabel('editor')}</option>`;
+    if(actorAdmin || role==='manager') options+=`<option value="manager" ${role==='manager'?'selected':''}>${projectRoleLabel('manager')}</option>`;
+    if(workspaceAdmin) options=`<option selected value="manager">${projectRoleLabel('admin')}</option>`;
+    return `<div class="project-member-row"><div class="project-member-person">${memberAvatarHtml(m,32)}<div class="project-member-person-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}${protectedManager&&!workspaceAdmin?(lang==='ar'?' · يتطلب مسؤول مساحة العمل':' · Workspace admin required'):''}</span></div></div><select class="project-role-select" ${disabled?'disabled':''} onchange="setProjectMemberAccess('${projectId}','${m.userId}',this.value)">${options}</select></div>`;
+  }).join('');
+  return `<div class="modal-head"><h3>${lang==='ar'?'إدارة وصول المشروع':'Manage project access'}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    <div class="access-modal-project"><b>${escapeHtml(p.name)}</b><span>${lang==='ar'?`أعضاء المشروع الحاليون: ${projectMemberCount(projectId)}. إزالة الوصول تزيل أيضًا إسنادات هذا العضو من مهام المشروع.`:`Current project members: ${projectMemberCount(projectId)}. Removing access also removes that user's task assignments in this project.`}</span></div>
+    <div class="project-member-list">${rows||`<div class="empty-mini">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active workspace members'}</div>`}</div>
+    <div class="permission-note"><svg><use href="#i-lock"/></svg><span>${actorAdmin?(lang==='ar'?'بصفتك مسؤول مساحة العمل يمكنك تعيين مديري المشاريع وتغيير جميع الأدوار.':'As a workspace admin, you can assign project managers and change all roles.'):(lang==='ar'?'مدير المشروع يمكنه إضافة المحررين والمشاهدين، بينما تعيين أو إزالة مدير مشروع يتطلب مسؤول مساحة العمل.':'Project managers can add editors/viewers. Assigning or removing another project manager requires a workspace admin.')}</span></div>`;
+}
+function openProjectAccessModal(projectId){
+  if(!canManageProjectClient(projectId)) return;
+  document.getElementById('addModalBody').innerHTML=projectAccessModalHtml(projectId);
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function setProjectMemberAccess(projectId,userId,role){
+  if(!canManageProjectClient(projectId)) return;
+  let res;
+  if(!role) res=await sb.rpc('tasky_remove_project_member',{p_project_id:projectId,p_user_id:userId});
+  else res=await sb.rpc('tasky_set_project_member',{p_project_id:projectId,p_user_id:userId,p_role:role});
+  if(res.error){
+    alert((lang==='ar'?'تعذّر تحديث صلاحية المشروع: ':'Could not update project access: ')+res.error.message);
+    openProjectAccessModal(projectId);
+    return;
+  }
+  await fetchProjectMemberships();
+  await fetchTasks();
+  renderNav(); renderAll();
+  if(activeNav==='team') renderModule();
+  openProjectAccessModal(projectId);
+  taskyToast(lang==='ar'?'تم تحديث صلاحية المشروع':'Project access updated',{tone:'success'});
+}
 function teamTemplate(){
   const plan = PLANS[currentPlan];
   const seatsLimit = plan.seats;
@@ -3715,6 +3872,7 @@ function teamTemplate(){
   const reservedSeats = activeMembers.length + pendingMembers.length;
   const seatsLeft = seatsLimit===Infinity ? '∞' : Math.max(0, seatsLimit-reservedSeats);
   const statusLabel = m => m.status==='active' ? (lang==='ar'?'نشط':'Active') : (lang==='ar'?'بانتظار القبول':'Pending');
+  if(currentUserRole!=='admin') return projectAccessSectionHtml();
   const rows = teamMembers.map(m => `
     <tr>
       <td>
@@ -3753,6 +3911,7 @@ function teamTemplate(){
         <tbody>${rows || `<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:24px">${lang==='ar'?'ما فيه أعضاء بعد':'No members yet'}</td></tr>`}</tbody>
       </table>
     </div>
+    ${projectAccessSectionHtml()}
     <div class="security-banner"><svg><use href="#i-shield"/></svg><span><b>${t('role_admin')}:</b> ${t('roleAdminDesc')}<br><b>${t('role_member')}:</b> ${t('roleMemberDesc')}</span></div>`;
 }
 async function changeRole(id, role){
@@ -4150,34 +4309,45 @@ async function submitAddProject(e){
     position: nextPosition
   }).select().single();
   if(error){ console.error('تعذّر إنشاء المشروع', error); alert(lang==='ar'?'تعذّر إنشاء المشروع، حاول مرة ثانية':'Could not create project. Please try again.'); return; }
-  projects.push(data);
-  activeProjectId = data.id;
   closeAddModal();
+  await fetchProjects();
+  await fetchProjectMemberships();
+  activeProjectId = data.id;
   setActiveProject(data.id);
+  if(canManageProjectClient(data.id)) taskyToast(lang==='ar'?'تم إنشاء المشروع وأصبحت مديره':'Project created; you are its manager',{tone:'success'});
 }
 
 /* ================= ADD TASK MODAL ================= */
-function createAssigneePickerHtml(selectedIds=[], {prefix='newAssignee', onChange=null}={}){
-  const members = assignableMembers();
+function createAssigneePickerHtml(selectedIds=[], {prefix='newAssignee', onChange=null, members=null, disabled=false}={}){
+  members = members || assignableMembers();
   if(!members.length) return `<div class="empty-mini">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active members'}</div>`;
   return `<div class="assignee-picker">${members.map(m=>{
     const checked = selectedIds.includes(m.userId);
     const handler = onChange ? `onchange="${onChange}('${m.userId}',this.checked)"` : '';
-    return `<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" ${checked?'checked':''} value="${m.userId}" data-assignee-box="${prefix}" ${handler}></label>`;
+    return `<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" ${checked?'checked':''} value="${m.userId}" data-assignee-box="${prefix}" ${handler} ${disabled?'disabled':''}></label>`;
   }).join('')}</div>`;
 }
+function renderNewTaskAssignees(projectId){
+  const box=document.getElementById('newTaskAssigneePicker'); if(!box)return;
+  box.innerHTML=createAssigneePickerHtml([], {prefix:'newAssignee',members:projectAssignableMembers(projectId)});
+}
 function openAddModal(){
-  if(!projects.length){ openProjectModal(); return; }
+  const permittedProjects=projects.filter(p=>canCreateTaskInProject(p.id));
+  if(!permittedProjects.length){
+    alert(lang==='ar'?'لا تملك صلاحية إنشاء مهام في أي مشروع متاح. اطلب من مدير المشروع منحك دور محرر أو مدير.':'You do not have permission to create tasks in any available project. Ask a project manager for Editor or Manager access.');
+    return;
+  }
+  const initialProject=permittedProjects.some(p=>p.id===activeProjectId)?activeProjectId:permittedProjects[0].id;
   const projectLabel = lang==='ar' ? 'المشروع' : 'Project';
   document.getElementById('addModalBody').innerHTML = `
     <div class="modal-head"><h3>${t('modalNewTask')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
     <form onsubmit="submitAddTask(event)">
       <div class="field"><label>${t('fieldTitle')}</label><input id="newTitle" required placeholder="${t('fieldTitlePh')}"></div>
-      <div class="field"><label>${projectLabel}</label><select id="newProject">${projects.map(p=>`<option value="${p.id}" ${p.id===activeProjectId?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>${projectLabel}</label><select id="newProject" onchange="renderNewTaskAssignees(this.value)">${permittedProjects.map(p=>`<option value="${p.id}" ${p.id===initialProject?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
       <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="newPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
       <div class="field"><label>${t('fieldSection')}</label><select id="newTag">${Object.keys(TAG_META).map(tg=>`<option value="${tg}">${t('tag_'+tg)}</option>`).join('')}</select></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="newStart" type="date"></div><div class="field"><label>${t('fieldDue')}</label><input id="newDue" type="date"></div></div>
-      <div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label>${createAssigneePickerHtml([], {prefix:'newAssignee'})}<small style="color:var(--muted);line-height:1.6">${lang==='ar'?'يمكن إسناد المهمة لأكثر من شخص. أول شخص محدد يصبح المسؤول الرئيسي ويمكن تغييره لاحقًا.':'A task can have multiple assignees. The first selected person becomes lead and can be changed later.'}</small></div>
+      <div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label><div id="newTaskAssigneePicker">${createAssigneePickerHtml([], {prefix:'newAssignee',members:projectAssignableMembers(initialProject)})}</div><small style="color:var(--muted);line-height:1.6">${lang==='ar'?'تظهر هنا فقط الأسماء التي لديها وصول لهذا المشروع. أول شخص محدد يصبح المسؤول الرئيسي ويمكن تغييره لاحقًا.':'Only people with access to this project appear here. The first selected person becomes lead and can be changed later.'}</small></div>
       <button type="submit" class="submit-btn">${t('submitAddTask')(t('col_todo'))}</button>
     </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
@@ -4188,6 +4358,7 @@ async function submitAddTask(e){
   const title = document.getElementById('newTitle').value.trim();
   if(!title) return;
   const projectId = document.getElementById('newProject').value;
+  if(!canCreateTaskInProject(projectId)){ alert(lang==='ar'?'لا تملك صلاحية إنشاء مهام في هذا المشروع':'You do not have permission to create tasks in this project'); return; }
   const tag = document.getElementById('newTag').value;
   const priority = document.getElementById('newPriority').value;
   const startDate = document.getElementById('newStart').value || null;
@@ -4275,21 +4446,23 @@ function taskLeadOptions(x){
 function renderSubtasks(x){
   const items=x.subtaskItems||[];
   const done=items.filter(s=>s.is_completed).length, total=items.length, pct=total?Math.round(done/total*100):0;
+  const canEdit=canEditTaskClient(x);
+  const members=projectAssignableMembers(x.projectId);
   return `
     ${total?`<div class="subtask-progress"><div class="progress-bar"><span style="width:${pct}%"></span></div><span>${done}/${total} · ${pct}%</span></div>`:''}
     <div class="subtask-list">${items.length?items.map(s=>`
       <div class="subtask-item">
         <div class="subtask-main-row">
-          <input type="checkbox" ${s.is_completed?'checked':''} onchange="toggleSubtaskComplete('${x.id}','${s.id}',this.checked)">
+          <input type="checkbox" ${s.is_completed?'checked':''} ${canEdit?'':'disabled'} onchange="toggleSubtaskComplete('${x.id}','${s.id}',this.checked)">
           <div class="subtask-title ${s.is_completed?'done':''}">${escapeHtml(s.title)}</div>
           ${assigneeStackHtml(s.assignees,23,3)}
-          <button class="subtask-delete" onclick="deleteSubtask('${x.id}','${s.id}')" title="${lang==='ar'?'حذف':'Delete'}"><svg style="width:14px;height:14px"><use href="#i-x"/></svg></button>
+          ${canEdit?`<button class="subtask-delete" onclick="deleteSubtask('${x.id}','${s.id}')" title="${lang==='ar'?'حذف':'Delete'}"><svg style="width:14px;height:14px"><use href="#i-x"/></svg></button>`:''}
         </div>
         <details class="subtask-assignees"><summary><svg style="width:13px;height:13px"><use href="#i-users"/></svg>${lang==='ar'?'مسؤولو المهمة الفرعية':'Subtask assignees'}</summary>
-          ${createAssigneePickerHtml((s.assignees||[]).map(m=>m.userId),{prefix:'subtask-'+s.id}).replaceAll('data-assignee-box="subtask-'+s.id+'"',`data-assignee-box="subtask-${s.id}" onchange="toggleSubtaskAssignee('${x.id}','${s.id}',this.value,this.checked)"`)}
+          ${createAssigneePickerHtml((s.assignees||[]).map(m=>m.userId),{prefix:'subtask-'+s.id,members,disabled:!canEdit}).replaceAll('data-assignee-box="subtask-'+s.id+'"',`data-assignee-box="subtask-${s.id}" onchange="toggleSubtaskAssignee('${x.id}','${s.id}',this.value,this.checked)"`)}
         </details>
       </div>`).join(''):`<div class="empty-mini">${lang==='ar'?'لا توجد مهام فرعية بعد':'No subtasks yet'}</div>`}</div>
-    <div class="subtask-add"><input id="newSubtaskTitle" placeholder="${lang==='ar'?'أضف مهمة فرعية...':'Add a subtask...'}" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask('${x.id}')}"/><button onclick="addSubtask('${x.id}')">${lang==='ar'?'إضافة':'Add'}</button></div>`;
+    ${canEdit?`<div class="subtask-add"><input id="newSubtaskTitle" placeholder="${lang==='ar'?'أضف مهمة فرعية...':'Add a subtask...'}" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask('${x.id}')}"/><button onclick="addSubtask('${x.id}')">${lang==='ar'?'إضافة':'Add'}</button></div>`:''}`;
 }
 
 function regexEscape(value){ return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
@@ -4332,7 +4505,8 @@ function handleCommentMentionInput(textarea){
   const state=mentionSearchFromTextarea(textarea);
   if(!state){ hideCommentMentionMenu(); return; }
   activeMentionRange=state;
-  const members=assignableMembers().filter(m=>m.userId!==currentUserId);
+  const mentionTask=tasks.find(t=>t.id===currentDetailTaskId);
+  const members=projectAssignableMembers(mentionTask?.projectId).filter(m=>m.userId!==currentUserId);
   const needle=state.needle;
   activeMentionCandidates=members.filter(m=>{
     if(!needle) return true;
@@ -4371,39 +4545,50 @@ function renderComments(){
   }).join('');
   return `${items||`<div class="empty-mini">${lang==='ar'?'ابدأ أول نقاش على هذه المهمة':'Start the first discussion on this task'}</div>`}<div class="comment-form"><div class="comment-compose"><div id="commentMentionMenu" class="mention-menu hidden"></div><textarea id="newTaskComment" oninput="handleCommentMentionInput(this)" onkeydown="handleCommentMentionKeydown(event)" onblur="setTimeout(hideCommentMentionMenu,140)" placeholder="${lang==='ar'?'اكتب تعليقًا... استخدم @ للإشارة إلى عضو':'Write a comment... use @ to mention a teammate'}"></textarea></div><button onclick="addTaskComment(currentDetailTaskId)">${lang==='ar'?'إرسال':'Send'}</button></div>`;
 }
-function renderAttachments(){
-  const items=detailAttachments.map(a=>`<div class="attachment-item"><div class="attachment-icon"><svg style="width:17px;height:17px"><use href="#i-file"/></svg></div><div class="attachment-copy"><b>${escapeHtml(a.file_name)}</b><span>${formatBytes(a.file_size)} · ${escapeHtml(formatDateTime(a.created_at))}</span></div><button class="attachment-action" onclick="openTaskAttachment('${a.id}')">${lang==='ar'?'فتح':'Open'}</button><button class="attachment-action" onclick="deleteTaskAttachment('${a.id}')">${lang==='ar'?'حذف':'Delete'}</button></div>`).join('');
-  return `${items||`<div class="empty-mini">${lang==='ar'?'لا توجد مرفقات':'No attachments'}</div>`}<label class="attachment-upload"><svg style="width:18px;height:18px;color:var(--blue)"><use href="#i-upload"/></svg><span style="font-size:11.5px;color:var(--muted)">${lang==='ar'?'إضافة مرفق (حتى 10MB)':'Add attachment (up to 10MB)'}</span><input type="file" onchange="uploadTaskAttachment(currentDetailTaskId,this)"></label>`;
+function renderAttachments(task=null){
+  const canEdit=task?canEditTaskClient(task):true;
+  const items=detailAttachments.map(a=>`<div class="attachment-item"><div class="attachment-icon"><svg style="width:17px;height:17px"><use href="#i-file"/></svg></div><div class="attachment-copy"><b>${escapeHtml(a.file_name)}</b><span>${formatBytes(a.file_size)} · ${escapeHtml(formatDateTime(a.created_at))}</span></div><button class="attachment-action" onclick="openTaskAttachment('${a.id}')">${lang==='ar'?'فتح':'Open'}</button>${canEdit?`<button class="attachment-action" onclick="deleteTaskAttachment('${a.id}')">${lang==='ar'?'حذف':'Delete'}</button>`:''}</div>`).join('');
+  return `${items||`<div class="empty-mini">${lang==='ar'?'لا توجد مرفقات':'No attachments'}</div>`}${canEdit?`<label class="attachment-upload"><svg style="width:18px;height:18px;color:var(--blue)"><use href="#i-upload"/></svg><span style="font-size:11.5px;color:var(--muted)">${lang==='ar'?'إضافة مرفق (حتى 10MB)':'Add attachment (up to 10MB)'}</span><input type="file" onchange="uploadTaskAttachment(currentDetailTaskId,this)"></label>`:''}`;
 }
+
 function renderActivity(){
   return detailActivity.length ? detailActivity.map(a=>`<div class="activity-item"><span class="activity-dot"></span><div class="activity-copy">${escapeHtml(activityText(a))}<time>${escapeHtml(formatDateTime(a.created_at))}</time></div></div>`).join('') : `<div class="empty-mini">${lang==='ar'?'سيظهر سجل تغييرات المهمة هنا':'Task changes will appear here'}</div>`;
 }
 function renderTaskDetailModal(id){
   const x=tasks.find(z=>z.id===id); if(!x) return;
   const done=x.subtaskItems?.filter(s=>s.is_completed).length||0, total=x.subtaskItems?.length||0;
+  const canEdit=canEditTaskClient(x), canDelete=canDeleteTaskClient(x);
+  const projectRole=projectRoleFor(x.projectId);
+  const projectMembers=projectAssignableMembers(x.projectId);
+  const editableProjects=projects.filter(p=>canCreateTaskInProject(p.id));
   const labels=lang==='ar'?{desc:'الوصف',sub:'المهام الفرعية',comments:'التعليقات',files:'المرفقات',activity:'سجل النشاط',status:'الحالة',priority:'الأولوية',project:'المشروع',start:'تاريخ البداية',due:'تاريخ الاستحقاق',assignees:'المسؤولون',lead:'المسؤول الرئيسي'}:{desc:'Description',sub:'Subtasks',comments:'Comments',files:'Attachments',activity:'Activity',status:'Status',priority:'Priority',project:'Project',start:'Start date',due:'Due date',assignees:'Assignees',lead:'Lead assignee'};
+  const ro=canEdit?'':'disabled';
+  const titleAction=canEdit?`onblur="saveTaskField('${x.id}','title',this.value,'${lang==='ar'?'العنوان':'title'}')"`:'readonly';
+  const descAction=canEdit?`onblur="saveTaskField('${x.id}','description',this.value,'${labels.desc}')"`:'readonly';
   document.getElementById('detailModalBody').innerHTML=`<div class="task-detail-shell">
-    <div class="task-detail-head"><div class="task-detail-head-main"><div class="task-detail-kicker">${tagChip(x.tag)}${taskPriorityPill(x)}${total?`<span class="detail-save-hint">${done}/${total} · ${Math.round(done/total*100)}%</span>`:''}</div><input class="task-title-input" value="${escapeHtml(taskTitle(x))}" onblur="saveTaskField('${x.id}','title',this.value,'${lang==='ar'?'العنوان':'title'}')"></div><button class="modal-close" onclick="closeDetailModal()"><svg style="width:19px;height:19px"><use href="#i-x"/></svg></button></div>
+    <div class="task-detail-head"><div class="task-detail-head-main"><div class="task-detail-kicker">${tagChip(x.tag)}${taskPriorityPill(x)}${total?`<span class="detail-save-hint">${done}/${total} · ${Math.round(done/total*100)}%</span>`:''}<span class="project-role-pill">${projectRoleLabel(projectRole)}</span></div><input class="task-title-input" value="${escapeHtml(taskTitle(x))}" ${titleAction}></div><button class="modal-close" onclick="closeDetailModal()"><svg style="width:19px;height:19px"><use href="#i-x"/></svg></button></div>
+    ${canEdit?'':`<div class="readonly-banner"><svg><use href="#i-lock"/></svg><span>${lang==='ar'?'لديك صلاحية مشاهدة هذا المشروع والتعليق، لكن تعديل المهمة يتطلب دور محرر أو مدير مشروع.':'You can view and comment on this project. Editing tasks requires Editor or Project Manager access.'}</span></div>`}
     <div class="task-detail-grid">
       <div class="task-detail-main">
-        <section class="task-detail-section"><h4>${labels.desc}<span class="detail-save-hint">${lang==='ar'?'يحفظ تلقائيًا':'Auto-saved'}</span></h4><textarea class="task-description" placeholder="${lang==='ar'?'اكتب وصف المهمة، المخرجات المطلوبة، أو أي ملاحظات...':'Describe the task, expected outcome, or notes...'}" onblur="saveTaskField('${x.id}','description',this.value,'${labels.desc}')">${escapeHtml(x.description||'')}</textarea></section>
+        <section class="task-detail-section"><h4>${labels.desc}<span class="detail-save-hint">${canEdit?(lang==='ar'?'يحفظ تلقائيًا':'Auto-saved'):(lang==='ar'?'للقراءة فقط':'Read only')}</span></h4><textarea class="task-description" placeholder="${lang==='ar'?'اكتب وصف المهمة، المخرجات المطلوبة، أو أي ملاحظات...':'Describe the task, expected outcome, or notes...'}" ${descAction}>${escapeHtml(x.description||'')}</textarea></section>
         <section class="task-detail-section"><h4>${labels.sub}</h4>${renderSubtasks(x)}</section>
         <section class="task-detail-section"><h4>${labels.comments}<span class="detail-save-hint">${detailComments.length}</span></h4><div class="comment-list">${renderComments()}</div></section>
-        <section class="task-detail-section"><h4>${labels.files}</h4><div class="attachment-list">${renderAttachments()}</div></section>
+        <section class="task-detail-section"><h4>${labels.files}</h4><div class="attachment-list">${renderAttachments(x)}</div></section>
         <section class="task-detail-section"><h4>${labels.activity}</h4><div class="activity-list">${renderActivity()}</div></section>
       </div>
       <aside class="task-detail-side">
-        <div class="detail-field"><label>${labels.status}</label><select class="detail-control" onchange="saveTaskField('${x.id}','col',this.value,'${labels.status}')">${COLUMNS.map(c=>`<option value="${c.id}" ${x.col===c.id?'selected':''}>${t(c.key)}</option>`).join('')}</select></div>
-        <div class="detail-field"><label>${labels.priority}</label><select class="detail-control" onchange="saveTaskField('${x.id}','priority',this.value,'${labels.priority}')"><option value="low" ${x.priority==='low'?'selected':''}>${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" ${x.priority==='medium'?'selected':''}>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high" ${x.priority==='high'?'selected':''}>${lang==='ar'?'عالية':'High'}</option><option value="urgent" ${x.priority==='urgent'?'selected':''}>${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
-        <div class="detail-field"><label>${labels.project}</label><select class="detail-control" onchange="saveTaskField('${x.id}','projectId',this.value,'${labels.project}')">${projects.map(p=>`<option value="${p.id}" ${x.projectId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
-        <div class="detail-field"><label>${labels.start}</label><input class="detail-control" type="date" value="${x.startDate||''}" onchange="saveTaskField('${x.id}','startDate',this.value,'${labels.start}')"></div>
-        <div class="detail-field"><label>${labels.due}</label><input class="detail-control" type="date" value="${x.dueDate||''}" onchange="saveTaskField('${x.id}','dueDate',this.value,'${labels.due}')"></div>
-        <div class="task-detail-section"><h4>${labels.assignees}<span>${assigneeStackHtml(x.assignees,25,4)}</span></h4><div class="assignee-picker">${assignableMembers().map(m=>`<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div>${x.leadAssigneeId===m.userId?'<span class="lead-badge">Lead</span>':''}<input type="checkbox" ${x.assignees.some(a=>a.userId===m.userId)?'checked':''} onchange="toggleTaskAssignee('${x.id}','${m.userId}',this.checked)"></label>`).join('')}</div></div>
-        <div class="detail-field"><label>${labels.lead}</label><select class="detail-control" onchange="setLeadAssignee('${x.id}',this.value)">${taskLeadOptions(x)}</select></div>
-        <button class="danger-link" onclick="deleteTask('${x.id}')">${lang==='ar'?'حذف المهمة':'Delete task'}</button>
+        <div class="detail-field"><label>${labels.status}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','col',this.value,'${labels.status}')">${COLUMNS.map(c=>`<option value="${c.id}" ${x.col===c.id?'selected':''}>${t(c.key)}</option>`).join('')}</select></div>
+        <div class="detail-field"><label>${labels.priority}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','priority',this.value,'${labels.priority}')"><option value="low" ${x.priority==='low'?'selected':''}>${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" ${x.priority==='medium'?'selected':''}>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high" ${x.priority==='high'?'selected':''}>${lang==='ar'?'عالية':'High'}</option><option value="urgent" ${x.priority==='urgent'?'selected':''}>${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
+        <div class="detail-field"><label>${labels.project}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','projectId',this.value,'${labels.project}')">${(canEdit?editableProjects:projects.filter(p=>p.id===x.projectId)).map(p=>`<option value="${p.id}" ${x.projectId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+        <div class="detail-field"><label>${labels.start}</label><input class="detail-control" ${ro} type="date" value="${x.startDate||''}" onchange="saveTaskField('${x.id}','startDate',this.value,'${labels.start}')"></div>
+        <div class="detail-field"><label>${labels.due}</label><input class="detail-control" ${ro} type="date" value="${x.dueDate||''}" onchange="saveTaskField('${x.id}','dueDate',this.value,'${labels.due}')"></div>
+        <div class="task-detail-section"><h4>${labels.assignees}<span>${assigneeStackHtml(x.assignees,25,4)}</span></h4><div class="assignee-picker">${projectMembers.map(m=>`<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div>${x.leadAssigneeId===m.userId?'<span class="lead-badge">Lead</span>':''}<input type="checkbox" ${x.assignees.some(a=>a.userId===m.userId)?'checked':''} ${ro} onchange="toggleTaskAssignee('${x.id}','${m.userId}',this.checked)"></label>`).join('')}</div></div>
+        <div class="detail-field"><label>${labels.lead}</label><select class="detail-control" ${ro} onchange="setLeadAssignee('${x.id}',this.value)">${taskLeadOptions(x)}</select></div>
+        ${canDelete?`<button class="danger-link" onclick="deleteTask('${x.id}')">${lang==='ar'?'حذف المهمة':'Delete task'}</button>`:''}
       </aside>
     </div></div>`;
 }
+
 async function openDetailModal(id){
   pendingCommentMentions.clear(); hideCommentMentionMenu();
   currentDetailTaskId=id;
@@ -4418,6 +4603,7 @@ async function refreshTaskDetail(taskId, reloadExtras=true){
 }
 async function saveTaskField(taskId, field, value, label=''){
   const x=tasks.find(t=>t.id===taskId); if(!x) return;
+  if(!canEditTaskClient(x)){ taskyToast(lang==='ar'?'لا تملك صلاحية تعديل هذه المهمة':'You do not have permission to edit this task',{tone:'warning'}); return; }
   const map={title:'title_ar',description:'description',priority:'priority',projectId:'project_id',startDate:'start_date',dueDate:'due_date',col:'col'};
   const dbField=map[field]; if(!dbField) return;
   let clean=value; if(['description','startDate','dueDate'].includes(field) && !clean) clean=null;
@@ -4432,6 +4618,7 @@ async function saveTaskField(taskId, field, value, label=''){
 }
 async function toggleTaskAssignee(taskId,userId,checked){
   const x=tasks.find(t=>t.id===taskId); if(!x) return;
+  if(!canEditTaskClient(x)) return;
   if(checked){
     const isLead=!x.assignees.length;
     const {error}=await sb.from('task_assignees').insert({task_id:taskId,workspace_id:currentWorkspaceId,user_id:userId,is_lead:isLead,assigned_by:currentUserId});
@@ -4455,6 +4642,7 @@ async function syncLegacyLead(taskId,userId){
   await sb.from('tasks').update({assignee_id:userId||null,assignee_initials:m?.initials||null,assignee_color:m?.color||null,updated_at:new Date().toISOString()}).eq('id',taskId);
 }
 async function setLeadAssignee(taskId,userId,refresh=true){
+  const task=tasks.find(t=>t.id===taskId); if(!canEditTaskClient(task)) return;
   await sb.from('task_assignees').update({is_lead:false}).eq('task_id',taskId).eq('workspace_id',currentWorkspaceId);
   if(userId){
     const {error}=await sb.from('task_assignees').update({is_lead:true}).eq('task_id',taskId).eq('user_id',userId);
@@ -4465,6 +4653,7 @@ async function setLeadAssignee(taskId,userId,refresh=true){
   if(refresh) await refreshTaskDetail(taskId,true);
 }
 async function addSubtask(taskId){
+  if(!canEditTaskClient(tasks.find(t=>t.id===taskId))) return;
   const input=document.getElementById('newSubtaskTitle'); const title=input?.value.trim(); if(!title)return;
   const x=tasks.find(t=>t.id===taskId); const position=(x?.subtaskItems?.length||0)+1;
   const {error}=await sb.from('subtasks').insert({workspace_id:currentWorkspaceId,task_id:taskId,title,position,created_by:currentUserId});
@@ -4473,17 +4662,20 @@ async function addSubtask(taskId){
   await refreshTaskDetail(taskId,true);
 }
 async function toggleSubtaskComplete(taskId,subtaskId,checked){
+  if(!canEditTaskClient(tasks.find(t=>t.id===taskId))) return;
   const {error}=await sb.from('subtasks').update({is_completed:checked}).eq('id',subtaskId).eq('workspace_id',currentWorkspaceId);
   if(error){alert(error.message);return;}
   await logTaskActivity(taskId,checked?'subtask_completed':'subtask_reopened',{subtask_id:subtaskId});
   await refreshTaskDetail(taskId,true);
 }
 async function deleteSubtask(taskId,subtaskId){
+  if(!canEditTaskClient(tasks.find(t=>t.id===taskId))) return;
   const ok=await taskyConfirm(lang==='ar'?'حذف المهمة الفرعية؟':'Delete this subtask?',{title:lang==='ar'?'حذف مهمة فرعية':'Delete subtask',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
   const {error}=await sb.from('subtasks').delete().eq('id',subtaskId).eq('workspace_id',currentWorkspaceId); if(error){alert(error.message);return;}
   await refreshTaskDetail(taskId,true);
 }
 async function toggleSubtaskAssignee(taskId,subtaskId,userId,checked){
+  if(!canEditTaskClient(tasks.find(t=>t.id===taskId))) return;
   const q=checked?sb.from('subtask_assignees').insert({subtask_id:subtaskId,workspace_id:currentWorkspaceId,user_id:userId,assigned_by:currentUserId}):sb.from('subtask_assignees').delete().eq('subtask_id',subtaskId).eq('user_id',userId);
   const {error}=await q; if(error){alert(error.message);return;}
   await logTaskActivity(taskId,checked?'subtask_assignee_added':'subtask_assignee_removed',{subtask_id:subtaskId,user_id:userId});
@@ -4505,6 +4697,7 @@ async function addTaskComment(taskId){
   await logTaskActivity(taskId,'comment_added',{mentions:mentionIds.length}); await refreshTaskDetail(taskId,true);
 }
 async function uploadTaskAttachment(taskId,input){
+  if(!canEditTaskClient(tasks.find(t=>t.id===taskId))) return;
   const file=input?.files?.[0]; if(!file)return; if(file.size>10*1024*1024){alert(lang==='ar'?'الحد الأقصى للمرفق 10MB':'Attachment limit is 10MB');input.value='';return;}
   const safe=(file.name||'file').replace(/[^a-zA-Z0-9._-]+/g,'_'); const path=`${currentWorkspaceId}/${taskId}/${crypto.randomUUID()}_${safe}`;
   const uploaded=await sb.storage.from('task-attachments').upload(path,file,{upsert:false,contentType:file.type||undefined});
@@ -4517,11 +4710,12 @@ async function openTaskAttachment(id){
   const a=detailAttachments.find(x=>x.id===id); if(!a)return; const {data,error}=await sb.storage.from('task-attachments').createSignedUrl(a.storage_path,120); if(error){alert(error.message);return;} window.open(data.signedUrl,'_blank','noopener');
 }
 async function deleteTaskAttachment(id){
-  const a=detailAttachments.find(x=>x.id===id); if(!a)return; const ok=await taskyConfirm(lang==='ar'?`حذف المرفق «${a.file_name}»؟`:`Delete attachment “${a.file_name}”?`,{title:lang==='ar'?'حذف مرفق':'Delete attachment',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
+  const a=detailAttachments.find(x=>x.id===id); if(!a)return;
+  if(!canEditTaskClient(tasks.find(t=>t.id===a.task_id))) return; const ok=await taskyConfirm(lang==='ar'?`حذف المرفق «${a.file_name}»؟`:`Delete attachment “${a.file_name}”?`,{title:lang==='ar'?'حذف مرفق':'Delete attachment',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
   const rm=await sb.storage.from('task-attachments').remove([a.storage_path]); if(rm.error){alert(rm.error.message);return;} const del=await sb.from('task_attachments').delete().eq('id',id); if(del.error){alert(del.error.message);return;} await logTaskActivity(a.task_id,'attachment_removed',{file_name:a.file_name}); await refreshTaskDetail(a.task_id,true);
 }
 async function deleteTask(taskId){
-  const x=tasks.find(t=>t.id===taskId); const ok=await taskyConfirm(lang==='ar'?`حذف المهمة «${taskTitle(x)}» وكل المهام الفرعية والتعليقات والمرفقات؟`:`Delete “${taskTitle(x)}” and all subtasks, comments, and attachments?`,{title:lang==='ar'?'حذف المهمة':'Delete task',tone:'danger',confirmText:lang==='ar'?'حذف نهائي':'Delete'}); if(!ok)return;
+  const x=tasks.find(t=>t.id===taskId); if(!canDeleteTaskClient(x)){ taskyToast(lang==='ar'?'حذف المهمة يتطلب مدير مشروع أو مسؤول مساحة العمل':'Deleting tasks requires Project Manager or Workspace Admin access',{tone:'warning'}); return; } const ok=await taskyConfirm(lang==='ar'?`حذف المهمة «${taskTitle(x)}» وكل المهام الفرعية والتعليقات والمرفقات؟`:`Delete “${taskTitle(x)}” and all subtasks, comments, and attachments?`,{title:lang==='ar'?'حذف المهمة':'Delete task',tone:'danger',confirmText:lang==='ar'?'حذف نهائي':'Delete'}); if(!ok)return;
   const paths=detailAttachments.filter(a=>a.task_id===taskId).map(a=>a.storage_path); if(paths.length) await sb.storage.from('task-attachments').remove(paths);
   const {error}=await sb.from('tasks').delete().eq('id',taskId).eq('workspace_id',currentWorkspaceId); if(error){alert(error.message);return;} closeDetailModal(); await fetchTasks(); renderAll(); taskyToast(lang==='ar'?'تم حذف المهمة':'Task deleted',{tone:'success'});
 }
