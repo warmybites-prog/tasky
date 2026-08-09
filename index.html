@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V29.1: event guest invitations + RSVP + QR check-in + branded reports -->
+<!-- Tasky V30: real budgets + approval workflow + linked finance entries -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1312,6 +1312,35 @@
     .event-task-create-grid .field.full{grid-column:auto;}
   }
 
+
+  /* ---------------- V30 REAL BUDGETS ---------------- */
+  .budget-toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;}
+  .budget-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;}
+  .budget-card-v30{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:17px;display:flex;flex-direction:column;gap:12px;min-width:0;}
+  .budget-card-v30.over{border-color:color-mix(in srgb,var(--danger) 45%,var(--border));}
+  .budget-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;}
+  .budget-card-title{font-weight:800;font-size:15px;line-height:1.55;min-width:0;}
+  .budget-card-meta{font-size:11.5px;color:var(--muted);margin-top:3px;line-height:1.6;}
+  .budget-status-pill{display:inline-flex;align-items:center;padding:4px 9px;border-radius:999px;font-size:10.5px;font-weight:800;white-space:nowrap;background:var(--green-tint);color:var(--green);}
+  .budget-status-pill.draft{background:var(--amber-tint);color:#8A6A1E;}.budget-status-pill.closed{background:var(--paper);color:var(--muted);}
+  .budget-money-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;}
+  .budget-money-cell{background:var(--paper);border-radius:11px;padding:9px 10px;min-width:0;}
+  .budget-money-cell span{display:block;font-size:10px;color:var(--muted);margin-bottom:3px;}.budget-money-cell b{font-size:12.5px;white-space:nowrap;}
+  .budget-progress-v30{height:7px;background:var(--paper);border-radius:999px;overflow:hidden;}.budget-progress-v30 span{display:block;height:100%;background:var(--green);border-radius:inherit;}.budget-card-v30.over .budget-progress-v30 span{background:var(--danger);}
+  .budget-card-foot{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;font-size:11px;color:var(--muted);}
+  #budgetModalOverlay{z-index:108;} #budgetEntryModalOverlay{z-index:118;}
+  .budget-detail-modal{width:min(860px,94vw);max-height:min(88vh,820px);overflow:auto;}
+  .budget-action-modal{width:min(620px,94vw);max-height:min(88vh,760px);overflow:auto;}
+  .budget-detail-summary{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:4px 0 16px;}
+  .budget-detail-stat{background:var(--paper);border-radius:12px;padding:11px;}.budget-detail-stat span{display:block;color:var(--muted);font-size:10.5px}.budget-detail-stat b{display:block;font-size:14px;margin-top:3px;}
+  .budget-entry-list{display:flex;flex-direction:column;gap:8px;}
+  .budget-entry-row{border:1px solid var(--border);border-radius:12px;padding:11px 12px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;align-items:start;}
+  .budget-entry-desc{font-size:12.5px;font-weight:700;line-height:1.6;}.budget-entry-meta{font-size:10.5px;color:var(--muted);line-height:1.65;margin-top:3px;}
+  .budget-entry-amount{text-align:end;white-space:nowrap;font-weight:800;font-size:13px;}.budget-entry-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap;}
+  .budget-entry-status{font-size:10px;font-weight:800;border-radius:999px;padding:3px 7px;display:inline-flex;margin-top:4px;background:var(--amber-tint);color:#8A6A1E}.budget-entry-status.approved{background:var(--green-tint);color:var(--green)}.budget-entry-status.rejected{background:var(--danger-tint);color:var(--danger)}
+  .budget-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;}.budget-form-grid .field.full{grid-column:1/-1;}
+  @media(max-width:760px){.budget-grid{grid-template-columns:1fr}.budget-detail-summary{grid-template-columns:repeat(2,1fr)}.budget-form-grid{grid-template-columns:1fr}.budget-form-grid .field.full{grid-column:auto}.budget-money-grid{grid-template-columns:1fr 1fr}.budget-money-cell:last-child{grid-column:1/-1}.budget-entry-row{grid-template-columns:1fr}.budget-entry-amount{text-align:start}}
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="https://cdn.jsdelivr.net/gh/davidshimjs/qrcodejs/qrcode.min.js"></script>
@@ -1517,6 +1546,14 @@
 </div>
 
 
+
+<div id="budgetModalOverlay" class="overlay hidden" onclick="if(event.target===this) closeBudgetModal()">
+  <div class="modal budget-detail-modal" onclick="event.stopPropagation()" id="budgetModalBody"></div>
+</div>
+<div id="budgetEntryModalOverlay" class="overlay hidden" onclick="if(event.target===this) closeBudgetActionModal()">
+  <div class="modal budget-action-modal" onclick="event.stopPropagation()" id="budgetEntryModalBody"></div>
+</div>
+
 <div id="taskyToastStack" class="tasky-toast-stack" aria-live="polite" aria-atomic="false"></div>
 
 <div id="taskyDialogBackdrop" class="tasky-dialog-backdrop" aria-hidden="true">
@@ -1541,7 +1578,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V29.3'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V30'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1630,6 +1667,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchTasks();
   await fetchInventory();
   await fetchEvents();
+  await fetchBudgets();
   await fetchNotifications();
   await fetchPendingPlanRequest();
   initTaskRealtime();
@@ -1662,6 +1700,8 @@ function initTaskRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'workspace_events',filter},scheduleEventsRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'event_participants',filter},scheduleEventsRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'event_invitations',filter},scheduleEventsRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'workspace_budgets',filter},scheduleBudgetRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'budget_entries',filter},scheduleBudgetRefresh)
     .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
 }
 function scheduleTaskRealtimeRefresh(){
@@ -2528,12 +2568,10 @@ let eventInvitationRows = [];
 let eventsRealtimeTimer = null;
 let eventQrScanner = null;
 
-let budgets = [
-  { id: 1, ar:"التسويق الرقمي", en:"Digital Marketing", allocated: 200000, spent: 138000, color: "var(--blue)" },
-  { id: 2, ar:"الفعاليات", en:"Events", allocated: 150000, spent: 92000, color: "var(--blue-light)" },
-  { id: 3, ar:"المخزون والتوريد", en:"Inventory & Supply", allocated: 90000, spent: 81000, color: "var(--teal)" },
-  { id: 4, ar:"تطوير منصة تاسكي", en:"Tasky Platform Development", allocated: 40000, spent: 9000, color: "var(--green)" },
-];
+let budgets = [];
+let budgetEntries = [];
+let budgetRealtimeTimer = null;
+let currentBudgetId = null;
 
 let campaigns = [
   { id: 1, ar:"إعادة استهداف زوار الموقع الذين لم يكملوا الشراء", en:"Retarget site visitors who abandoned checkout", impact_ar:"+18% تحويل متوقع", impact_en:"+18% expected conversion", reason_ar:"بناءً على تحليل بيانات آخر 30 يومًا لسلوك الزوار.", reason_en:"Based on analysis of the last 30 days of visitor behavior.", applied: false },
@@ -3824,7 +3862,126 @@ async function deleteEvent(id){
 }
 
 /* ================= BUDGETS MODULE ================= */
+
+/* ================= V30 REAL BUDGETS ================= */
+function budgetStatusLabel(status){
+  const map=lang==='ar'?{draft:'مسودة',active:'نشطة',closed:'مغلقة'}:{draft:'Draft',active:'Active',closed:'Closed'};
+  return map[status]||status;
+}
+function budgetKindLabel(kind){
+  const map=lang==='ar'?{expense:'مصروف',income:'إيراد / استرداد',adjustment:'تسوية'}:{expense:'Expense',income:'Income / refund',adjustment:'Adjustment'};
+  return map[kind]||kind;
+}
+function budgetEntryStatusLabel(status){
+  const map=lang==='ar'?{pending:'بانتظار الاعتماد',approved:'معتمد',rejected:'مرفوض'}:{pending:'Pending approval',approved:'Approved',rejected:'Rejected'};
+  return map[status]||status;
+}
+function budgetById(id){return budgets.find(b=>b.id===id)||null;}
+function budgetEntriesFor(id){return budgetEntries.filter(e=>e.budgetId===id);}
+function budgetApprovedNet(id){
+  return budgetEntriesFor(id).filter(e=>e.status==='approved').reduce((sum,e)=>{
+    if(e.kind==='income') return sum-Number(e.amount||0);
+    return sum+Number(e.amount||0);
+  },0);
+}
+function budgetPendingAmount(id){return budgetEntriesFor(id).filter(e=>e.status==='pending'&&e.kind!=='income').reduce((s,e)=>s+Number(e.amount||0),0);}
+function budgetManagerName(b){return taskMemberById(b.ownerUserId)?.fullName || (lang==='ar'?'غير محدد':'Not assigned');}
+function canManageBudgetClient(b){return !!b && (currentUserRole==='admin'||b.ownerUserId===currentUserId);}
+function budgetPeriodLabel(b){
+  if(!b.periodStart&&!b.periodEnd)return lang==='ar'?'بدون فترة محددة':'No fixed period';
+  const f=d=>d?new Date(d+'T12:00:00').toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{year:'numeric',month:'short',day:'numeric'}):'—';
+  return `${f(b.periodStart)} — ${f(b.periodEnd)}`;
+}
 function budgetsTemplate(){
+  const totalAllocated=budgets.reduce((s,b)=>s+Number(b.allocated||0),0);
+  const totalUsed=budgets.reduce((s,b)=>s+Math.max(0,budgetApprovedNet(b.id)),0);
+  const totalPending=budgets.reduce((s,b)=>s+budgetPendingAmount(b.id),0);
+  const overCount=budgets.filter(b=>budgetApprovedNet(b.id)>Number(b.allocated||0)).length;
+  const cards=budgets.map((b,i)=>{
+    const used=budgetApprovedNet(b.id), allocated=Number(b.allocated||0), remaining=allocated-used, over=remaining<0, pct=allocated>0?Math.min(100,Math.round(Math.max(0,used)/allocated*100)):(used>0?100:0), pending=budgetEntriesFor(b.id).filter(e=>e.status==='pending').length;
+    return `<div class="budget-card-v30 ${over?'over':''}" onclick="openBudgetDetail('${b.id}')" style="cursor:pointer">
+      <div class="budget-card-head"><div style="min-width:0"><div class="budget-card-title">${escapeHtml(L(b,''))}</div><div class="budget-card-meta">${escapeHtml(b.category||'')} ${b.category?'· ':''}${escapeHtml(budgetPeriodLabel(b))}<br>${lang==='ar'?'المسؤول':'Owner'}: ${escapeHtml(budgetManagerName(b))}</div></div><span class="budget-status-pill ${b.status}">${budgetStatusLabel(b.status)}</span></div>
+      <div class="budget-money-grid"><div class="budget-money-cell"><span>${lang==='ar'?'المعتمد':'Allocated'}</span><b>${fmtMoney(allocated)}</b></div><div class="budget-money-cell"><span>${lang==='ar'?'المستخدم':'Used'}</span><b>${fmtMoney(used)}</b></div><div class="budget-money-cell"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b style="color:${over?'var(--danger)':'inherit'}">${fmtMoney(remaining)}</b></div></div>
+      <div class="budget-progress-v30"><span style="width:${pct}%"></span></div>
+      <div class="budget-card-foot"><span>${pct}% ${lang==='ar'?'مستخدم':'used'}</span><span>${pending?`${pending} ${lang==='ar'?'طلب بانتظار الاعتماد':'pending requests'}`:(lang==='ar'?'لا توجد طلبات معلقة':'No pending requests')}</span></div>
+    </div>`;
+  }).join('');
+  return `<div class="stats-row">
+    <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'إجمالي الميزانيات':'Total allocated'}</span><div class="icon" style="background:var(--blue-deep)"><svg><use href="#i-wallet"/></svg></div></div><div class="value" style="font-size:22px">${fmtMoney(totalAllocated)}</div><span class="trend" style="color:var(--muted)">${budgets.length} ${lang==='ar'?'ميزانية':'budgets'}</span></div>
+    <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'المصروف المعتمد':'Approved usage'}</span><div class="icon" style="background:var(--teal)"><svg><use href="#i-check"/></svg></div></div><div class="value" style="font-size:22px">${fmtMoney(totalUsed)}</div><span class="trend" style="color:var(--muted)">${totalAllocated?Math.round(totalUsed/totalAllocated*100):0}% ${lang==='ar'?'من المخصص':'of allocated'}</span></div>
+    <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'بانتظار الاعتماد':'Pending approval'}</span><div class="icon" style="background:var(--amber)"><svg><use href="#i-calendar"/></svg></div></div><div class="value" style="font-size:22px">${fmtMoney(totalPending)}</div><span class="trend" style="color:var(--muted)">${budgetEntries.filter(e=>e.status==='pending').length} ${lang==='ar'?'طلبات':'requests'}</span></div>
+    <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'تجاوز الميزانية':'Over budget'}</span><div class="icon" style="background:${overCount?'var(--danger)':'var(--green)'}"><svg><use href="#i-flag"/></svg></div></div><div class="value">${overCount}</div><span class="trend" style="color:var(--muted)">${lang==='ar'?'ميزانيات متجاوزة':'budgets over limit'}</span></div>
+  </div>
+  <div class="budget-toolbar"><div><h3 style="font-size:15px">${lang==='ar'?'الميزانيات والمصروفات':'Budgets & Expenses'}</h3><div style="font-size:11.5px;color:var(--muted);margin-top:3px">${lang==='ar'?'إدارة المخصصات، طلبات الصرف، الاعتماد والربط بالفعاليات والمهام':'Manage allocations, expense requests, approvals, and links to events/tasks'}</div></div>${currentUserRole==='admin'?`<button class="primary-btn" onclick="openBudgetEditor()"><svg><use href="#i-plus"/></svg>${lang==='ar'?'ميزانية جديدة':'New budget'}</button>`:''}</div>
+  <div class="budget-grid" style="margin-top:14px">${cards||`<div class="section-card" style="grid-column:1/-1;text-align:center;padding:38px;color:var(--muted)">${lang==='ar'?'لا توجد ميزانيات بعد. أنشئ أول ميزانية.':'No budgets yet. Create the first budget.'}</div>`}</div>`;
+}
+async function openBudgetDetail(id){
+  const b=budgetById(id); if(!b)return; currentBudgetId=id;
+  const used=budgetApprovedNet(id), pendingAmount=budgetPendingAmount(id), allocated=Number(b.allocated||0), remaining=allocated-used, entries=budgetEntriesFor(id).slice().sort((a,b)=>new Date(b.createdAt)-new Date(a.createdAt)), canManage=canManageBudgetClient(b);
+  const rows=entries.map(e=>{
+    const requester=taskMemberById(e.requestedBy)?.fullName || (lang==='ar'?'عضو':'Member');
+    const linked=[e.eventId?(events.find(x=>x.id===e.eventId)?.ar||events.find(x=>x.id===e.eventId)?.en):null,e.taskId?(tasks.find(x=>x.id===e.taskId)?taskTitle(tasks.find(x=>x.id===e.taskId)):null):null].filter(Boolean).join(' · ');
+    const canDelete=canManage || (e.requestedBy===currentUserId&&e.status==='pending');
+    return `<div class="budget-entry-row"><div><div class="budget-entry-desc">${escapeHtml(e.description)}</div><div class="budget-entry-meta">${budgetKindLabel(e.kind)} · ${escapeHtml(e.occurredOn||'')} · ${lang==='ar'?'بواسطة':'by'} ${escapeHtml(requester)}${e.vendorName?' · '+escapeHtml(e.vendorName):''}${e.referenceNo?' · '+escapeHtml(e.referenceNo):''}${linked?' · '+escapeHtml(linked):''}</div>${e.rejectionReason?`<div class="budget-entry-meta" style="color:var(--danger)">${escapeHtml(e.rejectionReason)}</div>`:''}<span class="budget-entry-status ${e.status}">${budgetEntryStatusLabel(e.status)}</span></div><div><div class="budget-entry-amount" style="color:${e.kind==='income'?'var(--green)':'inherit'}">${e.kind==='income'?'− ':'+ '}${fmtMoney(e.amount)}</div><div class="budget-entry-actions">${canManage&&e.status==='pending'?`<button class="chip-btn" onclick="reviewBudgetEntry('${e.id}','approved')">${lang==='ar'?'اعتماد':'Approve'}</button><button class="chip-btn" style="color:var(--danger)" onclick="reviewBudgetEntry('${e.id}','rejected')">${lang==='ar'?'رفض':'Reject'}</button>`:''}${canDelete?`<button class="chip-btn" onclick="deleteBudgetEntry('${e.id}')">${lang==='ar'?'حذف':'Delete'}</button>`:''}</div></div></div>`;
+  }).join('');
+  document.getElementById('budgetModalBody').innerHTML=`<div class="modal-head"><div><h3>${escapeHtml(L(b,''))}</h3><div style="font-size:11px;color:var(--muted);margin-top:4px">${escapeHtml(budgetPeriodLabel(b))} · ${budgetStatusLabel(b.status)}</div></div><button class="modal-close" onclick="closeBudgetModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    <div class="budget-detail-summary"><div class="budget-detail-stat"><span>${lang==='ar'?'المخصص':'Allocated'}</span><b>${fmtMoney(allocated)}</b></div><div class="budget-detail-stat"><span>${lang==='ar'?'المستخدم المعتمد':'Approved usage'}</span><b>${fmtMoney(used)}</b></div><div class="budget-detail-stat"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b style="color:${remaining<0?'var(--danger)':'inherit'}">${fmtMoney(remaining)}</b></div><div class="budget-detail-stat"><span>${lang==='ar'?'طلبات معلقة':'Pending'}</span><b>${fmtMoney(pendingAmount)}</b></div></div>
+    ${b.notes?`<div class="security-banner" style="margin-bottom:14px"><svg><use href="#i-file"/></svg><span>${escapeHtml(b.notes)}</span></div>`:''}
+    <div class="budget-toolbar"><div><b style="font-size:13px">${lang==='ar'?'الحركات وطلبات الصرف':'Entries & expense requests'}</b><div style="font-size:10.5px;color:var(--muted);margin-top:2px">${lang==='ar'?'المصروفات لا تدخل في الاستخدام إلا بعد الاعتماد':'Expenses affect usage only after approval'}</div></div><div style="display:flex;gap:7px;flex-wrap:wrap"><button class="primary-btn" onclick="openBudgetEntryForm('${b.id}')"><svg><use href="#i-plus"/></svg>${lang==='ar'?'إضافة حركة':'Add entry'}</button>${canManage?`<button class="chip-btn" onclick="openBudgetEditor('${b.id}')">${lang==='ar'?'تعديل الميزانية':'Edit budget'}</button>`:''}</div></div>
+    <div class="budget-entry-list" style="margin-top:12px">${rows||`<div style="background:var(--paper);border-radius:12px;padding:25px;text-align:center;color:var(--muted);font-size:12px">${lang==='ar'?'لا توجد حركات مالية بعد':'No financial entries yet'}</div>`}</div>
+    ${currentUserRole==='admin'?`<div style="margin-top:18px;padding-top:12px;border-top:1px solid var(--border);display:flex;justify-content:flex-end"><button class="chip-btn" style="color:var(--danger)" onclick="deleteBudget('${b.id}')">${lang==='ar'?'حذف الميزانية':'Delete budget'}</button></div>`:''}`;
+  document.getElementById('budgetModalOverlay').classList.remove('hidden');
+}
+function closeBudgetModal(){document.getElementById('budgetModalOverlay').classList.add('hidden');currentBudgetId=null;}
+function closeBudgetActionModal(){document.getElementById('budgetEntryModalOverlay').classList.add('hidden');}
+function openBudgetEditor(id=null){
+  const b=id?budgetById(id):null;
+  const owners=teamMembers.filter(m=>m.status==='active'&&m.userId).map(m=>`<option value="${m.userId}" ${b?.ownerUserId===m.userId?'selected':''}>${escapeHtml(m.fullName)}</option>`).join('');
+  document.getElementById('budgetEntryModalBody').innerHTML=`<div class="modal-head"><h3>${b?(lang==='ar'?'تعديل الميزانية':'Edit budget'):(lang==='ar'?'ميزانية جديدة':'New budget')}</h3><button class="modal-close" onclick="closeBudgetActionModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitBudgetForm(event,'${b?.id||''}')"><div class="budget-form-grid"><div class="field"><label>${lang==='ar'?'اسم الميزانية بالعربية':'Budget name (Arabic)'}</label><input id="budgetNameAr" required value="${escapeHtml(b?.ar||'')}"></div><div class="field"><label>${lang==='ar'?'الاسم بالإنجليزية':'English name'}</label><input id="budgetNameEn" value="${escapeHtml(b?.en||'')}"></div><div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><input id="budgetCategory" value="${escapeHtml(b?.category||'')}" placeholder="${lang==='ar'?'مثال: فعاليات، تسويق':'e.g. Events, Marketing'}"></div><div class="field"><label>${lang==='ar'?'المبلغ المخصص':'Allocated amount'}</label><input id="budgetAllocated" type="number" min="0" step="0.01" value="${Number(b?.allocated||0)}"></div><div class="field"><label>${lang==='ar'?'بداية الفترة':'Period start'}</label><input id="budgetPeriodStart" type="date" value="${b?.periodStart||''}"></div><div class="field"><label>${lang==='ar'?'نهاية الفترة':'Period end'}</label><input id="budgetPeriodEnd" type="date" value="${b?.periodEnd||''}"></div><div class="field"><label>${lang==='ar'?'مسؤول الميزانية':'Budget owner'}</label><select id="budgetOwner"><option value="">${lang==='ar'?'بدون مسؤول محدد':'No assigned owner'}</option>${owners}</select></div><div class="field"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="budgetStatus"><option value="draft" ${b?.status==='draft'?'selected':''}>${budgetStatusLabel('draft')}</option><option value="active" ${!b||b.status==='active'?'selected':''}>${budgetStatusLabel('active')}</option><option value="closed" ${b?.status==='closed'?'selected':''}>${budgetStatusLabel('closed')}</option></select></div><div class="field full"><label>${lang==='ar'?'ملاحظات':'Notes'}</label><textarea id="budgetNotes" rows="3" style="width:100%;resize:vertical">${escapeHtml(b?.notes||'')}</textarea></div></div><button class="submit-btn" type="submit">${lang==='ar'?'حفظ الميزانية':'Save budget'}</button></form>`;
+  document.getElementById('budgetEntryModalOverlay').classList.remove('hidden');
+}
+async function submitBudgetForm(e,id){
+  e.preventDefault();
+  const args={p_workspace_id:currentWorkspaceId,p_budget_id:id||null,p_name_ar:document.getElementById('budgetNameAr').value.trim(),p_name_en:document.getElementById('budgetNameEn').value.trim(),p_category:document.getElementById('budgetCategory').value.trim(),p_period_start:document.getElementById('budgetPeriodStart').value||null,p_period_end:document.getElementById('budgetPeriodEnd').value||null,p_allocated_amount:Number(document.getElementById('budgetAllocated').value||0),p_status:document.getElementById('budgetStatus').value,p_owner_user_id:document.getElementById('budgetOwner').value||null,p_notes:document.getElementById('budgetNotes').value.trim()};
+  const {error}=await sb.rpc('tasky_save_budget',args); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الميزانية':'Could not save budget',message:error.message,tone:'error'});return;}
+  closeBudgetActionModal(); await fetchBudgets(); renderModule(); if(id)openBudgetDetail(id); taskyToast(lang==='ar'?'تم حفظ الميزانية':'Budget saved',{tone:'success'});
+}
+function openBudgetEntryForm(budgetId){
+  const b=budgetById(budgetId); if(!b)return;
+  const eventOpts=events.map(ev=>`<option value="${ev.id}">${escapeHtml(lang==='ar'?(ev.ar||ev.en):(ev.en||ev.ar))}</option>`).join('');
+  const taskOpts=tasks.map(tk=>`<option value="${tk.id}">${escapeHtml(taskTitle(tk))}</option>`).join('');
+  document.getElementById('budgetEntryModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'إضافة حركة مالية':'Add financial entry'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(b,''))}</div></div><button class="modal-close" onclick="closeBudgetActionModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitBudgetEntry(event,'${budgetId}')"><div class="budget-form-grid"><div class="field"><label>${lang==='ar'?'نوع الحركة':'Entry type'}</label><select id="budgetEntryKind"><option value="expense">${budgetKindLabel('expense')}</option><option value="income">${budgetKindLabel('income')}</option><option value="adjustment">${budgetKindLabel('adjustment')}</option></select></div><div class="field"><label>${lang==='ar'?'المبلغ':'Amount'}</label><input id="budgetEntryAmount" type="number" min="0.01" step="0.01" required></div><div class="field"><label>${lang==='ar'?'التاريخ':'Date'}</label><input id="budgetEntryDate" type="date" value="${new Date().toISOString().slice(0,10)}"></div><div class="field"><label>${lang==='ar'?'المورد / الجهة':'Vendor / payee'}</label><input id="budgetEntryVendor"></div><div class="field full"><label>${lang==='ar'?'الوصف':'Description'}</label><input id="budgetEntryDescription" required placeholder="${lang==='ar'?'مثال: دفعة حجز القاعة':'e.g. Venue booking payment'}"></div><div class="field"><label>${lang==='ar'?'رقم المرجع / الفاتورة':'Reference / invoice no.'}</label><input id="budgetEntryReference"></div><div class="field"><label>${lang==='ar'?'ربط بفعالية (اختياري)':'Link event (optional)'}</label><select id="budgetEntryEvent"><option value="">—</option>${eventOpts}</select></div><div class="field full"><label>${lang==='ar'?'ربط بمهمة (اختياري)':'Link task (optional)'}</label><select id="budgetEntryTask"><option value="">—</option>${taskOpts}</select></div></div><div style="font-size:11px;color:var(--muted);line-height:1.7;margin:-3px 0 12px">${canManageBudgetClient(b)?(lang==='ar'?'لأنك مدير هذه الميزانية، ستُعتمد الحركة مباشرة.':'As a budget manager, this entry will be approved immediately.'):(lang==='ar'?'ستُرسل الحركة كطلب بانتظار اعتماد مدير الميزانية.':'This entry will be submitted for budget manager approval.')}</div><button class="submit-btn" type="submit">${lang==='ar'?'حفظ وإرسال':'Save & submit'}</button></form>`;
+  document.getElementById('budgetEntryModalOverlay').classList.remove('hidden');
+}
+async function submitBudgetEntry(e,budgetId){
+  e.preventDefault(); const args={p_budget_id:budgetId,p_kind:document.getElementById('budgetEntryKind').value,p_amount:Number(document.getElementById('budgetEntryAmount').value||0),p_occurred_on:document.getElementById('budgetEntryDate').value||null,p_description:document.getElementById('budgetEntryDescription').value.trim(),p_vendor_name:document.getElementById('budgetEntryVendor').value.trim(),p_reference_no:document.getElementById('budgetEntryReference').value.trim(),p_event_id:document.getElementById('budgetEntryEvent').value||null,p_task_id:document.getElementById('budgetEntryTask').value||null};
+  const {error}=await sb.rpc('tasky_submit_budget_entry',args); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الحركة':'Could not save entry',message:error.message,tone:'error'});return;} closeBudgetActionModal(); await fetchBudgets(); renderModule(); openBudgetDetail(budgetId); taskyToast(canManageBudgetClient(budgetById(budgetId))?(lang==='ar'?'تم اعتماد الحركة وإضافتها':'Entry approved and added'):(lang==='ar'?'تم إرسال طلب الصرف للاعتماد':'Expense request sent for approval'),{tone:'success'});
+}
+async function reviewBudgetEntry(id,status){
+  let reason=null; if(status==='rejected'){reason=lang==='ar'?'مرفوض من مدير الميزانية':'Rejected by budget manager';}
+  const {error}=await sb.rpc('tasky_review_budget_entry',{p_entry_id:id,p_status:status,p_rejection_reason:reason}); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر تحديث الطلب':'Could not review request',message:error.message,tone:'error'});return;} const bid=budgetEntries.find(e=>e.id===id)?.budgetId; await fetchBudgets(); renderModule(); if(bid)openBudgetDetail(bid); taskyToast(status==='approved'?(lang==='ar'?'تم اعتماد الطلب':'Request approved'):(lang==='ar'?'تم رفض الطلب':'Request rejected'),{tone:status==='approved'?'success':'info'});
+}
+async function deleteBudgetEntry(id){
+  const e=budgetEntries.find(x=>x.id===id); if(!e)return; const ok=await taskyConfirm(lang==='ar'?'حذف هذه الحركة المالية؟':'Delete this financial entry?',{title:lang==='ar'?'حذف الحركة':'Delete entry',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return; const {error}=await sb.rpc('tasky_delete_budget_entry',{p_entry_id:id}); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر الحذف':'Could not delete entry',message:error.message,tone:'error'});return;} await fetchBudgets(); renderModule(); openBudgetDetail(e.budgetId);
+}
+async function deleteBudget(id){
+  const b=budgetById(id); if(!b)return; const ok=await taskyConfirm(lang==='ar'?`حذف ميزانية «${L(b,'')}» وكل حركاتها؟`:`Delete “${L(b,'')}” and all entries?`,{title:lang==='ar'?'حذف الميزانية':'Delete budget',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return; const {error}=await sb.rpc('tasky_delete_budget',{p_budget_id:id}); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر الحذف':'Could not delete budget',message:error.message,tone:'error'});return;} closeBudgetModal(); await fetchBudgets(); renderModule(); taskyToast(lang==='ar'?'تم حذف الميزانية':'Budget deleted',{tone:'success'});
+}
+async function fetchBudgets(){
+  if(!currentWorkspaceId){budgets=[];budgetEntries=[];return;}
+  const [bq,eq]=await Promise.all([
+    sb.from('workspace_budgets').select('id,workspace_id,name_ar,name_en,category,period_start,period_end,allocated_amount,status,owner_user_id,notes,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:true}),
+    sb.from('budget_entries').select('id,workspace_id,budget_id,kind,amount,status,occurred_on,description,vendor_name,reference_no,event_id,task_id,requested_by,approved_by,approved_at,rejection_reason,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false})
+  ]);
+  if(bq.error){console.warn('V30 budgets unavailable; run V30 migration',bq.error);budgets=[];} else budgets=(bq.data||[]).map((r,i)=>({id:r.id,workspaceId:r.workspace_id,ar:r.name_ar,en:r.name_en||r.name_ar,category:r.category||'',periodStart:r.period_start,periodEnd:r.period_end,allocated:Number(r.allocated_amount||0),status:r.status,ownerUserId:r.owner_user_id,notes:r.notes||'',createdBy:r.created_by,createdAt:r.created_at,color:['var(--blue)','var(--teal)','var(--green)','var(--violet)'][i%4],spent:0}));
+  if(eq.error){console.warn('V30 budget entries unavailable',eq.error);budgetEntries=[];} else budgetEntries=(eq.data||[]).map(r=>({id:r.id,workspaceId:r.workspace_id,budgetId:r.budget_id,kind:r.kind,amount:Number(r.amount||0),status:r.status,occurredOn:r.occurred_on,description:r.description,vendorName:r.vendor_name,referenceNo:r.reference_no,eventId:r.event_id,taskId:r.task_id,requestedBy:r.requested_by,approvedBy:r.approved_by,approvedAt:r.approved_at,rejectionReason:r.rejection_reason,createdAt:r.created_at,updatedAt:r.updated_at}));
+  budgets.forEach(b=>b.spent=Math.max(0,budgetApprovedNet(b.id)));
+}
+function scheduleBudgetRefresh(){
+  clearTimeout(budgetRealtimeTimer); budgetRealtimeTimer=setTimeout(async()=>{const openId=currentBudgetId; await fetchBudgets(); if(activeNav==='budgets')renderModule(); if(openId&&budgetById(openId))openBudgetDetail(openId);},220);
+}
+
+function legacyBudgetsTemplateV29(){
   const totalAllocated = budgets.reduce((s,c)=>s+c.allocated,0);
   const totalSpent = budgets.reduce((s,c)=>s+c.spent,0);
   const remaining = totalAllocated - totalSpent;
