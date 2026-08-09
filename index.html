@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V25.1: project-level permissions + project managers + task access control -->
+<!-- Tasky V26: real Supabase inventory + movements + supply requests -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1375,7 +1375,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V25.1'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V26'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1462,6 +1462,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchTeamMembers();
   await fetchProjectMemberships();
   await fetchTasks();
+  await fetchInventory();
   await fetchNotifications();
   await fetchPendingPlanRequest();
   initTaskRealtime();
@@ -1488,6 +1489,9 @@ function initTaskRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'notifications',filter:`user_id=eq.${currentUserId}`},async()=>{ await fetchNotifications(); })
     .on('postgres_changes',{event:'*',schema:'public',table:'project_members',filter},scheduleProjectAccessRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'projects',filter},scheduleProjectAccessRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'inventory_items',filter},scheduleInventoryRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'inventory_movements',filter},scheduleInventoryRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'inventory_supply_requests',filter},scheduleInventoryRefresh)
     .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
 }
 function scheduleTaskRealtimeRefresh(){
@@ -2324,15 +2328,10 @@ let filterAssignedToMe = false;
 let taskRealtimeChannel = null;
 let taskRealtimeTimer = null;
 
-let inventory = [
-  { id: 1, ar:"أكياس تغليف مطبوعة", en:"Printed packaging bags", cat_ar:"مستلزمات تعبئة", cat_en:"Packing supplies", branch_ar:"الفرع الرئيسي - الرياض", branch_en:"Main branch - Riyadh", qty: 1200, min: 300, unit_ar:"قطعة", unit_en:"pcs", price: 2 },
-  { id: 2, ar:"أقمشة يونيفورم الصيف", en:"Summer uniform fabric", cat_ar:"الأزياء", cat_en:"Apparel", branch_ar:"مستودع جدة", branch_en:"Jeddah warehouse", qty: 45, min: 100, unit_ar:"قطعة", unit_en:"pcs", price: 60 },
-  { id: 3, ar:"لابتوبات للموظفين الجدد", en:"Laptops for new hires", cat_ar:"تقنية", cat_en:"Technology", branch_ar:"المستودع المركزي", branch_en:"Central warehouse", qty: 3, min: 5, unit_ar:"جهاز", unit_en:"units", price: 3200 },
-  { id: 4, ar:"بخور ومستلزمات الفعاليات", en:"Incense & event supplies", cat_ar:"فعاليات", cat_en:"Events", branch_ar:"فرع الدمام", branch_en:"Dammam branch", qty: 220, min: 50, unit_ar:"علبة", unit_en:"boxes", price: 35 },
-  { id: 5, ar:"أوراق A4 للطباعة", en:"A4 printing paper", cat_ar:"قرطاسية", cat_en:"Stationery", branch_ar:"الفرع الرئيسي - الرياض", branch_en:"Main branch - Riyadh", qty: 15, min: 20, unit_ar:"رزمة", unit_en:"reams", price: 18 },
-  { id: 6, ar:"دروع تكريم مخصصة", en:"Custom honor plaques", cat_ar:"فعاليات", cat_en:"Events", branch_ar:"مستودع جدة", branch_en:"Jeddah warehouse", qty: 60, min: 20, unit_ar:"قطعة", unit_en:"pcs", price: 90 },
-  { id: 7, ar:"بطاريات كاميرات تصوير", en:"Camera batteries", cat_ar:"تقنية", cat_en:"Technology", branch_ar:"المستودع المركزي", branch_en:"Central warehouse", qty: 80, min: 30, unit_ar:"قطعة", unit_en:"pcs", price: 25 },
-];
+let inventory = [];
+let inventoryMovements = [];
+let inventorySupplyRequests = [];
+let inventoryRealtimeTimer = null;
 let invQuery = "";
 
 const CONTENT_STAGES = [
@@ -3100,48 +3099,104 @@ function renderModule(){
 function inventoryTemplate(){
   const totalItems = inventory.length;
   const lowStock = inventory.filter(i=>i.qty<=i.min).length;
-  const totalValue = inventory.reduce((s,i)=>s+i.qty*i.price,0);
-  const rows = inventory.filter(i=>!invQuery || L(i,'').toLowerCase().includes(invQuery.toLowerCase())).map(i => {
+  const totalValue = inventory.reduce((sum,i)=>sum+i.qty*i.price,0);
+  const branches = new Set(inventory.map(i=>lang==='en'?i.branch_en:i.branch_ar).filter(Boolean)).size;
+  const pendingRequests=inventorySupplyRequests.filter(r=>r.status==='pending'||r.status==='approved'||r.status==='ordered').length;
+  const q=(invQuery||'').trim().toLowerCase();
+  const rows = inventory.filter(i=>!q || [i.ar,i.en,i.cat_ar,i.cat_en,i.branch_ar,i.branch_en,i.sku].some(v=>String(v||'').toLowerCase().includes(q))).map(i => {
     const low = i.qty <= i.min;
+    const unit=lang==='en'?(i.unit_en||i.unit_ar):(i.unit_ar||i.unit_en);
     return `
       <tr>
-        <td><b>${L(i,'')}</b><div style="font-size:11.5px;color:var(--muted)">${lang==='en'?i.branch_en:i.branch_ar}</div></td>
-        <td>${lang==='en'?i.cat_en:i.cat_ar}</td>
+        <td><b>${escapeHtml(L(i,''))}</b>${i.sku?`<div style="font-size:11px;color:var(--muted);font-family:'IBM Plex Mono',monospace">${escapeHtml(i.sku)}</div>`:''}<div style="font-size:11.5px;color:var(--muted)">${escapeHtml(lang==='en'?i.branch_en:i.branch_ar)}</div></td>
+        <td>${escapeHtml(lang==='en'?i.cat_en:i.cat_ar)||'—'}</td>
         <td>
           <div class="qty-control">
-            <button onclick="adjustQty(${i.id},-10)">−</button>
-            <span style="min-width:44px;text-align:center;font-family:'IBM Plex Mono',monospace">${i.qty}</span>
-            <button onclick="adjustQty(${i.id},10)">+</button>
-            <span style="color:var(--muted);font-size:11.5px">${lang==='en'?i.unit_en:i.unit_ar}</span>
+            <button onclick="adjustQty('${i.id}',-1)" aria-label="${lang==='ar'?'إنقاص الكمية':'Decrease quantity'}">−</button>
+            <span style="min-width:52px;text-align:center;font-family:'IBM Plex Mono',monospace">${formatInventoryNumber(i.qty)}</span>
+            <button onclick="adjustQty('${i.id}',1)" aria-label="${lang==='ar'?'زيادة الكمية':'Increase quantity'}">+</button>
+            <span style="color:var(--muted);font-size:11.5px">${escapeHtml(unit)}</span>
           </div>
         </td>
-        <td><span class="status-pill" style="background:${low?'var(--danger-tint)':'var(--green-tint)'};color:${low?'var(--danger)':'var(--green)'}">${low?t('invLowPill'):t('invAvailable')}</span></td>
+        <td><span class="status-pill" style="background:${low?'var(--danger-tint)':'var(--green-tint)'};color:${low?'var(--danger)':'var(--green)'}">${low?t('invLowPill'):t('invAvailable')}</span><div style="font-size:10.8px;color:var(--muted);margin-top:4px">${lang==='ar'?'الحد الأدنى':'Min'}: ${formatInventoryNumber(i.min)}</div></td>
         <td style="font-family:'IBM Plex Mono',monospace">${fmtMoney(i.qty*i.price)}</td>
-        <td>${low?`<button class="chip-btn" style="padding:6px 10px;font-size:11.5px" onclick="requestSupply(${i.id})">${t('invRequest')}</button>`:'—'}</td>
+        <td><div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button class="chip-btn" style="padding:6px 9px;font-size:11.5px" onclick="openInventoryItemModal('${i.id}')">${lang==='ar'?'تعديل':'Edit'}</button>
+          ${low?`<button class="chip-btn" style="padding:6px 9px;font-size:11.5px" onclick="openSupplyRequestModal('${i.id}')">${t('invRequest')}</button>`:''}
+          ${currentUserRole==='admin'?`<button class="chip-btn" style="padding:6px 9px;font-size:11.5px;color:var(--danger)" onclick="deleteInventoryItem('${i.id}')">${lang==='ar'?'حذف':'Delete'}</button>`:''}
+        </div></td>
       </tr>`;
   }).join('');
-
+  const recent=inventoryMovements.slice(0,6).map(m=>{
+    const item=inventoryItemById(m.item_id); const positive=Number(m.delta)>0;
+    return `<div style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)">
+      <div style="min-width:0"><b style="font-size:12.5px">${escapeHtml(item?L(item,''):(lang==='ar'?'صنف محذوف':'Deleted item'))}</b><div style="font-size:11px;color:var(--muted)">${escapeHtml(m.note||inventoryMemberName(m.created_by))}</div></div>
+      <div style="text-align:end;white-space:nowrap"><b style="color:${positive?'var(--green)':'var(--danger)'}">${positive?'+':''}${formatInventoryNumber(Number(m.delta))}</b><div style="font-size:10.5px;color:var(--muted)">${formatInventoryDate(m.created_at)}</div></div>
+    </div>`;
+  }).join('');
   return `
     <div class="stats-row">
       <div class="stat-card"><div class="top"><span class="label">${t('invTotalItems')}</span><div class="icon" style="background:var(--teal)"><svg><use href="#i-box"/></svg></div></div><div class="value">${totalItems}</div><span class="trend" style="color:var(--muted)">${t('invAcrossBranches')}</span></div>
       <div class="stat-card"><div class="top"><span class="label">${t('invLow')}</span><div class="icon" style="background:var(--danger)"><svg><use href="#i-flag"/></svg></div></div><div class="value">${lowStock}</div><span class="trend" style="color:var(--danger)">${t('invLowTrend')}</span></div>
       <div class="stat-card"><div class="top"><span class="label">${t('invValue')}</span><div class="icon" style="background:var(--blue-deep)"><svg><use href="#i-wallet"/></svg></div></div><div class="value" style="font-size:18px">${fmtMoney(totalValue)}</div><span class="trend" style="color:var(--muted)">${t('invValueTrend')}</span></div>
-      <div class="stat-card"><div class="top"><span class="label">${t('invBranches')}</span><div class="icon" style="background:var(--green)"><svg><use href="#i-map"/></svg></div></div><div class="value">4</div><span class="trend" style="color:var(--muted)">${t('invBranchesTrend')}</span></div>
+      <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'طلبات التوريد':'Supply requests'}</span><div class="icon" style="background:var(--green)"><svg><use href="#i-inbox"/></svg></div></div><div class="value">${pendingRequests}</div><span class="trend" style="color:var(--muted)">${branches} ${lang==='ar'?'مواقع/فروع':'locations'}</span></div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap">
       <h3 style="font-size:15px">${t('invAllItems')}</h3>
-      <div class="inv-search"><svg><use href="#i-search"/></svg><input placeholder="${t('invSearchPh')}" oninput="onInvSearch(this.value)" value="${invQuery}"></div>
+      <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+        <div class="inv-search"><svg><use href="#i-search"/></svg><input placeholder="${t('invSearchPh')}" oninput="onInvSearch(this.value)" value="${escapeHtml(invQuery)}"></div>
+        <button class="primary-btn" onclick="openInventoryItemModal()"><svg><use href="#i-plus"/></svg>${lang==='ar'?'صنف جديد':'New item'}</button>
+      </div>
     </div>
-    <div class="section-card">
+    <div class="section-card" style="overflow:auto">
       <table>
         <thead><tr><th>${t('invColItem')}</th><th>${t('invColCat')}</th><th>${t('invColQty')}</th><th>${t('invColStatus')}</th><th>${t('invColValue')}</th><th></th></tr></thead>
-        <tbody>${rows || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:24px">${t('invNoResults')}</td></tr>`}</tbody>
+        <tbody>${rows || `<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:34px">${inventory.length?(t('invNoResults')):(lang==='ar'?'لا توجد أصناف بعد. أضف أول صنف للمخزون.':'No inventory items yet. Add your first item.')}</td></tr>`}</tbody>
       </table>
+    </div>
+    <div class="section-card" style="padding:16px 18px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px"><h3 style="font-size:14px">${lang==='ar'?'آخر حركات المخزون':'Recent stock movements'}</h3><span style="font-size:11px;color:var(--muted)">${lang==='ar'?'محفوظة في سجل دائم':'Permanent audit trail'}</span></div>
+      ${recent || `<div style="padding:22px;text-align:center;color:var(--muted);font-size:12px">${lang==='ar'?'لا توجد حركات بعد':'No movements yet'}</div>`}
     </div>`;
 }
+function formatInventoryNumber(n){ return Number.isInteger(Number(n))?String(Number(n)):Number(n).toLocaleString(lang==='ar'?'ar-SA':'en-US',{maximumFractionDigits:2}); }
+function formatInventoryDate(iso){ if(!iso) return ''; try{return new Intl.DateTimeFormat(lang==='ar'?'ar-SA':'en-US',{month:'short',day:'numeric',hour:'numeric',minute:'2-digit'}).format(new Date(iso));}catch{return '';} }
 function onInvSearch(v){ invQuery = v; renderModule(); }
-function adjustQty(id,delta){ inventory = inventory.map(i => i.id===id ? {...i, qty: Math.max(0, i.qty+delta)} : i); renderModule(); }
-function requestSupply(id){ const item = inventory.find(i=>i.id===id); alert(t('invRequestSent')(L(item,''))); }
+async function adjustQty(id,delta){
+  const item=inventoryItemById(id); if(!item) return;
+  const {error}=await sb.rpc('adjust_inventory_quantity',{p_item_id:id,p_delta:delta,p_note:lang==='ar'?'تعديل سريع من شاشة المخزون':'Quick adjustment from inventory'});
+  if(error){ showTaskyDialog({title:lang==='ar'?'تعذّر تعديل الكمية':'Could not adjust quantity',message:error.message,tone:'error'}); return; }
+  await fetchInventory(); renderModule();
+}
+function openInventoryItemModal(id=null){
+  const item=id?inventoryItemById(id):null;
+  const val=(x)=>escapeHtml(x??'');
+  document.getElementById('addModalBody').innerHTML=`
+    <div class="modal-head"><h3>${item?(lang==='ar'?'تعديل الصنف':'Edit item'):(lang==='ar'?'صنف جديد':'New inventory item')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    <form onsubmit="submitInventoryItem(event,'${item?.id||''}')">
+      <div class="field"><label>${lang==='ar'?'اسم الصنف بالعربية':'Arabic item name'}</label><input id="invNameAr" required value="${val(item?.ar)}"></div>
+      <div class="field"><label>${lang==='ar'?'الاسم بالإنجليزية':'English item name'}</label><input id="invNameEn" value="${val(item?.en)}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><input id="invCatAr" value="${val(item?.cat_ar)}"></div><div class="field"><label>SKU</label><input id="invSku" value="${val(item?.sku)}"></div></div>
+      <div class="field"><label>${lang==='ar'?'الفرع / الموقع':'Branch / location'}</label><input id="invBranchAr" value="${val(item?.branch_ar)}"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'الحد الأدنى':'Minimum quantity'}</label><input id="invMin" type="number" min="0" step="0.01" value="${item?.min??0}"></div><div class="field"><label>${lang==='ar'?'الوحدة':'Unit'}</label><input id="invUnitAr" value="${val(item?.unit_ar)}" placeholder="${lang==='ar'?'قطعة، صندوق...':'pcs, boxes...'}"></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'سعر الوحدة':'Unit price'}</label><input id="invPrice" type="number" min="0" step="0.01" value="${item?.price??0}"></div>${item?'':`<div class="field"><label>${lang==='ar'?'الكمية الافتتاحية':'Opening quantity'}</label><input id="invQty" type="number" min="0" step="0.01" value="0"></div>`}</div>
+      <button type="submit" class="submit-btn">${lang==='ar'?'حفظ الصنف':'Save item'}</button>
+    </form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function submitInventoryItem(e,id){
+  e.preventDefault(); const item=id?inventoryItemById(id):null;
+  const args={p_workspace_id:currentWorkspaceId,p_item_id:id||null,p_name_ar:document.getElementById('invNameAr').value.trim(),p_name_en:document.getElementById('invNameEn').value.trim()||null,p_category_ar:document.getElementById('invCatAr').value.trim()||null,p_category_en:null,p_branch_ar:document.getElementById('invBranchAr').value.trim()||null,p_branch_en:null,p_sku:document.getElementById('invSku').value.trim()||null,p_quantity:item?item.qty:Number(document.getElementById('invQty').value||0),p_min_quantity:Number(document.getElementById('invMin').value||0),p_unit_ar:document.getElementById('invUnitAr').value.trim()||null,p_unit_en:null,p_unit_price:Number(document.getElementById('invPrice').value||0)};
+  const {error}=await sb.rpc('save_inventory_item',args); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الصنف':'Could not save item',message:error.message,tone:'error'});return;}
+  closeAddModal(); await fetchInventory(); renderModule(); taskyToast(item?(lang==='ar'?'تم تحديث الصنف':'Item updated'):(lang==='ar'?'تمت إضافة الصنف':'Item added'),{tone:'success'});
+}
+function openSupplyRequestModal(id){
+  const item=inventoryItemById(id); if(!item)return; const suggested=Math.max(1,item.min-item.qty);
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><h3>${lang==='ar'?'طلب توريد':'Supply request'}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitSupplyRequest(event,'${id}')"><div style="background:var(--paper);border-radius:10px;padding:11px 12px;margin-bottom:14px;font-size:12.5px"><b>${escapeHtml(L(item,''))}</b><div style="color:var(--muted);margin-top:3px">${lang==='ar'?'المتوفر':'Available'}: ${formatInventoryNumber(item.qty)} · ${lang==='ar'?'الحد الأدنى':'Minimum'}: ${formatInventoryNumber(item.min)}</div></div><div class="field"><label>${lang==='ar'?'الكمية المطلوبة':'Requested quantity'}</label><input id="supplyQty" type="number" min="0.01" step="0.01" value="${suggested}" required></div><div class="field"><label>${lang==='ar'?'ملاحظة':'Note'}</label><textarea id="supplyNote" rows="3" placeholder="${lang==='ar'?'سبب الطلب أو تفاصيل إضافية':'Reason or extra details'}"></textarea></div><button class="submit-btn" type="submit">${lang==='ar'?'إرسال الطلب':'Send request'}</button></form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function submitSupplyRequest(e,id){ e.preventDefault(); const qty=Number(document.getElementById('supplyQty').value); const note=document.getElementById('supplyNote').value.trim()||null; const {error}=await sb.rpc('request_inventory_supply',{p_item_id:id,p_requested_quantity:qty,p_note:note}); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إرسال الطلب':'Could not send request',message:error.message,tone:'error'});return;} closeAddModal(); await fetchInventory(); renderModule(); taskyToast(lang==='ar'?'تم إرسال طلب التوريد':'Supply request sent',{tone:'success'}); }
+async function deleteInventoryItem(id){ const item=inventoryItemById(id); if(!item)return; const ok=await taskyConfirm(lang==='ar'?`حذف «${L(item,'')}» وكل سجل حركاته؟`:`Delete “${L(item,'')}” and its movement history?`,{title:lang==='ar'?'حذف الصنف':'Delete item',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return; const {error}=await sb.rpc('delete_inventory_item',{p_item_id:id}); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر الحذف':'Could not delete item',message:error.message,tone:'error'});return;} await fetchInventory(); renderModule(); taskyToast(lang==='ar'?'تم حذف الصنف':'Item deleted',{tone:'success'}); }
 
 /* ================= CONTENT / APPROVALS MODULE ================= */
 function contentTemplate(){
@@ -4240,6 +4295,38 @@ async function moveTask(id,col){
 }
 
 /* ================= NOTIFICATIONS ================= */
+
+async function fetchInventory(){
+  if(!currentWorkspaceId){ inventory=[]; inventoryMovements=[]; inventorySupplyRequests=[]; return; }
+  const [itemsRes,movementsRes,requestsRes]=await Promise.all([
+    sb.from('inventory_items').select('id,workspace_id,name_ar,name_en,category_ar,category_en,branch_ar,branch_en,sku,quantity,min_quantity,unit_ar,unit_en,unit_price,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:true}),
+    sb.from('inventory_movements').select('id,workspace_id,item_id,delta,quantity_before,quantity_after,note,created_by,created_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}).limit(30),
+    sb.from('inventory_supply_requests').select('id,workspace_id,item_id,requested_quantity,note,status,requested_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}).limit(30)
+  ]);
+  if(itemsRes.error){ console.warn('V26 inventory unavailable; run V26 migration',itemsRes.error); inventory=[]; return; }
+  inventory=(itemsRes.data||[]).map(row=>({
+    id:row.id, ar:row.name_ar||row.name_en||'', en:row.name_en||row.name_ar||'',
+    cat_ar:row.category_ar||'', cat_en:row.category_en||row.category_ar||'',
+    branch_ar:row.branch_ar||'', branch_en:row.branch_en||row.branch_ar||'', sku:row.sku||'',
+    qty:Number(row.quantity||0), min:Number(row.min_quantity||0), unit_ar:row.unit_ar||'', unit_en:row.unit_en||row.unit_ar||'',
+    price:Number(row.unit_price||0), createdBy:row.created_by, createdAt:row.created_at, updatedAt:row.updated_at
+  }));
+  inventoryMovements=movementsRes.error?[]:(movementsRes.data||[]);
+  inventorySupplyRequests=requestsRes.error?[]:(requestsRes.data||[]);
+}
+function scheduleInventoryRefresh(){
+  clearTimeout(inventoryRealtimeTimer);
+  inventoryRealtimeTimer=setTimeout(async()=>{
+    await fetchInventory();
+    if(activeNav==='inventory') renderModule();
+  },180);
+}
+function inventoryItemById(id){ return inventory.find(i=>String(i.id)===String(id)); }
+function inventoryMemberName(userId){
+  const m=teamMembers.find(x=>x.userId===userId);
+  return m?.fullName || (userId===currentUserId ? (lang==='ar'?'أنت':'You') : (lang==='ar'?'عضو الفريق':'Team member'));
+}
+
 async function fetchNotifications(){
   if(!currentUserId || !currentWorkspaceId) return;
   const {data,error}=await sb.from('notifications').select('id,user_id,actor_id,type,task_id,comment_id,metadata,is_read,created_at').eq('workspace_id',currentWorkspaceId).eq('user_id',currentUserId).order('created_at',{ascending:false}).limit(40);
