@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V26: real Supabase inventory + movements + supply requests -->
+<!-- Tasky V26.1: inventory modal responsive layout fix -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -305,8 +305,14 @@
   .modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;}
   .modal-head h3{font-size:17px;}
   .modal-close{background:none;border:none;color:var(--ink);}
-  .field{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;}
-  .field input, .field select{border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13.5px;outline:none;color:var(--ink);background:var(--paper);}
+  .field{display:flex;flex-direction:column;gap:5px;font-size:12.5px;color:var(--ink-soft);margin-bottom:14px;min-width:0;}
+  .field input, .field select, .field textarea{width:100%;min-width:0;max-width:100%;border:1px solid var(--border);border-radius:9px;padding:9px 12px;font-size:13.5px;outline:none;color:var(--ink);background:var(--paper);box-sizing:border-box;}
+  .modal form{min-width:0;}
+  .modal.inventory-modal{width:520px;max-width:min(92vw,520px);overflow-x:hidden;}
+  .inventory-form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 12px;min-width:0;}
+  .inventory-form-grid .field{min-width:0;}
+  .inventory-form-grid .field.full{grid-column:1/-1;}
+  .inventory-form-actions{position:sticky;bottom:-18px;background:linear-gradient(to top,var(--card) 76%,rgba(255,255,255,0));padding-top:10px;margin-top:2px;}
   .submit-btn{width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:700;font-size:14px;display:flex;align-items:center;justify-content:center;gap:6px;}
   .detail-row{display:flex;justify-content:space-between;font-size:13.5px;color:var(--ink-soft);margin-bottom:10px;}
   .detail-row b{color:var(--ink);font-weight:600;display:flex;align-items:center;gap:6px;}
@@ -951,6 +957,10 @@
     /* 16px form controls prevent Safari from zooming inputs */
     .field input,.field select,.field textarea,.search-mini input{font-size:16px;}
     .field{font-size:12.5px;margin-bottom:12px;}
+    .modal.inventory-modal{width:calc(100vw - 24px);max-width:calc(100vw - 24px);overflow-x:hidden;}
+    .inventory-form-grid{grid-template-columns:1fr;gap:0;}
+    .inventory-form-grid .field.full{grid-column:auto;}
+    .inventory-form-actions{bottom:-18px;padding-bottom:2px;}
 
     .branding-preview{align-items:flex-start;}
     .branding-preview-logo{width:52px;height:52px;border-radius:13px;}
@@ -3174,14 +3184,20 @@ function openInventoryItemModal(id=null){
   document.getElementById('addModalBody').innerHTML=`
     <div class="modal-head"><h3>${item?(lang==='ar'?'تعديل الصنف':'Edit item'):(lang==='ar'?'صنف جديد':'New inventory item')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
     <form onsubmit="submitInventoryItem(event,'${item?.id||''}')">
-      <div class="field"><label>${lang==='ar'?'اسم الصنف بالعربية':'Arabic item name'}</label><input id="invNameAr" required value="${val(item?.ar)}"></div>
-      <div class="field"><label>${lang==='ar'?'الاسم بالإنجليزية':'English item name'}</label><input id="invNameEn" value="${val(item?.en)}"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><input id="invCatAr" value="${val(item?.cat_ar)}"></div><div class="field"><label>SKU</label><input id="invSku" value="${val(item?.sku)}"></div></div>
-      <div class="field"><label>${lang==='ar'?'الفرع / الموقع':'Branch / location'}</label><input id="invBranchAr" value="${val(item?.branch_ar)}"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'الحد الأدنى':'Minimum quantity'}</label><input id="invMin" type="number" min="0" step="0.01" value="${item?.min??0}"></div><div class="field"><label>${lang==='ar'?'الوحدة':'Unit'}</label><input id="invUnitAr" value="${val(item?.unit_ar)}" placeholder="${lang==='ar'?'قطعة، صندوق...':'pcs, boxes...'}"></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'سعر الوحدة':'Unit price'}</label><input id="invPrice" type="number" min="0" step="0.01" value="${item?.price??0}"></div>${item?'':`<div class="field"><label>${lang==='ar'?'الكمية الافتتاحية':'Opening quantity'}</label><input id="invQty" type="number" min="0" step="0.01" value="0"></div>`}</div>
-      <button type="submit" class="submit-btn">${lang==='ar'?'حفظ الصنف':'Save item'}</button>
+      <div class="inventory-form-grid">
+        <div class="field full"><label>${lang==='ar'?'اسم الصنف بالعربية':'Arabic item name'}</label><input id="invNameAr" required value="${val(item?.ar)}"></div>
+        <div class="field full"><label>${lang==='ar'?'الاسم بالإنجليزية':'English item name'}</label><input id="invNameEn" value="${val(item?.en)}"></div>
+        <div class="field"><label>${lang==='ar'?'التصنيف':'Category'}</label><input id="invCatAr" value="${val(item?.cat_ar)}"></div>
+        <div class="field"><label>SKU</label><input id="invSku" value="${val(item?.sku)}"></div>
+        <div class="field full"><label>${lang==='ar'?'الفرع / الموقع':'Branch / location'}</label><input id="invBranchAr" value="${val(item?.branch_ar)}"></div>
+        <div class="field"><label>${lang==='ar'?'الحد الأدنى':'Minimum quantity'}</label><input id="invMin" type="number" min="0" step="0.01" value="${item?.min??0}"></div>
+        <div class="field"><label>${lang==='ar'?'الوحدة':'Unit'}</label><input id="invUnitAr" value="${val(item?.unit_ar)}" placeholder="${lang==='ar'?'قطعة، صندوق...':'pcs, boxes...'}"></div>
+        <div class="field"><label>${lang==='ar'?'سعر الوحدة':'Unit price'}</label><input id="invPrice" type="number" min="0" step="0.01" value="${item?.price??0}"></div>
+        ${item?'':`<div class="field"><label>${lang==='ar'?'الكمية الافتتاحية':'Opening quantity'}</label><input id="invQty" type="number" min="0" step="0.01" value="0"></div>`}
+      </div>
+      <div class="inventory-form-actions"><button type="submit" class="submit-btn">${lang==='ar'?'حفظ الصنف':'Save item'}</button></div>
     </form>`;
+  document.getElementById('addModalBody').classList.add('inventory-modal');
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
 async function submitInventoryItem(e,id){
@@ -4449,7 +4465,7 @@ function openAddModal(){
     </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
-function closeAddModal(){ document.getElementById('addModalOverlay').classList.add('hidden'); }
+function closeAddModal(){ document.getElementById('addModalOverlay').classList.add('hidden'); document.getElementById('addModalBody').classList.remove('inventory-modal'); }
 async function submitAddTask(e){
   e.preventDefault();
   const title = document.getElementById('newTitle').value.trim();
