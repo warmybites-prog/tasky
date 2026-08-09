@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V27: real events + profile avatars + linked tasks -->
+<!-- Tasky V28: advanced events + costs + PDF reports + transparent avatars + manager access fix -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1199,6 +1199,49 @@
     .event-participants-picker{grid-template-columns:1fr;max-height:230px;}
   }
 
+
+  /* ---------------- V28 ADVANCED EVENTS ---------------- */
+  .avatar.has-photo,.settings-profile-avatar.has-photo{background:transparent!important;}
+  .avatar.has-photo img,.settings-profile-avatar.has-photo img{object-fit:contain!important;background:transparent!important;}
+  #eventModalBody.modal{width:min(920px,94vw);max-width:94vw;}
+  .event-finance-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin:15px 0;}
+  .event-finance-card{border:1px solid var(--border);background:var(--paper);border-radius:13px;padding:12px 13px;min-width:0;}
+  .event-finance-card span{display:block;font-size:10.5px;color:var(--muted);margin-bottom:4px;}
+  .event-finance-card b{display:block;font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .event-finance-card.negative b{color:var(--danger);}
+  .event-info-strip{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:12px 0;}
+  .event-info-box{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:10px 11px;min-width:0;}
+  .event-info-box svg{width:16px;height:16px;flex:none;color:var(--green);margin-top:1px;}
+  .event-info-box div{min-width:0;}
+  .event-info-box b,.event-info-box span,.event-info-box a{display:block;font-size:11.5px;line-height:1.55;overflow-wrap:anywhere;}
+  .event-info-box span{color:var(--muted);font-size:10.5px;}
+  .event-info-box a{color:var(--green);font-weight:700;text-decoration:none;margin-top:2px;}
+  .event-section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:18px 0 8px;}
+  .event-section-head h4{font-size:13px;}
+  .event-task-card{border:1px solid var(--border);border-radius:13px;background:var(--card);overflow:hidden;margin-bottom:8px;}
+  .event-task-head{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:9px;align-items:center;padding:10px 11px;background:var(--paper);}
+  .event-task-title{font-size:12px;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .event-task-meta{display:flex;flex-wrap:wrap;align-items:center;gap:7px;color:var(--muted);font-size:10.5px;margin-top:3px;}
+  .event-task-actions{display:flex;align-items:center;gap:6px;}
+  .event-subtask-list{display:flex;flex-direction:column;padding:5px 11px 9px;}
+  .event-subtask-row{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid color-mix(in srgb,var(--border) 70%,transparent);font-size:11px;}
+  .event-subtask-row:last-child{border-bottom:0;}
+  .event-subtask-row.done .event-subtask-title{text-decoration:line-through;color:var(--muted);}
+  .event-budget-progress{height:6px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:7px;}
+  .event-budget-progress span{height:100%;display:block;background:var(--green);border-radius:inherit;}
+  .event-budget-progress.over span{background:var(--danger);}
+  .event-modal-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:18px;}
+  .event-modal-actions .submit-btn{flex:1;min-width:180px;}
+  .event-report-btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;}
+  @media(max-width:700px){
+    #eventModalBody.modal{width:100vw;max-width:100vw;max-height:96dvh;border-radius:22px 22px 0 0;padding:18px 15px 20px;}
+    .event-finance-grid{grid-template-columns:1fr 1fr;}
+    .event-finance-card:first-child{grid-column:1/-1;}
+    .event-info-strip{grid-template-columns:1fr;}
+    .event-task-head{grid-template-columns:auto minmax(0,1fr);}
+    .event-task-actions{grid-column:1/-1;justify-content:flex-end;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1422,7 +1465,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V27'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V28'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1550,6 +1593,7 @@ function scheduleTaskRealtimeRefresh(){
     await fetchTasks();
     if(currentDetailTaskId){ await fetchTaskDetailExtras(currentDetailTaskId); renderTaskDetailModal(currentDetailTaskId); }
     renderAll();
+    if(activeNav==='events') renderModule();
   },220);
 }
 
@@ -1634,6 +1678,7 @@ async function fetchTasks(){
       id: row.id,
       projectId: row.project_id,
       eventId: row.event_id || null,
+      cost: Number(row.cost||0),
       col: row.col,
       tag: row.tag || 'operations',
       ar: row.title_ar,
@@ -1765,7 +1810,7 @@ async function finishInviteSetup(){
   const alreadyActive = await hasActiveMembershipForInvite(verifiedUser);
 
   if(!claimed && !alreadyActive){
-    errBox.textContent = 'تم حفظ كلمة المرور، لكن تعذّر تفعيل عضوية الفريق. أعد فتح رابط الدعوة أو تواصل مع مسؤول مساحة العمل.';
+    errBox.textContent = 'تم حفظ كلمة المرور، لكن تعذّر تفعيل عضوية الفريق. أعد فتح رابط الدعوة أو تواصل مع مدير مساحة العمل.';
     errBox.style.display = 'block';
     btn.disabled = false;
     btn.textContent = 'إعادة محاولة التفعيل';
@@ -2083,7 +2128,7 @@ const STR = {
     teamPendingInvites:"دعوات معلّقة", teamPendingInvitesTrend:"بانتظار القبول",
     teamAllTitle:"أعضاء الفريق", teamInvite:"دعوة عضو",
     teamColMember:"العضو", teamColEmail:"البريد الإلكتروني", teamColRole:"الصلاحية", teamColActions:"",
-    role_admin:"أدمن", role_member:"عضو",
+    role_admin:"مدير", role_member:"عضو",
     teamRemove:"إزالة", teamRemoveConfirm:n=>`إزالة ${n} من الفريق؟`,
     modalInvite:"دعوة عضو جديد", fieldInviteName:"الاسم", fieldInviteNamePh:"مثال: عبدالله القحطاني",
     fieldInviteEmail:"البريد الإلكتروني", fieldInviteEmailPh:"مثال: name@company.com",
@@ -2347,7 +2392,7 @@ const NAV_ITEMS = [
   { id: "assets", key:"nav_assets", icon: "i-layers", group:"grp_other" },
   { id: "reports", key:"nav_reports", icon: "i-download", group:"grp_other" },
   { id: "settings", key:"nav_settings", icon: "i-settings", group:"grp_account", always:true },
-  { id: "team", key:"nav_team", icon: "i-users", group:"grp_account" },
+  { id: "team", key:"nav_team", icon: "i-users", group:"grp_account", always:true },
   { id: "billing", key:"nav_billing", icon: "i-crown", group:"grp_account", adminOnly:true },
 ];
 const NOTIFICATIONS = [
@@ -2526,8 +2571,8 @@ async function fetchExternalData(serviceId){
   'modules' lists which nav sections a plan unlocks; 'all' unlocks everything.
 */
 const PLANS = {
-  free:     { id:"free",     price:0,   priceYear:0,   seats:5,        modules:["tasks","inventory","events"] },
-  pro:      { id:"pro",      price:149, priceYear:124, seats:25,       modules:["tasks","inventory","events","content","campaigns","budgets","vendors","media","requests","comms","assets","reports","analytics","integrations"] },
+  free:     { id:"free",     price:0,   priceYear:0,   seats:5,        modules:["tasks","inventory","events","team"] },
+  pro:      { id:"pro",      price:149, priceYear:124, seats:25,       modules:["tasks","inventory","events","content","campaigns","budgets","vendors","media","requests","comms","assets","reports","analytics","integrations","team"] },
   business: { id:"business", price:null,priceYear:null,seats:Infinity, modules:"all" },
 };
 function planAllows(planId, moduleId){
@@ -2633,7 +2678,7 @@ function projectRoleFor(projectId,userId=currentUserId){
   return projectMembershipFor(projectId,userId)?.role || null;
 }
 function projectRoleLabel(role){
-  const ar={admin:'مسؤول مساحة العمل',manager:'مدير المشروع',editor:'محرر',viewer:'مشاهد'};
+  const ar={admin:'مدير مساحة العمل',manager:'مدير المشروع',editor:'محرر',viewer:'مشاهد'};
   const en={admin:'Workspace admin',manager:'Project manager',editor:'Editor',viewer:'Viewer'};
   return (lang==='ar'?ar:en)[role] || (lang==='ar'?'بدون وصول':'No access');
 }
@@ -2682,7 +2727,7 @@ function memberAvatarHtml(member,size=26){
   if(!member) return avatarHtml('؟','var(--blue)',size);
   const title = escapeHtml(member.fullName || member.email || '');
   if(member.avatarUrl){
-    return `<div class="avatar" title="${title}" style="width:${size}px;height:${size}px;overflow:hidden;background:${member.color}"><img src="${escapeHtml(member.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:cover"></div>`;
+    return `<div class="avatar has-photo" title="${title}" style="width:${size}px;height:${size}px;overflow:hidden;background:transparent"><img src="${escapeHtml(member.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:contain;background:transparent"></div>`;
   }
   return `<div class="avatar" title="${title}" style="width:${size}px;height:${size}px;font-size:${size*0.38}px;background:${member.color}">${escapeHtml(member.initials || '؟')}</div>`;
 }
@@ -3294,32 +3339,56 @@ function contentActionButtons(c){
 function moveContent(id,stage){ contentItems = contentItems.map(c => c.id===id ? {...c, stage} : c); renderModule(); }
 
 /* ================= EVENTS MODULE ================= */
+function eventLinkedTasks(eventId){ return tasks.filter(task=>task.eventId===eventId); }
+function eventTaskCosts(eventId){ return eventLinkedTasks(eventId).reduce((sum,t)=>sum+Number(t.cost||0),0); }
+function eventRemainingBudget(ev){ return Number(ev?.budget||0)-eventTaskCosts(ev?.id); }
+function eventTaskStatusLabel(task){ const c=COLUMNS.find(x=>x.id===task.col); return c?t(c.key):(task.col||''); }
+function eventBudgetPct(ev){ const b=Number(ev?.budget||0), c=eventTaskCosts(ev?.id); return b>0?Math.min(100,Math.round(c/b*100)):(c>0?100:0); }
+function eventContactHtml(ev){
+  if(!ev?.contactName && !ev?.contactPhone && !ev?.contactEmail) return '';
+  return `<div class="event-info-box"><svg><use href="#i-users"/></svg><div><b>${escapeHtml(ev.contactName|| (lang==='ar'?'جهة التواصل':'Contact'))}</b>${ev.contactPhone?`<a href="tel:${escapeHtml(ev.contactPhone)}">${escapeHtml(ev.contactPhone)}</a>`:''}${ev.contactEmail?`<a href="mailto:${escapeHtml(ev.contactEmail)}">${escapeHtml(ev.contactEmail)}</a>`:''}<span>${lang==='ar'?'بيانات التواصل':'Contact details'}</span></div></div>`;
+}
+function eventLocationHtml(ev){
+  if(!ev?.location && !ev?.googleMapsUrl) return '';
+  return `<div class="event-info-box"><svg><use href="#i-map"/></svg><div>${ev.location?`<b>${escapeHtml(ev.location)}</b>`:''}${ev.googleMapsUrl?`<a href="${escapeHtml(ev.googleMapsUrl)}" target="_blank" rel="noopener">${lang==='ar'?'فتح الموقع في Google Maps':'Open in Google Maps'}</a>`:''}<span>${lang==='ar'?'الموقع':'Location'}</span></div></div>`;
+}
+function eventTaskCardHtml(task,ev){
+  const col=COLUMNS.find(c=>c.id===task.col);
+  const cost=Number(task.cost||0);
+  const canEdit=canEditTaskClient(task);
+  const subtasks=task.subtaskItems||[];
+  return `<div class="event-task-card">
+    <div class="event-task-head"><span class="dot" style="width:9px;height:9px;border-radius:50%;background:${col?.dot||'var(--muted)'}"></span><div style="min-width:0"><div class="event-task-title">${escapeHtml(taskTitle(task))}</div><div class="event-task-meta"><span>${t(col?.key||'col_todo')}</span>${cost>0?`<span>· ${lang==='ar'?'تكلفة':'Cost'}: ${fmtMoney(cost)}</span>`:''}<span>· ${subtasks.length} ${lang==='ar'?'فرعية':'subtasks'}</span>${assigneeStackHtml(task.assignees,22,3)}</div></div><div class="event-task-actions"><button type="button" class="chip-btn" style="padding:5px 8px;font-size:10.5px" onclick="closeEventModal();openDetailModal('${task.id}')">${lang==='ar'?'فتح':'Open'}</button>${canEdit?`<button type="button" class="chip-btn" style="padding:5px 8px;font-size:10.5px" onclick="openEventSubtaskModal('${ev.id}','${task.id}')">+ ${lang==='ar'?'فرعية':'Subtask'}</button>`:''}</div></div>
+    <div class="event-subtask-list">${subtasks.length?subtasks.map(s=>`<div class="event-subtask-row ${s.is_completed?'done':''}"><span>${s.is_completed?'✓':'○'}</span><span class="event-subtask-title">${escapeHtml(s.title)}</span>${assigneeStackHtml(s.assignees,21,3)}</div>`).join(''):`<div class="empty-mini" style="padding:7px 0">${lang==='ar'?'لا توجد مهام فرعية':'No subtasks'}</div>`}</div>
+  </div>`;
+}
 function eventsTemplate(){
   const totalBudget=events.reduce((sum,e)=>sum+e.budget,0);
+  const totalCosts=events.reduce((sum,e)=>sum+eventTaskCosts(e.id),0);
   const totalParticipants=events.reduce((sum,e)=>sum+(e.participantIds?.length||0),0);
   const upcoming=events.filter(e=>e.startAt && new Date(e.startAt)>=new Date()).sort((a,b)=>new Date(a.startAt)-new Date(b.startAt));
   const nearest=upcoming[0]||null;
   return `
     <div class="stats-row">
       <div class="stat-card"><div class="top"><span class="label">${t('evThisQuarter')}</span><div class="icon" style="background:var(--blue-light)"><svg><use href="#i-calendar"/></svg></div></div><div class="value">${events.length}</div><span class="trend" style="color:var(--muted)">${lang==='ar'?'فعاليات مساحة العمل':'Workspace events'}</span></div>
-      <div class="stat-card"><div class="top"><span class="label">${t('evTotalBudget')}</span><div class="icon" style="background:var(--blue-deep)"><svg><use href="#i-wallet"/></svg></div></div><div class="value" style="font-size:18px">${fmtMoney(totalBudget)}</div><span class="trend" style="color:var(--muted)">${lang==='ar'?'إجمالي الميزانيات المخططة':'Total planned budgets'}</span></div>
+      <div class="stat-card"><div class="top"><span class="label">${t('evTotalBudget')}</span><div class="icon" style="background:var(--blue-deep)"><svg><use href="#i-wallet"/></svg></div></div><div class="value" style="font-size:18px">${fmtMoney(totalBudget)}</div><span class="trend" style="color:var(--muted)">${lang==='ar'?`تكلفة المهام: ${fmtMoney(totalCosts)}`:`Task costs: ${fmtMoney(totalCosts)}`}</span></div>
       <div class="stat-card"><div class="top"><span class="label">${lang==='ar'?'المشاركون':'Participants'}</span><div class="icon" style="background:var(--teal)"><svg><use href="#i-users"/></svg></div></div><div class="value">${totalParticipants}</div><span class="trend" style="color:var(--muted)">${lang==='ar'?'تكليفات أعضاء الفريق':'Team assignments'}</span></div>
       <div class="stat-card"><div class="top"><span class="label">${t('evNearest')}</span><div class="icon" style="background:var(--green)"><svg><use href="#i-flag"/></svg></div></div><div class="value" style="font-size:14px;line-height:1.5">${nearest?escapeHtml(L(nearest,'')):'—'}</div><span class="trend" style="color:var(--muted)">${nearest?escapeHtml(formatEventDate(nearest.startAt)):(lang==='ar'?'لا توجد فعالية قادمة':'No upcoming event')}</span></div>
     </div>
     <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap">
-      <div><h3 style="font-size:15px">${t('evUpcoming')}</h3><div style="font-size:11.5px;color:var(--muted);margin-top:3px">${lang==='ar'?'إدارة المواعيد والمشاركين وربط المهام بالفعاليات':'Manage dates, participants, and event-linked tasks'}</div></div>
+      <div><h3 style="font-size:15px">${t('evUpcoming')}</h3><div style="font-size:11.5px;color:var(--muted);margin-top:3px">${lang==='ar'?'إدارة المواعيد، الموقع، التواصل، المهام وميزانية الفعالية':'Manage dates, location, contacts, tasks, and event budget'}</div></div>
       <button class="primary-btn" onclick="openEventModal()"><svg><use href="#i-plus"/></svg> ${t('evNewEvent')}</button>
     </div>
     <div class="event-grid">
       ${events.map(ev=>{
-        const participants=eventParticipants(ev);
-        const linked=tasks.filter(task=>task.eventId===ev.id);
-        const colors=eventStatusStyle(ev.status);
+        const participants=eventParticipants(ev), linked=eventLinkedTasks(ev.id), colors=eventStatusStyle(ev.status), costs=eventTaskCosts(ev.id), remaining=eventRemainingBudget(ev), pct=eventBudgetPct(ev);
         return `<div class="event-card" onclick="openEventModal('${ev.id}')">
           <div class="event-card-top"><span class="event-date-badge"><svg style="width:12px;height:12px"><use href="#i-calendar"/></svg>${escapeHtml(formatEventDate(ev.startAt))}</span><span class="tag" style="background:${colors[0]};color:${colors[1]};width:fit-content">${escapeHtml(eventStatusLabel(ev.status))}</span></div>
           <h4>${escapeHtml(L(ev,''))}</h4>
           ${ev.location?`<div class="event-meta-row"><svg style="width:13px;height:13px"><use href="#i-map"/></svg>${escapeHtml(ev.location)}</div>`:''}
-          <div class="event-meta-row"><svg style="width:13px;height:13px"><use href="#i-wallet"/></svg>${fmtMoney(ev.budget)}</div>
+          ${ev.googleMapsUrl?`<div class="event-meta-row"><a href="${escapeHtml(ev.googleMapsUrl)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:var(--green);text-decoration:none;font-weight:700">Google Maps ↗</a></div>`:''}
+          <div class="event-meta-row"><svg style="width:13px;height:13px"><use href="#i-wallet"/></svg>${fmtMoney(costs)} / ${fmtMoney(ev.budget)} · ${lang==='ar'?'متبقي':'left'} ${fmtMoney(remaining)}</div>
+          <div class="event-budget-progress ${remaining<0?'over':''}"><span style="width:${pct}%"></span></div>
           ${ev.capacity?`<div><div style="display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-bottom:4px"><span>${lang==='ar'?'الفريق المشارك / السعة':'Team / capacity'}</span><span>${participants.length} / ${ev.capacity}</span></div><div class="progress-bar"><span style="width:${Math.min(100,(participants.length/Math.max(1,ev.capacity))*100)}%;background:var(--blue-light)"></span></div></div>`:''}
           <div class="event-participant-row"><div>${assigneeStackHtml(participants,25,4)}</div><span class="event-task-count"><svg style="width:13px;height:13px"><use href="#i-check"/></svg>${linked.length} ${lang==='ar'?'مهمة':'tasks'}</span></div>
         </div>`;
@@ -3330,10 +3399,14 @@ function openEventModal(id=null){
   const ev=id?eventById(id):null;
   const selected=new Set(ev?.participantIds||[]);
   const members=assignableMembers();
-  const linked=ev?tasks.filter(t=>t.eventId===ev.id):[];
+  const linked=ev?eventLinkedTasks(ev.id):[];
+  const costs=ev?eventTaskCosts(ev.id):0;
+  const remaining=ev?eventRemainingBudget(ev):0;
+  const pct=ev?eventBudgetPct(ev):0;
   const canDelete=!!ev && (currentUserRole==='admin' || ev.createdBy===currentUserId);
   document.getElementById('eventModalBody').innerHTML=`
     <div class="modal-head"><div><h3>${ev?(lang==='ar'?'تفاصيل الفعالية':'Event details'):t('eventModalTitle')}</h3>${ev?`<div style="font-size:11px;color:var(--muted);margin-top:3px">${linked.length} ${lang==='ar'?'مهمة مرتبطة':'linked tasks'}</div>`:''}</div><button class="modal-close" onclick="closeEventModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
+    ${ev?`<div class="event-finance-grid"><div class="event-finance-card"><span>${lang==='ar'?'ميزانية الفعالية':'Event budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="event-finance-card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="event-finance-card ${remaining<0?'negative':''}"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b><div class="event-budget-progress ${remaining<0?'over':''}"><span style="width:${pct}%"></span></div></div></div><div class="event-info-strip">${eventLocationHtml(ev)}${eventContactHtml(ev)}</div>`:''}
     <form onsubmit="submitEvent(event,'${ev?.id||''}')">
       <div class="event-form-grid">
         <div class="field full"><label>${lang==='ar'?'اسم الفعالية بالعربية':'Arabic event name'}</label><input id="evTitleAr" required maxlength="180" value="${escapeHtml(ev?.ar||'')}"></div>
@@ -3341,14 +3414,18 @@ function openEventModal(id=null){
         <div class="field full"><label>${lang==='ar'?'الوصف':'Description'}</label><textarea id="evDescription" placeholder="${lang==='ar'?'الهدف من الفعالية، المخرجات أو الملاحظات...':'Purpose, expected outcome, or notes...'}">${escapeHtml(ev?.description||'')}</textarea></div>
         <div class="field"><label>${lang==='ar'?'بداية الفعالية':'Starts'}</label><input id="evStart" type="datetime-local" value="${toDatetimeLocal(ev?.startAt)}"></div>
         <div class="field"><label>${lang==='ar'?'نهاية الفعالية':'Ends'}</label><input id="evEnd" type="datetime-local" value="${toDatetimeLocal(ev?.endAt)}"></div>
-        <div class="field full"><label>${t('fieldEventLoc')}</label><input id="evLocation" value="${escapeHtml(ev?.location||'')}" placeholder="${t('fieldEventLocPh')}"></div>
+        <div class="field"><label>${t('fieldEventLoc')}</label><input id="evLocation" value="${escapeHtml(ev?.location||'')}" placeholder="${t('fieldEventLocPh')}"></div>
+        <div class="field"><label>${lang==='ar'?'رابط Google Maps (اختياري)':'Google Maps link (optional)'}</label><input id="evMapsUrl" type="url" dir="ltr" value="${escapeHtml(ev?.googleMapsUrl||'')}" placeholder="https://maps.app.goo.gl/..."></div>
+        <div class="field"><label>${lang==='ar'?'اسم شخص التواصل':'Contact person'}</label><input id="evContactName" value="${escapeHtml(ev?.contactName||'')}" placeholder="${lang==='ar'?'اختياري':'Optional'}"></div>
+        <div class="field"><label>${lang==='ar'?'رقم التواصل':'Contact phone'}</label><input id="evContactPhone" type="tel" dir="ltr" value="${escapeHtml(ev?.contactPhone||'')}" placeholder="+966..."></div>
+        <div class="field full"><label>${lang==='ar'?'بريد التواصل':'Contact email'}</label><input id="evContactEmail" type="email" dir="ltr" value="${escapeHtml(ev?.contactEmail||'')}" placeholder="name@example.com"></div>
         <div class="field"><label>${t('fieldEventBudget')}</label><input id="evBudget" type="number" min="0" step="0.01" value="${ev?.budget??0}"></div>
         <div class="field"><label>${t('fieldEventCapacity')}</label><input id="evCapacity" type="number" min="0" step="1" value="${ev?.capacity??0}"></div>
         <div class="field full"><label>${lang==='ar'?'الحالة':'Status'}</label><select id="evStatus"><option value="preparing" ${ev?.status==='preparing'?'selected':''}>${lang==='ar'?'قيد التحضير':'In preparation'}</option><option value="confirmed" ${ev?.status==='confirmed'?'selected':''}>${lang==='ar'?'مؤكدة':'Confirmed'}</option><option value="completed" ${ev?.status==='completed'?'selected':''}>${lang==='ar'?'مكتملة':'Completed'}</option><option value="cancelled" ${ev?.status==='cancelled'?'selected':''}>${lang==='ar'?'ملغاة':'Cancelled'}</option></select></div>
         <div class="field full"><label>${lang==='ar'?'أعضاء الفريق المشاركون':'Participating team members'}</label><div class="event-participants-picker">${members.map(m=>`<label class="event-participant-option">${memberAvatarHtml(m,29)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" data-event-participant value="${m.userId}" ${selected.has(m.userId)?'checked':''}></label>`).join('') || `<div style="color:var(--muted);font-size:12px">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active members'}</div>`}</div></div>
       </div>
-      ${ev?`<div style="margin-top:16px"><label style="font-size:12px;font-weight:700">${lang==='ar'?'المهام المرتبطة':'Linked tasks'}</label><div class="event-linked-tasks">${linked.map(task=>{const col=COLUMNS.find(c=>c.id===task.col);return `<div class="event-linked-task"><span class="dot" style="background:${col?.dot||'var(--muted)'}"></span><span style="flex:1">${escapeHtml(taskTitle(task))}</span><button type="button" class="chip-btn" style="padding:4px 8px;font-size:10.5px" onclick="closeEventModal();openDetailModal('${task.id}')">${lang==='ar'?'فتح':'Open'}</button></div>`}).join('')||`<div style="font-size:11.5px;color:var(--muted)">${lang==='ar'?'يمكن ربط المهام بهذه الفعالية من نافذة تفاصيل المهمة.':'Link tasks to this event from the task details panel.'}</div>`}</div></div>`:''}
-      <div style="display:flex;gap:9px;align-items:center;margin-top:18px;flex-wrap:wrap"><button type="submit" class="submit-btn" style="flex:1;min-width:180px">${ev?(lang==='ar'?'حفظ التغييرات':'Save changes'):t('submitAddEvent')}</button>${canDelete?`<button type="button" class="chip-btn" style="color:var(--danger)" onclick="deleteEvent('${ev.id}')">${lang==='ar'?'حذف الفعالية':'Delete event'}</button>`:''}</div>
+      ${ev?`<div class="event-section-head"><h4>${lang==='ar'?'مهام الفعالية':'Event tasks'}</h4><button type="button" class="chip-btn" onclick="openEventTaskModal('${ev.id}')">+ ${lang==='ar'?'إضافة مهمة':'Add task'}</button></div><div>${linked.map(task=>eventTaskCardHtml(task,ev)).join('')||`<div class="empty-mini">${lang==='ar'?'لا توجد مهام مرتبطة بعد':'No linked tasks yet'}</div>`}</div>`:''}
+      <div class="event-modal-actions"><button type="submit" class="submit-btn">${ev?(lang==='ar'?'حفظ التغييرات':'Save changes'):t('submitAddEvent')}</button>${ev?`<button type="button" class="chip-btn event-report-btn" onclick="exportEventPdf('${ev.id}')"><svg style="width:15px;height:15px"><use href="#i-download"/></svg>${lang==='ar'?'تقرير PDF':'PDF report'}</button>`:''}${canDelete?`<button type="button" class="chip-btn" style="color:var(--danger)" onclick="deleteEvent('${ev.id}')">${lang==='ar'?'حذف الفعالية':'Delete event'}</button>`:''}</div>
     </form>`;
   document.getElementById('eventModalOverlay').classList.remove('hidden');
 }
@@ -3356,20 +3433,15 @@ function closeEventModal(){ document.getElementById('eventModalOverlay').classLi
 async function submitEvent(e,id){
   e.preventDefault();
   const participantIds=[...document.querySelectorAll('[data-event-participant]:checked')].map(x=>x.value);
-  const startVal=document.getElementById('evStart').value;
-  const endVal=document.getElementById('evEnd').value;
+  const startVal=document.getElementById('evStart').value, endVal=document.getElementById('evEnd').value;
   const args={
-    p_workspace_id:currentWorkspaceId,
-    p_event_id:id||null,
-    p_title_ar:document.getElementById('evTitleAr').value.trim(),
-    p_title_en:document.getElementById('evTitleEn').value.trim()||null,
+    p_workspace_id:currentWorkspaceId,p_event_id:id||null,
+    p_title_ar:document.getElementById('evTitleAr').value.trim(),p_title_en:document.getElementById('evTitleEn').value.trim()||null,
     p_description:document.getElementById('evDescription').value.trim()||null,
-    p_start_at:startVal?new Date(startVal).toISOString():null,
-    p_end_at:endVal?new Date(endVal).toISOString():null,
-    p_location:document.getElementById('evLocation').value.trim()||null,
-    p_budget:Number(document.getElementById('evBudget').value||0),
-    p_capacity:Number(document.getElementById('evCapacity').value||0),
-    p_status:document.getElementById('evStatus').value
+    p_start_at:startVal?new Date(startVal).toISOString():null,p_end_at:endVal?new Date(endVal).toISOString():null,
+    p_location:document.getElementById('evLocation').value.trim()||null,p_google_maps_url:document.getElementById('evMapsUrl').value.trim()||null,
+    p_contact_name:document.getElementById('evContactName').value.trim()||null,p_contact_phone:document.getElementById('evContactPhone').value.trim()||null,p_contact_email:document.getElementById('evContactEmail').value.trim()||null,
+    p_budget:Number(document.getElementById('evBudget').value||0),p_capacity:Number(document.getElementById('evCapacity').value||0),p_status:document.getElementById('evStatus').value
   };
   const {data,error}=await sb.rpc('tasky_save_event',args);
   if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ الفعالية':'Could not save event',message:error.message,tone:'error'});return;}
@@ -3377,6 +3449,44 @@ async function submitEvent(e,id){
   const participantSave=await sb.rpc('tasky_set_event_participants',{p_event_id:eventId,p_user_ids:participantIds});
   if(participantSave.error){showTaskyDialog({title:lang==='ar'?'تم حفظ الفعالية لكن تعذّر حفظ المشاركين':'Event saved, participants failed',message:participantSave.error.message,tone:'warning'});}
   closeEventModal(); await fetchEvents(); renderModule(); taskyToast(id?(lang==='ar'?'تم تحديث الفعالية':'Event updated'):(lang==='ar'?'تمت إضافة الفعالية':'Event added'),{tone:'success'});
+}
+function openEventTaskModal(eventId){
+  const ev=eventById(eventId); if(!ev)return;
+  const editable=projects.filter(p=>canCreateTaskInProject(p.id));
+  if(!editable.length){ taskyToast(lang==='ar'?'لا توجد مشاريع لديك صلاحية إنشاء مهام فيها':'You do not have task creation access in any project',{tone:'warning'}); return; }
+  const projectId=editable[0].id;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة جديدة للفعالية':'New event task'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(L(ev,''))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitEventTask(event,'${eventId}')"><div class="field"><label>${lang==='ar'?'عنوان المهمة':'Task title'}</label><input id="eventTaskTitle" required maxlength="220"></div><div class="field"><label>${lang==='ar'?'المشروع':'Project'}</label><select id="eventTaskProject" onchange="refreshEventTaskAssignees(this.value)">${editable.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="eventTaskPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div><div class="field"><label>${lang==='ar'?'تكلفة المهمة':'Task cost'}</label><input id="eventTaskCost" type="number" min="0" step="0.01" value="0"></div></div><div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label><div id="eventTaskAssignees">${createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId)})}</div></div><button class="submit-btn" type="submit">${lang==='ar'?'إضافة المهمة':'Add task'}</button></form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+function refreshEventTaskAssignees(projectId){ const box=document.getElementById('eventTaskAssignees'); if(box) box.innerHTML=createAssigneePickerHtml([],{prefix:'eventTaskAssignee',members:projectAssignableMembers(projectId)}); }
+async function submitEventTask(e,eventId){
+  e.preventDefault(); const title=document.getElementById('eventTaskTitle').value.trim(); if(!title)return;
+  const projectId=document.getElementById('eventTaskProject').value, priority=document.getElementById('eventTaskPriority').value, cost=Math.max(0,Number(document.getElementById('eventTaskCost').value||0));
+  const assigneeIds=[...document.querySelectorAll('[data-assignee-box="eventTaskAssignee"]:checked')].map(x=>x.value); const lead=taskMemberById(assigneeIds[0]);
+  const payload={workspace_id:currentWorkspaceId,project_id:projectId,event_id:eventId,col:'todo',tag:'events',title_ar:title,title_en:title,description:null,priority,cost,assignee_id:lead?.userId||null,assignee_initials:lead?.initials||null,assignee_color:lead?.color||null,comments_count:0,subtasks_done:0,subtasks_total:0};
+  const {data,error}=await sb.from('tasks').insert(payload).select().single(); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إنشاء مهمة الفعالية':'Could not create event task',message:error.message,tone:'error'});return;}
+  if(assigneeIds.length){const rows=assigneeIds.map((userId,i)=>({task_id:data.id,workspace_id:currentWorkspaceId,user_id:userId,is_lead:i===0,assigned_by:currentUserId}));const r=await sb.from('task_assignees').insert(rows);if(r.error) console.warn(r.error);}
+  await logTaskActivity(data.id,'task_created',{title,event_id:eventId,cost}); closeAddModal(); await fetchTasks(); openEventModal(eventId); renderAll(); taskyToast(lang==='ar'?'تمت إضافة مهمة للفعالية':'Event task added',{tone:'success'});
+}
+function openEventSubtaskModal(eventId,taskId){
+  const task=tasks.find(t=>t.id===taskId); if(!task||!canEditTaskClient(task))return;
+  const members=projectAssignableMembers(task.projectId);
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'مهمة فرعية جديدة':'New subtask'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${escapeHtml(taskTitle(task))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitEventSubtask(event,'${eventId}','${taskId}')"><div class="field"><label>${lang==='ar'?'عنوان المهمة الفرعية':'Subtask title'}</label><input id="eventSubtaskTitle" required maxlength="220"></div><div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label>${createAssigneePickerHtml([],{prefix:'eventSubtaskAssignee',members})}</div><button class="submit-btn" type="submit">${lang==='ar'?'إضافة المهمة الفرعية':'Add subtask'}</button></form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function submitEventSubtask(e,eventId,taskId){
+  e.preventDefault(); const title=document.getElementById('eventSubtaskTitle').value.trim(); if(!title)return; const task=tasks.find(t=>t.id===taskId); if(!task||!canEditTaskClient(task))return;
+  const position=(task.subtaskItems?.length||0)+1; const {data,error}=await sb.from('subtasks').insert({workspace_id:currentWorkspaceId,task_id:taskId,title,position,created_by:currentUserId}).select('id').single(); if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إضافة المهمة الفرعية':'Could not add subtask',message:error.message,tone:'error'});return;}
+  const ids=[...document.querySelectorAll('[data-assignee-box="eventSubtaskAssignee"]:checked')].map(x=>x.value); if(ids.length){const rows=ids.map(user_id=>({subtask_id:data.id,workspace_id:currentWorkspaceId,user_id,assigned_by:currentUserId}));const r=await sb.from('subtask_assignees').insert(rows);if(r.error) console.warn(r.error);}
+  await logTaskActivity(taskId,'subtask_added',{title,from_event:true}); closeAddModal(); await fetchTasks(); openEventModal(eventId); taskyToast(lang==='ar'?'تمت إضافة المهمة الفرعية':'Subtask added',{tone:'success'});
+}
+function exportEventPdf(eventId){
+  const ev=eventById(eventId); if(!ev)return; const linked=eventLinkedTasks(eventId), participants=eventParticipants(ev), costs=eventTaskCosts(eventId), remaining=eventRemainingBudget(ev);
+  const dir=lang==='ar'?'rtl':'ltr'; const localeTitle=escapeHtml(L(ev,''));
+  const taskRows=linked.map((t,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(taskTitle(t))}</td><td>${escapeHtml((t.assignees||[]).map(x=>x.fullName).join('، ')||'—')}</td><td>${fmtMoney(Number(t.cost||0))}</td><td>${escapeHtml(eventTaskStatusLabel(t))}</td></tr><tr class="sub"><td></td><td colspan="4">${(t.subtaskItems||[]).length?(t.subtaskItems||[]).map(s=>`${s.is_completed?'✓':'○'} ${escapeHtml(s.title)}${s.assignees?.length?' - '+escapeHtml(s.assignees.map(a=>a.fullName).join('، ')):''}`).join('<br>'):(lang==='ar'?'لا توجد مهام فرعية':'No subtasks')}</td></tr>`).join('');
+  const w=window.open('','_blank'); if(!w){taskyToast(lang==='ar'?'اسمح بالنوافذ المنبثقة لتصدير التقرير':'Allow pop-ups to export the report',{tone:'warning'});return;}
+  w.document.write(`<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><title>${localeTitle}</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font-family:Arial,"Tahoma",sans-serif;color:#182018;margin:0;font-size:11px;line-height:1.55}.brand{font-size:22px;font-weight:800;color:#2A6C2E;margin-bottom:4px}.muted{color:#6b746c}.head{border-bottom:2px solid #2A6C2E;padding-bottom:12px;margin-bottom:16px}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:12px 0}.card{border:1px solid #dfe5dd;border-radius:8px;padding:9px}.card span{display:block;color:#6b746c;font-size:9px}.card b{font-size:13px}.section{margin-top:17px}.section h2{font-size:14px;margin:0 0 8px;color:#2A6C2E}.info{border:1px solid #e1e6df;border-radius:8px;padding:10px;margin:7px 0}table{width:100%;border-collapse:collapse;margin-top:7px}th,td{border:1px solid #dfe5dd;padding:7px;text-align:${dir==='rtl'?'right':'left'};vertical-align:top}th{background:#f2f5f0}.sub td{color:#5f685f;font-size:9.5px;background:#fafbf9}.footer{margin-top:18px;padding-top:9px;border-top:1px solid #dfe5dd;color:#7a8079;font-size:9px}@media print{button{display:none}}</style></head><body><div class="head"><div class="brand">${lang==='ar'?'تاسكي':'Tasky'}</div><div class="muted">${lang==='ar'?'تقرير الفعالية':'Event Report'}</div><h1 style="font-size:20px;margin:8px 0 3px">${localeTitle}</h1><div class="muted">${escapeHtml(formatEventDate(ev.startAt))}${ev.endAt?' - '+escapeHtml(formatEventDate(ev.endAt)):''}</div></div><div class="grid"><div class="card"><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="card"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b></div></div>${ev.description?`<div class="section"><h2>${lang==='ar'?'الوصف':'Description'}</h2><div class="info">${escapeHtml(ev.description)}</div></div>`:''}<div class="section"><h2>${lang==='ar'?'الموقع والتواصل':'Location & Contact'}</h2><div class="info">${ev.location?`<b>${lang==='ar'?'الموقع':'Location'}:</b> ${escapeHtml(ev.location)}<br>`:''}${ev.googleMapsUrl?`<b>Google Maps:</b> ${escapeHtml(ev.googleMapsUrl)}<br>`:''}${ev.contactName?`<b>${lang==='ar'?'شخص التواصل':'Contact'}:</b> ${escapeHtml(ev.contactName)}<br>`:''}${ev.contactPhone?`<b>${lang==='ar'?'الهاتف':'Phone'}:</b> ${escapeHtml(ev.contactPhone)}<br>`:''}${ev.contactEmail?`<b>${lang==='ar'?'البريد':'Email'}:</b> ${escapeHtml(ev.contactEmail)}`:''}</div></div><div class="section"><h2>${lang==='ar'?'المشاركون':'Participants'}</h2><div class="info">${escapeHtml(participants.map(p=>p.fullName).join('، ')||'—')}</div></div><div class="section"><h2>${lang==='ar'?'المهام والتكاليف':'Tasks & Costs'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'المهمة':'Task'}</th><th>${lang==='ar'?'المسؤولون':'Assignees'}</th><th>${lang==='ar'?'التكلفة':'Cost'}</th><th>${lang==='ar'?'الحالة':'Status'}</th></tr></thead><tbody>${taskRows||`<tr><td colspan="5">${lang==='ar'?'لا توجد مهام':'No tasks'}</td></tr>`}</tbody></table></div><div class="footer">${lang==='ar'?'تم إنشاء التقرير من منصة تاسكي':'Generated by Tasky'} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div></body></html>`);
+  w.document.close(); w.focus(); setTimeout(()=>w.print(),350);
 }
 async function deleteEvent(id){
   const ev=eventById(id); if(!ev)return;
@@ -3987,12 +4097,12 @@ function projectAccessModalHtml(projectId){
     let options=`<option value="" ${!role?'selected':''}>${lang==='ar'?'بدون وصول':'No access'}</option><option value="viewer" ${role==='viewer'?'selected':''}>${projectRoleLabel('viewer')}</option><option value="editor" ${role==='editor'?'selected':''}>${projectRoleLabel('editor')}</option>`;
     if(actorAdmin || role==='manager') options+=`<option value="manager" ${role==='manager'?'selected':''}>${projectRoleLabel('manager')}</option>`;
     if(workspaceAdmin) options=`<option selected value="manager">${projectRoleLabel('admin')}</option>`;
-    return `<div class="project-member-row"><div class="project-member-person">${memberAvatarHtml(m,32)}<div class="project-member-person-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}${protectedManager&&!workspaceAdmin?(lang==='ar'?' · يتطلب مسؤول مساحة العمل':' · Workspace admin required'):''}</span></div></div><select class="project-role-select" ${disabled?'disabled':''} onchange="setProjectMemberAccess('${projectId}','${m.userId}',this.value)">${options}</select></div>`;
+    return `<div class="project-member-row"><div class="project-member-person">${memberAvatarHtml(m,32)}<div class="project-member-person-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}${protectedManager&&!workspaceAdmin?(lang==='ar'?' · يتطلب مدير مساحة العمل':' · Workspace admin required'):''}</span></div></div><select class="project-role-select" ${disabled?'disabled':''} onchange="setProjectMemberAccess('${projectId}','${m.userId}',this.value)">${options}</select></div>`;
   }).join('');
   return `<div class="modal-head"><h3>${lang==='ar'?'إدارة وصول المشروع':'Manage project access'}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
     <div class="access-modal-project"><b>${escapeHtml(p.name)}</b><span>${lang==='ar'?`أعضاء المشروع الحاليون: ${projectMemberCount(projectId)}. إزالة الوصول تزيل أيضًا إسنادات هذا العضو من مهام المشروع.`:`Current project members: ${projectMemberCount(projectId)}. Removing access also removes that user's task assignments in this project.`}</span></div>
     <div class="project-member-list">${rows||`<div class="empty-mini">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active workspace members'}</div>`}</div>
-    <div class="permission-note"><svg><use href="#i-lock"/></svg><span>${actorAdmin?(lang==='ar'?'بصفتك مسؤول مساحة العمل يمكنك تعيين مديري المشاريع وتغيير جميع الأدوار.':'As a workspace admin, you can assign project managers and change all roles.'):(lang==='ar'?'مدير المشروع يمكنه إضافة المحررين والمشاهدين، بينما تعيين أو إزالة مدير مشروع يتطلب مسؤول مساحة العمل.':'Project managers can add editors/viewers. Assigning or removing another project manager requires a workspace admin.')}</span></div>`;
+    <div class="permission-note"><svg><use href="#i-lock"/></svg><span>${actorAdmin?(lang==='ar'?'بصفتك مدير مساحة العمل يمكنك تعيين مديري المشاريع وتغيير جميع الأدوار.':'As a workspace admin, you can assign project managers and change all roles.'):(lang==='ar'?'مدير المشروع يمكنه إضافة المحررين والمشاهدين، بينما تعيين أو إزالة مدير مشروع يتطلب مدير مساحة العمل.':'Project managers can add editors/viewers. Assigning or removing another project manager requires a workspace admin.')}</span></div>`;
 }
 function openProjectAccessModal(projectId){
   if(!canManageProjectClient(projectId)) return;
@@ -4195,8 +4305,8 @@ function settingsProfileTemplate(me){
   return `<div class="settings-card">
     <div class="settings-card-head"><div class="settings-profile-line"><div><h3>${lang==='ar'?'ملفك الشخصي':'Your profile'}</h3><p>${lang==='ar'?'هذه البيانات تظهر لأعضاء فريقك وعند إسناد المهام والإشارات.':'This information is shown to teammates, assignees, and mentions.'}</p></div></div></div>
     <div class="profile-avatar-editor">
-      <div class="settings-profile-avatar" style="background:${me?.color||'var(--green)'}" id="settingsAvatarPreview">${avatar}</div>
-      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;margin-bottom:7px">${lang==='ar'?'الصورة الشخصية':'Profile photo'}</div><div class="profile-avatar-actions"><label class="avatar-upload-label"><svg style="width:16px;height:16px"><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الصورة':'Change photo'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadMyAvatar(this)"></label>${me?.avatarUrl?`<button type="button" class="chip-btn" onclick="removeMyAvatar()">${lang==='ar'?'إزالة الصورة':'Remove photo'}</button>`:''}</div><div class="profile-avatar-note">${lang==='ar'?'PNG أو JPG أو WEBP · يتم قص الصورة وتخفيف حجمها تلقائيًا.':'PNG, JPG or WEBP · automatically cropped and optimized.'}</div></div>
+      <div class="settings-profile-avatar ${me?.avatarUrl?'has-photo':''}" style="background:${me?.avatarUrl?'transparent':(me?.color||'var(--green)')}" id="settingsAvatarPreview">${avatar}</div>
+      <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;margin-bottom:7px">${lang==='ar'?'الصورة الشخصية':'Profile photo'}</div><div class="profile-avatar-actions"><label class="avatar-upload-label"><svg style="width:16px;height:16px"><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الصورة':'Change photo'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadMyAvatar(this)"></label>${me?.avatarUrl?`<button type="button" class="chip-btn" onclick="removeMyAvatar()">${lang==='ar'?'إزالة الصورة':'Remove photo'}</button>`:''}</div><div class="profile-avatar-note">${lang==='ar'?'PNG بخلفية شفافة يبقى شفافًا · JPG أو WEBP · يتم قص الصورة وتخفيف حجمها تلقائيًا.':'Transparent PNG stays transparent · JPG or WEBP · automatically cropped and optimized.'}</div></div>
     </div>
     <form onsubmit="saveMyProfile(event)"><div class="settings-form-grid">
       <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل':'Full name'}</label><input id="settingsFullName" required maxlength="120" value="${escapeHtml(me?.fullName||'')}"></div>
@@ -4212,10 +4322,17 @@ async function optimizeAvatarFile(file){
   const dataUrl=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=()=>reject(new Error('Read failed'));r.readAsDataURL(file);});
   const img=await new Promise((resolve,reject)=>{const i=new Image();i.onload=()=>resolve(i);i.onerror=()=>reject(new Error(lang==='ar'?'تعذّر قراءة الصورة':'Could not read image'));i.src=dataUrl;});
   const side=Math.min(img.naturalWidth,img.naturalHeight); const sx=(img.naturalWidth-side)/2, sy=(img.naturalHeight-side)/2;
-  const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=512; const ctx=canvas.getContext('2d');
+  const canvas=document.createElement('canvas'); canvas.width=512; canvas.height=512; const ctx=canvas.getContext('2d',{alpha:true});
+  ctx.clearRect(0,0,512,512);
   ctx.drawImage(img,sx,sy,side,side,0,0,512,512);
-  let blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.86));
-  if(!blob) blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
+  let blob;
+  if(file.type==='image/png'){
+    // Preserve PNG transparency instead of flattening it against the avatar color.
+    blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));
+  }else{
+    blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/webp',0.86));
+    if(!blob) blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/jpeg',0.88));
+  }
   if(!blob) throw new Error(lang==='ar'?'تعذّر تجهيز الصورة':'Could not process image');
   return blob;
 }
@@ -4226,7 +4343,7 @@ async function uploadMyAvatar(input){
   const file=input?.files?.[0]; if(!file)return; const me=currentMember(); const oldUrl=me?.avatarUrl||null;
   try{
     input.disabled=true; taskyToast(lang==='ar'?'جارٍ تجهيز الصورة...':'Preparing photo...',{tone:'info',duration:1800});
-    const blob=await optimizeAvatarFile(file); const ext=blob.type==='image/webp'?'webp':'jpg'; const path=`${currentUserId}/${Date.now()}.${ext}`;
+    const blob=await optimizeAvatarFile(file); const ext=blob.type==='image/png'?'png':(blob.type==='image/webp'?'webp':'jpg'); const path=`${currentUserId}/${Date.now()}.${ext}`;
     const {error:uploadError}=await sb.storage.from('user-avatars').upload(path,blob,{contentType:blob.type,cacheControl:'3600',upsert:false});
     if(uploadError) throw uploadError;
     const {data:publicData}=sb.storage.from('user-avatars').getPublicUrl(path); const url=`${publicData.publicUrl}?v=${Date.now()}`;
@@ -4244,7 +4361,7 @@ async function removeMyAvatar(){
 function settingsWorkspaceTemplate(){
   const logo=currentWorkspaceLogoUrl?`<img src="${escapeHtml(currentWorkspaceLogoUrl)}" style="width:100%;height:100%;object-fit:cover" alt="">`:escapeHtml(workspaceInitials(currentWorkspaceName||''));
   return `<div class="settings-card">
-    <div class="settings-card-head"><div><h3>${lang==='ar'?'إعدادات مساحة العمل':'Workspace settings'}</h3><p>${lang==='ar'?'اسم الفريق وهوية مساحة العمل. التعديل متاح للأدمن فقط.':'Team name and workspace identity. Admins only.'}</p></div></div>
+    <div class="settings-card-head"><div><h3>${lang==='ar'?'إعدادات مساحة العمل':'Workspace settings'}</h3><p>${lang==='ar'?'اسم الفريق وهوية مساحة العمل. التعديل متاح للمدير فقط.':'Team name and workspace identity. Admins only.'}</p></div></div>
     <form onsubmit="saveWorkspaceSettings(event)"><div class="settings-form-grid"><div class="settings-field full"><label>${lang==='ar'?'اسم مساحة العمل':'Workspace name'}</label><input id="settingsWorkspaceName" maxlength="120" required value="${escapeHtml(currentWorkspaceName||'')}"></div></div><div class="settings-actions"><button type="button" class="chip-btn" onclick="openWorkspaceBrandingModal()"><svg><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الشعار':'Change logo'}</button><button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ':'Save'}</button></div></form>
   </div>
   <div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'ملخص مساحة العمل':'Workspace summary'}</h3></div></div><div class="settings-summary-grid"><div class="settings-summary"><span>${lang==='ar'?'الباقة الفعلية':'Active plan'}</span><b>${t('plan_'+currentPlan+'_name')}</b></div><div class="settings-summary"><span>${lang==='ar'?'الأعضاء النشطون':'Active members'}</span><b>${teamMembers.filter(m=>m.status==='active').length}</b></div><div class="settings-summary"><span>${lang==='ar'?'دورك':'Your role'}</span><b>${currentUserRole==='admin'?t('role_admin'):t('role_member')}</b></div></div></div>`;
@@ -4459,7 +4576,7 @@ function scheduleInventoryRefresh(){
 async function fetchEvents(){
   if(!currentWorkspaceId){ events=[]; eventParticipantRows=[]; return; }
   const [eventsRes,participantsRes]=await Promise.all([
-    sb.from('workspace_events').select('id,workspace_id,title_ar,title_en,description,start_at,end_at,location,budget,capacity,status,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('start_at',{ascending:true,nullsFirst:false}),
+    sb.from('workspace_events').select('id,workspace_id,title_ar,title_en,description,start_at,end_at,location,google_maps_url,contact_name,contact_phone,contact_email,budget,capacity,status,created_by,created_at,updated_at').eq('workspace_id',currentWorkspaceId).order('start_at',{ascending:true,nullsFirst:false}),
     sb.from('event_participants').select('id,event_id,workspace_id,user_id,created_by,created_at').eq('workspace_id',currentWorkspaceId)
   ]);
   if(eventsRes.error){ console.warn('V27 events unavailable; run V27 migration',eventsRes.error); events=[]; eventParticipantRows=[]; return; }
@@ -4472,6 +4589,10 @@ async function fetchEvents(){
     startAt:row.start_at||null,
     endAt:row.end_at||null,
     location:row.location||'',
+    googleMapsUrl:row.google_maps_url||'',
+    contactName:row.contact_name||'',
+    contactPhone:row.contact_phone||'',
+    contactEmail:row.contact_email||'',
     budget:Number(row.budget||0),
     capacity:Number(row.capacity||0),
     status:row.status||'preparing',
@@ -4634,6 +4755,7 @@ function openAddModal(){
       <div class="field"><label>${t('fieldTitle')}</label><input id="newTitle" required placeholder="${t('fieldTitlePh')}"></div>
       <div class="field"><label>${projectLabel}</label><select id="newProject" onchange="renderNewTaskAssignees(this.value)">${permittedProjects.map(p=>`<option value="${p.id}" ${p.id===initialProject?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
       <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="newPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
+      <div class="field"><label>${lang==='ar'?'التكلفة (اختياري)':'Cost (optional)'}</label><input id="newCost" type="number" min="0" step="0.01" value="0"></div>
       <div class="field"><label>${t('fieldSection')}</label><select id="newTag">${Object.keys(TAG_META).map(tg=>`<option value="${tg}">${t('tag_'+tg)}</option>`).join('')}</select></div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="newStart" type="date"></div><div class="field"><label>${t('fieldDue')}</label><input id="newDue" type="date"></div></div>
       <div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label><div id="newTaskAssigneePicker">${createAssigneePickerHtml([], {prefix:'newAssignee',members:projectAssignableMembers(initialProject)})}</div><small style="color:var(--muted);line-height:1.6">${lang==='ar'?'تظهر هنا فقط الأسماء التي لديها وصول لهذا المشروع. أول شخص محدد يصبح المسؤول الرئيسي ويمكن تغييره لاحقًا.':'Only people with access to this project appear here. The first selected person becomes lead and can be changed later.'}</small></div>
@@ -4650,13 +4772,14 @@ async function submitAddTask(e){
   if(!canCreateTaskInProject(projectId)){ alert(lang==='ar'?'لا تملك صلاحية إنشاء مهام في هذا المشروع':'You do not have permission to create tasks in this project'); return; }
   const tag = document.getElementById('newTag').value;
   const priority = document.getElementById('newPriority').value;
+  const cost = Number(document.getElementById('newCost')?.value||0);
   const startDate = document.getElementById('newStart').value || null;
   const due = document.getElementById('newDue').value || null;
   const assigneeIds = [...document.querySelectorAll('[data-assignee-box="newAssignee"]:checked')].map(el=>el.value);
   const lead = assigneeIds[0] ? taskMemberById(assigneeIds[0]) : null;
   const payload = {
     workspace_id: currentWorkspaceId, project_id: projectId, col:'todo', tag,
-    title_ar:title, title_en:title, description:null, priority, start_date:startDate,
+    title_ar:title, title_en:title, description:null, priority, cost, start_date:startDate,
     due_date:due, due_ar:due, due_en:due, overdue:false,
     assignee_id: lead?.userId || null,
     assignee_initials: lead?.initials || null,
@@ -4850,7 +4973,7 @@ function renderTaskDetailModal(id){
   const projectRole=projectRoleFor(x.projectId);
   const projectMembers=projectAssignableMembers(x.projectId);
   const editableProjects=projects.filter(p=>canCreateTaskInProject(p.id));
-  const labels=lang==='ar'?{desc:'الوصف',sub:'المهام الفرعية',comments:'التعليقات',files:'المرفقات',activity:'سجل النشاط',status:'الحالة',priority:'الأولوية',project:'المشروع',start:'تاريخ البداية',due:'تاريخ الاستحقاق',assignees:'المسؤولون',lead:'المسؤول الرئيسي',event:'الفعالية'}:{desc:'Description',sub:'Subtasks',comments:'Comments',files:'Attachments',activity:'Activity',status:'Status',priority:'Priority',project:'Project',start:'Start date',due:'Due date',assignees:'Assignees',lead:'Lead assignee',event:'Event'};
+  const labels=lang==='ar'?{desc:'الوصف',sub:'المهام الفرعية',comments:'التعليقات',files:'المرفقات',activity:'سجل النشاط',status:'الحالة',priority:'الأولوية',project:'المشروع',start:'تاريخ البداية',due:'تاريخ الاستحقاق',assignees:'المسؤولون',lead:'المسؤول الرئيسي',event:'الفعالية',cost:'التكلفة'}:{desc:'Description',sub:'Subtasks',comments:'Comments',files:'Attachments',activity:'Activity',status:'Status',priority:'Priority',project:'Project',start:'Start date',due:'Due date',assignees:'Assignees',lead:'Lead assignee',event:'Event',cost:'Cost'};
   const ro=canEdit?'':'disabled';
   const titleAction=canEdit?`onblur="saveTaskField('${x.id}','title',this.value,'${lang==='ar'?'العنوان':'title'}')"`:'readonly';
   const descAction=canEdit?`onblur="saveTaskField('${x.id}','description',this.value,'${labels.desc}')"`:'readonly';
@@ -4870,6 +4993,7 @@ function renderTaskDetailModal(id){
         <div class="detail-field"><label>${labels.priority}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','priority',this.value,'${labels.priority}')"><option value="low" ${x.priority==='low'?'selected':''}>${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" ${x.priority==='medium'?'selected':''}>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high" ${x.priority==='high'?'selected':''}>${lang==='ar'?'عالية':'High'}</option><option value="urgent" ${x.priority==='urgent'?'selected':''}>${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
         <div class="detail-field"><label>${labels.project}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','projectId',this.value,'${labels.project}')">${(canEdit?editableProjects:projects.filter(p=>p.id===x.projectId)).map(p=>`<option value="${p.id}" ${x.projectId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
         <div class="detail-field"><label>${labels.event}</label><select class="detail-control" ${ro} onchange="saveTaskField('${x.id}','eventId',this.value,'${labels.event}')"><option value="">${lang==='ar'?'بدون فعالية':'No event'}</option>${events.map(ev=>`<option value="${ev.id}" ${x.eventId===ev.id?'selected':''}>${escapeHtml(L(ev,''))}</option>`).join('')}</select></div>
+        <div class="detail-field"><label>${labels.cost}</label><input class="detail-control" ${ro} type="number" min="0" step="0.01" value="${Number(x.cost||0)}" onchange="saveTaskField('${x.id}','cost',this.value,'${labels.cost}')"></div>
         <div class="detail-field"><label>${labels.start}</label><input class="detail-control" ${ro} type="date" value="${x.startDate||''}" onchange="saveTaskField('${x.id}','startDate',this.value,'${labels.start}')"></div>
         <div class="detail-field"><label>${labels.due}</label><input class="detail-control" ${ro} type="date" value="${x.dueDate||''}" onchange="saveTaskField('${x.id}','dueDate',this.value,'${labels.due}')"></div>
         <div class="task-detail-section"><h4>${labels.assignees}<span>${assigneeStackHtml(x.assignees,25,4)}</span></h4><div class="assignee-picker">${projectMembers.map(m=>`<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div>${x.leadAssigneeId===m.userId?'<span class="lead-badge">Lead</span>':''}<input type="checkbox" ${x.assignees.some(a=>a.userId===m.userId)?'checked':''} ${ro} onchange="toggleTaskAssignee('${x.id}','${m.userId}',this.checked)"></label>`).join('')}</div></div>
@@ -4894,9 +5018,9 @@ async function refreshTaskDetail(taskId, reloadExtras=true){
 async function saveTaskField(taskId, field, value, label=''){
   const x=tasks.find(t=>t.id===taskId); if(!x) return;
   if(!canEditTaskClient(x)){ taskyToast(lang==='ar'?'لا تملك صلاحية تعديل هذه المهمة':'You do not have permission to edit this task',{tone:'warning'}); return; }
-  const map={title:'title_ar',description:'description',priority:'priority',projectId:'project_id',eventId:'event_id',startDate:'start_date',dueDate:'due_date',col:'col'};
+  const map={title:'title_ar',description:'description',priority:'priority',projectId:'project_id',eventId:'event_id',cost:'cost',startDate:'start_date',dueDate:'due_date',col:'col'};
   const dbField=map[field]; if(!dbField) return;
-  let clean=value; if(['description','eventId','startDate','dueDate'].includes(field) && !clean) clean=null;
+  let clean=value; if(['description','eventId','startDate','dueDate'].includes(field) && !clean) clean=null; if(field==='cost') clean=Math.max(0,Number(value||0));
   const payload={[dbField]:clean,updated_at:new Date().toISOString()};
   if(field==='title') payload.title_en=value;
   if(field==='dueDate'){payload.due_ar=clean;payload.due_en=clean;}
@@ -5005,7 +5129,7 @@ async function deleteTaskAttachment(id){
   const rm=await sb.storage.from('task-attachments').remove([a.storage_path]); if(rm.error){alert(rm.error.message);return;} const del=await sb.from('task_attachments').delete().eq('id',id); if(del.error){alert(del.error.message);return;} await logTaskActivity(a.task_id,'attachment_removed',{file_name:a.file_name}); await refreshTaskDetail(a.task_id,true);
 }
 async function deleteTask(taskId){
-  const x=tasks.find(t=>t.id===taskId); if(!canDeleteTaskClient(x)){ taskyToast(lang==='ar'?'حذف المهمة يتطلب مدير مشروع أو مسؤول مساحة العمل':'Deleting tasks requires Project Manager or Workspace Admin access',{tone:'warning'}); return; } const ok=await taskyConfirm(lang==='ar'?`حذف المهمة «${taskTitle(x)}» وكل المهام الفرعية والتعليقات والمرفقات؟`:`Delete “${taskTitle(x)}” and all subtasks, comments, and attachments?`,{title:lang==='ar'?'حذف المهمة':'Delete task',tone:'danger',confirmText:lang==='ar'?'حذف نهائي':'Delete'}); if(!ok)return;
+  const x=tasks.find(t=>t.id===taskId); if(!canDeleteTaskClient(x)){ taskyToast(lang==='ar'?'حذف المهمة يتطلب مدير مشروع أو مدير مساحة العمل':'Deleting tasks requires Project Manager or Workspace Admin access',{tone:'warning'}); return; } const ok=await taskyConfirm(lang==='ar'?`حذف المهمة «${taskTitle(x)}» وكل المهام الفرعية والتعليقات والمرفقات؟`:`Delete “${taskTitle(x)}” and all subtasks, comments, and attachments?`,{title:lang==='ar'?'حذف المهمة':'Delete task',tone:'danger',confirmText:lang==='ar'?'حذف نهائي':'Delete'}); if(!ok)return;
   const paths=detailAttachments.filter(a=>a.task_id===taskId).map(a=>a.storage_path); if(paths.length) await sb.storage.from('task-attachments').remove(paths);
   const {error}=await sb.from('tasks').delete().eq('id',taskId).eq('workspace_id',currentWorkspaceId); if(error){alert(error.message);return;} closeDetailModal(); await fetchTasks(); renderAll(); taskyToast(lang==='ar'?'تم حذف المهمة':'Task deleted',{tone:'success'});
 }
