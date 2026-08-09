@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V22: professional tasks + multi-assignees + subtasks + comments + attachments + activity -->
+<!-- Tasky V23: @mentions + in-app notifications + professional tasks -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1027,6 +1027,26 @@
   .comment-body{font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
   .comment-form{display:flex;gap:8px;margin-top:10px;align-items:flex-end;}
   .comment-form textarea{flex:1;min-height:58px;max-height:130px;resize:vertical;border:1px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);padding:9px 11px;font:inherit;font-size:13px;outline:none;}
+  .comment-compose{position:relative;flex:1;min-width:0;}
+  .comment-compose textarea{width:100%;display:block;}
+  .mention-menu{position:absolute;z-index:65;inset-inline:0;bottom:calc(100% + 7px);background:var(--card);border:1px solid var(--border);border-radius:13px;box-shadow:0 14px 34px rgba(18,32,20,.14);padding:5px;max-height:235px;overflow:auto;}
+  .mention-menu.hidden{display:none;}
+  .mention-menu-label{padding:7px 9px 5px;font-size:10.5px;color:var(--muted);font-weight:700;}
+  .mention-item{width:100%;border:0;background:transparent;color:var(--ink);display:flex;align-items:center;gap:9px;text-align:start;padding:8px 9px;border-radius:9px;cursor:pointer;}
+  .mention-item:hover,.mention-item.active{background:var(--green-tint);}
+  .mention-item-main{min-width:0;flex:1;}
+  .mention-item-name{display:block;font-size:12.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .mention-item-meta{display:block;font-size:10.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:1px;}
+  .comment-mention{display:inline;font-weight:700;color:var(--green);background:var(--green-tint);border-radius:5px;padding:0 3px;}
+  .notif-item{cursor:pointer;}
+  .notif-item.unread{background:color-mix(in srgb,var(--green-tint) 55%,var(--card));}
+  .notif-item .notif-row{display:flex;align-items:flex-start;gap:8px;}
+  .notif-item .notif-copy{min-width:0;flex:1;}
+  .notif-dropdown-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 11px;border-bottom:1px solid var(--border);}
+  .notif-dropdown-head b{font-size:12.5px;}
+  .notif-mark-all{border:0;background:none;color:var(--green);font-size:10.5px;font-weight:700;padding:4px;}
+  .notif-empty{padding:20px 12px;text-align:center;font-size:12px;color:var(--muted);}
+
   .attachment-item{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:11px;padding:9px 10px;background:var(--card);}
   .attachment-icon{width:34px;height:34px;border-radius:9px;background:var(--blue-tint);color:var(--blue);display:grid;place-items:center;flex:none;}
   .attachment-copy{flex:1;min-width:0;}
@@ -1057,6 +1077,8 @@
     .assignee-picker{max-height:190px;}
     .comment-form{align-items:stretch;flex-direction:column;}
     .comment-form button{min-height:42px;}
+    .mention-menu{position:fixed;left:12px;right:12px;bottom:calc(env(safe-area-inset-bottom, 0px) + 12px);max-height:min(42vh,300px);}
+
     .subtask-add{flex-direction:column;}
     .subtask-add button{min-height:42px;}
     .attachment-upload{align-items:flex-start;flex-direction:column;}
@@ -1198,7 +1220,7 @@
           <div id="themeDropdown" class="dropdown hidden theme-panel" style="left:0;top:44px;"></div>
         </div>
         <div style="position:relative">
-          <button class="icon-btn" onclick="toggleNotif()"><svg><use href="#i-bell"/></svg><span class="badge">3</span></button>
+          <button class="icon-btn" onclick="toggleNotif()"><svg><use href="#i-bell"/></svg><span class="badge" id="notifBadge" style="display:none">0</span></button>
           <div id="notifDropdown" class="dropdown hidden" style="left:0;top:44px;width:280px;"></div>
         </div>
         <button class="primary-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel2"></span></button>
@@ -1284,7 +1306,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V22'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V23'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1364,6 +1386,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchProjects();
   await fetchTeamMembers();
   await fetchTasks();
+  await fetchNotifications();
   initTaskRealtime();
   applyCurrentUserProfile();
   renderTeamAvatarStack();
@@ -1385,6 +1408,7 @@ function initTaskRealtime(){
     .on('postgres_changes',{event:'*',schema:'public',table:'task_comments',filter},scheduleTaskRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'task_attachments',filter},scheduleTaskRealtimeRefresh)
     .on('postgres_changes',{event:'*',schema:'public',table:'task_activity',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'notifications',filter:`user_id=eq.${currentUserId}`},async()=>{ await fetchNotifications(); })
     .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
 }
 function scheduleTaskRealtimeRefresh(){
@@ -2177,6 +2201,12 @@ let currentDetailTaskId = null;
 let detailComments = [];
 let detailAttachments = [];
 let detailActivity = [];
+let detailCommentMentions = [];
+let pendingCommentMentions = new Map();
+let activeMentionCandidates = [];
+let activeMentionIndex = 0;
+let activeMentionRange = null;
+let userNotifications = [];
 let filterAssignedToMe = false;
 let taskRealtimeChannel = null;
 let taskRealtimeTimer = null;
@@ -3893,10 +3923,48 @@ async function moveTask(id,col){
 }
 
 /* ================= NOTIFICATIONS ================= */
-function toggleNotif(){
-  const dd = document.getElementById('notifDropdown');
-  dd.innerHTML = NOTIFICATIONS.map(n => `<div class="notif-item"><div class="txt">${lang==='en'?n.en:n.ar}</div><div class="time">${lang==='en'?n.time_en:n.time_ar}</div></div>`).join('');
+async function fetchNotifications(){
+  if(!currentUserId || !currentWorkspaceId) return;
+  const {data,error}=await sb.from('notifications').select('id,user_id,actor_id,type,task_id,comment_id,metadata,is_read,created_at').eq('workspace_id',currentWorkspaceId).eq('user_id',currentUserId).order('created_at',{ascending:false}).limit(40);
+  if(error){ console.warn('V23 notifications unavailable; run V23 migration',error); userNotifications=[]; updateNotificationBadge(); return; }
+  userNotifications=data||[]; updateNotificationBadge();
+  const dd=document.getElementById('notifDropdown'); if(dd && !dd.classList.contains('hidden')) renderNotificationDropdown();
+}
+function updateNotificationBadge(){
+  const badge=document.getElementById('notifBadge'); if(!badge)return;
+  const count=userNotifications.filter(n=>!n.is_read).length;
+  badge.textContent=count>99?'99+':String(count); badge.style.display=count?'grid':'none';
+}
+function notificationText(n){
+  const actor=taskMemberById(n.actor_id); const actorName=actor?.fullName||(lang==='ar'?'أحد أعضاء الفريق':'A teammate');
+  const task=tasks.find(t=>t.id===n.task_id); const title=task?taskTitle(task):(lang==='ar'?'مهمة':'a task');
+  if(n.type==='mention') return lang==='ar'?`${actorName} أشار إليك في تعليق على «${title}»`:`${actorName} mentioned you in a comment on “${title}”`;
+  return lang==='ar'?'لديك إشعار جديد':'You have a new notification';
+}
+function notificationPreview(n){ return String(n?.metadata?.comment_preview||'').trim(); }
+function renderNotificationDropdown(){
+  const dd=document.getElementById('notifDropdown'); if(!dd)return;
+  const unread=userNotifications.filter(n=>!n.is_read).length;
+  const head=`<div class="notif-dropdown-head"><b>${lang==='ar'?'الإشعارات':'Notifications'}${unread?` · ${unread}`:''}</b>${unread?`<button class="notif-mark-all" onclick="event.stopPropagation();markAllNotificationsRead()">${lang==='ar'?'تحديد الكل كمقروء':'Mark all read'}</button>`:''}</div>`;
+  const rows=userNotifications.map(n=>{ const actor=taskMemberById(n.actor_id); const preview=notificationPreview(n); return `<div class="notif-item ${n.is_read?'':'unread'}" onclick="openNotification('${n.id}')"><div class="notif-row">${memberAvatarHtml(actor,30)}<div class="notif-copy"><div class="txt">${escapeHtml(notificationText(n))}</div>${preview?`<div style="font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>`:''}<div class="time">${escapeHtml(formatDateTime(n.created_at))}</div></div></div></div>`; }).join('');
+  dd.innerHTML=head+(rows||`<div class="notif-empty">${lang==='ar'?'لا توجد إشعارات جديدة':'No notifications yet'}</div>`);
+}
+async function toggleNotif(){
+  const dd=document.getElementById('notifDropdown'); if(!dd)return;
+  const opening=dd.classList.contains('hidden');
+  if(opening){ await fetchNotifications(); renderNotificationDropdown(); }
   dd.classList.toggle('hidden');
+}
+async function openNotification(id){
+  const n=userNotifications.find(x=>x.id===id); if(!n)return;
+  if(!n.is_read){ await sb.from('notifications').update({is_read:true,read_at:new Date().toISOString()}).eq('id',id).eq('user_id',currentUserId); n.is_read=true; updateNotificationBadge(); }
+  document.getElementById('notifDropdown')?.classList.add('hidden');
+  if(n.task_id){ await openDetailModal(n.task_id); }
+}
+async function markAllNotificationsRead(){
+  const unreadIds=userNotifications.filter(n=>!n.is_read).map(n=>n.id); if(!unreadIds.length)return;
+  const {error}=await sb.from('notifications').update({is_read:true,read_at:new Date().toISOString()}).eq('workspace_id',currentWorkspaceId).eq('user_id',currentUserId).in('id',unreadIds);
+  if(!error){ userNotifications.forEach(n=>n.is_read=true); updateNotificationBadge(); renderNotificationDropdown(); }
 }
 
 /* ================= PROJECT MODAL ================= */
@@ -4004,12 +4072,14 @@ async function logTaskActivity(taskId, action, metadata={}){
   if(error) console.warn('task activity log skipped',error);
 }
 async function fetchTaskDetailExtras(taskId){
-  const [commentsRes, attachmentsRes, activityRes] = await Promise.all([
+  const [commentsRes, mentionsRes, attachmentsRes, activityRes] = await Promise.all([
     sb.from('task_comments').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:true}),
+    sb.from('task_comment_mentions').select('comment_id,user_id,mentioned_by,created_at').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId),
     sb.from('task_attachments').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}),
     sb.from('task_activity').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}).limit(60)
   ]);
   detailComments = commentsRes.data || [];
+  detailCommentMentions = mentionsRes.data || [];
   detailAttachments = attachmentsRes.data || [];
   detailActivity = activityRes.data || [];
 }
@@ -4068,11 +4138,85 @@ function renderSubtasks(x){
       </div>`).join(''):`<div class="empty-mini">${lang==='ar'?'لا توجد مهام فرعية بعد':'No subtasks yet'}</div>`}</div>
     <div class="subtask-add"><input id="newSubtaskTitle" placeholder="${lang==='ar'?'أضف مهمة فرعية...':'Add a subtask...'}" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask('${x.id}')}"/><button onclick="addSubtask('${x.id}')">${lang==='ar'?'إضافة':'Add'}</button></div>`;
 }
+
+function regexEscape(value){ return String(value||'').replace(/[.*+?^${}()|[\]\\]/g,'\\$&'); }
+function commentBodyHtml(comment){
+  let html=escapeHtml(comment?.body||'');
+  const mentions=detailCommentMentions.filter(x=>x.comment_id===comment.id);
+  mentions.forEach(row=>{
+    const member=taskMemberById(row.user_id);
+    const name=member?.fullName;
+    if(!name) return;
+    const token='@'+escapeHtml(name);
+    html=html.replace(new RegExp(regexEscape(token),'g'),`<span class="comment-mention">${token}</span>`);
+  });
+  return html;
+}
+function hideCommentMentionMenu(){
+  const menu=document.getElementById('commentMentionMenu');
+  if(menu) menu.classList.add('hidden');
+  activeMentionCandidates=[]; activeMentionRange=null; activeMentionIndex=0;
+}
+function mentionSearchFromTextarea(textarea){
+  const cursor=textarea.selectionStart ?? textarea.value.length;
+  const before=textarea.value.slice(0,cursor);
+  const at=before.lastIndexOf('@');
+  if(at<0) return null;
+  const prev=at>0?before.charAt(at-1):'';
+  if(prev && !/\s|[([{،,:;.!?؟]/.test(prev)) return null;
+  const fragment=before.slice(at+1);
+  if(/[\n\r]/.test(fragment) || fragment.length>45) return null;
+  return {start:at,end:cursor,needle:fragment.trim().toLocaleLowerCase(lang==='ar'?'ar':'en')};
+}
+function renderCommentMentionMenu(){
+  const menu=document.getElementById('commentMentionMenu');
+  if(!menu) return;
+  if(!activeMentionCandidates.length){ menu.innerHTML=`<div class="notif-empty">${lang==='ar'?'لا يوجد عضو مطابق':'No matching teammate'}</div>`; menu.classList.remove('hidden'); return; }
+  menu.innerHTML=`<div class="mention-menu-label">${lang==='ar'?'أشر إلى أحد أعضاء الفريق':'Mention a teammate'}</div>`+activeMentionCandidates.map((m,i)=>`<button type="button" class="mention-item ${i===activeMentionIndex?'active':''}" onmousedown="event.preventDefault();chooseCommentMention('${m.userId}')">${memberAvatarHtml(m,30)}<span class="mention-item-main"><span class="mention-item-name">${escapeHtml(m.fullName)}</span><span class="mention-item-meta">${escapeHtml(m.jobTitle||m.email||'')}</span></span></button>`).join('');
+  menu.classList.remove('hidden');
+}
+function handleCommentMentionInput(textarea){
+  const state=mentionSearchFromTextarea(textarea);
+  if(!state){ hideCommentMentionMenu(); return; }
+  activeMentionRange=state;
+  const members=assignableMembers().filter(m=>m.userId!==currentUserId);
+  const needle=state.needle;
+  activeMentionCandidates=members.filter(m=>{
+    if(!needle) return true;
+    return `${m.fullName||''} ${m.email||''} ${m.jobTitle||''}`.toLocaleLowerCase(lang==='ar'?'ar':'en').includes(needle);
+  }).slice(0,7);
+  activeMentionIndex=0;
+  renderCommentMentionMenu();
+}
+function handleCommentMentionKeydown(event){
+  const menu=document.getElementById('commentMentionMenu');
+  if(!menu || menu.classList.contains('hidden')) return;
+  if(event.key==='ArrowDown'){ event.preventDefault(); if(activeMentionCandidates.length){activeMentionIndex=(activeMentionIndex+1)%activeMentionCandidates.length;renderCommentMentionMenu();} }
+  else if(event.key==='ArrowUp'){ event.preventDefault(); if(activeMentionCandidates.length){activeMentionIndex=(activeMentionIndex-1+activeMentionCandidates.length)%activeMentionCandidates.length;renderCommentMentionMenu();} }
+  else if((event.key==='Enter'||event.key==='Tab') && activeMentionCandidates.length){ event.preventDefault(); chooseCommentMention(activeMentionCandidates[activeMentionIndex].userId); }
+  else if(event.key==='Escape'){ event.preventDefault(); hideCommentMentionMenu(); }
+}
+function chooseCommentMention(userId){
+  const textarea=document.getElementById('newTaskComment');
+  const member=taskMemberById(userId);
+  if(!textarea||!member||!activeMentionRange) return;
+  const {start,end}=activeMentionRange;
+  const insert=`@${member.fullName} `;
+  textarea.value=textarea.value.slice(0,start)+insert+textarea.value.slice(end);
+  const pos=start+insert.length;
+  textarea.focus(); textarea.setSelectionRange(pos,pos);
+  pendingCommentMentions.set(userId,member.fullName);
+  hideCommentMentionMenu();
+}
+function validPendingMentionIds(body){
+  return [...pendingCommentMentions.entries()].filter(([id,name])=>body.includes('@'+name)).map(([id])=>id);
+}
+
 function renderComments(){
   const items=detailComments.map(c=>{
-    const m=taskMemberById(c.author_id); return `<div class="comment-item">${memberAvatarHtml(m,30)}<div class="comment-bubble"><div class="comment-meta"><b>${escapeHtml(m?.fullName||(lang==='ar'?'عضو':'Member'))}</b><span>·</span><span>${escapeHtml(formatDateTime(c.created_at))}</span></div><div class="comment-body">${escapeHtml(c.body)}</div></div></div>`;
+    const m=taskMemberById(c.author_id); return `<div class="comment-item">${memberAvatarHtml(m,30)}<div class="comment-bubble"><div class="comment-meta"><b>${escapeHtml(m?.fullName||(lang==='ar'?'عضو':'Member'))}</b><span>·</span><span>${escapeHtml(formatDateTime(c.created_at))}</span></div><div class="comment-body">${commentBodyHtml(c)}</div></div></div>`;
   }).join('');
-  return `${items||`<div class="empty-mini">${lang==='ar'?'ابدأ أول نقاش على هذه المهمة':'Start the first discussion on this task'}</div>`}<div class="comment-form"><textarea id="newTaskComment" placeholder="${lang==='ar'?'اكتب تعليقًا...':'Write a comment...'}"></textarea><button onclick="addTaskComment(currentDetailTaskId)">${lang==='ar'?'إرسال':'Send'}</button></div>`;
+  return `${items||`<div class="empty-mini">${lang==='ar'?'ابدأ أول نقاش على هذه المهمة':'Start the first discussion on this task'}</div>`}<div class="comment-form"><div class="comment-compose"><div id="commentMentionMenu" class="mention-menu hidden"></div><textarea id="newTaskComment" oninput="handleCommentMentionInput(this)" onkeydown="handleCommentMentionKeydown(event)" onblur="setTimeout(hideCommentMentionMenu,140)" placeholder="${lang==='ar'?'اكتب تعليقًا... استخدم @ للإشارة إلى عضو':'Write a comment... use @ to mention a teammate'}"></textarea></div><button onclick="addTaskComment(currentDetailTaskId)">${lang==='ar'?'إرسال':'Send'}</button></div>`;
 }
 function renderAttachments(){
   const items=detailAttachments.map(a=>`<div class="attachment-item"><div class="attachment-icon"><svg style="width:17px;height:17px"><use href="#i-file"/></svg></div><div class="attachment-copy"><b>${escapeHtml(a.file_name)}</b><span>${formatBytes(a.file_size)} · ${escapeHtml(formatDateTime(a.created_at))}</span></div><button class="attachment-action" onclick="openTaskAttachment('${a.id}')">${lang==='ar'?'فتح':'Open'}</button><button class="attachment-action" onclick="deleteTaskAttachment('${a.id}')">${lang==='ar'?'حذف':'Delete'}</button></div>`).join('');
@@ -4108,6 +4252,7 @@ function renderTaskDetailModal(id){
     </div></div>`;
 }
 async function openDetailModal(id){
+  pendingCommentMentions.clear(); hideCommentMentionMenu();
   currentDetailTaskId=id;
   document.getElementById('detailModalBody').innerHTML=`<div style="padding:34px;text-align:center;color:var(--muted)">${lang==='ar'?'جارٍ تحميل تفاصيل المهمة...':'Loading task details...'}</div>`;
   document.getElementById('detailModalOverlay').classList.remove('hidden');
@@ -4193,9 +4338,18 @@ async function toggleSubtaskAssignee(taskId,subtaskId,userId,checked){
 }
 async function addTaskComment(taskId){
   const input=document.getElementById('newTaskComment'); const body=input?.value.trim(); if(!body)return;
-  const {error}=await sb.from('task_comments').insert({workspace_id:currentWorkspaceId,task_id:taskId,author_id:currentUserId,body});
+  const mentionIds=validPendingMentionIds(body);
+  const {data:comment,error}=await sb.from('task_comments').insert({workspace_id:currentWorkspaceId,task_id:taskId,author_id:currentUserId,body}).select('id').single();
   if(error){alert((lang==='ar'?'تعذّر إضافة التعليق: ':'Could not add comment: ')+error.message);return;}
-  await logTaskActivity(taskId,'comment_added',{}); await refreshTaskDetail(taskId,true);
+  if(mentionIds.length){
+    const mentionRes=await sb.rpc('tasky_add_comment_mentions',{p_comment_id:comment.id,p_user_ids:mentionIds});
+    if(mentionRes.error){
+      console.error('mention notification failed',mentionRes.error);
+      taskyToast(lang==='ar'?'تم نشر التعليق، لكن تعذّر إرسال بعض إشعارات الإشارة':'Comment posted, but some mention notifications could not be sent',{tone:'warning'});
+    }
+  }
+  pendingCommentMentions.clear(); hideCommentMentionMenu();
+  await logTaskActivity(taskId,'comment_added',{mentions:mentionIds.length}); await refreshTaskDetail(taskId,true);
 }
 async function uploadTaskAttachment(taskId,input){
   const file=input?.files?.[0]; if(!file)return; if(file.size>10*1024*1024){alert(lang==='ar'?'الحد الأقصى للمرفق 10MB':'Attachment limit is 10MB');input.value='';return;}
