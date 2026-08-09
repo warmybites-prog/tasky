@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
-<!-- Tasky V21: updated Arabic/English wordmarks + mobile ready + branding -->
+<!-- Tasky V22: professional tasks + multi-assignees + subtasks + comments + attachments + activity -->
 <link id="taskyFavicon" rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjEyNDAgMTMyMCAxNDQwIDEzNjAiPgogIDxwYXRoIGZpbGw9IiMyYTZjMmUiIGZpbGwtcnVsZT0iZXZlbm9kZCIgZD0iTTE5MjMuNCwxMzc3LjQxYzg1LjExLDAsMTY2LjI4LDE3LjAyLDI0MC45Miw0OC40NGwtMTg3LjIzLDIwNi44N2MtMTguMzMtMi42Mi0zNS4zNS0zLjkzLTUzLjY4LTMuOTMtMTYxLjA1LDAtMjk4LjUzLDEwMy40NC0zNDkuNTksMjQ3LjQ2LTEzLjA5LDM3Ljk3LTIwLjk1LDc5Ljg3LTIwLjk1LDEyNC4zOSwwLDIwNC4yNiwxNjYuMjksMzcwLjU0LDM3MC41NCwzNzAuNTQsMTkxLjE2LDAsMzQ2Ljk3LTE0NC4wMywzNjkuMjMtMzI4LjY0bDIxOS45Ny0yNDYuMTVjMjAuOTUsNjQuMTYsMzQuMDQsMTMyLjI0LDM0LjA0LDIwNC4yNiwwLDM0My4wNC0yNzguODksNjIxLjkzLTYyMy4yNCw2MjEuOTNzLTYyMS45My0yNzguODktNjIxLjkzLTYyMS45MywyNzguODktNjIzLjI0LDYyMS45My02MjMuMjRoMFoiLz4KICA8cGF0aCBmaWxsPSIjODJhZjIxIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiIGQ9Ik0xNzE1LjQ0LDE4NzYuMjdoMjAyLjM4YzE2LjA2LDAsMzEuMzctNi43OSw0Mi4xNS0xOC43bDQxNi41NS00NjAuMTVjMTAuNzgtMTEuOTEsMjYuMDktMTguNyw0Mi4xNS0xOC43aDE1My4wN2M0OS4wOSwwLDc1LjExLDU4LjAyLDQyLjQ2LDk0LjY4bC02MzMuMjcsNzExLjA2Yy0yMS40MiwyNC4wNS01OC41MiwyNS41My04MS43OCwzLjI2bC0yMjMuMDQtMjEzLjUxYy0zNy4wMy0zNS40NS0xMS45NC05Ny45MywzOS4zMi05Ny45M1oiLz4KPC9zdmc+Cg==">
 <meta name="theme-color" content="#12291A">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -963,6 +963,105 @@
     .modal{max-height:92dvh;}
   }
 
+
+
+  /* ---------------- PROFESSIONAL TASKS (V22) ---------------- */
+  #detailModalBody.modal{width:min(980px,94vw);max-width:94vw;padding:0;overflow:hidden;}
+  .task-detail-shell{display:flex;flex-direction:column;max-height:min(90dvh,900px);}
+  .task-detail-head{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 16px;border-bottom:1px solid var(--border);background:var(--card);}
+  .task-detail-head-main{flex:1;min-width:0;}
+  .task-title-input{width:100%;border:0;background:transparent;color:var(--ink);font-family:"Almarai",sans-serif;font-size:21px;font-weight:800;line-height:1.45;padding:2px 0;outline:none;}
+  html[dir="ltr"] .task-title-input{font-family:"Inter",sans-serif;}
+  .task-detail-kicker{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:5px;}
+  .priority-pill{font-size:10.5px;font-weight:800;padding:4px 8px;border-radius:999px;display:inline-flex;align-items:center;gap:4px;}
+  .priority-low{background:var(--blue-tint);color:var(--blue);}
+  .priority-medium{background:var(--paper);color:var(--ink-soft);border:1px solid var(--border);}
+  .priority-high{background:var(--amber-tint);color:#8a6419;}
+  .priority-urgent{background:var(--danger-tint);color:var(--danger);}
+  .task-detail-grid{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(270px,.72fr);min-height:0;overflow:auto;}
+  .task-detail-main{padding:20px 24px 28px;min-width:0;}
+  .task-detail-side{padding:20px;border-inline-start:1px solid var(--border);background:color-mix(in srgb,var(--paper) 58%,var(--card));min-width:0;}
+  .task-detail-section{padding:0 0 20px;margin-bottom:20px;border-bottom:1px solid var(--border);}
+  .task-detail-section:last-child{border-bottom:0;margin-bottom:0;}
+  .task-detail-section h4{font-size:13.5px;margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;gap:10px;}
+  .task-description{width:100%;min-height:112px;resize:vertical;border:1px solid var(--border);border-radius:12px;background:var(--paper);color:var(--ink);padding:12px 13px;font:inherit;font-size:13.5px;line-height:1.75;outline:none;}
+  .task-description:focus,.detail-control:focus{border-color:color-mix(in srgb,var(--green) 60%,var(--border));box-shadow:0 0 0 3px color-mix(in srgb,var(--green-tint) 70%,transparent);}
+  .detail-field{display:flex;flex-direction:column;gap:6px;margin-bottom:13px;}
+  .detail-field>label{font-size:11.5px;color:var(--muted);font-weight:700;}
+  .detail-control{width:100%;min-height:40px;border:1px solid var(--border);border-radius:10px;background:var(--card);color:var(--ink);padding:8px 10px;font:inherit;font-size:13px;outline:none;}
+  .assignee-picker{display:flex;flex-direction:column;gap:7px;max-height:220px;overflow:auto;padding:6px;border:1px solid var(--border);border-radius:12px;background:var(--card);}
+  .assignee-option{display:flex;align-items:center;gap:9px;padding:7px 8px;border-radius:9px;font-size:12.5px;cursor:pointer;transition:background .15s;}
+  .assignee-option:hover{background:var(--paper);}
+  .assignee-option input{accent-color:var(--green);width:16px;height:16px;flex:none;}
+  .assignee-option .member-copy{min-width:0;flex:1;}
+  .assignee-option .member-copy b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .assignee-option .member-copy span{display:block;font-size:10.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .lead-badge{font-size:9.5px;font-weight:800;color:#806018;background:var(--amber-tint);padding:3px 6px;border-radius:999px;}
+  .task-avatar-stack{display:flex;align-items:center;direction:ltr;min-width:0;}
+  .task-avatar-stack .avatar{margin-left:-6px;border:2px solid var(--card);box-shadow:0 1px 2px rgba(0,0,0,.08);}
+  .task-avatar-stack .avatar:first-child{margin-left:0;}
+  .avatar-more{display:grid;place-items:center;border-radius:50%;background:var(--paper);color:var(--ink-soft);font-weight:800;border:2px solid var(--card);margin-left:-6px;font-size:9px;}
+  .subtask-progress{display:flex;align-items:center;gap:10px;margin-bottom:12px;}
+  .subtask-progress .progress-bar{flex:1;margin:0;height:7px;}
+  .subtask-progress span{font-size:11.5px;color:var(--muted);white-space:nowrap;}
+  .subtask-list{display:flex;flex-direction:column;gap:8px;}
+  .subtask-item{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:10px 11px;}
+  .subtask-main-row{display:flex;align-items:center;gap:9px;min-width:0;}
+  .subtask-main-row input[type=checkbox]{width:17px;height:17px;accent-color:var(--green);flex:none;}
+  .subtask-title{flex:1;min-width:0;font-size:13px;color:var(--ink);}
+  .subtask-title.done{text-decoration:line-through;color:var(--muted);}
+  .subtask-delete{border:0;background:none;color:var(--muted);padding:5px;border-radius:7px;display:grid;place-items:center;}
+  .subtask-delete:hover{background:var(--danger-tint);color:var(--danger);}
+  .subtask-assignees{margin-top:8px;padding-top:8px;border-top:1px dashed var(--border);}
+  .subtask-assignees summary{list-style:none;display:flex;align-items:center;gap:7px;cursor:pointer;color:var(--muted);font-size:11.5px;}
+  .subtask-assignees summary::-webkit-details-marker{display:none;}
+  .subtask-assignees .assignee-picker{margin-top:8px;max-height:160px;}
+  .subtask-add{display:flex;gap:8px;margin-top:10px;}
+  .subtask-add input{flex:1;min-width:0;border:1px solid var(--border);border-radius:10px;padding:9px 11px;background:var(--paper);color:var(--ink);font:inherit;font-size:13px;outline:none;}
+  .subtask-add button,.comment-form button{border:0;border-radius:10px;background:var(--green);color:#fff;padding:9px 13px;font-weight:700;white-space:nowrap;}
+  .comment-list,.attachment-list,.activity-list{display:flex;flex-direction:column;gap:9px;}
+  .comment-item{display:flex;align-items:flex-start;gap:9px;padding:10px 0;}
+  .comment-bubble{flex:1;min-width:0;background:var(--paper);border-radius:12px;padding:9px 11px;}
+  .comment-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:3px;font-size:10.5px;color:var(--muted);}
+  .comment-meta b{font-size:11.5px;color:var(--ink);}
+  .comment-body{font-size:13px;line-height:1.65;white-space:pre-wrap;word-break:break-word;}
+  .comment-form{display:flex;gap:8px;margin-top:10px;align-items:flex-end;}
+  .comment-form textarea{flex:1;min-height:58px;max-height:130px;resize:vertical;border:1px solid var(--border);border-radius:10px;background:var(--paper);color:var(--ink);padding:9px 11px;font:inherit;font-size:13px;outline:none;}
+  .attachment-item{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:11px;padding:9px 10px;background:var(--card);}
+  .attachment-icon{width:34px;height:34px;border-radius:9px;background:var(--blue-tint);color:var(--blue);display:grid;place-items:center;flex:none;}
+  .attachment-copy{flex:1;min-width:0;}
+  .attachment-copy b{display:block;font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .attachment-copy span{font-size:10.5px;color:var(--muted);}
+  .attachment-action{border:0;background:var(--paper);color:var(--ink-soft);border-radius:8px;padding:7px 8px;font-size:11px;}
+  .attachment-upload{display:flex;align-items:center;gap:9px;margin-top:10px;padding:10px;border:1px dashed var(--border);border-radius:11px;background:var(--paper);}
+  .attachment-upload input{min-width:0;max-width:100%;font-size:11.5px;color:var(--ink-soft);}
+  .activity-item{display:flex;gap:9px;align-items:flex-start;position:relative;}
+  .activity-dot{width:8px;height:8px;border-radius:50%;background:var(--green);margin-top:7px;flex:none;box-shadow:0 0 0 4px var(--green-tint);}
+  .activity-copy{min-width:0;font-size:12px;line-height:1.6;color:var(--ink-soft);}
+  .activity-copy b{color:var(--ink);}
+  .activity-copy time{display:block;font-size:10.5px;color:var(--muted);margin-top:1px;}
+  .empty-mini{padding:14px;text-align:center;color:var(--muted);font-size:12px;background:var(--paper);border-radius:10px;}
+  .detail-save-hint{font-size:10.5px;color:var(--muted);}
+  .danger-link{border:0;background:none;color:var(--danger);padding:6px 0;font:inherit;font-size:11.5px;font-weight:700;}
+
+  @media(max-width:760px){
+    #detailModalOverlay{align-items:flex-end;padding:0;}
+    #detailModalBody.modal{width:100vw;max-width:100vw;max-height:96dvh;border-radius:22px 22px 0 0;}
+    .task-detail-shell{max-height:96dvh;}
+    .task-detail-head{padding:17px 16px 12px;}
+    .task-title-input{font-size:18px;}
+    .task-detail-grid{grid-template-columns:1fr;overflow:auto;}
+    .task-detail-main{padding:16px;}
+    .task-detail-side{padding:16px;border-inline-start:0;border-top:1px solid var(--border);}
+    .task-detail-grid>.task-detail-main,.task-detail-grid>.task-detail-side{overflow:visible;}
+    .assignee-picker{max-height:190px;}
+    .comment-form{align-items:stretch;flex-direction:column;}
+    .comment-form button{min-height:42px;}
+    .subtask-add{flex-direction:column;}
+    .subtask-add button{min-height:42px;}
+    .attachment-upload{align-items:flex-start;flex-direction:column;}
+  }
+
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -1009,6 +1108,7 @@
 <symbol id="i-check" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="8.5"/><path d="m8.5 12.3 2.4 2.4 4.6-5"/></symbol>
 <symbol id="i-box" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5 12 3l8.5 4.5v9L12 21l-8.5-4.5Z"/><path d="M3.5 7.5 12 12l8.5-4.5M12 12v9"/></symbol>
 <symbol id="i-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 3h7l4 4v14H7Z"/><path d="M14 3v4h4"/><path d="m9.5 14 1.8 1.8L14.5 12"/></symbol>
+<symbol id="i-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16V4"/><path d="m7.5 8.5 4.5-4.5 4.5 4.5"/><path d="M5 14v5h14v-5"/></symbol>
 <symbol id="i-calendar" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3.5" y="5" width="17" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3.5 10h17"/></symbol>
 <symbol id="i-wallet" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3.5 7.5A2.5 2.5 0 0 1 6 5h13a1 1 0 0 1 1 1v3"/><path d="M3.5 7.5V17a2.5 2.5 0 0 0 2.5 2.5h13a1 1 0 0 0 1-1V10a1 1 0 0 0-1-1H16a2 2 0 1 0 0 4h4"/></symbol>
 <symbol id="i-spark" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3.5 13.6 9l5.4 1.6-5.4 1.6L12 18l-1.6-5.8L5 10.6 10.4 9Z"/></symbol>
@@ -1184,7 +1284,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V21'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V22'; console.info('Tasky build', window.TASKY_BUILD);
 const sb = window.supabase.createClient('https://ghzgmrnqididkmocuzrf.supabase.co', 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A');
 
 let authMode = 'signin';
@@ -1264,12 +1364,36 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchProjects();
   await fetchTeamMembers();
   await fetchTasks();
+  initTaskRealtime();
   applyCurrentUserProfile();
   renderTeamAvatarStack();
   renderRoleToggle();
   renderNav();
   renderAll();
   return true;
+}
+
+function initTaskRealtime(){
+  if(!currentWorkspaceId || !sb?.channel) return;
+  if(taskRealtimeChannel){ try{ sb.removeChannel(taskRealtimeChannel); }catch{} taskRealtimeChannel=null; }
+  const filter=`workspace_id=eq.${currentWorkspaceId}`;
+  taskRealtimeChannel=sb.channel(`tasky-v22-${currentWorkspaceId}`)
+    .on('postgres_changes',{event:'*',schema:'public',table:'tasks',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'task_assignees',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'subtasks',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'subtask_assignees',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'task_comments',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'task_attachments',filter},scheduleTaskRealtimeRefresh)
+    .on('postgres_changes',{event:'*',schema:'public',table:'task_activity',filter},scheduleTaskRealtimeRefresh)
+    .subscribe(status=>{ if(status==='CHANNEL_ERROR') console.warn('Tasky realtime channel error'); });
+}
+function scheduleTaskRealtimeRefresh(){
+  clearTimeout(taskRealtimeTimer);
+  taskRealtimeTimer=setTimeout(async()=>{
+    await fetchTasks();
+    if(currentDetailTaskId){ await fetchTaskDetailExtras(currentDetailTaskId); renderTaskDetailModal(currentDetailTaskId); }
+    renderAll();
+  },220);
 }
 
 async function fetchProjects(){
@@ -1288,30 +1412,67 @@ async function fetchProjects(){
 
 async function fetchTasks(){
   if(!currentWorkspaceId) return;
-  const { data, error } = await sb
-    .from('tasks')
-    .select('*')
-    .eq('workspace_id', currentWorkspaceId)
-    .order('created_at', { ascending: true });
-  if(error){ console.error('تعذّر تحميل المهام', error); return; }
-  tasks = data.map(row => {
-    const member = teamMembers.find(m => m.userId && m.userId === row.assignee_id);
+  const [tasksRes, assigneesRes, subtasksRes, subtaskAssigneesRes, commentsRes] = await Promise.all([
+    sb.from('tasks').select('*').eq('workspace_id', currentWorkspaceId).order('created_at', { ascending:true }),
+    sb.from('task_assignees').select('task_id, workspace_id, user_id, is_lead, created_at').eq('workspace_id', currentWorkspaceId),
+    sb.from('subtasks').select('id, workspace_id, task_id, title, is_completed, position, due_date, created_by, created_at, updated_at').eq('workspace_id', currentWorkspaceId).order('position', {ascending:true}).order('created_at',{ascending:true}),
+    sb.from('subtask_assignees').select('subtask_id, workspace_id, user_id, created_at').eq('workspace_id', currentWorkspaceId),
+    sb.from('task_comments').select('id, task_id').eq('workspace_id', currentWorkspaceId)
+  ]);
+  if(tasksRes.error){ console.error('تعذّر تحميل المهام', tasksRes.error); return; }
+  if(assigneesRes.error) console.warn('V22 task_assignees unavailable; run V22 migration', assigneesRes.error);
+  if(subtasksRes.error) console.warn('V22 subtasks unavailable; run V22 migration', subtasksRes.error);
+  if(subtaskAssigneesRes.error) console.warn('V22 subtask_assignees unavailable; run V22 migration', subtaskAssigneesRes.error);
+  if(commentsRes.error) console.warn('V22 task_comments unavailable; run V22 migration', commentsRes.error);
+
+  taskAssigneeRows = assigneesRes.data || [];
+  subtaskRows = subtasksRes.data || [];
+  subtaskAssigneeRows = subtaskAssigneesRes.data || [];
+  const commentCounts = (commentsRes.data || []).reduce((acc,row)=>{ acc[row.task_id]=(acc[row.task_id]||0)+1; return acc; },{});
+  const today = new Date().toISOString().slice(0,10);
+
+  tasks = (tasksRes.data || []).map(row => {
+    let assignmentRows = taskAssigneeRows.filter(a=>a.task_id===row.id);
+    let assignees = assignmentRows.map(a=>taskMemberById(a.user_id)).filter(Boolean);
+    let leadRow = assignmentRows.find(a=>a.is_lead) || assignmentRows[0] || null;
+    if(!assignees.length && row.assignee_id){
+      const legacy = taskMemberById(row.assignee_id);
+      if(legacy){ assignees=[legacy]; leadRow={user_id:legacy.userId,is_lead:true}; }
+    }
+    const children = subtaskRows.filter(s=>s.task_id===row.id).map(s=>({
+      ...s,
+      assignees: subtaskAssigneeRows.filter(a=>a.subtask_id===s.id).map(a=>taskMemberById(a.user_id)).filter(Boolean)
+    }));
+    const doneCount = children.filter(s=>s.is_completed).length;
+    const totalCount = children.length;
+    const first = assignees[0] || null;
+    const dueDate = row.due_date || null;
     return {
       id: row.id,
       projectId: row.project_id,
       col: row.col,
-      tag: row.tag,
+      tag: row.tag || 'operations',
       ar: row.title_ar,
-      en: row.title_en,
-      due_ar: row.due_ar || row.due_date || null,
-      due_en: row.due_en || row.due_date || null,
-      overdue: row.overdue,
-      assigneeId: row.assignee_id || null,
-      assignee: member?.initials || row.assignee_initials || '؟',
-      assigneeName: member?.fullName || row.assignee_initials || (lang==='ar' ? 'غير مسندة' : 'Unassigned'),
-      assigneeColor: member?.color || row.assignee_color || 'var(--blue)',
-      comments: row.comments_count || 0,
-      subtasks: (row.subtasks_done != null && row.subtasks_total != null) ? [row.subtasks_done, row.subtasks_total] : null,
+      en: row.title_en || row.title_ar,
+      description: row.description || '',
+      priority: row.priority || 'medium',
+      startDate: row.start_date || null,
+      dueDate,
+      due_ar: row.due_ar || dueDate || null,
+      due_en: row.due_en || dueDate || null,
+      overdue: !!(dueDate && dueDate < today && row.col !== 'done'),
+      completedAt: row.completed_at || null,
+      assigneeId: leadRow?.user_id || row.assignee_id || null,
+      leadAssigneeId: leadRow?.user_id || null,
+      assignees,
+      assignee: first?.initials || row.assignee_initials || '؟',
+      assigneeName: first?.fullName || row.assignee_initials || (lang==='ar' ? 'غير مسندة' : 'Unassigned'),
+      assigneeColor: first?.color || row.assignee_color || 'var(--blue)',
+      comments: commentCounts[row.id] ?? row.comments_count ?? 0,
+      subtaskItems: children,
+      subtasks: totalCount ? [doneCount,totalCount] : null,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
     };
   });
 }
@@ -2009,6 +2170,16 @@ const ASSIGNEE_OPTIONS = [
   { initials: "م ع", color: "var(--blue-light)", ar:"منال العمري (م ع)", en:"Manal Al-Omari (MO)" },
 ];
 let tasks = []; // يتم تعبئتها فعليًا من قاعدة البيانات بعد تسجيل الدخول عبر fetchTasks()
+let taskAssigneeRows = [];
+let subtaskRows = [];
+let subtaskAssigneeRows = [];
+let currentDetailTaskId = null;
+let detailComments = [];
+let detailAttachments = [];
+let detailActivity = [];
+let filterAssignedToMe = false;
+let taskRealtimeChannel = null;
+let taskRealtimeTimer = null;
 
 let inventory = [
   { id: 1, ar:"أكياس تغليف مطبوعة", en:"Printed packaging bags", cat_ar:"مستلزمات تعبئة", cat_en:"Packing supplies", branch_ar:"الفرع الرئيسي - الرياض", branch_en:"Main branch - Riyadh", qty: 1200, min: 300, unit_ar:"قطعة", unit_en:"pcs", price: 2 },
@@ -2276,6 +2447,31 @@ function tagChip(tagId){
 function avatarHtml(initials,color,size){
   return `<div class="avatar" style="width:${size}px;height:${size}px;font-size:${size*0.42}px;background:${color}">${initials}</div>`;
 }
+function memberAvatarHtml(member,size=26){
+  if(!member) return avatarHtml('؟','var(--blue)',size);
+  const title = escapeHtml(member.fullName || member.email || '');
+  if(member.avatarUrl){
+    return `<div class="avatar" title="${title}" style="width:${size}px;height:${size}px;overflow:hidden;background:${member.color}"><img src="${escapeHtml(member.avatarUrl)}" alt="" style="width:100%;height:100%;object-fit:cover"></div>`;
+  }
+  return `<div class="avatar" title="${title}" style="width:${size}px;height:${size}px;font-size:${size*0.38}px;background:${member.color}">${escapeHtml(member.initials || '؟')}</div>`;
+}
+function assigneeStackHtml(assignees=[], size=26, max=3){
+  const list = (assignees || []).filter(Boolean);
+  if(!list.length) return `<div class="avatar" title="${lang==='ar'?'غير مسندة':'Unassigned'}" style="width:${size}px;height:${size}px;font-size:${size*.42}px;background:var(--paper);color:var(--muted);border:1px dashed var(--border)">—</div>`;
+  const shown = list.slice(0,max).map(m=>memberAvatarHtml(m,size)).join('');
+  const extra = list.length-max;
+  return `<div class="task-avatar-stack">${shown}${extra>0?`<div class="avatar-more" style="width:${size}px;height:${size}px">+${extra}</div>`:''}</div>`;
+}
+function taskMemberById(userId){ return teamMembers.find(m=>m.userId===userId) || null; }
+function formatBytes(bytes){
+  const n=Number(bytes||0); if(!n) return '—';
+  if(n<1024) return `${n} B`; if(n<1048576) return `${(n/1024).toFixed(1)} KB`; return `${(n/1048576).toFixed(1)} MB`;
+}
+function formatDateTime(value){
+  if(!value) return '';
+  try { return new Intl.DateTimeFormat(lang==='ar'?'ar-SA':'en-US',{dateStyle:'medium',timeStyle:'short'}).format(new Date(value)); } catch { return String(value); }
+}
+
 function fmtMoney(n){ return t('currency')(n.toLocaleString('en-US')); }
 function escapeHtml(value){
   return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[ch]));
@@ -2438,10 +2634,11 @@ function currentProject(){ return projects.find(p => p.id === activeProjectId) |
 function visibleTasks(){
   let list = tasks.filter(x =>
     (!activeProjectId || x.projectId === activeProjectId) &&
-    (!query || (lang==='en'?x.en:x.ar).toLowerCase().includes(query.toLowerCase())) &&
-    (!filterTag || x.tag === filterTag)
+    (!query || taskTitle(x).toLowerCase().includes(query.toLowerCase())) &&
+    (!filterTag || x.tag === filterTag) &&
+    (!filterAssignedToMe || (x.assignees || []).some(m => m.userId === currentUserId))
   );
-  if (urgentFirst) list = [...list].sort((a,b) => (b.overdue?1:0) - (a.overdue?1:0));
+  if(urgentFirst) list = list.slice().sort((a,b) => (b.priority==='urgent')-(a.priority==='urgent') || (b.overdue?1:0)-(a.overdue?1:0));
   return list;
 }
 function taskTitle(x){ return lang==='en' ? x.en : x.ar; }
@@ -2482,7 +2679,7 @@ function applyChrome(){
   applyCurrentUserProfile();
   document.getElementById('breadcrumbRoot').textContent = t('breadcrumbRoot');
   document.getElementById('langBtn').textContent = lang==='ar' ? 'EN' : 'عربي';
-  document.getElementById('filterLabel').textContent = filterTag ? t('tag_'+filterTag) : t('filter');
+  document.getElementById('filterLabel').textContent = filterAssignedToMe ? (lang==='ar'?'مسندة إليّ':'Assigned to me') : (filterTag ? t('tag_'+filterTag) : t('filter'));
   document.getElementById('sortLabel').textContent = t('sort');
   document.getElementById('aiBannerText').innerHTML = `<b>${t('aiPrefix')}</b> ${t('aiText')}`;
   document.getElementById('aiBannerLink').textContent = t('aiLink');
@@ -2610,6 +2807,10 @@ function renderHomeStats(){
 function onBudgetChange(val){ document.getElementById('budgetLabel').textContent = t('statBudget')(val); }
 
 /* ================= BOARD / LIST ================= */
+function taskPriorityPill(x){
+  const labels = lang==='ar' ? {low:'منخفضة',medium:'متوسطة',high:'عالية',urgent:'عاجلة'} : {low:'Low',medium:'Medium',high:'High',urgent:'Urgent'};
+  return `<span class="priority-pill priority-${x.priority||'medium'}">${labels[x.priority||'medium']}</span>`;
+}
 function renderBoard(){
   const vis = visibleTasks();
   const board = document.getElementById('boardView');
@@ -2617,18 +2818,18 @@ function renderBoard(){
     const colTasks = vis.filter(x => x.col === col.id);
     const cards = colTasks.map(x => `
       <div class="task-card ${x.col==='done'?'done':''}" draggable="true" data-id="${x.id}" ondragstart="onDragStart(event,'${x.id}')">
-        <div class="tags">${tagChip(x.tag)}</div>
-        <div class="task-title ${x.col==='done'?'done':''}" onclick="openDetailModal('${x.id}')">${taskTitle(x)}</div>
-        ${x.subtasks ? `<div class="progress-bar"><span style="width:${(x.subtasks[0]/x.subtasks[1])*100}%"></span></div>` : ''}
+        <div class="tags">${tagChip(x.tag)} ${x.priority==='urgent'?taskPriorityPill(x):''}</div>
+        <div class="task-title ${x.col==='done'?'done':''}" onclick="openDetailModal('${x.id}')">${escapeHtml(taskTitle(x))}</div>
+        ${x.subtasks ? `<div class="progress-bar"><span style="width:${Math.round((x.subtasks[0]/x.subtasks[1])*100)}%"></span></div>` : ''}
         <div class="task-meta">
           <div class="left">
             ${x.col==='done'
               ? `<span style="color:var(--green)"><svg><use href="#i-check"/></svg>${t('done')}</span>`
-              : (taskDue(x) ? `<span class="due ${x.overdue?'urgent':''}">${x.overdue?'<svg><use href="#i-flag"/></svg>':''}${taskDue(x)}</span>` : '')}
+              : (taskDue(x) ? `<span class="due ${x.overdue?'urgent':''}">${x.overdue?'<svg><use href="#i-flag"/></svg>':''}${escapeHtml(taskDue(x))}</span>` : '')}
             ${x.subtasks ? `<span>${x.subtasks[0]} / ${x.subtasks[1]} ${t('subtasksSuffix')}</span>` : ''}
             ${x.comments ? `<span><svg><use href="#i-comment"/></svg>${x.comments}</span>` : ''}
           </div>
-          ${avatarHtml(x.assignee, x.assigneeColor, 24)}
+          ${assigneeStackHtml(x.assignees,24,3)}
         </div>
         ${x.col!=='done' ? `<button class="complete-btn" onclick="moveTask('${x.id}','done')">${t('markComplete')}</button>` : ''}
       </div>`).join('');
@@ -2648,10 +2849,11 @@ function renderList(){
     return `
       <div class="list-row" onclick="openDetailModal('${x.id}')">
         <span class="dot" style="background:${col.dot}"></span>
-        <div class="title" style="${x.col==='done'?'text-decoration:line-through':''}">${taskTitle(x)}</div>
+        <div class="title" style="${x.col==='done'?'text-decoration:line-through':''}">${escapeHtml(taskTitle(x))}</div>
+        ${taskPriorityPill(x)}
         ${tagChip(x.tag)}
         <span class="col-label">${t(col.key)}</span>
-        ${avatarHtml(x.assignee, x.assigneeColor, 24)}
+        ${assigneeStackHtml(x.assignees,24,3)}
       </div>`;
   }).join('');
 }
@@ -3650,13 +3852,22 @@ function onSearch(val){
 }
 function toggleFilterDropdown(){
   const dd = document.getElementById('filterDropdown');
-  dd.innerHTML = [`<button onclick="setFilterTag(null)">${t('filterAll')}</button>`]
-    .concat(Object.keys(TAG_META).map(tag => `<button onclick="setFilterTag('${tag}')">${t('tag_'+tag)}</button>`)).join('');
+  dd.innerHTML = `
+    <button onclick="setAssignedToMeFilter(${!filterAssignedToMe})">${filterAssignedToMe?'✓ ':''}${lang==='ar'?'مسندة إليّ':'Assigned to me'}</button>
+    <div style="height:1px;background:var(--border);margin:4px 2px"></div>
+    <button onclick="setFilterTag(null)">${t('filterAll')}</button>
+    ${Object.keys(TAG_META).map(tag => `<button onclick="setFilterTag('${tag}')">${t('tag_'+tag)}</button>`).join('')}`;
   dd.classList.toggle('hidden');
+}
+function setAssignedToMeFilter(on){
+  filterAssignedToMe = !!on;
+  document.getElementById('filterLabel').textContent = filterAssignedToMe ? (lang==='ar'?'مسندة إليّ':'Assigned to me') : (filterTag ? t('tag_'+filterTag) : t('filter'));
+  document.getElementById('filterDropdown').classList.add('hidden');
+  renderAll();
 }
 function setFilterTag(tag){
   filterTag = tag;
-  document.getElementById('filterLabel').textContent = tag ? t('tag_'+tag) : t('filter');
+  document.getElementById('filterLabel').textContent = filterAssignedToMe ? (lang==='ar'?'مسندة إليّ':'Assigned to me') : (tag ? t('tag_'+tag) : t('filter'));
   document.getElementById('filterDropdown').classList.add('hidden');
   renderAll();
 }
@@ -3671,11 +3882,14 @@ function onDragStart(e,id){ dragId = id; }
 function onDragOver(e,colId){ e.preventDefault(); document.querySelectorAll('.column').forEach(c=>c.classList.remove('drag-over')); e.currentTarget.classList.add('drag-over'); }
 function onDragLeave(e){ e.currentTarget.classList.remove('drag-over'); }
 function onDrop(e,colId){ e.preventDefault(); e.currentTarget.classList.remove('drag-over'); if(dragId!=null) moveTask(dragId, colId); dragId = null; }
-function moveTask(id,col){
-  tasks = tasks.map(x => x.id===id ? {...x, col} : x);
+async function moveTask(id,col){
+  const old = tasks.find(x=>x.id===id);
+  tasks = tasks.map(x => x.id===id ? {...x, col, completedAt: col==='done'?new Date().toISOString():null} : x);
   renderAll();
-  sb.from('tasks').update({ col, updated_at: new Date().toISOString() }).eq('id', id)
-    .then(({ error }) => { if(error) console.error('moveTask save failed', error); });
+  const { error } = await sb.from('tasks').update({ col, completed_at: col==='done'?new Date().toISOString():null, updated_at:new Date().toISOString() }).eq('id', id);
+  if(error){ console.error('moveTask save failed', error); await fetchTasks(); renderAll(); return; }
+  if(old?.col !== col) await logTaskActivity(id,'status_changed',{from:old?.col,to:col});
+  if(currentDetailTaskId===id) await refreshTaskDetail(id,false);
 }
 
 /* ================= NOTIFICATIONS ================= */
@@ -3722,22 +3936,27 @@ async function submitAddProject(e){
 }
 
 /* ================= ADD TASK MODAL ================= */
+function createAssigneePickerHtml(selectedIds=[], {prefix='newAssignee', onChange=null}={}){
+  const members = assignableMembers();
+  if(!members.length) return `<div class="empty-mini">${lang==='ar'?'لا يوجد أعضاء نشطون':'No active members'}</div>`;
+  return `<div class="assignee-picker">${members.map(m=>{
+    const checked = selectedIds.includes(m.userId);
+    const handler = onChange ? `onchange="${onChange}('${m.userId}',this.checked)"` : '';
+    return `<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div><input type="checkbox" ${checked?'checked':''} value="${m.userId}" data-assignee-box="${prefix}" ${handler}></label>`;
+  }).join('')}</div>`;
+}
 function openAddModal(){
   if(!projects.length){ openProjectModal(); return; }
   const projectLabel = lang==='ar' ? 'المشروع' : 'Project';
-  const members = assignableMembers();
-  const unassignedLabel = lang==='ar' ? 'بدون مسؤول' : 'Unassigned';
   document.getElementById('addModalBody').innerHTML = `
     <div class="modal-head"><h3>${t('modalNewTask')}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
     <form onsubmit="submitAddTask(event)">
       <div class="field"><label>${t('fieldTitle')}</label><input id="newTitle" required placeholder="${t('fieldTitlePh')}"></div>
       <div class="field"><label>${projectLabel}</label><select id="newProject">${projects.map(p=>`<option value="${p.id}" ${p.id===activeProjectId?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+      <div class="field"><label>${lang==='ar'?'الأولوية':'Priority'}</label><select id="newPriority"><option value="low">${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" selected>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high">${lang==='ar'?'عالية':'High'}</option><option value="urgent">${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
       <div class="field"><label>${t('fieldSection')}</label><select id="newTag">${Object.keys(TAG_META).map(tg=>`<option value="${tg}">${t('tag_'+tg)}</option>`).join('')}</select></div>
-      <div class="field"><label>${t('fieldDue')}</label><input id="newDue" type="date"></div>
-      <div class="field"><label>${t('fieldAssignee')}</label><select id="newAssignee">
-        <option value="">${unassignedLabel}</option>
-        ${members.map(m=>`<option value="${m.userId}">${escapeHtml(m.fullName)}${m.jobTitle ? ' — '+escapeHtml(m.jobTitle) : ''}</option>`).join('')}
-      </select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div class="field"><label>${lang==='ar'?'تاريخ البداية':'Start date'}</label><input id="newStart" type="date"></div><div class="field"><label>${t('fieldDue')}</label><input id="newDue" type="date"></div></div>
+      <div class="field"><label>${lang==='ar'?'المسؤولون':'Assignees'}</label>${createAssigneePickerHtml([], {prefix:'newAssignee'})}<small style="color:var(--muted);line-height:1.6">${lang==='ar'?'يمكن إسناد المهمة لأكثر من شخص. أول شخص محدد يصبح المسؤول الرئيسي ويمكن تغييره لاحقًا.':'A task can have multiple assignees. The first selected person becomes lead and can be changed later.'}</small></div>
       <button type="submit" class="submit-btn">${t('submitAddTask')(t('col_todo'))}</button>
     </form>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
@@ -3749,72 +3968,256 @@ async function submitAddTask(e){
   if(!title) return;
   const projectId = document.getElementById('newProject').value;
   const tag = document.getElementById('newTag').value;
+  const priority = document.getElementById('newPriority').value;
+  const startDate = document.getElementById('newStart').value || null;
   const due = document.getElementById('newDue').value || null;
-  const assigneeId = document.getElementById('newAssignee').value || null;
-  const member = assigneeId ? teamMembers.find(m=>m.userId===assigneeId) : null;
-
+  const assigneeIds = [...document.querySelectorAll('[data-assignee-box="newAssignee"]:checked')].map(el=>el.value);
+  const lead = assigneeIds[0] ? taskMemberById(assigneeIds[0]) : null;
   const payload = {
-    workspace_id: currentWorkspaceId,
-    project_id: projectId,
-    col: 'todo',
-    tag,
-    title_ar: title,
-    title_en: title,
-    due_date: due,
-    due_ar: due,
-    due_en: due,
-    overdue: false,
-    assignee_id: assigneeId,
-    assignee_initials: member?.initials || null,
-    assignee_color: member?.color || null,
-    comments_count: 0
+    workspace_id: currentWorkspaceId, project_id: projectId, col:'todo', tag,
+    title_ar:title, title_en:title, description:null, priority, start_date:startDate,
+    due_date:due, due_ar:due, due_en:due, overdue:false,
+    assignee_id: lead?.userId || null,
+    assignee_initials: lead?.initials || null,
+    assignee_color: lead?.color || null,
+    comments_count:0, subtasks_done:0, subtasks_total:0
   };
-
-  closeAddModal();
+  const submit = e.submitter; if(submit){ submit.disabled=true; submit.textContent=lang==='ar'?'جارٍ الإنشاء...':'Creating...'; }
   const { data, error } = await sb.from('tasks').insert(payload).select().single();
-  if(error){ console.error(error); alert(lang==='ar'?'صار خطأ أثناء إضافة المهمة، حاول مرة ثانية':'Could not add the task. Please try again.'); return; }
-  tasks.push({
-    id: data.id,
-    projectId: data.project_id,
-    col: data.col,
-    tag: data.tag,
-    ar: data.title_ar,
-    en: data.title_en,
-    due_ar: data.due_ar || data.due_date || null,
-    due_en: data.due_en || data.due_date || null,
-    overdue: data.overdue,
-    assigneeId: data.assignee_id || null,
-    assignee: member?.initials || data.assignee_initials || '؟',
-    assigneeName: member?.fullName || (lang==='ar' ? 'غير مسندة' : 'Unassigned'),
-    assigneeColor: member?.color || data.assignee_color || 'var(--blue)',
-    comments: data.comments_count || 0,
-    subtasks: null
-  });
+  if(error){ console.error(error); alert(lang==='ar'?'تعذّر إنشاء المهمة. تأكد من تشغيل Migration V22.':'Could not create task. Make sure the V22 migration is installed.'); if(submit) submit.disabled=false; return; }
+  if(assigneeIds.length){
+    const rows = assigneeIds.map((userId,i)=>({task_id:data.id,workspace_id:currentWorkspaceId,user_id:userId,is_lead:i===0,assigned_by:currentUserId}));
+    const assigneeSave = await sb.from('task_assignees').insert(rows);
+    if(assigneeSave.error) console.error('Could not save task assignees',assigneeSave.error);
+  }
+  await logTaskActivity(data.id,'task_created',{title});
+  closeAddModal();
+  await fetchTasks();
   renderAll();
+  taskyToast(lang==='ar'?'تم إنشاء المهمة':'Task created',{tone:'success'});
 }
 
 /* ================= TASK DETAIL MODAL ================= */
-function openDetailModal(id){
-  const x = tasks.find(z=>z.id===id);
-  const col = COLUMNS.find(c=>c.id===x.col);
-  document.getElementById('detailModalBody').innerHTML = `
-    <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:6px;">
-      ${tagChip(x.tag)}
-      <button class="modal-close" onclick="closeDetailModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button>
-    </div>
-    <h3 style="font-size:18px;margin:10px 0 16px;${x.col==='done'?'text-decoration:line-through':''}">${taskTitle(x)}</h3>
-    <div class="detail-row"><span>${t('detailAssignee')}</span><b>${avatarHtml(x.assignee,x.assigneeColor,20)}${escapeHtml(x.assigneeName || x.assignee)}</b></div>
-    <div class="detail-row"><span>${t('detailStatus')}</span><b>${t(col.key)}</b></div>
-    ${taskDue(x)?`<div class="detail-row"><span>${t('detailDate')}</span><b style="color:${x.overdue?'var(--danger)':'var(--ink)'}">${taskDue(x)}</b></div>`:''}
-    ${x.subtasks?`<div class="detail-row"><span>${t('detailSubtasks')}</span><b>${x.subtasks[0]} / ${x.subtasks[1]}</b></div>`:''}
-    <div style="margin-top:12px;">
-      ${x.col!=='done'
-        ? `<button class="submit-btn" onclick="moveTask('${x.id}','done'); closeDetailModal();"><svg style="width:16px;height:16px"><use href="#i-check"/></svg> ${t('detailMarkComplete')}</button>`
-        : `<div style="text-align:center;color:var(--green);font-weight:600;font-size:13.5px;">${t('detailDoneMsg')}</div>`}
-    </div>`;
-  document.getElementById('detailModalOverlay').classList.remove('hidden');
+async function logTaskActivity(taskId, action, metadata={}){
+  if(!taskId || !currentWorkspaceId) return;
+  const { error } = await sb.from('task_activity').insert({workspace_id:currentWorkspaceId,task_id:taskId,actor_id:currentUserId,action,metadata});
+  if(error) console.warn('task activity log skipped',error);
 }
-function closeDetailModal(){ document.getElementById('detailModalOverlay').classList.add('hidden'); }
+async function fetchTaskDetailExtras(taskId){
+  const [commentsRes, attachmentsRes, activityRes] = await Promise.all([
+    sb.from('task_comments').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:true}),
+    sb.from('task_attachments').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}),
+    sb.from('task_activity').select('*').eq('task_id',taskId).eq('workspace_id',currentWorkspaceId).order('created_at',{ascending:false}).limit(60)
+  ]);
+  detailComments = commentsRes.data || [];
+  detailAttachments = attachmentsRes.data || [];
+  detailActivity = activityRes.data || [];
+}
+function activityText(row){
+  const actor = taskMemberById(row.actor_id)?.fullName || (lang==='ar'?'أحد أعضاء الفريق':'Team member');
+  const m = row.metadata || {};
+  const memberName = m.user_id ? (taskMemberById(m.user_id)?.fullName || '') : (m.name||'');
+  const ar={
+    task_created:`أنشأ ${actor} المهمة`,
+    status_changed:`غيّر ${actor} حالة المهمة`,
+    field_updated:`حدّث ${actor} ${m.label||'بيانات المهمة'}`,
+    assignee_added:`أضاف ${actor} ${memberName||'مسؤولًا'} إلى المهمة`,
+    assignee_removed:`أزال ${actor} ${memberName||'مسؤولًا'} من المهمة`,
+    lead_changed:`عيّن ${actor} ${memberName||'مسؤولًا'} كمسؤول رئيسي`,
+    subtask_added:`أضاف ${actor} مهمة فرعية`,
+    subtask_completed:`أكمل ${actor} مهمة فرعية`,
+    subtask_reopened:`أعاد ${actor} فتح مهمة فرعية`,
+    subtask_assignee_added:`أسند ${actor} مهمة فرعية إلى ${memberName||'عضو'}`,
+    subtask_assignee_removed:`أزال ${actor} ${memberName||'عضوًا'} من مهمة فرعية`,
+    comment_added:`أضاف ${actor} تعليقًا`,
+    attachment_added:`أرفق ${actor} ملفًا`,
+    attachment_removed:`حذف ${actor} مرفقًا`
+  };
+  const en={
+    task_created:`${actor} created the task`, status_changed:`${actor} changed the task status`, field_updated:`${actor} updated ${m.label||'task details'}`,
+    assignee_added:`${actor} assigned ${memberName||'a member'}`, assignee_removed:`${actor} removed ${memberName||'an assignee'}`, lead_changed:`${actor} made ${memberName||'a member'} the lead assignee`,
+    subtask_added:`${actor} added a subtask`, subtask_completed:`${actor} completed a subtask`, subtask_reopened:`${actor} reopened a subtask`,
+    subtask_assignee_added:`${actor} assigned a subtask to ${memberName||'a member'}`, subtask_assignee_removed:`${actor} removed ${memberName||'a member'} from a subtask`,
+    comment_added:`${actor} added a comment`, attachment_added:`${actor} attached a file`, attachment_removed:`${actor} removed an attachment`
+  };
+  return (lang==='ar'?ar:en)[row.action] || `${actor} · ${row.action}`;
+}
+function detailAssigneePickerHtml(x){
+  return createAssigneePickerHtml((x.assignees||[]).map(m=>m.userId), {prefix:'detailTask', onChange:`toggleTaskAssignee.bind(null,'${x.id}')`}).replaceAll(`onchange="toggleTaskAssignee.bind(null,'${x.id}')('`, `onchange="toggleTaskAssignee('${x.id}','`).replaceAll(`',this.checked)"`, `',this.checked)"`);
+}
+function taskLeadOptions(x){
+  if(!(x.assignees||[]).length) return `<option value="">${lang==='ar'?'بدون مسؤول رئيسي':'No lead'}</option>`;
+  return `<option value="">${lang==='ar'?'بدون مسؤول رئيسي':'No lead'}</option>` + x.assignees.map(m=>`<option value="${m.userId}" ${x.leadAssigneeId===m.userId?'selected':''}>${escapeHtml(m.fullName)}</option>`).join('');
+}
+function renderSubtasks(x){
+  const items=x.subtaskItems||[];
+  const done=items.filter(s=>s.is_completed).length, total=items.length, pct=total?Math.round(done/total*100):0;
+  return `
+    ${total?`<div class="subtask-progress"><div class="progress-bar"><span style="width:${pct}%"></span></div><span>${done}/${total} · ${pct}%</span></div>`:''}
+    <div class="subtask-list">${items.length?items.map(s=>`
+      <div class="subtask-item">
+        <div class="subtask-main-row">
+          <input type="checkbox" ${s.is_completed?'checked':''} onchange="toggleSubtaskComplete('${x.id}','${s.id}',this.checked)">
+          <div class="subtask-title ${s.is_completed?'done':''}">${escapeHtml(s.title)}</div>
+          ${assigneeStackHtml(s.assignees,23,3)}
+          <button class="subtask-delete" onclick="deleteSubtask('${x.id}','${s.id}')" title="${lang==='ar'?'حذف':'Delete'}"><svg style="width:14px;height:14px"><use href="#i-x"/></svg></button>
+        </div>
+        <details class="subtask-assignees"><summary><svg style="width:13px;height:13px"><use href="#i-users"/></svg>${lang==='ar'?'مسؤولو المهمة الفرعية':'Subtask assignees'}</summary>
+          ${createAssigneePickerHtml((s.assignees||[]).map(m=>m.userId),{prefix:'subtask-'+s.id}).replaceAll('data-assignee-box="subtask-'+s.id+'"',`data-assignee-box="subtask-${s.id}" onchange="toggleSubtaskAssignee('${x.id}','${s.id}',this.value,this.checked)"`)}
+        </details>
+      </div>`).join(''):`<div class="empty-mini">${lang==='ar'?'لا توجد مهام فرعية بعد':'No subtasks yet'}</div>`}</div>
+    <div class="subtask-add"><input id="newSubtaskTitle" placeholder="${lang==='ar'?'أضف مهمة فرعية...':'Add a subtask...'}" onkeydown="if(event.key==='Enter'){event.preventDefault();addSubtask('${x.id}')}"/><button onclick="addSubtask('${x.id}')">${lang==='ar'?'إضافة':'Add'}</button></div>`;
+}
+function renderComments(){
+  const items=detailComments.map(c=>{
+    const m=taskMemberById(c.author_id); return `<div class="comment-item">${memberAvatarHtml(m,30)}<div class="comment-bubble"><div class="comment-meta"><b>${escapeHtml(m?.fullName||(lang==='ar'?'عضو':'Member'))}</b><span>·</span><span>${escapeHtml(formatDateTime(c.created_at))}</span></div><div class="comment-body">${escapeHtml(c.body)}</div></div></div>`;
+  }).join('');
+  return `${items||`<div class="empty-mini">${lang==='ar'?'ابدأ أول نقاش على هذه المهمة':'Start the first discussion on this task'}</div>`}<div class="comment-form"><textarea id="newTaskComment" placeholder="${lang==='ar'?'اكتب تعليقًا...':'Write a comment...'}"></textarea><button onclick="addTaskComment(currentDetailTaskId)">${lang==='ar'?'إرسال':'Send'}</button></div>`;
+}
+function renderAttachments(){
+  const items=detailAttachments.map(a=>`<div class="attachment-item"><div class="attachment-icon"><svg style="width:17px;height:17px"><use href="#i-file"/></svg></div><div class="attachment-copy"><b>${escapeHtml(a.file_name)}</b><span>${formatBytes(a.file_size)} · ${escapeHtml(formatDateTime(a.created_at))}</span></div><button class="attachment-action" onclick="openTaskAttachment('${a.id}')">${lang==='ar'?'فتح':'Open'}</button><button class="attachment-action" onclick="deleteTaskAttachment('${a.id}')">${lang==='ar'?'حذف':'Delete'}</button></div>`).join('');
+  return `${items||`<div class="empty-mini">${lang==='ar'?'لا توجد مرفقات':'No attachments'}</div>`}<label class="attachment-upload"><svg style="width:18px;height:18px;color:var(--blue)"><use href="#i-upload"/></svg><span style="font-size:11.5px;color:var(--muted)">${lang==='ar'?'إضافة مرفق (حتى 10MB)':'Add attachment (up to 10MB)'}</span><input type="file" onchange="uploadTaskAttachment(currentDetailTaskId,this)"></label>`;
+}
+function renderActivity(){
+  return detailActivity.length ? detailActivity.map(a=>`<div class="activity-item"><span class="activity-dot"></span><div class="activity-copy">${escapeHtml(activityText(a))}<time>${escapeHtml(formatDateTime(a.created_at))}</time></div></div>`).join('') : `<div class="empty-mini">${lang==='ar'?'سيظهر سجل تغييرات المهمة هنا':'Task changes will appear here'}</div>`;
+}
+function renderTaskDetailModal(id){
+  const x=tasks.find(z=>z.id===id); if(!x) return;
+  const done=x.subtaskItems?.filter(s=>s.is_completed).length||0, total=x.subtaskItems?.length||0;
+  const labels=lang==='ar'?{desc:'الوصف',sub:'المهام الفرعية',comments:'التعليقات',files:'المرفقات',activity:'سجل النشاط',status:'الحالة',priority:'الأولوية',project:'المشروع',start:'تاريخ البداية',due:'تاريخ الاستحقاق',assignees:'المسؤولون',lead:'المسؤول الرئيسي'}:{desc:'Description',sub:'Subtasks',comments:'Comments',files:'Attachments',activity:'Activity',status:'Status',priority:'Priority',project:'Project',start:'Start date',due:'Due date',assignees:'Assignees',lead:'Lead assignee'};
+  document.getElementById('detailModalBody').innerHTML=`<div class="task-detail-shell">
+    <div class="task-detail-head"><div class="task-detail-head-main"><div class="task-detail-kicker">${tagChip(x.tag)}${taskPriorityPill(x)}${total?`<span class="detail-save-hint">${done}/${total} · ${Math.round(done/total*100)}%</span>`:''}</div><input class="task-title-input" value="${escapeHtml(taskTitle(x))}" onblur="saveTaskField('${x.id}','title',this.value,'${lang==='ar'?'العنوان':'title'}')"></div><button class="modal-close" onclick="closeDetailModal()"><svg style="width:19px;height:19px"><use href="#i-x"/></svg></button></div>
+    <div class="task-detail-grid">
+      <div class="task-detail-main">
+        <section class="task-detail-section"><h4>${labels.desc}<span class="detail-save-hint">${lang==='ar'?'يحفظ تلقائيًا':'Auto-saved'}</span></h4><textarea class="task-description" placeholder="${lang==='ar'?'اكتب وصف المهمة، المخرجات المطلوبة، أو أي ملاحظات...':'Describe the task, expected outcome, or notes...'}" onblur="saveTaskField('${x.id}','description',this.value,'${labels.desc}')">${escapeHtml(x.description||'')}</textarea></section>
+        <section class="task-detail-section"><h4>${labels.sub}</h4>${renderSubtasks(x)}</section>
+        <section class="task-detail-section"><h4>${labels.comments}<span class="detail-save-hint">${detailComments.length}</span></h4><div class="comment-list">${renderComments()}</div></section>
+        <section class="task-detail-section"><h4>${labels.files}</h4><div class="attachment-list">${renderAttachments()}</div></section>
+        <section class="task-detail-section"><h4>${labels.activity}</h4><div class="activity-list">${renderActivity()}</div></section>
+      </div>
+      <aside class="task-detail-side">
+        <div class="detail-field"><label>${labels.status}</label><select class="detail-control" onchange="saveTaskField('${x.id}','col',this.value,'${labels.status}')">${COLUMNS.map(c=>`<option value="${c.id}" ${x.col===c.id?'selected':''}>${t(c.key)}</option>`).join('')}</select></div>
+        <div class="detail-field"><label>${labels.priority}</label><select class="detail-control" onchange="saveTaskField('${x.id}','priority',this.value,'${labels.priority}')"><option value="low" ${x.priority==='low'?'selected':''}>${lang==='ar'?'منخفضة':'Low'}</option><option value="medium" ${x.priority==='medium'?'selected':''}>${lang==='ar'?'متوسطة':'Medium'}</option><option value="high" ${x.priority==='high'?'selected':''}>${lang==='ar'?'عالية':'High'}</option><option value="urgent" ${x.priority==='urgent'?'selected':''}>${lang==='ar'?'عاجلة':'Urgent'}</option></select></div>
+        <div class="detail-field"><label>${labels.project}</label><select class="detail-control" onchange="saveTaskField('${x.id}','projectId',this.value,'${labels.project}')">${projects.map(p=>`<option value="${p.id}" ${x.projectId===p.id?'selected':''}>${escapeHtml(p.name)}</option>`).join('')}</select></div>
+        <div class="detail-field"><label>${labels.start}</label><input class="detail-control" type="date" value="${x.startDate||''}" onchange="saveTaskField('${x.id}','startDate',this.value,'${labels.start}')"></div>
+        <div class="detail-field"><label>${labels.due}</label><input class="detail-control" type="date" value="${x.dueDate||''}" onchange="saveTaskField('${x.id}','dueDate',this.value,'${labels.due}')"></div>
+        <div class="task-detail-section"><h4>${labels.assignees}<span>${assigneeStackHtml(x.assignees,25,4)}</span></h4><div class="assignee-picker">${assignableMembers().map(m=>`<label class="assignee-option">${memberAvatarHtml(m,28)}<div class="member-copy"><b>${escapeHtml(m.fullName)}</b><span>${escapeHtml(m.jobTitle||m.email||'')}</span></div>${x.leadAssigneeId===m.userId?'<span class="lead-badge">Lead</span>':''}<input type="checkbox" ${x.assignees.some(a=>a.userId===m.userId)?'checked':''} onchange="toggleTaskAssignee('${x.id}','${m.userId}',this.checked)"></label>`).join('')}</div></div>
+        <div class="detail-field"><label>${labels.lead}</label><select class="detail-control" onchange="setLeadAssignee('${x.id}',this.value)">${taskLeadOptions(x)}</select></div>
+        <button class="danger-link" onclick="deleteTask('${x.id}')">${lang==='ar'?'حذف المهمة':'Delete task'}</button>
+      </aside>
+    </div></div>`;
+}
+async function openDetailModal(id){
+  currentDetailTaskId=id;
+  document.getElementById('detailModalBody').innerHTML=`<div style="padding:34px;text-align:center;color:var(--muted)">${lang==='ar'?'جارٍ تحميل تفاصيل المهمة...':'Loading task details...'}</div>`;
+  document.getElementById('detailModalOverlay').classList.remove('hidden');
+  await fetchTaskDetailExtras(id);
+  renderTaskDetailModal(id);
+}
+function closeDetailModal(){ currentDetailTaskId=null; document.getElementById('detailModalOverlay').classList.add('hidden'); }
+async function refreshTaskDetail(taskId, reloadExtras=true){
+  await fetchTasks(); if(reloadExtras) await fetchTaskDetailExtras(taskId); if(currentDetailTaskId===taskId) renderTaskDetailModal(taskId); renderAll();
+}
+async function saveTaskField(taskId, field, value, label=''){
+  const x=tasks.find(t=>t.id===taskId); if(!x) return;
+  const map={title:'title_ar',description:'description',priority:'priority',projectId:'project_id',startDate:'start_date',dueDate:'due_date',col:'col'};
+  const dbField=map[field]; if(!dbField) return;
+  let clean=value; if(['description','startDate','dueDate'].includes(field) && !clean) clean=null;
+  const payload={[dbField]:clean,updated_at:new Date().toISOString()};
+  if(field==='title') payload.title_en=value;
+  if(field==='dueDate'){payload.due_ar=clean;payload.due_en=clean;}
+  if(field==='col') payload.completed_at=clean==='done'?new Date().toISOString():null;
+  const {error}=await sb.from('tasks').update(payload).eq('id',taskId).eq('workspace_id',currentWorkspaceId);
+  if(error){alert((lang==='ar'?'تعذّر حفظ التغيير: ':'Could not save change: ')+error.message);return;}
+  await logTaskActivity(taskId,field==='col'?'status_changed':'field_updated',{field,label,value:clean});
+  await refreshTaskDetail(taskId,true);
+}
+async function toggleTaskAssignee(taskId,userId,checked){
+  const x=tasks.find(t=>t.id===taskId); if(!x) return;
+  if(checked){
+    const isLead=!x.assignees.length;
+    const {error}=await sb.from('task_assignees').insert({task_id:taskId,workspace_id:currentWorkspaceId,user_id:userId,is_lead:isLead,assigned_by:currentUserId});
+    if(error){alert((lang==='ar'?'تعذّر إضافة المسؤول: ':'Could not add assignee: ')+error.message);return;}
+    if(isLead) await syncLegacyLead(taskId,userId);
+    await logTaskActivity(taskId,'assignee_added',{user_id:userId});
+  }else{
+    const wasLead=x.leadAssigneeId===userId;
+    const {error}=await sb.from('task_assignees').delete().eq('task_id',taskId).eq('user_id',userId);
+    if(error){alert((lang==='ar'?'تعذّر إزالة المسؤول: ':'Could not remove assignee: ')+error.message);return;}
+    await logTaskActivity(taskId,'assignee_removed',{user_id:userId});
+    if(wasLead){
+      const remaining=x.assignees.filter(m=>m.userId!==userId);
+      if(remaining[0]) await setLeadAssignee(taskId,remaining[0].userId,false); else await syncLegacyLead(taskId,null);
+    }
+  }
+  await refreshTaskDetail(taskId,true);
+}
+async function syncLegacyLead(taskId,userId){
+  const m=userId?taskMemberById(userId):null;
+  await sb.from('tasks').update({assignee_id:userId||null,assignee_initials:m?.initials||null,assignee_color:m?.color||null,updated_at:new Date().toISOString()}).eq('id',taskId);
+}
+async function setLeadAssignee(taskId,userId,refresh=true){
+  await sb.from('task_assignees').update({is_lead:false}).eq('task_id',taskId).eq('workspace_id',currentWorkspaceId);
+  if(userId){
+    const {error}=await sb.from('task_assignees').update({is_lead:true}).eq('task_id',taskId).eq('user_id',userId);
+    if(error){alert((lang==='ar'?'تعذّر تعيين المسؤول الرئيسي: ':'Could not set lead: ')+error.message);return;}
+  }
+  await syncLegacyLead(taskId,userId||null);
+  if(userId) await logTaskActivity(taskId,'lead_changed',{user_id:userId});
+  if(refresh) await refreshTaskDetail(taskId,true);
+}
+async function addSubtask(taskId){
+  const input=document.getElementById('newSubtaskTitle'); const title=input?.value.trim(); if(!title)return;
+  const x=tasks.find(t=>t.id===taskId); const position=(x?.subtaskItems?.length||0)+1;
+  const {error}=await sb.from('subtasks').insert({workspace_id:currentWorkspaceId,task_id:taskId,title,position,created_by:currentUserId});
+  if(error){alert((lang==='ar'?'تعذّر إضافة المهمة الفرعية: ':'Could not add subtask: ')+error.message);return;}
+  await logTaskActivity(taskId,'subtask_added',{title});
+  await refreshTaskDetail(taskId,true);
+}
+async function toggleSubtaskComplete(taskId,subtaskId,checked){
+  const {error}=await sb.from('subtasks').update({is_completed:checked}).eq('id',subtaskId).eq('workspace_id',currentWorkspaceId);
+  if(error){alert(error.message);return;}
+  await logTaskActivity(taskId,checked?'subtask_completed':'subtask_reopened',{subtask_id:subtaskId});
+  await refreshTaskDetail(taskId,true);
+}
+async function deleteSubtask(taskId,subtaskId){
+  const ok=await taskyConfirm(lang==='ar'?'حذف المهمة الفرعية؟':'Delete this subtask?',{title:lang==='ar'?'حذف مهمة فرعية':'Delete subtask',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
+  const {error}=await sb.from('subtasks').delete().eq('id',subtaskId).eq('workspace_id',currentWorkspaceId); if(error){alert(error.message);return;}
+  await refreshTaskDetail(taskId,true);
+}
+async function toggleSubtaskAssignee(taskId,subtaskId,userId,checked){
+  const q=checked?sb.from('subtask_assignees').insert({subtask_id:subtaskId,workspace_id:currentWorkspaceId,user_id:userId,assigned_by:currentUserId}):sb.from('subtask_assignees').delete().eq('subtask_id',subtaskId).eq('user_id',userId);
+  const {error}=await q; if(error){alert(error.message);return;}
+  await logTaskActivity(taskId,checked?'subtask_assignee_added':'subtask_assignee_removed',{subtask_id:subtaskId,user_id:userId});
+  await refreshTaskDetail(taskId,true);
+}
+async function addTaskComment(taskId){
+  const input=document.getElementById('newTaskComment'); const body=input?.value.trim(); if(!body)return;
+  const {error}=await sb.from('task_comments').insert({workspace_id:currentWorkspaceId,task_id:taskId,author_id:currentUserId,body});
+  if(error){alert((lang==='ar'?'تعذّر إضافة التعليق: ':'Could not add comment: ')+error.message);return;}
+  await logTaskActivity(taskId,'comment_added',{}); await refreshTaskDetail(taskId,true);
+}
+async function uploadTaskAttachment(taskId,input){
+  const file=input?.files?.[0]; if(!file)return; if(file.size>10*1024*1024){alert(lang==='ar'?'الحد الأقصى للمرفق 10MB':'Attachment limit is 10MB');input.value='';return;}
+  const safe=(file.name||'file').replace(/[^a-zA-Z0-9._-]+/g,'_'); const path=`${currentWorkspaceId}/${taskId}/${crypto.randomUUID()}_${safe}`;
+  const uploaded=await sb.storage.from('task-attachments').upload(path,file,{upsert:false,contentType:file.type||undefined});
+  if(uploaded.error){alert((lang==='ar'?'تعذّر رفع المرفق: ':'Could not upload attachment: ')+uploaded.error.message);return;}
+  const meta=await sb.from('task_attachments').insert({workspace_id:currentWorkspaceId,task_id:taskId,uploaded_by:currentUserId,file_name:file.name,storage_path:path,mime_type:file.type||null,file_size:file.size});
+  if(meta.error){await sb.storage.from('task-attachments').remove([path]);alert(meta.error.message);return;}
+  await logTaskActivity(taskId,'attachment_added',{file_name:file.name}); await refreshTaskDetail(taskId,true);
+}
+async function openTaskAttachment(id){
+  const a=detailAttachments.find(x=>x.id===id); if(!a)return; const {data,error}=await sb.storage.from('task-attachments').createSignedUrl(a.storage_path,120); if(error){alert(error.message);return;} window.open(data.signedUrl,'_blank','noopener');
+}
+async function deleteTaskAttachment(id){
+  const a=detailAttachments.find(x=>x.id===id); if(!a)return; const ok=await taskyConfirm(lang==='ar'?`حذف المرفق «${a.file_name}»؟`:`Delete attachment “${a.file_name}”?`,{title:lang==='ar'?'حذف مرفق':'Delete attachment',tone:'danger',confirmText:lang==='ar'?'حذف':'Delete'}); if(!ok)return;
+  const rm=await sb.storage.from('task-attachments').remove([a.storage_path]); if(rm.error){alert(rm.error.message);return;} const del=await sb.from('task_attachments').delete().eq('id',id); if(del.error){alert(del.error.message);return;} await logTaskActivity(a.task_id,'attachment_removed',{file_name:a.file_name}); await refreshTaskDetail(a.task_id,true);
+}
+async function deleteTask(taskId){
+  const x=tasks.find(t=>t.id===taskId); const ok=await taskyConfirm(lang==='ar'?`حذف المهمة «${taskTitle(x)}» وكل المهام الفرعية والتعليقات والمرفقات؟`:`Delete “${taskTitle(x)}” and all subtasks, comments, and attachments?`,{title:lang==='ar'?'حذف المهمة':'Delete task',tone:'danger',confirmText:lang==='ar'?'حذف نهائي':'Delete'}); if(!ok)return;
+  const paths=detailAttachments.filter(a=>a.task_id===taskId).map(a=>a.storage_path); if(paths.length) await sb.storage.from('task-attachments').remove(paths);
+  const {error}=await sb.from('tasks').delete().eq('id',taskId).eq('workspace_id',currentWorkspaceId); if(error){alert(error.message);return;} closeDetailModal(); await fetchTasks(); renderAll(); taskyToast(lang==='ar'?'تم حذف المهمة':'Task deleted',{tone:'success'});
+}
 
 /* ================= AI MODAL ================= */
 function openAiModal(){
