@@ -1479,10 +1479,14 @@
 .platform-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#073d33,#0b4d40);display:flex;align-items:center;justify-content:center;padding:24px}.platform-gate-card{width:min(560px,100%);background:white;border-radius:24px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.35);text-align:center}.platform-gate-logo{width:68px;height:68px;border-radius:19px;background:var(--green-tint);display:grid;place-items:center;margin:0 auto 18px;color:var(--green)}.platform-gate-logo svg{width:32px;height:32px}.platform-gate-card h2{font-family:Almarai;margin:0 0 10px;font-size:21px}.platform-gate-card p{color:var(--muted);font-size:12px;line-height:1.9;margin:0 auto 18px;max-width:460px}.platform-gate-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.platform-gate-actions button,.platform-gate-actions a{border-radius:11px;padding:9px 14px;font-size:10px;font-weight:800;text-decoration:none;border:1px solid var(--border);background:white;color:var(--ink-soft)}.platform-gate-actions .primary{background:var(--green);border-color:var(--green);color:white}
 @media(max-width:700px){.platform-runtime-banner{margin-bottom:10px}.platform-gate-card{padding:22px 17px}.platform-gate-card h2{font-size:18px}}
 
-/* Tasky V65 — advanced platform announcements */
+/* Tasky V66 — release telemetry + advanced platform announcements */
 .platform-runtime-banner{align-items:center}.platform-runtime-banner .announcement-copy{min-width:0;flex:1}.platform-runtime-banner .announcement-actions{display:flex;align-items:center;gap:7px;margin-inline-start:auto;flex:none}.platform-runtime-banner .announcement-cta{border:1px solid color-mix(in srgb,var(--green) 28%,var(--border));background:var(--card);color:var(--green);border-radius:9px;padding:7px 10px;font-size:10.5px;font-weight:800;white-space:nowrap}.platform-runtime-banner .announcement-skip{width:30px;height:30px;border:0;background:transparent;color:var(--muted);border-radius:8px;display:grid;place-items:center;font-size:19px}.platform-runtime-banner .announcement-skip:hover{background:rgba(255,255,255,.7)}
 .platform-announcement-popup-backdrop{position:fixed;inset:0;z-index:3200;background:rgba(8,18,11,.45);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}.platform-announcement-popup{width:min(560px,100%);max-height:min(88dvh,760px);overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:25px;box-shadow:0 30px 80px rgba(10,30,16,.25);position:relative}.platform-announcement-popup .popup-image{display:block;width:100%;max-height:285px;object-fit:cover;background:var(--paper)}.platform-announcement-popup .popup-body{padding:24px}.platform-announcement-popup .popup-tone{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--blue-tint);color:var(--blue);margin-bottom:13px}.platform-announcement-popup.success .popup-tone{background:var(--green-tint);color:var(--green)}.platform-announcement-popup.warning .popup-tone{background:var(--amber-tint);color:#8a6419}.platform-announcement-popup.critical .popup-tone{background:var(--danger-tint);color:var(--danger)}.platform-announcement-popup h2{font-size:20px;margin:0 0 8px}.platform-announcement-popup p{font-size:13px;line-height:1.85;color:var(--ink-soft);margin:0;white-space:pre-wrap}.platform-announcement-popup .popup-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}.platform-announcement-popup .popup-actions button{border:1px solid var(--border);background:var(--card);color:var(--ink-soft);border-radius:11px;padding:9px 14px;font-size:11.5px;font-weight:800}.platform-announcement-popup .popup-actions .primary{background:var(--green);border-color:var(--green);color:#fff}.platform-announcement-popup .popup-close{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.88);color:#273329;border-radius:10px;display:grid;place-items:center;font-size:19px;z-index:1}.platform-announcement-popup:not(:has(.popup-image)) .popup-close{border-color:var(--border);background:var(--paper)}
 @media(max-width:640px){.platform-runtime-banner{align-items:flex-start;flex-wrap:wrap}.platform-runtime-banner .announcement-actions{width:100%;margin-inline-start:44px}.platform-announcement-popup-backdrop{align-items:flex-end;padding:10px}.platform-announcement-popup{border-radius:22px 22px 16px 16px;max-height:92dvh}.platform-announcement-popup .popup-body{padding:20px 17px calc(18px + env(safe-area-inset-bottom))}.platform-announcement-popup h2{font-size:18px}.platform-announcement-popup .popup-actions{flex-direction:column-reverse}.platform-announcement-popup .popup-actions button{width:100%}}
+
+/* Tasky V66 — release notice & minimum supported build */
+.platform-release-notice{border:1px solid #cddfda;border-radius:14px;padding:12px 13px;background:linear-gradient(180deg,var(--card),var(--green-tint));display:flex;align-items:flex-start;gap:11px;margin-bottom:14px;box-shadow:0 8px 22px rgba(10,44,36,.04)}.platform-release-notice .release-icon{width:36px;height:36px;border-radius:11px;background:var(--card);color:var(--green);display:grid;place-items:center;flex:none;border:1px solid var(--border)}.platform-release-notice .release-icon svg{width:18px;height:18px}.platform-release-notice .release-copy{min-width:0;flex:1}.platform-release-notice h4{font-size:12px;margin:0 0 4px}.platform-release-notice p{font-size:10px;color:var(--muted);line-height:1.7;margin:0;white-space:pre-wrap}.platform-release-notice .release-meta{font-size:9px;color:var(--green);font-weight:800;margin-top:5px}.platform-release-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.platform-release-actions button{border:1px solid var(--border);background:var(--card);color:var(--ink-soft);border-radius:9px;padding:6px 9px;font:700 9.5px inherit}.platform-release-actions button.primary{background:var(--green);border-color:var(--green);color:#fff}.platform-release-gate{z-index:10040}.platform-release-builds{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:10px 0 16px}.platform-release-builds span{font-size:10px;border:1px solid var(--border);border-radius:999px;padding:5px 8px;background:var(--paper);color:var(--ink-soft)}
+@media(max-width:640px){.platform-release-notice{flex-wrap:wrap}.platform-release-actions{width:100%;justify-content:flex-end}.platform-release-actions button{min-height:36px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1726,7 +1730,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V65'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V66'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1742,6 +1746,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
+let platformReleaseRuntime={current_build:window.TASKY_BUILD,latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let pendingPlanRequest = null;
 let settingsSection = 'profile';
 let projects = [];
@@ -1785,6 +1790,16 @@ async function fetchPlatformRuntime(){
   }catch(err){console.warn('Platform runtime refresh failed',err);}
   return platformRuntime;
 }
+
+async function fetchPlatformReleaseRuntimeV66(){
+  platformReleaseRuntime={current_build:window.TASKY_BUILD,latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  if(!currentWorkspaceId)return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:window.TASKY_BUILD});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+}
+function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
+function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
+function dismissPlatformReleaseV66(){const r=platformReleaseRuntime?.release;if(r)localStorage.setItem(platformReleaseDismissKeyV66(r),'1');renderPlatformReleaseRuntimeV66();}
+function renderPlatformReleaseRuntimeV66(){const {gate,notice}=ensurePlatformReleaseElementsV66();if(platformRuntimeBlocksApp()){gate.classList.add('hidden');notice.classList.add('hidden');return;}const rr=platformReleaseRuntime||{};if(rr.hard_block){const msg=lang==='ar'?(rr.update_message_ar||'هذه النسخة من تاسكي لم تعد مدعومة. حدّث الصفحة للحصول على آخر إصدار.'):(rr.update_message_en||rr.update_message_ar||'This Tasky build is no longer supported. Refresh the page to load the latest version.');gate.innerHTML=`<div class="platform-gate-card"><div class="platform-gate-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 14v5h14v-5"/></svg></div><h2>${lang==='ar'?'تحديث تاسكي مطلوب':'Tasky update required'}</h2><p>${escapeHtml(msg)}</p><div class="platform-release-builds"><span>${lang==='ar'?'نسختك':'Your build'}: ${escapeHtml(rr.current_build||window.TASKY_BUILD)}</span><span>${lang==='ar'?'الحد الأدنى':'Minimum'}: ${escapeHtml(rr.minimum_supported_build||'—')}</span><span>${lang==='ar'?'الأحدث':'Latest'}: ${escapeHtml(rr.latest_stable_build||'—')}</span></div><div class="platform-gate-actions"><button class="primary" onclick="location.reload()">${lang==='ar'?'تحديث الصفحة':'Refresh page'}</button><button onclick="signOutUser()">${lang==='ar'?'تسجيل الخروج':'Sign out'}</button></div></div>`;gate.classList.remove('hidden');notice.classList.add('hidden');return;}gate.classList.add('hidden');const r=rr.release;if(!r||localStorage.getItem(platformReleaseDismissKeyV66(r))==='1'){notice.classList.add('hidden');notice.innerHTML='';return;}const title=lang==='ar'?r.title_ar:(r.title_en||r.title_ar),notes=lang==='ar'?r.notes_ar:(r.notes_en||r.notes_ar);notice.innerHTML=`<div class="release-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v12"/><path d="m8 7 4-4 4 4"/><path d="M5 14v5h14v-5"/></svg></div><div class="release-copy"><h4>${escapeHtml(title||'')}</h4><p>${escapeHtml(notes||'')}</p><div class="release-meta">${escapeHtml(r.version||'')} · ${r.release_type==='security'?(lang==='ar'?'تحديث أمني':'Security update'):r.release_type==='fix'?(lang==='ar'?'إصلاح':'Fix'):r.release_type==='feature'?(lang==='ar'?'ميزة جديدة':'New feature'):(lang==='ar'?'تحسين':'Improvement')}</div></div><div class="platform-release-actions">${rr.update_available?`<button class="primary" onclick="location.reload()">${lang==='ar'?'تحميل التحديث':'Load update'}</button>`:''}<button onclick="dismissPlatformReleaseV66()">${lang==='ar'?'إخفاء':'Dismiss'}</button></div>`;notice.classList.remove('hidden');}
 function schedulePlatformRuntimeRefresh(){
   if(platformRuntimeRefreshTimer)clearInterval(platformRuntimeRefreshTimer);
   platformRuntimeRefreshTimer=setInterval(()=>refreshPlatformRuntimeLive(),60000);
@@ -1793,7 +1808,9 @@ async function refreshPlatformRuntimeLive(){
   if(!currentWorkspaceId)return;
   const wasBlocked=platformRuntimeBlocksApp();
   await fetchPlatformRuntime();
+  await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
+  renderPlatformReleaseRuntimeV66();
   renderRoleToggle();
   renderNav();
   const isBlocked=platformRuntimeBlocksApp();
@@ -1902,11 +1919,13 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   renderWorkspaceBrand();
 
   await fetchPlatformRuntime();
+  await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
+  renderPlatformReleaseRuntimeV66();
   schedulePlatformRuntimeRefresh();
   renderRoleToggle();
   renderNav();
-  if(platformRuntimeBlocksApp()) return true;
+  if(platformRuntimeBlocksApp()||platformReleaseRuntime?.hard_block) return true;
 
   await fetchProjects();
   await fetchTeamMembers();
@@ -3413,6 +3432,7 @@ function toggleLang(){
   renderModule();
   renderAll();
   renderPlatformRuntimeUi();
+  renderPlatformReleaseRuntimeV66();
 }
 
 /* ================= THEME ================= */
