@@ -1502,6 +1502,16 @@
 .onboarding-v68-complete{display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--green) 22%,var(--border));background:var(--green-tint);color:var(--green);border-radius:14px;padding:12px 14px}.onboarding-v68-complete .icon{width:34px;height:34px;border-radius:11px;background:var(--green);color:#fff;display:grid;place-items:center;flex:none}.onboarding-v68-complete .icon svg{width:17px;height:17px}.onboarding-v68-complete b{font-size:12px}.onboarding-v68-complete span{display:block;font-size:9.5px;color:var(--ink-soft);margin-top:2px}
 @media(max-width:1050px){.onboarding-v68-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:650px){.tasky-onboarding-v68{padding:13px}.onboarding-v68-head{align-items:center}.onboarding-v68-head p{display:none}.onboarding-v68-steps{grid-template-columns:1fr}.onboarding-v68-step{grid-template-columns:30px minmax(0,1fr) auto}.onboarding-v68-plan-grid{grid-template-columns:1fr}}
+
+
+  /* ---------------- V69 COMMERCIAL LAUNCH FLOW ---------------- */
+  .commercial-v69-card{border:1px solid color-mix(in srgb,var(--green) 22%,var(--border));background:linear-gradient(135deg,color-mix(in srgb,var(--green-tint) 68%,var(--card)),var(--card));border-radius:16px;padding:15px 17px;margin-bottom:15px;display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+  .commercial-v69-card.warning{border-color:color-mix(in srgb,var(--amber) 36%,var(--border));background:linear-gradient(135deg,var(--amber-tint),var(--card))}
+  .commercial-v69-card.info{border-color:color-mix(in srgb,var(--blue) 28%,var(--border));background:linear-gradient(135deg,var(--blue-tint),var(--card))}
+  .commercial-v69-copy{min-width:0;flex:1}.commercial-v69-copy h4{font-size:13.5px;margin:0 0 5px}.commercial-v69-copy p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}.commercial-v69-meta{display:flex;align-items:center;gap:7px;flex-wrap:wrap;margin-top:8px}.commercial-v69-pill{display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:999px;background:var(--card);padding:4px 8px;font-size:9.5px;font-weight:800;color:var(--ink-soft)}
+  .commercial-v69-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.commercial-v69-actions button{min-height:38px}
+  .commercial-v69-trial-note{border:1px solid color-mix(in srgb,var(--green) 20%,var(--border));background:var(--green-tint);border-radius:12px;padding:10px 12px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);margin:9px 0 13px}.commercial-v69-trial-note b{color:var(--green)}
+  @media(max-width:640px){.commercial-v69-card{align-items:stretch;flex-direction:column}.commercial-v69-actions{width:100%}.commercial-v69-actions button{flex:1;justify-content:center}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1745,7 +1755,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V68'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V69'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1765,6 +1775,7 @@ let platformReleaseRuntime={current_build:window.TASKY_BUILD,latest_stable_build
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
+let commercialRuntimeV69={commercial_status:'free',effective_plan:'free',can_start_trial:false,trial_days:14,trial_remaining_seconds:0,gateway_connected:false,payment_mode:'manual'};
 let settingsSection = 'profile';
 let projects = [];
 let projectMemberships = [];
@@ -1823,13 +1834,15 @@ function schedulePlatformRuntimeRefresh(){
 }
 async function refreshPlatformRuntimeLive(){
   if(!currentWorkspaceId)return;
-  const wasBlocked=platformRuntimeBlocksApp();
+  const wasBlocked=platformRuntimeBlocksApp(),planBefore=currentPlan;
+  await fetchCommercialRuntimeV69({render:false});
   await fetchPlatformRuntime();
   await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
   renderPlatformReleaseRuntimeV66();
   renderRoleToggle();
   renderNav();
+  if(planBefore!==currentPlan){renderAll();renderModule();}
   const isBlocked=platformRuntimeBlocksApp();
   if(wasBlocked&&!isBlocked){location.reload();return;}
 }
@@ -1936,7 +1949,8 @@ function runOnboardingActionV68(step){
 function openOnboardingPlanV68(){
   if(currentUserRole!=='admin')return;
   const cycle=onboardingStateV68?.selected_billing_cycle||billingCycle||'monthly';billingCycle=cycle;
-  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'اختر باقة البداية':'Choose your starting plan'}</h3><div style="font-size:10.5px;color:var(--muted);margin-top:4px">${lang==='ar'?'يمكنك البدء بالمجانية والترقية لاحقًا في أي وقت.':'You can start free and upgrade at any time.'}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="bplan-toggle" style="margin:4px 0 10px"><button class="${billingCycle==='monthly'?'active':''}" onclick="billingCycle='monthly';openOnboardingPlanV68()">${t('billMonthly')}</button><button class="${billingCycle==='yearly'?'active':''}" onclick="billingCycle='yearly';openOnboardingPlanV68()">${t('billYearly')}</button></div><div class="onboarding-v68-plan-grid">${['free','pro','business'].map(id=>`<div class="onboarding-v68-plan ${id===currentPlan?'current':''}"><b>${t('plan_'+id+'_name')}</b><small>${t('plan_'+id+'_desc')}</small><div style="font-size:11px;font-weight:800;color:var(--green)">${id==='free'?(lang==='ar'?'مجانية':'Free'):(PLANS[id].price===null?(lang==='ar'?'حسب الاتفاق':'Custom'):`${billingCycle==='monthly'?PLANS[id].price:PLANS[id].priceYear} ${lang==='ar'?'ر.س/شهر':'SAR/mo'}`)}</div><button class="${id==='free'?'secondary':''}" onclick="chooseOnboardingPlanV68('${id}')">${id==='free'?(lang==='ar'?'ابدأ بالمجانية':'Start free'):(lang==='ar'?'طلب هذه الباقة':'Request this plan')}</button></div>`).join('')}</div>`;
+  const trial=commercialRuntimeV69?.can_start_trial?`<div class="commercial-v69-trial-note"><b>${lang==='ar'?`تجربة احترافية مجانية لمدة ${Number(commercialRuntimeV69.trial_days||14)} يومًا`:`${Number(commercialRuntimeV69.trial_days||14)}-day Professional trial`}</b><br>${lang==='ar'?'لا تحتاج بطاقة بنكية، ويمكنك الترقية المدفوعة لاحقًا.':'No card required; you can upgrade to a paid plan later.'} <button class="chip-btn" style="margin-inline-start:7px" onclick="closeAddModal();startCommercialTrialV69()">${lang==='ar'?'ابدأ التجربة':'Start trial'}</button></div>`:'';
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'اختر باقة البداية':'Choose your starting plan'}</h3><div style="font-size:10.5px;color:var(--muted);margin-top:4px">${lang==='ar'?'يمكنك البدء بالمجانية، تجربة الاحترافية، أو طلب ترقية مدفوعة.':'Start free, try Professional, or request a paid upgrade.'}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>${trial}<div class="bplan-toggle" style="margin:4px 0 10px"><button class="${billingCycle==='monthly'?'active':''}" onclick="billingCycle='monthly';openOnboardingPlanV68()">${t('billMonthly')}</button><button class="${billingCycle==='yearly'?'active':''}" onclick="billingCycle='yearly';openOnboardingPlanV68()">${t('billYearly')}</button></div><div class="onboarding-v68-plan-grid">${['free','pro','business'].map(id=>`<div class="onboarding-v68-plan ${id===currentPlan?'current':''}"><b>${t('plan_'+id+'_name')}</b><small>${t('plan_'+id+'_desc')}</small><div style="font-size:11px;font-weight:800;color:var(--green)">${id==='free'?(lang==='ar'?'مجانية':'Free'):(PLANS[id].price===null?(lang==='ar'?'حسب الاتفاق':'Custom'):`${billingCycle==='monthly'?PLANS[id].price:PLANS[id].priceYear} ${lang==='ar'?'ر.س/شهر':'SAR/mo'}`)}</div><button class="${id==='free'?'secondary':''}" onclick="chooseOnboardingPlanV68('${id}')">${id==='free'?(lang==='ar'?'ابدأ بالمجانية':'Start free'):(lang==='ar'?'طلب هذه الباقة':'Request this plan')}</button></div>`).join('')}</div>`;
   document.getElementById('addModalOverlay').classList.remove('hidden');
 }
 async function chooseOnboardingPlanV68(planId){
@@ -1946,6 +1960,43 @@ async function chooseOnboardingPlanV68(planId){
   }
   closeAddModal();
   await applyPlanChange(planId);
+}
+
+
+/* ================= V69 COMMERCIAL LAUNCH FLOW ================= */
+async function fetchCommercialRuntimeV69({render=false}={}){
+  if(!currentWorkspaceId){commercialRuntimeV69={commercial_status:'free',effective_plan:'free',can_start_trial:false,trial_days:14,trial_remaining_seconds:0,gateway_connected:false,payment_mode:'manual'};return commercialRuntimeV69;}
+  try{
+    const {data,error}=await sb.rpc('tasky_commercial_runtime_v69',{p_workspace_id:currentWorkspaceId});
+    if(error){console.warn('V69 commercial runtime unavailable; run V69 migration',error);return commercialRuntimeV69;}
+    commercialRuntimeV69={...commercialRuntimeV69,...(data||{})};
+    if(commercialRuntimeV69.effective_plan&&PLANS[commercialRuntimeV69.effective_plan]) currentPlan=commercialRuntimeV69.effective_plan;
+    if(render){renderNav();renderModule();renderOnboardingV68();}
+    return commercialRuntimeV69;
+  }catch(err){console.warn('V69 commercial runtime failed',err);return commercialRuntimeV69;}
+}
+function commercialStatusLabelV69(status){const ar={free:'المجانية',trialing:'تجربة مجانية',pending_paid:'طلب ترقية معلق',paid_manual:'اشتراك مدفوع',cancelled:'ملغي'};const en={free:'Free',trialing:'Free trial',pending_paid:'Upgrade pending',paid_manual:'Paid subscription',cancelled:'Cancelled'};return (lang==='ar'?ar:en)[status]||status||'—';}
+function commercialTrialRemainingV69(){const sec=Math.max(0,Number(commercialRuntimeV69?.trial_remaining_seconds||0));const days=Math.floor(sec/86400),hours=Math.ceil((sec%86400)/3600);if(days>0)return lang==='ar'?`${days} يوم${hours?` و${hours} ساعة`:''}`:`${days}d${hours?` ${hours}h`:''}`;return lang==='ar'?`${Math.max(1,hours)} ساعة`:`${Math.max(1,hours)}h`;}
+function commercialBillingPanelV69(){
+  const c=commercialRuntimeV69||{},status=c.commercial_status||'free',plan=c.effective_plan||currentPlan||'free',sales=c.sales_email||'';
+  if(status==='trialing')return `<div class="commercial-v69-card info"><div class="commercial-v69-copy"><h4>${lang==='ar'?`تجربتك المجانية على «${t('plan_'+plan+'_name')}» فعّالة`:`Your “${t('plan_'+plan+'_name')}” free trial is active`}</h4><p>${lang==='ar'?`متبقي تقريبًا ${commercialTrialRemainingV69()}. عند نهاية التجربة ستعود مساحة العمل تلقائيًا إلى الباقة المجانية ما لم يتم اعتماد اشتراك مدفوع.`:`About ${commercialTrialRemainingV69()} remaining. At trial end the workspace returns to Free unless a paid subscription is approved.`}</p><div class="commercial-v69-meta"><span class="commercial-v69-pill">${commercialStatusLabelV69(status)}</span><span class="commercial-v69-pill">${lang==='ar'?'تنتهي':'Ends'} · ${c.trial_ends_at?new Date(c.trial_ends_at).toLocaleDateString(lang==='ar'?'ar-SA':'en-US'):'—'}</span><span class="commercial-v69-pill">${lang==='ar'?'بدون بطاقة بنكية':'No card required'}</span></div></div><div class="commercial-v69-actions"><button class="primary-btn" onclick="setActiveNav('billing')">${lang==='ar'?'اختيار اشتراك':'Choose subscription'}</button></div></div>`;
+  if(c.pending_plan||status==='pending_paid')return `<div class="commercial-v69-card warning"><div class="commercial-v69-copy"><h4>${lang==='ar'?'طلب الترقية تحت المراجعة':'Your upgrade request is under review'}</h4><p>${lang==='ar'?`طلب ${t('plan_'+(c.pending_plan||'pro')+'_name')} مسجل. لن تتغير حالة الاشتراك المدفوع إلا بعد اعتماد فريق تاسكي وتأكيد الفوترة.`:`Your ${t('plan_'+(c.pending_plan||'pro')+'_name')} request is recorded. Paid status changes only after Tasky approval and billing confirmation.`}</p></div>${sales?`<div class="commercial-v69-actions"><a class="chip-btn" href="mailto:${escapeHtml(sales)}">${lang==='ar'?'التواصل مع المبيعات':'Contact sales'}</a></div>`:''}</div>`;
+  if(c.can_start_trial)return `<div class="commercial-v69-card"><div class="commercial-v69-copy"><h4>${lang==='ar'?`جرّب الاحترافية مجانًا لمدة ${Number(c.trial_days||14)} يومًا`:`Try Professional free for ${Number(c.trial_days||14)} days`}</h4><p>${lang==='ar'?'افتح مزايا الباقة الاحترافية لشركتك الآن بدون بطاقة بنكية. التجربة متاحة مرة واحدة لكل شركة ثم تعود تلقائيًا إلى المجانية إذا لم تتم الترقية.':'Unlock Professional features now with no card required. One trial is available per company and automatically falls back to Free if you do not upgrade.'}</p></div><div class="commercial-v69-actions"><button class="primary-btn" onclick="startCommercialTrialV69()">${lang==='ar'?'بدء التجربة المجانية':'Start free trial'}</button></div></div>`;
+  if(status==='paid_manual')return `<div class="commercial-v69-card"><div class="commercial-v69-copy"><h4>${lang==='ar'?'اشتراك تاسكي فعّال':'Tasky subscription is active'}</h4><p>${lang==='ar'?'يتم تأكيد الفوترة والتحصيل يدويًا حاليًا من فريق تاسكي إلى أن يتم ربط بوابة الدفع.':'Billing and collection are currently confirmed manually by Tasky until the payment gateway is connected.'}</p><div class="commercial-v69-meta"><span class="commercial-v69-pill">${t('plan_'+plan+'_name')}</span><span class="commercial-v69-pill">${lang==='ar'?'فوترة يدوية':'Manual billing'}</span></div></div></div>`;
+  return '';
+}
+async function startCommercialTrialV69(){
+  if(currentUserRole!=='admin'||!currentWorkspaceId)return;
+  const days=Number(commercialRuntimeV69?.trial_days||14);
+  const ok=await taskyConfirm(lang==='ar'?`سيتم تفعيل الباقة الاحترافية لهذه الشركة مجانًا لمدة ${days} يومًا. لا تحتاج بطاقة بنكية وستعود للمجانية تلقائيًا عند انتهاء التجربة إذا لم تعتمد ترقية مدفوعة.`:`Professional will be enabled for this company free for ${days} days. No card is required and the workspace returns to Free automatically if no paid upgrade is approved.`,{title:lang==='ar'?'بدء التجربة المجانية':'Start free trial',tone:'warning',confirmText:lang==='ar'?'ابدأ التجربة':'Start trial'});
+  if(!ok)return;
+  const {data,error}=await sb.rpc('tasky_commercial_start_trial_v69',{p_workspace_id:currentWorkspaceId});
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر بدء التجربة':'Could not start trial',message:error.message,tone:'error'});return;}
+  commercialRuntimeV69={...commercialRuntimeV69,...(data||{})};
+  if(commercialRuntimeV69.effective_plan&&PLANS[commercialRuntimeV69.effective_plan])currentPlan=commercialRuntimeV69.effective_plan;
+  await fetchPlatformRuntime();await fetchOnboardingStateV68({render:false});
+  renderPlatformRuntimeUi();renderNav();renderAll();renderModule();
+  taskyToast(lang==='ar'?`تم تفعيل التجربة المجانية لمدة ${days} يومًا`:`${days}-day free trial activated`,{tone:'success'});
 }
 
 async function loadWorkspaceAndData(authoritativeUser = null){
@@ -2016,6 +2067,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   if(wsLabel && currentWorkspaceName) wsLabel.textContent = currentWorkspaceName;
   renderWorkspaceBrand();
 
+  await fetchCommercialRuntimeV69({render:false});
   await fetchPlatformRuntime();
   await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
@@ -2038,6 +2090,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchSurveys();
   await fetchNotifications();
   await fetchPendingPlanRequest();
+  await fetchCommercialRuntimeV69({render:false});
   await fetchOnboardingStateV68({render:false});
   initTaskRealtime();
   applyCurrentUserProfile();
@@ -5992,7 +6045,7 @@ function settingsSecurityTemplate(){
   return `<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'تغيير كلمة المرور':'Change password'}</h3><p>${lang==='ar'?'يتم تحديث كلمة المرور مباشرة عبر Supabase Auth.':'Your password is updated directly through Supabase Auth.'}</p></div></div><form onsubmit="changeMyPassword(event)"><div class="settings-form-grid"><div class="settings-field"><label>${lang==='ar'?'كلمة المرور الجديدة':'New password'}</label><input id="settingsPassword" type="password" minlength="8" required autocomplete="new-password"></div><div class="settings-field"><label>${lang==='ar'?'تأكيد كلمة المرور':'Confirm password'}</label><input id="settingsPasswordConfirm" type="password" minlength="8" required autocomplete="new-password"></div></div><div class="settings-actions"><button class="primary-btn" type="submit"><svg><use href="#i-shield"/></svg>${lang==='ar'?'تحديث كلمة المرور':'Update password'}</button></div></form></div>`;
 }
 function settingsBillingTemplate(){
-  return `<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'الباقة والفوترة':'Plan & billing'}</h3><p>${lang==='ar'?'قاعدة البيانات هي مصدر الحقيقة للباقة. طلب التغيير لا يفعّل اشتراكًا مدفوعًا تلقائيًا.':'The database is the source of truth. A change request does not automatically activate a paid subscription.'}</p></div></div><div class="settings-plan-box"><div><span style="font-size:11px;color:var(--muted)">${lang==='ar'?'الباقة الحالية':'Current plan'}</span><div class="plan-title">${t('plan_'+currentPlan+'_name')}</div></div><button class="primary-btn" onclick="setActiveNav('billing')"><svg><use href="#i-crown"/></svg>${lang==='ar'?'عرض الباقات':'View plans'}</button></div>${pendingPlanRequest?`<div class="pending-plan-note">${lang==='ar'?`طلب معلّق: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`:`Pending request: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`}</div>`:''}</div>`;
+  return `${commercialBillingPanelV69()}<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'الباقة والفوترة':'Plan & billing'}</h3><p>${lang==='ar'?'قاعدة البيانات هي مصدر الحقيقة للباقة. طلب التغيير لا يفعّل اشتراكًا مدفوعًا تلقائيًا.':'The database is the source of truth. A change request does not automatically activate a paid subscription.'}</p></div></div><div class="settings-plan-box"><div><span style="font-size:11px;color:var(--muted)">${lang==='ar'?'الباقة الحالية':'Current plan'}</span><div class="plan-title">${t('plan_'+currentPlan+'_name')}</div></div><button class="primary-btn" onclick="setActiveNav('billing')"><svg><use href="#i-crown"/></svg>${lang==='ar'?'عرض الباقات':'View plans'}</button></div>${pendingPlanRequest?`<div class="pending-plan-note">${lang==='ar'?`طلب معلّق: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`:`Pending request: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`}</div>`:''}</div>`;
 }
 async function saveMyProfile(e){
   e.preventDefault();
@@ -6039,14 +6092,14 @@ function planFeatureList(planId){
 function billingTemplate(){
   const plan = PLANS[currentPlan];
   const seatsLimit = plan.seats===Infinity ? '∞' : plan.seats;
-  return `
+  return `${commercialBillingPanelV69()}
     <div class="section-card" style="padding:22px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
       <div>
         <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${t('billCurrentPlan')}</div>
         <div style="font-size:20px;font-weight:800;font-family:'Almarai';color:var(--green)">${t('plan_'+currentPlan+'_name')}</div>
       </div>
       <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${t('billSeatsUsed')}</div><div style="font-family:'IBM Plex Mono',monospace;font-weight:700;">${teamMembers.filter(m=>m.status==='active').length} / ${seatsLimit}</div></div>
-      <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${lang==='ar'?'حالة الفوترة':'Billing status'}</div><div style="font-weight:700;">${lang==='ar'?'غير مربوطة ببوابة دفع بعد':'Payment gateway not connected yet'}</div></div>
+      <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${lang==='ar'?'حالة الفوترة':'Billing status'}</div><div style="font-weight:700;">${commercialStatusLabelV69(commercialRuntimeV69?.commercial_status)} · ${lang==='ar'?'التحصيل يدوي حاليًا':'Manual collection for now'}</div></div>
     </div>
 
     ${pendingPlanRequest ? `<div class="pending-plan-note">${lang==='ar'?`يوجد طلب معلّق للانتقال إلى باقة «${t('plan_'+pendingPlanRequest.to_plan+'_name')}». الباقة الفعلية ستبقى «${t('plan_'+currentPlan+'_name')}» حتى اعتماد الطلب.`:`A request to switch to “${t('plan_'+pendingPlanRequest.to_plan+'_name')}” is pending. The active plan remains “${t('plan_'+currentPlan+'_name')}” until approved.`}</div>` : ''}
@@ -6094,6 +6147,7 @@ async function applyPlanChange(id){
     return;
   }
   pendingPlanRequest=data || {to_plan:id,billing_cycle:billingCycle,status:'pending'};
+  await fetchCommercialRuntimeV69({render:false});
   await markOnboardingActionV68('plan_reviewed',{selected_plan:id,billing_cycle:billingCycle});
   taskyToast(lang==='ar'?'تم تسجيل طلب تغيير الباقة':'Plan change request recorded',{tone:'success'});
   renderModule();
