@@ -1487,6 +1487,9 @@
 /* Tasky V66 — release notice & minimum supported build */
 .platform-release-notice{border:1px solid #cddfda;border-radius:14px;padding:12px 13px;background:linear-gradient(180deg,var(--card),var(--green-tint));display:flex;align-items:flex-start;gap:11px;margin-bottom:14px;box-shadow:0 8px 22px rgba(10,44,36,.04)}.platform-release-notice .release-icon{width:36px;height:36px;border-radius:11px;background:var(--card);color:var(--green);display:grid;place-items:center;flex:none;border:1px solid var(--border)}.platform-release-notice .release-icon svg{width:18px;height:18px}.platform-release-notice .release-copy{min-width:0;flex:1}.platform-release-notice h4{font-size:12px;margin:0 0 4px}.platform-release-notice p{font-size:10px;color:var(--muted);line-height:1.7;margin:0;white-space:pre-wrap}.platform-release-notice .release-meta{font-size:9px;color:var(--green);font-weight:800;margin-top:5px}.platform-release-actions{display:flex;gap:6px;align-items:center;flex-wrap:wrap}.platform-release-actions button{border:1px solid var(--border);background:var(--card);color:var(--ink-soft);border-radius:9px;padding:6px 9px;font:700 9.5px inherit}.platform-release-actions button.primary{background:var(--green);border-color:var(--green);color:#fff}.platform-release-gate{z-index:10040}.platform-release-builds{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin:10px 0 16px}.platform-release-builds span{font-size:10px;border:1px solid var(--border);border-radius:999px;padding:5px 8px;background:var(--paper);color:var(--ink-soft)}
 @media(max-width:640px){.platform-release-notice{flex-wrap:wrap}.platform-release-actions{width:100%;justify-content:flex-end}.platform-release-actions button{min-height:36px}}
+
+/* Tasky V67 — production hardening */
+.launch-network-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:22000;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.2);background:var(--danger);color:#fff;display:none;max-width:calc(100vw - 24px);text-align:center}.launch-network-banner.show{display:block}.launch-network-banner.online{background:var(--green)}.launch-connection-retry{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:4px 8px;margin-inline-start:7px;font:inherit;font-size:9px;font-weight:800}.launch-boot-fallback{position:fixed;inset:0;z-index:21900;background:var(--paper);display:grid;place-items:center;padding:20px}.launch-boot-card{width:min(480px,100%);background:var(--card);border:1px solid var(--border);border-radius:22px;padding:24px;text-align:center;box-shadow:0 22px 60px rgba(18,41,26,.12)}.launch-boot-card h2{font-size:18px;margin-bottom:9px}.launch-boot-card p{font-size:12px;color:var(--muted);line-height:1.8}.launch-boot-card .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.launch-boot-card button{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:9px 13px;font:inherit;font-weight:700}.launch-boot-card button.primary{background:var(--green);border-color:var(--green);color:#fff}@media(max-width:560px){.launch-network-banner{bottom:10px;font-size:10px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1730,7 +1733,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V66'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V67'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -8005,6 +8008,19 @@ async function openSupportTicketDetail(id){
 }
 async function submitSupportReply(e,id){e.preventDefault();const body=document.getElementById('supportReplyBody').value.trim();const {error}=await sb.rpc('tasky_support_reply_ticket',{p_ticket_id:id,p_body:body});if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إرسال الرد':'Could not send reply',message:error.message,tone:'error'});return;}await fetchSupportTickets();await openSupportTicketDetail(id);taskyToast(lang==='ar'?'تم إرسال الرد':'Reply sent',{tone:'success'});}
 async function rateSupportTicket(id,rating){const feedback=window.prompt(lang==='ar'?'تعليق إضافي (اختياري)':'Additional feedback (optional)','')||null;const {error}=await sb.rpc('tasky_support_rate_ticket',{p_ticket_id:id,p_rating:rating,p_feedback:feedback});if(error){showTaskyDialog({title:lang==='ar'?'تعذّر حفظ التقييم':'Could not save rating',message:error.message,tone:'error'});return;}await fetchSupportTickets();closeAddModal();taskyToast(lang==='ar'?'شكرًا لتقييمك':'Thanks for your feedback',{tone:'success'});}
+
+
+/* ================= V67 PRODUCTION HARDENING ================= */
+let __taskyClientErrorLoggingV67=false;
+function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
+function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;let session=null;try{session=(await sb.auth.getSession()).data?.session;}catch(_){}if(!session?.user?.id)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:window.TASKY_BUILD,p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:location.pathname+location.search});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
+window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
+window.addEventListener('offline',updateTaskyNetworkBannerV67);
+window.addEventListener('online',()=>{updateTaskyNetworkBannerV67();setTimeout(()=>{try{checkSession();}catch(_){}},250);});
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible'&&navigator.onLine){try{sb.auth.getSession().then(({data})=>{if(data?.session&&typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId){fetchPlatformRuntime?.().then(()=>renderPlatformRuntimeUi?.()).catch(()=>{});}});}catch(_){}}});
+setTimeout(updateTaskyNetworkBannerV67,0);
 
 /* ================= MASTER RENDER ================= */
 function renderAll(){
