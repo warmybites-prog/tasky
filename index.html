@@ -1478,6 +1478,11 @@
 .platform-runtime-banner{border:1px solid #cddfda;border-radius:14px;padding:11px 13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;background:#edf6f2;color:var(--ink);box-shadow:0 8px 22px rgba(10,44,36,.04)}.platform-runtime-banner.info{background:#eef5fa;border-color:#d5e2eb}.platform-runtime-banner.success{background:#edf6f2;border-color:#cce2d9}.platform-runtime-banner.warning{background:#fff7e6;border-color:#ead9b3}.platform-runtime-banner.critical{background:#fff0ee;border-color:#edcbc7}.platform-runtime-banner .runtime-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.72);display:grid;place-items:center;flex:0 0 auto}.platform-runtime-banner h4{margin:0 0 3px;font-size:12px}.platform-runtime-banner p{margin:0;color:var(--muted);font-size:10px;line-height:1.65}.platform-runtime-banner button{margin-inline-start:auto;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:3px}
 .platform-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#073d33,#0b4d40);display:flex;align-items:center;justify-content:center;padding:24px}.platform-gate-card{width:min(560px,100%);background:white;border-radius:24px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.35);text-align:center}.platform-gate-logo{width:68px;height:68px;border-radius:19px;background:var(--green-tint);display:grid;place-items:center;margin:0 auto 18px;color:var(--green)}.platform-gate-logo svg{width:32px;height:32px}.platform-gate-card h2{font-family:Almarai;margin:0 0 10px;font-size:21px}.platform-gate-card p{color:var(--muted);font-size:12px;line-height:1.9;margin:0 auto 18px;max-width:460px}.platform-gate-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.platform-gate-actions button,.platform-gate-actions a{border-radius:11px;padding:9px 14px;font-size:10px;font-weight:800;text-decoration:none;border:1px solid var(--border);background:white;color:var(--ink-soft)}.platform-gate-actions .primary{background:var(--green);border-color:var(--green);color:white}
 @media(max-width:700px){.platform-runtime-banner{margin-bottom:10px}.platform-gate-card{padding:22px 17px}.platform-gate-card h2{font-size:18px}}
+
+/* Tasky V65 — advanced platform announcements */
+.platform-runtime-banner{align-items:center}.platform-runtime-banner .announcement-copy{min-width:0;flex:1}.platform-runtime-banner .announcement-actions{display:flex;align-items:center;gap:7px;margin-inline-start:auto;flex:none}.platform-runtime-banner .announcement-cta{border:1px solid color-mix(in srgb,var(--green) 28%,var(--border));background:var(--card);color:var(--green);border-radius:9px;padding:7px 10px;font-size:10.5px;font-weight:800;white-space:nowrap}.platform-runtime-banner .announcement-skip{width:30px;height:30px;border:0;background:transparent;color:var(--muted);border-radius:8px;display:grid;place-items:center;font-size:19px}.platform-runtime-banner .announcement-skip:hover{background:rgba(255,255,255,.7)}
+.platform-announcement-popup-backdrop{position:fixed;inset:0;z-index:3200;background:rgba(8,18,11,.45);backdrop-filter:blur(5px);display:flex;align-items:center;justify-content:center;padding:18px}.platform-announcement-popup{width:min(560px,100%);max-height:min(88dvh,760px);overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:25px;box-shadow:0 30px 80px rgba(10,30,16,.25);position:relative}.platform-announcement-popup .popup-image{display:block;width:100%;max-height:285px;object-fit:cover;background:var(--paper)}.platform-announcement-popup .popup-body{padding:24px}.platform-announcement-popup .popup-tone{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--blue-tint);color:var(--blue);margin-bottom:13px}.platform-announcement-popup.success .popup-tone{background:var(--green-tint);color:var(--green)}.platform-announcement-popup.warning .popup-tone{background:var(--amber-tint);color:#8a6419}.platform-announcement-popup.critical .popup-tone{background:var(--danger-tint);color:var(--danger)}.platform-announcement-popup h2{font-size:20px;margin:0 0 8px}.platform-announcement-popup p{font-size:13px;line-height:1.85;color:var(--ink-soft);margin:0;white-space:pre-wrap}.platform-announcement-popup .popup-actions{display:flex;gap:8px;align-items:center;justify-content:flex-end;flex-wrap:wrap;margin-top:20px}.platform-announcement-popup .popup-actions button{border:1px solid var(--border);background:var(--card);color:var(--ink-soft);border-radius:11px;padding:9px 14px;font-size:11.5px;font-weight:800}.platform-announcement-popup .popup-actions .primary{background:var(--green);border-color:var(--green);color:#fff}.platform-announcement-popup .popup-close{position:absolute;top:12px;inset-inline-end:12px;width:34px;height:34px;border:1px solid rgba(255,255,255,.75);background:rgba(255,255,255,.88);color:#273329;border-radius:10px;display:grid;place-items:center;font-size:19px;z-index:1}.platform-announcement-popup:not(:has(.popup-image)) .popup-close{border-color:var(--border);background:var(--paper)}
+@media(max-width:640px){.platform-runtime-banner{align-items:flex-start;flex-wrap:wrap}.platform-runtime-banner .announcement-actions{width:100%;margin-inline-start:44px}.platform-announcement-popup-backdrop{align-items:flex-end;padding:10px}.platform-announcement-popup{border-radius:22px 22px 16px 16px;max-height:92dvh}.platform-announcement-popup .popup-body{padding:20px 17px calc(18px + env(safe-area-inset-bottom))}.platform-announcement-popup h2{font-size:18px}.platform-announcement-popup .popup-actions{flex-direction:column-reverse}.platform-announcement-popup .popup-actions button{width:100%}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1721,7 +1726,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V64.2'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V65'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1760,10 +1765,12 @@ async function fetchPlatformRuntime(){
     // V64.1 is the canonical source for maintenance and announcements.
     // Keep the legacy endpoint as a compatibility source for module gating and
     // workspace suspension until those controls are migrated to the bridge.
-    const [canonical,legacy]=await Promise.all([
-      sb.rpc('tasky_platform_runtime_v641',{p_workspace_id:currentWorkspaceId}),
+    const [canonicalPrimary,legacy]=await Promise.all([
+      sb.rpc('tasky_platform_runtime_v65',{p_workspace_id:currentWorkspaceId}),
       sb.rpc('tasky_platform_runtime',{p_workspace_id:currentWorkspaceId})
     ]);
+    let canonical=canonicalPrimary;
+    if(canonical.error) canonical=await sb.rpc('tasky_platform_runtime_v641',{p_workspace_id:currentWorkspaceId});
     if(!legacy.error&&legacy.data) platformRuntime={...platformRuntime,...legacy.data};
     if(!canonical.error&&canonical.data){
       const legacyModules=platformRuntime.modules||{};
@@ -1772,7 +1779,7 @@ async function fetchPlatformRuntime(){
       const legacySupport=platformRuntime.support_email||null;
       platformRuntime={...platformRuntime,...canonical.data,modules:legacyModules,workspace_status:legacyStatus,suspension_reason:legacyReason,support_email:legacySupport};
     }else if(canonical.error){
-      console.warn('V64.1 canonical runtime unavailable; using compatibility runtime',canonical.error);
+      console.warn('V65 canonical runtime unavailable; using compatibility runtime',canonical.error);
     }
     if(legacy.error) console.info('Legacy platform runtime unavailable; V64.1 runtime remains active');
   }catch(err){console.warn('Platform runtime refresh failed',err);}
@@ -1792,20 +1799,37 @@ async function refreshPlatformRuntimeLive(){
   const isBlocked=platformRuntimeBlocksApp();
   if(wasBlocked&&!isBlocked){location.reload();return;}
 }
+let platformAnnouncementDisplayState=new Map();
 function ensurePlatformRuntimeElements(){
   let gate=document.getElementById('platformGate');if(!gate){gate=document.createElement('div');gate.id='platformGate';gate.className='platform-gate hidden';document.body.appendChild(gate);}
   let banner=document.getElementById('platformAnnouncementBanner');if(!banner){banner=document.createElement('div');banner.id='platformAnnouncementBanner';banner.className='platform-runtime-banner hidden';const content=document.querySelector('.app .content');if(content)content.insertBefore(banner,content.firstChild);}
-  return {gate,banner};
+  let popup=document.getElementById('platformAnnouncementPopup');if(!popup){popup=document.createElement('div');popup.id='platformAnnouncementPopup';popup.className='platform-announcement-popup-backdrop hidden';document.body.appendChild(popup);}
+  return {gate,banner,popup};
 }
+function platformAnnouncementDisplayKey(a){return `${a.id}:${a.delivery_revision||1}`;}
+function platformAnnouncementDisplay(a){const key=platformAnnouncementDisplayKey(a);let state=platformAnnouncementDisplayState.get(key);if(!state){state={token:crypto.randomUUID?crypto.randomUUID():`${Date.now()}-${Math.random()}`,viewTracked:false};platformAnnouncementDisplayState.set(key,state);}return state;}
+async function trackPlatformAnnouncementEvent(a,eventType,state=null){if(!a?.id||!currentWorkspaceId)return null;const st=state||platformAnnouncementDisplay(a);try{const {data,error}=await sb.rpc('tasky_platform_track_announcement_event_v65',{p_announcement_id:a.id,p_workspace_id:currentWorkspaceId,p_event_type:eventType,p_display_token:st.token});if(error){console.warn('Announcement event tracking',eventType,error);return null;}return data;}catch(err){console.warn('Announcement event tracking failed',eventType,err);return null;}}
+function platformAnnouncementText(a){return {title:lang==='ar'?a.title_ar:(a.title_en||a.title_ar),body:lang==='ar'?a.body_ar:(a.body_en||a.body_ar),cta:lang==='ar'?(a.cta_label_ar||'عرض التفاصيل'):(a.cta_label_en||a.cta_label_ar||'View details')};}
+function platformAnnouncementHasDestination(a){return a?.destination_type==='internal'||a?.destination_type==='external';}
 function renderPlatformRuntimeUi(){
-  const {gate,banner}=ensurePlatformRuntimeElements();
+  const {gate,banner,popup}=ensurePlatformRuntimeElements();
   const blocked=platformRuntimeBlocksApp();
-  if(blocked){const maintenance=platformRuntime.maintenance_mode===true,msg=platformRuntimeMessage(maintenance?'maintenance':'suspended');const email=platformRuntime.support_email||'';gate.innerHTML=`<div class="platform-gate-card"><div class="platform-gate-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></div><h2>${escapeHtml(msg.title)}</h2><p>${escapeHtml(msg.body)}</p><div class="platform-gate-actions">${email?`<a class="primary" href="mailto:${escapeHtml(email)}">${lang==='ar'?'التواصل مع الدعم':'Contact support'}</a>`:''}<button onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Try again'}</button><button onclick="signOutUser()">${lang==='ar'?'تسجيل الخروج':'Sign out'}</button></div></div>`;gate.classList.remove('hidden');}else gate.classList.add('hidden');
-  const announcementDismissKey=a=>`tasky_ann_dismissed_${a.id}_${String(a.updated_at||a.created_at||'v1')}`;
-  const anns=(platformRuntime.announcements||[]).filter(a=>!localStorage.getItem(announcementDismissKey(a)));
-  if(!blocked&&anns.length){const a=anns[0],title=lang==='ar'?a.title_ar:(a.title_en||a.title_ar),body=lang==='ar'?a.body_ar:(a.body_en||a.body_ar);banner.className=`platform-runtime-banner ${a.tone||'info'}`;banner.innerHTML=`<div class="runtime-icon"><svg style="width:18px;height:18px"><use href="#i-bell"/></svg></div><div><h4>${escapeHtml(title||'')}</h4><p>${escapeHtml(body||'')}</p></div><button onclick="dismissPlatformAnnouncement('${a.id}')">×</button>`;}else{banner.className='platform-runtime-banner hidden';banner.innerHTML='';}
+  if(blocked){const maintenance=platformRuntime.maintenance_mode===true,msg=platformRuntimeMessage(maintenance?'maintenance':'suspended');const email=platformRuntime.support_email||'';gate.innerHTML=`<div class="platform-gate-card"><div class="platform-gate-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></div><h2>${escapeHtml(msg.title)}</h2><p>${escapeHtml(msg.body)}</p><div class="platform-gate-actions">${email?`<a class="primary" href="mailto:${escapeHtml(email)}">${lang==='ar'?'التواصل مع الدعم':'Contact support'}</a>`:''}<button onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Try again'}</button><button onclick="signOutUser()">${lang==='ar'?'تسجيل الخروج':'Sign out'}</button></div></div>`;gate.classList.remove('hidden');banner.className='platform-runtime-banner hidden';popup.classList.add('hidden');return;}else gate.classList.add('hidden');
+  const anns=platformRuntime.announcements||[];
+  if(!anns.length){banner.className='platform-runtime-banner hidden';banner.innerHTML='';popup.classList.add('hidden');popup.innerHTML='';return;}
+  const a=anns[0],txt=platformAnnouncementText(a),state=platformAnnouncementDisplay(a);
+  if(!state.viewTracked){state.viewTracked=true;trackPlatformAnnouncementEvent(a,'view',state).then(res=>{if(res&&res.recorded===false&&res.reason==='not_eligible'){platformRuntime.announcements=(platformRuntime.announcements||[]).filter(x=>String(x.id)!==String(a.id));renderPlatformRuntimeUi();}});}
+  if(a.display_type==='popup'){
+    banner.className='platform-runtime-banner hidden';banner.innerHTML='';
+    popup.innerHTML=`<div class="platform-announcement-popup ${a.tone||'info'}">${a.image_url?`<img class="popup-image" src="${escapeHtml(a.image_url)}" alt="">`:''}<button class="popup-close" onclick="skipPlatformAnnouncement('${a.id}')" aria-label="${lang==='ar'?'تخطي':'Skip'}">×</button><div class="popup-body"><div class="popup-tone"><svg style="width:20px;height:20px"><use href="#i-bell"/></svg></div><h2>${escapeHtml(txt.title||'')}</h2><p>${escapeHtml(txt.body||'')}</p><div class="popup-actions"><button onclick="skipPlatformAnnouncement('${a.id}')">${lang==='ar'?'تخطي':'Skip'}</button>${platformAnnouncementHasDestination(a)?`<button class="primary" onclick="openPlatformAnnouncementDestination('${a.id}')">${escapeHtml(txt.cta)}</button>`:''}</div></div></div>`;popup.classList.remove('hidden');
+  }else{
+    popup.classList.add('hidden');popup.innerHTML='';
+    banner.className=`platform-runtime-banner ${a.tone||'info'}`;banner.innerHTML=`<div class="runtime-icon"><svg style="width:18px;height:18px"><use href="#i-bell"/></svg></div><div class="announcement-copy"><h4>${escapeHtml(txt.title||'')}</h4><p>${escapeHtml(txt.body||'')}</p></div><div class="announcement-actions">${platformAnnouncementHasDestination(a)?`<button class="announcement-cta" onclick="openPlatformAnnouncementDestination('${a.id}')">${escapeHtml(txt.cta)}</button>`:''}<button class="announcement-skip" onclick="skipPlatformAnnouncement('${a.id}')" aria-label="${lang==='ar'?'تخطي':'Skip'}">×</button></div>`;
+  }
 }
-function dismissPlatformAnnouncement(id){const a=(platformRuntime.announcements||[]).find(x=>String(x.id)===String(id));if(a)localStorage.setItem(`tasky_ann_dismissed_${a.id}_${String(a.updated_at||a.created_at||'v1')}`,'1');renderPlatformRuntimeUi();}
+async function skipPlatformAnnouncement(id){const a=(platformRuntime.announcements||[]).find(x=>String(x.id)===String(id));if(!a)return;const state=platformAnnouncementDisplay(a);await trackPlatformAnnouncementEvent(a,'skip',state);platformRuntime.announcements=(platformRuntime.announcements||[]).filter(x=>String(x.id)!==String(id));platformAnnouncementDisplayState.delete(platformAnnouncementDisplayKey(a));renderPlatformRuntimeUi();setTimeout(()=>refreshPlatformRuntimeLive(),250);}
+async function openPlatformAnnouncementDestination(id){const a=(platformRuntime.announcements||[]).find(x=>String(x.id)===String(id));if(!a)return;const state=platformAnnouncementDisplay(a);await trackPlatformAnnouncementEvent(a,'click',state);platformRuntime.announcements=(platformRuntime.announcements||[]).filter(x=>String(x.id)!==String(id));platformAnnouncementDisplayState.delete(platformAnnouncementDisplayKey(a));renderPlatformRuntimeUi();if(a.destination_type==='internal'&&a.destination_section){setActiveNav(a.destination_section);}else if(a.destination_type==='external'&&/^https?:\/\//i.test(a.destination_url||'')){window.open(a.destination_url,'_blank','noopener,noreferrer');}setTimeout(()=>refreshPlatformRuntimeLive(),250);}
+function dismissPlatformAnnouncement(id){skipPlatformAnnouncement(id);}
 function platformModuleState(moduleId){return platformRuntime?.modules?.[moduleId]||null;}
 function openPlatformModuleUnavailable(moduleId){const st=platformModuleState(moduleId);showTaskyDialog({title:lang==='ar'?'الوحدة غير متاحة حاليًا':'Module currently unavailable',message:(lang==='ar'?(st?.message_ar||'هذه الوحدة غير متاحة حاليًا وفق إعدادات المنصة أو الباقة الحالية.'):(st?.message_en||st?.message_ar||'This module is currently unavailable under the platform or current plan settings.')),tone:'warning'});}
 
@@ -3388,6 +3412,7 @@ function toggleLang(){
   renderViewTabs();
   renderModule();
   renderAll();
+  renderPlatformRuntimeUi();
 }
 
 /* ================= THEME ================= */
