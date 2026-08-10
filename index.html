@@ -1473,6 +1473,11 @@
 @media(max-width:1000px){.platform-kpi-grid{grid-template-columns:repeat(2,1fr)}.platform-grid-2,.platform-staff-grid{grid-template-columns:1fr}.platform-detail-grid{grid-template-columns:1fr 1fr}}
 @media(max-width:620px){.platform-kpi-grid,.platform-form-grid,.platform-detail-grid{grid-template-columns:1fr}.platform-request-card,.platform-support-card,.support-ticket-card{align-items:flex-start;flex-direction:column}.platform-audit-row{grid-template-columns:1fr}.platform-toolbar input,.platform-toolbar select{width:100%;min-width:0}}
 
+
+/* Tasky V58 — platform runtime controls */
+.platform-runtime-banner{border:1px solid #cddfda;border-radius:14px;padding:11px 13px;margin-bottom:14px;display:flex;align-items:flex-start;gap:10px;background:#edf6f2;color:var(--ink);box-shadow:0 8px 22px rgba(10,44,36,.04)}.platform-runtime-banner.info{background:#eef5fa;border-color:#d5e2eb}.platform-runtime-banner.success{background:#edf6f2;border-color:#cce2d9}.platform-runtime-banner.warning{background:#fff7e6;border-color:#ead9b3}.platform-runtime-banner.critical{background:#fff0ee;border-color:#edcbc7}.platform-runtime-banner .runtime-icon{width:34px;height:34px;border-radius:10px;background:rgba(255,255,255,.72);display:grid;place-items:center;flex:0 0 auto}.platform-runtime-banner h4{margin:0 0 3px;font-size:12px}.platform-runtime-banner p{margin:0;color:var(--muted);font-size:10px;line-height:1.65}.platform-runtime-banner button{margin-inline-start:auto;border:0;background:transparent;color:var(--muted);font-size:18px;line-height:1;padding:3px}
+.platform-gate{position:fixed;inset:0;z-index:9999;background:linear-gradient(145deg,#073d33,#0b4d40);display:flex;align-items:center;justify-content:center;padding:24px}.platform-gate-card{width:min(560px,100%);background:white;border-radius:24px;padding:28px;box-shadow:0 28px 90px rgba(0,0,0,.35);text-align:center}.platform-gate-logo{width:68px;height:68px;border-radius:19px;background:var(--green-tint);display:grid;place-items:center;margin:0 auto 18px;color:var(--green)}.platform-gate-logo svg{width:32px;height:32px}.platform-gate-card h2{font-family:Almarai;margin:0 0 10px;font-size:21px}.platform-gate-card p{color:var(--muted);font-size:12px;line-height:1.9;margin:0 auto 18px;max-width:460px}.platform-gate-actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap}.platform-gate-actions button,.platform-gate-actions a{border-radius:11px;padding:9px 14px;font-size:10px;font-weight:800;text-decoration:none;border:1px solid var(--border);background:white;color:var(--ink-soft)}.platform-gate-actions .primary{background:var(--green);border-color:var(--green);color:white}
+@media(max-width:700px){.platform-runtime-banner{margin-bottom:10px}.platform-gate-card{padding:22px 17px}.platform-gate-card h2{font-size:18px}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1716,7 +1721,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V56'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V58'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1731,11 +1736,35 @@ let currentWorkspaceName = null;
 let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
+let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
 let pendingPlanRequest = null;
 let settingsSection = 'profile';
 let projects = [];
 let projectMemberships = [];
 let activeProjectId = null;
+
+function platformRuntimeBlocksApp(){return !!platformRuntime && !platformRuntime.is_platform_admin && (platformRuntime.workspace_status==='suspended'||platformRuntime.maintenance_mode===true);}
+function platformRuntimeMessage(kind){if(kind==='maintenance')return {title:lang==='ar'?(platformRuntime.maintenance_title_ar||'تاسكي تحت الصيانة المؤقتة'):(platformRuntime.maintenance_title_en||platformRuntime.maintenance_title_ar||'Tasky is under maintenance'),body:lang==='ar'?(platformRuntime.maintenance_message_ar||'نعمل حاليًا على تحديث المنصة. يرجى المحاولة لاحقًا.'):(platformRuntime.maintenance_message_en||platformRuntime.maintenance_message_ar||'We are currently updating the platform. Please try again later.')};return {title:lang==='ar'?'تم إيقاف مساحة العمل مؤقتًا':'Workspace access is temporarily suspended',body:platformRuntime.suspension_reason||(lang==='ar'?'يرجى التواصل مع مسؤول تاسكي أو الدعم الفني لمعرفة تفاصيل حالة الاشتراك.':'Please contact Tasky support or your account administrator for details.')};}
+async function fetchPlatformRuntime(){
+  platformRuntime={modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
+  if(!currentWorkspaceId)return platformRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_runtime',{p_workspace_id:currentWorkspaceId});if(error){console.warn('V58 runtime config unavailable',error);return platformRuntime;}platformRuntime=data||platformRuntime;}catch(err){console.warn('V58 runtime config failed',err);}return platformRuntime;
+}
+function ensurePlatformRuntimeElements(){
+  let gate=document.getElementById('platformGate');if(!gate){gate=document.createElement('div');gate.id='platformGate';gate.className='platform-gate hidden';document.body.appendChild(gate);}
+  let banner=document.getElementById('platformAnnouncementBanner');if(!banner){banner=document.createElement('div');banner.id='platformAnnouncementBanner';banner.className='platform-runtime-banner hidden';const content=document.querySelector('.app .content');if(content)content.insertBefore(banner,content.firstChild);}
+  return {gate,banner};
+}
+function renderPlatformRuntimeUi(){
+  const {gate,banner}=ensurePlatformRuntimeElements();
+  const blocked=platformRuntimeBlocksApp();
+  if(blocked){const maintenance=platformRuntime.maintenance_mode===true,msg=platformRuntimeMessage(maintenance?'maintenance':'suspended');const email=platformRuntime.support_email||'';gate.innerHTML=`<div class="platform-gate-card"><div class="platform-gate-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9"><path d="M12 3v3M12 18v3M3 12h3M18 12h3"/><circle cx="12" cy="12" r="4"/></svg></div><h2>${escapeHtml(msg.title)}</h2><p>${escapeHtml(msg.body)}</p><div class="platform-gate-actions">${email?`<a class="primary" href="mailto:${escapeHtml(email)}">${lang==='ar'?'التواصل مع الدعم':'Contact support'}</a>`:''}<button onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Try again'}</button><button onclick="signOutUser()">${lang==='ar'?'تسجيل الخروج':'Sign out'}</button></div></div>`;gate.classList.remove('hidden');}else gate.classList.add('hidden');
+  const anns=(platformRuntime.announcements||[]).filter(a=>!localStorage.getItem(`tasky_ann_dismissed_${a.id}`));
+  if(!blocked&&anns.length){const a=anns[0],title=lang==='ar'?a.title_ar:(a.title_en||a.title_ar),body=lang==='ar'?a.body_ar:(a.body_en||a.body_ar);banner.className=`platform-runtime-banner ${a.tone||'info'}`;banner.innerHTML=`<div class="runtime-icon"><svg style="width:18px;height:18px"><use href="#i-bell"/></svg></div><div><h4>${escapeHtml(title||'')}</h4><p>${escapeHtml(body||'')}</p></div><button onclick="dismissPlatformAnnouncement('${a.id}')">×</button>`;}else{banner.className='platform-runtime-banner hidden';banner.innerHTML='';}
+}
+function dismissPlatformAnnouncement(id){localStorage.setItem(`tasky_ann_dismissed_${id}`,'1');renderPlatformRuntimeUi();}
+function platformModuleState(moduleId){return platformRuntime?.modules?.[moduleId]||null;}
+function openPlatformModuleUnavailable(moduleId){const st=platformModuleState(moduleId);showTaskyDialog({title:lang==='ar'?'الوحدة غير متاحة حاليًا':'Module currently unavailable',message:(lang==='ar'?(st?.message_ar||'هذه الوحدة غير متاحة حاليًا وفق إعدادات المنصة أو الباقة الحالية.'):(st?.message_en||st?.message_ar||'This module is currently unavailable under the platform or current plan settings.')),tone:'warning'});}
 
 async function loadWorkspaceAndData(authoritativeUser = null){
   const { data: { session } } = await sb.auth.getSession();
@@ -1804,6 +1833,12 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   const wsLabel = document.getElementById('workspaceLabel');
   if(wsLabel && currentWorkspaceName) wsLabel.textContent = currentWorkspaceName;
   renderWorkspaceBrand();
+
+  await fetchPlatformRuntime();
+  renderPlatformRuntimeUi();
+  renderRoleToggle();
+  renderNav();
+  if(platformRuntimeBlocksApp()) return true;
 
   await fetchProjects();
   await fetchTeamMembers();
@@ -2023,17 +2058,15 @@ function toggleAuthMode(){
   document.getElementById('authError').style.display='none';
 }
 async function createWorkspaceForNewUser(userId, companyName, email){
+  try{const cfg=await sb.rpc('tasky_platform_signup_config');if(!cfg.error&&cfg.data?.workspace_creation_enabled===false)throw new Error(lang==='ar'?'إنشاء مساحات عمل جديدة متوقف مؤقتًا من إدارة تاسكي. يمكنك تسجيل الدخول بدعوة موجودة أو التواصل مع الدعم.':'New workspace creation is temporarily paused by Tasky administration. You can still join through an existing invitation or contact support.');}catch(err){if(err?.message)throw err;}
   const slug = companyName.trim().toLowerCase().replace(/\s+/g,'-') + '-' + Date.now().toString(36);
   const { data: ws, error: wsError } = await sb.from('workspaces').insert({ name: companyName, slug, plan_id: 'free' }).select().single();
-  if(wsError){ console.error(wsError); return; }
-  await sb.from('workspace_members').insert({ workspace_id: ws.id, user_id: userId, role: 'admin', status: 'active', joined_at: new Date().toISOString(), invited_email: email });
-  const { error: projectError } = await sb.rpc('tasky_create_project', {
-    p_workspace_id: ws.id,
-    p_name: 'المهام العامة',
-    p_description: null,
-    p_position: 0
-  });
+  if(wsError) throw wsError;
+  const memberResult=await sb.from('workspace_members').insert({ workspace_id: ws.id, user_id: userId, role: 'admin', status: 'active', joined_at: new Date().toISOString(), invited_email: email });
+  if(memberResult.error) throw memberResult.error;
+  const { error: projectError } = await sb.rpc('tasky_create_project', {p_workspace_id: ws.id,p_name: 'المهام العامة',p_description: null,p_position: 0});
   if(projectError) console.warn('تعذّر إنشاء المشروع الافتراضي', projectError);
+  return ws;
 }
 async function claimPendingInvite(userId, email){
   // V5: secure SECURITY DEFINER RPC verifies auth.uid() + authenticated email server-side.
@@ -2168,7 +2201,7 @@ async function handleAuthSubmit(){
       const claimed = await claimPendingInvite(data.user.id, email);
       if(!claimed){
         if(!company){ errBox.textContent = 'اكتب اسم شركتك أو فريقك (ما فيه دعوة معلّقة لهذا البريد)'; errBox.style.display='block'; return; }
-        await createWorkspaceForNewUser(data.user.id, company, email);
+        try{await createWorkspaceForNewUser(data.user.id, company, email);}catch(ex){errBox.textContent=ex?.message||'تعذّر إنشاء مساحة العمل';errBox.style.display='block';return;}
       }
     }
     alert('تم إنشاء الحساب! تحقق من بريدك لو طلب منك تفعيل الحساب.');
@@ -2897,8 +2930,10 @@ const PLANS = {
   business: { id:"business", price:null,priceYear:null,seats:Infinity, modules:"all" },
 };
 function planAllows(planId, moduleId){
+  const runtimeState=platformModuleState(moduleId);
+  if(runtimeState) return !!runtimeState.enabled;
   const p = PLANS[planId];
-  return p.modules === "all" || p.modules.includes(moduleId);
+  return !!p && (p.modules === "all" || p.modules.includes(moduleId));
 }
 
 let teamMembers = []; // تُعبّى فعليًا من قاعدة البيانات + profiles
@@ -3376,8 +3411,12 @@ function renderNav(){
     lastGroup = item.group || lastGroup;
     const gated = !!item.group && !item.adminOnly && !item.always;
     const locked = gated && !planAllows(currentPlan, item.id);
+    const runtimeState=platformModuleState(item.id);
+    const baseline=PLANS[currentPlan]?.modules==='all'||PLANS[currentPlan]?.modules?.includes(item.id);
+    const runtimeRestricted=!!runtimeState && !runtimeState.enabled && (!runtimeState.global_enabled || baseline);
+    const lockedAction=runtimeRestricted?`openPlatformModuleUnavailable('${item.id}')`:`openUpgradeModal('${item.id}')`;
     const navItem = `${groupHeader}
-      <a class="nav-item ${activeNav===item.id?'active':''} ${locked?'locked':''}" onclick="${locked?`openUpgradeModal('${item.id}')`:`setActiveNav('${item.id}')`}">
+      <a class="nav-item ${activeNav===item.id?'active':''} ${locked?'locked':''}" onclick="${locked?lockedAction:`setActiveNav('${item.id}')`}">
         <svg><use href="#${item.icon}"/></svg>${t(item.key)}
         ${locked ? `<svg style="width:13px;height:13px;margin-inline-start:auto;opacity:.7"><use href="#i-lock"/></svg>` : (item.dot?`<span class="dot" style="background:${item.dot}"></span>`:'')}
       </a>`;
@@ -3473,6 +3512,7 @@ function setActiveProject(id){
 /* ================= NAV / VIEW SWITCHING ================= */
 function setActiveNav(id){
   const item = NAV_ITEMS.find(n=>n.id===id);
+  if(item && item.group && !item.always && !item.adminOnly && !planAllows(currentPlan,id)){openPlatformModuleUnavailable(id);return;}
   if(item && item.adminOnly && currentUserRole !== 'admin'){ setActiveNav('tasks'); return; }
   if(item && item.group && !item.adminOnly && !item.always && !planAllows(currentPlan, id)){ openUpgradeModal(id); return; }
   activeNav = id;
