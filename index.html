@@ -1512,6 +1512,13 @@
   .commercial-v69-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.commercial-v69-actions button{min-height:38px}
   .commercial-v69-trial-note{border:1px solid color-mix(in srgb,var(--green) 20%,var(--border));background:var(--green-tint);border-radius:12px;padding:10px 12px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);margin:9px 0 13px}.commercial-v69-trial-note b{color:var(--green)}
   @media(max-width:640px){.commercial-v69-card{align-items:stretch;flex-direction:column}.commercial-v69-actions{width:100%}.commercial-v69-actions button{flex:1;justify-content:center}}
+
+  /* ---------------- V70 PRODUCTION LAUNCH ---------------- */
+  .launch-v70-note{display:none;text-align:start;border:1px solid var(--border);border-radius:11px;background:var(--paper);padding:9px 10px;margin:-1px 0 10px;font-size:10.5px;line-height:1.65;color:var(--muted)}
+  .launch-v70-note.show{display:block}.launch-v70-note.closed{background:var(--blue-tint);color:var(--blue-deep);border-color:color-mix(in srgb,var(--blue) 20%,var(--border))}.launch-v70-note.blocked{background:var(--amber-tint);color:#7a5b16;border-color:color-mix(in srgb,var(--amber) 24%,var(--border))}
+  .launch-v70-legal{display:none;text-align:start;border:1px solid var(--border);border-radius:11px;background:var(--paper);padding:10px 11px;margin:0 0 11px}.launch-v70-legal.show{display:block}
+  .launch-v70-legal label{display:flex;align-items:flex-start;gap:8px;font-size:10.5px;line-height:1.7;color:var(--ink-soft);cursor:pointer}.launch-v70-legal input{width:16px;height:16px;flex:none;margin-top:2px;accent-color:var(--green)}
+  .launch-v70-legal a{color:var(--green);font-weight:700;text-decoration:none}.launch-v70-legal a:hover{text-decoration:underline}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1531,6 +1538,8 @@
     <div id="signupOnlyFields" style="display:none;">
       <input id="authFullName" placeholder="الاسم الكامل" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
       <input id="authCompany" placeholder="اسم شركتك أو فريقك" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
+      <div id="launchSignupNoteV70" class="launch-v70-note"></div>
+      <div id="launchLegalV70" class="launch-v70-legal"><label><input id="launchLegalAcceptV70" type="checkbox"><span id="launchLegalTextV70"></span></label></div>
     </div>
     <input id="authEmail" type="email" placeholder="البريد الإلكتروني" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
     <input id="authPassword" type="password" placeholder="كلمة المرور" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:16px;font-size:14px;box-sizing:border-box;">
@@ -1551,6 +1560,7 @@
     <div id="inviteSetupError" style="display:none;background:var(--danger-tint);color:var(--danger);font-size:12.5px;padding:10px;border-radius:8px;margin-bottom:12px;text-align:right;"></div>
     <input id="inviteNewPassword" type="password" placeholder="كلمة المرور الجديدة" minlength="8" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14px;box-sizing:border-box;background:var(--paper);color:var(--ink);">
     <input id="inviteConfirmPassword" type="password" placeholder="تأكيد كلمة المرور" minlength="8" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:14px;font-size:14px;box-sizing:border-box;background:var(--paper);color:var(--ink);">
+    <div id="inviteLegalV70" class="launch-v70-legal" style="margin-bottom:12px"><label><input id="inviteLegalAcceptV70" type="checkbox"><span id="inviteLegalTextV70"></span></label></div>
     <button id="inviteSetupBtn" onclick="finishInviteSetup()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;">تفعيل الحساب والدخول</button>
   </div>
 </div>
@@ -1755,7 +1765,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V69'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V70'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1776,6 +1786,8 @@ let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
 let commercialRuntimeV69={commercial_status:'free',effective_plan:'free',can_start_trial:false,trial_days:14,trial_remaining_seconds:0,gateway_connected:false,payment_mode:'manual'};
+let productionLaunchV70={launch_mode:'closed_beta',signup_enabled:true,require_legal_acceptance:false,terms_url:null,privacy_url:null,terms_version:'2026-08',privacy_version:'2026-08',support_email:null};
+let productionLaunchLoadedV70=false;
 let settingsSection = 'profile';
 let projects = [];
 let projectMemberships = [];
@@ -2066,6 +2078,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   const wsLabel = document.getElementById('workspaceLabel');
   if(wsLabel && currentWorkspaceName) wsLabel.textContent = currentWorkspaceName;
   renderWorkspaceBrand();
+  await syncLegalAcceptanceV70FromMetadata(currentWorkspaceId);
 
   await fetchCommercialRuntimeV69({render:false});
   await fetchPlatformRuntime();
@@ -2289,6 +2302,76 @@ async function fetchTasks(){
   });
 }
 
+
+/* ================= V70 PRODUCTION LAUNCH ================= */
+async function loadPublicLaunchConfigV70(){
+  try{
+    const {data,error}=await sb.rpc('tasky_public_launch_config_v70');
+    if(error) throw error;
+    productionLaunchV70={...productionLaunchV70,...(data||{})};
+    productionLaunchLoadedV70=true;
+  }catch(err){
+    console.warn('V70 public launch config unavailable',err);
+    productionLaunchLoadedV70=false;
+  }
+  renderSignupLaunchGateV70();
+  renderInviteLegalV70();
+  return productionLaunchV70;
+}
+function launchLegalLinkV70(url,label){return url?`<a href="${escapeHtml(url)}" target="_blank" rel="noopener noreferrer">${label}</a>`:`<b>${label}</b>`;}
+function renderInviteLegalV70(){
+  const box=document.getElementById('inviteLegalV70'),text=document.getElementById('inviteLegalTextV70');if(!box||!text)return;
+  const cfg=productionLaunchV70||{};if(!cfg.require_legal_acceptance){box.classList.remove('show');return;}
+  const terms=launchLegalLinkV70(cfg.terms_url,lang==='ar'?'شروط الاستخدام':'Terms of Use'),privacy=launchLegalLinkV70(cfg.privacy_url,lang==='ar'?'سياسة الخصوصية':'Privacy Policy');
+  text.innerHTML=lang==='ar'?`أوافق على ${terms} و${privacy}.`:`I agree to the ${terms} and ${privacy}.`;box.classList.add('show');
+}
+function renderSignupLaunchGateV70(){
+  const note=document.getElementById('launchSignupNoteV70'),legal=document.getElementById('launchLegalV70'),text=document.getElementById('launchLegalTextV70');
+  if(!note||!legal||!text)return;
+  const cfg=productionLaunchV70||{};
+  note.className='launch-v70-note';
+  if(authMode==='signup'){
+    if(!productionLaunchLoadedV70){note.textContent=lang==='ar'?'جارٍ التحقق من إتاحة التسجيل...':'Checking signup availability...';note.classList.add('show');}
+    else if(cfg.launch_mode==='closed_beta'){note.textContent=lang==='ar'?'تاسكي حاليًا في Closed Beta. إنشاء شركة جديدة متاح فقط للحسابات المعتمدة، بينما روابط دعوات الفرق تعمل كالمعتاد.':'Tasky is currently in Closed Beta. New workspaces are limited to approved accounts; team invitation links still work normally.';note.classList.add('show','closed');}
+    else if(cfg.launch_mode==='prelaunch'||cfg.signup_enabled===false){note.textContent=lang==='ar'?`إنشاء شركات جديدة متوقف مؤقتًا.${cfg.support_email?' للتواصل: '+cfg.support_email:''}`:`New workspace signup is temporarily unavailable.${cfg.support_email?' Contact: '+cfg.support_email:''}`;note.classList.add('show','blocked');}
+    if(cfg.require_legal_acceptance){
+      const terms=launchLegalLinkV70(cfg.terms_url,lang==='ar'?'شروط الاستخدام':'Terms of Use');
+      const privacy=launchLegalLinkV70(cfg.privacy_url,lang==='ar'?'سياسة الخصوصية':'Privacy Policy');
+      text.innerHTML=lang==='ar'?`أوافق على ${terms} و${privacy}.`:`I agree to the ${terms} and ${privacy}.`;
+      legal.classList.add('show');
+    }else legal.classList.remove('show');
+  }else{note.classList.remove('show');legal.classList.remove('show');}
+}
+async function checkSignupGateV70(email){
+  const {data,error}=await sb.rpc('tasky_public_signup_gate_v70',{p_email:email});
+  if(error) throw new Error(lang==='ar'?'تعذّر التحقق من إتاحة التسجيل. حاول مرة أخرى.':'Could not verify signup availability. Please try again.');
+  return data||{allowed:false,reason:'unknown'};
+}
+function signupGateMessageV70(gate){
+  const support=gate?.support_email||productionLaunchV70?.support_email;
+  const suffix=support?(lang==='ar'?` تواصل معنا على ${support}.`:` Contact us at ${support}.`):'';
+  const reason=gate?.reason;
+  if(reason==='closed_beta_capacity')return (lang==='ar'?'اكتمل العدد المحدد للـClosed Beta حاليًا.':'The current Closed Beta cohort is full.')+suffix;
+  if(reason==='closed_beta_not_allowed')return (lang==='ar'?'هذا البريد غير مضاف إلى قائمة Closed Beta حتى الآن.':'This email is not yet approved for the Closed Beta.')+suffix;
+  if(reason==='prelaunch')return (lang==='ar'?'التسجيل العام لم يبدأ بعد.':'Public signup has not opened yet.')+suffix;
+  if(reason==='signup_disabled')return (lang==='ar'?'إنشاء شركات جديدة متوقف مؤقتًا.':'New workspace signup is temporarily disabled.')+suffix;
+  return (lang==='ar'?'التسجيل غير متاح لهذا الحساب حاليًا.':'Signup is not available for this account right now.')+suffix;
+}
+async function recordLegalAcceptanceV70(workspaceId,source='signup'){
+  const cfg=productionLaunchV70||{};
+  if(!cfg.require_legal_acceptance||!workspaceId)return;
+  try{await sb.rpc('tasky_record_legal_acceptance_v70',{p_workspace_id:workspaceId,p_terms_version:cfg.terms_version||'current',p_privacy_version:cfg.privacy_version||'current',p_source:source});}catch(err){console.warn('V70 legal acceptance sync',err);}
+}
+async function syncLegalAcceptanceV70FromMetadata(workspaceId){
+  if(!workspaceId)return;
+  try{
+    const {data:{user}}=await sb.auth.getUser();const m=user?.user_metadata||{};
+    if(m.tasky_legal_accepted_at&&m.tasky_terms_version&&m.tasky_privacy_version){
+      await sb.rpc('tasky_record_legal_acceptance_v70',{p_workspace_id:workspaceId,p_terms_version:m.tasky_terms_version,p_privacy_version:m.tasky_privacy_version,p_source:'signup_metadata'});
+    }
+  }catch(err){console.warn('V70 legal metadata sync',err);}
+}
+
 function toggleAuthMode(){
   authMode = authMode === 'signin' ? 'signup' : 'signin';
   document.getElementById('signupOnlyFields').style.display = authMode==='signup' ? 'block' : 'none';
@@ -2296,6 +2379,7 @@ function toggleAuthMode(){
   document.getElementById('authToggleText').textContent = authMode==='signup' ? 'عندك حساب؟' : 'ما عندك حساب؟';
   document.getElementById('authToggleBtn').textContent = authMode==='signup' ? 'تسجيل الدخول' : 'إنشاء حساب جديد';
   document.getElementById('authError').style.display='none';
+  renderSignupLaunchGateV70();
 }
 async function createWorkspaceForNewUser(userId, companyName, email){
   try{const cfg=await sb.rpc('tasky_platform_signup_config');if(!cfg.error&&cfg.data?.workspace_creation_enabled===false)throw new Error(lang==='ar'?'إنشاء مساحات عمل جديدة متوقف مؤقتًا من إدارة تاسكي. يمكنك تسجيل الدخول بدعوة موجودة أو التواصل مع الدعم.':'New workspace creation is temporarily paused by Tasky administration. You can still join through an existing invitation or contact support.');}catch(err){if(err?.message)throw err;}
@@ -2306,6 +2390,7 @@ async function createWorkspaceForNewUser(userId, companyName, email){
   if(memberResult.error) throw memberResult.error;
   const { error: projectError } = await sb.rpc('tasky_create_project', {p_workspace_id: ws.id,p_name: 'المهام العامة',p_description: null,p_position: 0});
   if(projectError) console.warn('تعذّر إنشاء المشروع الافتراضي', projectError);
+  await recordLegalAcceptanceV70(ws.id,'workspace_signup');
   return ws;
 }
 async function claimPendingInvite(userId, email){
@@ -2339,6 +2424,7 @@ async function getAuthoritativeInviteState(session){
 function showInviteSetup(show){
   const overlay = document.getElementById('inviteSetupScreen');
   if(overlay) overlay.style.display = show ? 'flex' : 'none';
+  if(show) renderInviteLegalV70();
 }
 
 async function hasActiveMembershipForInvite(user){
@@ -2371,6 +2457,10 @@ async function finishInviteSetup(){
     errBox.style.display = 'block';
     return;
   }
+  if(productionLaunchV70.require_legal_acceptance&&!document.getElementById('inviteLegalAcceptV70')?.checked){
+    errBox.textContent = lang==='ar'?'لازم توافق على شروط الاستخدام وسياسة الخصوصية لإكمال تفعيل الحساب.':'You must accept the Terms of Use and Privacy Policy to activate your account.';
+    errBox.style.display='block';return;
+  }
 
   btn.disabled = true;
   btn.textContent = 'جاري التفعيل...';
@@ -2400,13 +2490,16 @@ async function finishInviteSetup(){
 
   // Step 3: clear the invite flag only after membership activation succeeds.
   const currentMeta = verifiedUser?.user_metadata || {};
+  const legalMetaInvite=productionLaunchV70.require_legal_acceptance?{tasky_legal_accepted_at:new Date().toISOString(),tasky_terms_version:productionLaunchV70.terms_version||'current',tasky_privacy_version:productionLaunchV70.privacy_version||'current'}:{};
   const { error: metadataError } = await sb.auth.updateUser({
     data: {
       ...currentMeta,
+      ...legalMetaInvite,
       tasky_invited: false,
       tasky_invite_completed_at: new Date().toISOString()
     }
   });
+  if(productionLaunchV70.require_legal_acceptance&&verifiedUser?.user_metadata?.tasky_workspace_id){await recordLegalAcceptanceV70(verifiedUser.user_metadata.tasky_workspace_id,'invite_acceptance');}
 
   if(metadataError){
     console.warn('تم التفعيل لكن تعذّر تحديث علامة الدعوة', metadataError);
@@ -2435,7 +2528,12 @@ async function handleAuthSubmit(){
     const fullName = document.getElementById('authFullName').value.trim();
     const company = document.getElementById('authCompany').value.trim();
     if(!fullName){ errBox.textContent = 'اكتب اسمك الكامل'; errBox.style.display='block'; return; }
-    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName } } });
+    let signupGate;try{signupGate=await checkSignupGateV70(email);}catch(ex){errBox.textContent=ex.message;errBox.style.display='block';return;}
+    if(!signupGate.allowed){errBox.textContent=signupGateMessageV70(signupGate);errBox.style.display='block';return;}
+    const legalAccepted=!productionLaunchV70.require_legal_acceptance||!!document.getElementById('launchLegalAcceptV70')?.checked;
+    if(!legalAccepted){errBox.textContent=lang==='ar'?'لازم توافق على شروط الاستخدام وسياسة الخصوصية لإكمال التسجيل.':'You must accept the Terms of Use and Privacy Policy to continue.';errBox.style.display='block';return;}
+    const legalMeta=productionLaunchV70.require_legal_acceptance?{tasky_legal_accepted_at:new Date().toISOString(),tasky_terms_version:productionLaunchV70.terms_version||'current',tasky_privacy_version:productionLaunchV70.privacy_version||'current'}:{};
+    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, ...legalMeta } } });
     if(error){ errBox.textContent = error.message; errBox.style.display='block'; return; }
     if(data.user){
       const claimed = await claimPendingInvite(data.user.id, email);
@@ -3590,6 +3688,8 @@ function toggleLang(){
   renderPlatformRuntimeUi();
   renderPlatformReleaseRuntimeV66();
   renderOnboardingV68();
+  renderSignupLaunchGateV70();
+  renderInviteLegalV70();
 }
 
 /* ================= THEME ================= */
@@ -8212,6 +8312,7 @@ const taskyPublicInviteToken=taskyPublicParams.get('invite');
 const taskyPublicSurveyToken=taskyPublicParams.get('survey');
 const taskyPublicSalesQuoteToken=taskyPublicParams.get('salesquote');
 const taskyPublicInvoiceToken=taskyPublicParams.get('invoice');
+loadPublicLaunchConfigV70();
 if(taskyPublicInvoiceToken) showPublicCrmInvoicePortal(taskyPublicInvoiceToken); else if(taskyPublicSalesQuoteToken) showPublicCrmQuotePortal(taskyPublicSalesQuoteToken); else if(taskyPublicQuoteToken) showPublicVendorQuotePortal(taskyPublicQuoteToken); else if(taskyPublicInviteToken) showPublicEventInvitation(taskyPublicInviteToken); else if(taskyPublicSurveyToken) showPublicSurveyPortal(taskyPublicSurveyToken); else checkSession();
 </script>
 </body>
