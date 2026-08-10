@@ -1721,7 +1721,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V58'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V64.2'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1737,18 +1737,72 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
+let platformRuntimeRefreshTimer = null;
+let platformRuntimeRefreshBusy = false;
+let platformRuntimeLastBlocked = false;
 let pendingPlanRequest = null;
 let settingsSection = 'profile';
 let projects = [];
 let projectMemberships = [];
 let activeProjectId = null;
 
-function platformRuntimeBlocksApp(){return !!platformRuntime && !platformRuntime.is_platform_admin && (platformRuntime.workspace_status==='suspended'||platformRuntime.maintenance_mode===true);}
+function platformRuntimeBlocksApp(){return !!platformRuntime && (platformRuntime.maintenance_mode===true || (!platformRuntime.is_platform_admin && platformRuntime.workspace_status==='suspended'));}
 function platformRuntimeMessage(kind){if(kind==='maintenance')return {title:lang==='ar'?(platformRuntime.maintenance_title_ar||'تاسكي تحت الصيانة المؤقتة'):(platformRuntime.maintenance_title_en||platformRuntime.maintenance_title_ar||'Tasky is under maintenance'),body:lang==='ar'?(platformRuntime.maintenance_message_ar||'نعمل حاليًا على تحديث المنصة. يرجى المحاولة لاحقًا.'):(platformRuntime.maintenance_message_en||platformRuntime.maintenance_message_ar||'We are currently updating the platform. Please try again later.')};return {title:lang==='ar'?'تم إيقاف مساحة العمل مؤقتًا':'Workspace access is temporarily suspended',body:platformRuntime.suspension_reason||(lang==='ar'?'يرجى التواصل مع مسؤول تاسكي أو الدعم الفني لمعرفة تفاصيل حالة الاشتراك.':'Please contact Tasky support or your account administrator for details.')};}
 async function fetchPlatformRuntime(){
-  platformRuntime={modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
+  const defaults={modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
+  platformRuntime=defaults;
   if(!currentWorkspaceId)return platformRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_runtime',{p_workspace_id:currentWorkspaceId});if(error){console.warn('V58 runtime config unavailable',error);return platformRuntime;}platformRuntime=data||platformRuntime;}catch(err){console.warn('V58 runtime config failed',err);}return platformRuntime;
+
+  let legacy={};
+  try{
+    const legacyRes=await sb.rpc('tasky_platform_runtime',{p_workspace_id:currentWorkspaceId});
+    if(!legacyRes.error && legacyRes.data) legacy=legacyRes.data;
+    else if(legacyRes.error) console.warn('Legacy platform runtime unavailable',legacyRes.error);
+  }catch(err){console.warn('Legacy platform runtime failed',err);}
+
+  let canonical={};
+  try{
+    const {data,error}=await sb.rpc('tasky_platform_runtime_v641',{p_workspace_id:currentWorkspaceId});
+    if(error){
+      console.warn('V64.1 canonical runtime unavailable',error);
+    }else if(data){
+      canonical=data;
+    }
+  }catch(err){console.warn('V64.1 canonical runtime failed',err);}
+
+  platformRuntime={
+    ...defaults,
+    ...legacy,
+    ...canonical,
+    modules:legacy?.modules||canonical?.modules||{},
+    announcements:Array.isArray(canonical?.announcements)?canonical.announcements:(Array.isArray(legacy?.announcements)?legacy.announcements:[])
+  };
+  return platformRuntime;
+}
+async function refreshPlatformRuntimeLive(){
+  if(platformRuntimeRefreshBusy||!currentWorkspaceId)return;
+  platformRuntimeRefreshBusy=true;
+  const wasBlocked=platformRuntimeBlocksApp();
+  try{
+    await fetchPlatformRuntime();
+    const isBlocked=platformRuntimeBlocksApp();
+    renderPlatformRuntimeUi();
+    if(wasBlocked&&!isBlocked){
+      window.location.reload();
+      return;
+    }
+    platformRuntimeLastBlocked=isBlocked;
+  }finally{platformRuntimeRefreshBusy=false;}
+}
+function startPlatformRuntimeRefresh(){
+  if(platformRuntimeRefreshTimer)clearInterval(platformRuntimeRefreshTimer);
+  platformRuntimeLastBlocked=platformRuntimeBlocksApp();
+  platformRuntimeRefreshTimer=setInterval(()=>refreshPlatformRuntimeLive(),60000);
+}
+function stopPlatformRuntimeRefresh(){
+  if(platformRuntimeRefreshTimer){clearInterval(platformRuntimeRefreshTimer);platformRuntimeRefreshTimer=null;}
+  platformRuntimeRefreshBusy=false;
+  platformRuntimeLastBlocked=false;
 }
 function ensurePlatformRuntimeElements(){
   let gate=document.getElementById('platformGate');if(!gate){gate=document.createElement('div');gate.id='platformGate';gate.className='platform-gate hidden';document.body.appendChild(gate);}
@@ -1836,6 +1890,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
 
   await fetchPlatformRuntime();
   renderPlatformRuntimeUi();
+  startPlatformRuntimeRefresh();
   renderRoleToggle();
   renderNav();
   if(platformRuntimeBlocksApp()) return true;
@@ -2212,6 +2267,7 @@ async function handleAuthSubmit(){
   checkSession();
 }
 async function signOutUser(){
+  stopPlatformRuntimeRefresh();
   await sb.auth.signOut();
   currentWorkspaceId = null;
   currentUserId = null;
@@ -2233,6 +2289,7 @@ async function checkSession(){
   const authScreen = document.getElementById('authScreen');
 
   if(!session || !session.user){
+    stopPlatformRuntimeRefresh();
     currentUserId = null;
     currentUserEmail = null;
     currentWorkspaceId = null;
@@ -3344,6 +3401,7 @@ function toggleLang(){
   renderViewTabs();
   renderModule();
   renderAll();
+  renderPlatformRuntimeUi();
 }
 
 /* ================= THEME ================= */
@@ -7927,6 +7985,11 @@ function renderAll(){
 /* ================= INIT ================= */
 // Auth invitation links can establish the session after the page starts loading.
 // Re-check the app state when Supabase reports a signed-in session.
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&currentWorkspaceId)refreshPlatformRuntimeLive();
+});
+window.addEventListener('focus',()=>{if(currentWorkspaceId)refreshPlatformRuntimeLive();});
+
 sb.auth.onAuthStateChange((event, session) => {
   const qs=new URLSearchParams(window.location.search);const publicInviteToken=qs.get('invite');const publicQuoteToken=qs.get('quote');const publicSurveyToken=qs.get('survey');const publicSalesQuoteToken=qs.get('salesquote');const publicInvoiceToken=qs.get('invoice');
   if(!publicInviteToken && !publicQuoteToken && !publicSurveyToken && !publicSalesQuoteToken && !publicInvoiceToken && event === 'SIGNED_IN' && session){
