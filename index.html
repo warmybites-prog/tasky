@@ -1490,6 +1490,18 @@
 
 /* Tasky V67 — production hardening */
 .launch-network-banner{position:fixed;left:50%;bottom:18px;transform:translateX(-50%);z-index:22000;border-radius:999px;padding:9px 14px;font-size:11px;font-weight:800;box-shadow:0 12px 30px rgba(0,0,0,.2);background:var(--danger);color:#fff;display:none;max-width:calc(100vw - 24px);text-align:center}.launch-network-banner.show{display:block}.launch-network-banner.online{background:var(--green)}.launch-connection-retry{border:0;background:rgba(255,255,255,.18);color:#fff;border-radius:999px;padding:4px 8px;margin-inline-start:7px;font:inherit;font-size:9px;font-weight:800}.launch-boot-fallback{position:fixed;inset:0;z-index:21900;background:var(--paper);display:grid;place-items:center;padding:20px}.launch-boot-card{width:min(480px,100%);background:var(--card);border:1px solid var(--border);border-radius:22px;padding:24px;text-align:center;box-shadow:0 22px 60px rgba(18,41,26,.12)}.launch-boot-card h2{font-size:18px;margin-bottom:9px}.launch-boot-card p{font-size:12px;color:var(--muted);line-height:1.8}.launch-boot-card .actions{display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:14px}.launch-boot-card button{border:1px solid var(--border);background:var(--card);border-radius:10px;padding:9px 13px;font:inherit;font-weight:700}.launch-boot-card button.primary{background:var(--green);border-color:var(--green);color:#fff}@media(max-width:560px){.launch-network-banner{bottom:10px;font-size:10px}}
+
+
+/* ---------------- V68 FIRST COMPANY ONBOARDING ---------------- */
+.tasky-onboarding-v68{border:1px solid color-mix(in srgb,var(--green) 24%,var(--border));background:linear-gradient(135deg,color-mix(in srgb,var(--green-tint) 72%,var(--card)),var(--card));border-radius:18px;padding:16px 17px;box-shadow:0 12px 30px rgba(18,41,26,.055);position:relative;overflow:hidden}
+.tasky-onboarding-v68::after{content:'';position:absolute;width:180px;height:180px;border-radius:50%;background:color-mix(in srgb,var(--green-bright) 12%,transparent);inset-inline-end:-85px;top:-95px;pointer-events:none}
+.onboarding-v68-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;position:relative;z-index:1}.onboarding-v68-head h3{font-size:15px;margin:0 0 4px}.onboarding-v68-head p{font-size:11px;line-height:1.7;color:var(--muted);margin:0}.onboarding-v68-progress-copy{font-size:10.5px;font-weight:800;color:var(--green);white-space:nowrap}.onboarding-v68-collapse{width:32px;height:32px;border:1px solid var(--border);border-radius:9px;background:var(--card);color:var(--muted);display:grid;place-items:center;padding:0;flex:none}.onboarding-v68-collapse svg{width:15px;height:15px;transition:transform .18s}.tasky-onboarding-v68.collapsed .onboarding-v68-collapse svg{transform:rotate(180deg)}
+.onboarding-v68-track{height:7px;background:color-mix(in srgb,var(--border) 78%,transparent);border-radius:999px;overflow:hidden;margin:12px 0 13px;position:relative;z-index:1}.onboarding-v68-track i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--green-bright));border-radius:inherit;transition:width .3s ease}
+.onboarding-v68-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;position:relative;z-index:1}.onboarding-v68-step{display:grid;grid-template-columns:30px minmax(0,1fr) auto;align-items:center;gap:9px;border:1px solid var(--border);border-radius:12px;padding:9px 10px;background:color-mix(in srgb,var(--card) 90%,transparent);min-width:0}.onboarding-v68-step.done{border-color:color-mix(in srgb,var(--green) 18%,var(--border));background:color-mix(in srgb,var(--green-tint) 48%,var(--card))}.onboarding-v68-step.next{border-color:color-mix(in srgb,var(--green) 40%,var(--border));box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 6%,transparent)}.onboarding-v68-num{width:30px;height:30px;border-radius:10px;background:var(--paper);color:var(--muted);display:grid;place-items:center;font-size:10px;font-weight:900}.onboarding-v68-step.done .onboarding-v68-num{background:var(--green);color:#fff}.onboarding-v68-copy{min-width:0}.onboarding-v68-copy b{display:block;font-size:10.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.onboarding-v68-copy span{display:block;font-size:8.8px;color:var(--muted);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.onboarding-v68-step button{border:1px solid var(--border);background:var(--card);color:var(--green);border-radius:9px;padding:6px 8px;font:800 9px inherit;white-space:nowrap}.onboarding-v68-step.done button{display:none}.tasky-onboarding-v68.collapsed .onboarding-v68-steps{display:none}.tasky-onboarding-v68.collapsed .onboarding-v68-track{margin-bottom:0}
+.onboarding-v68-plan-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px;margin-top:12px}.onboarding-v68-plan{border:1px solid var(--border);border-radius:13px;background:var(--paper);padding:12px;display:flex;flex-direction:column;gap:7px}.onboarding-v68-plan.current{border-color:var(--green)}.onboarding-v68-plan b{font-size:13px}.onboarding-v68-plan small{color:var(--muted);font-size:9.5px;line-height:1.55;min-height:30px}.onboarding-v68-plan button{margin-top:auto;border:0;border-radius:9px;background:var(--green);color:white;min-height:36px;font-weight:800}.onboarding-v68-plan button.secondary{background:var(--card);color:var(--green);border:1px solid var(--border)}
+.onboarding-v68-complete{display:flex;align-items:center;gap:10px;border:1px solid color-mix(in srgb,var(--green) 22%,var(--border));background:var(--green-tint);color:var(--green);border-radius:14px;padding:12px 14px}.onboarding-v68-complete .icon{width:34px;height:34px;border-radius:11px;background:var(--green);color:#fff;display:grid;place-items:center;flex:none}.onboarding-v68-complete .icon svg{width:17px;height:17px}.onboarding-v68-complete b{font-size:12px}.onboarding-v68-complete span{display:block;font-size:9.5px;color:var(--ink-soft);margin-top:2px}
+@media(max-width:1050px){.onboarding-v68-steps{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.tasky-onboarding-v68{padding:13px}.onboarding-v68-head{align-items:center}.onboarding-v68-head p{display:none}.onboarding-v68-steps{grid-template-columns:1fr}.onboarding-v68-step{grid-template-columns:30px minmax(0,1fr) auto}.onboarding-v68-plan-grid{grid-template-columns:1fr}}
 </style>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
@@ -1733,7 +1745,7 @@
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V67'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V68'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1750,6 +1762,8 @@ let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
 let platformReleaseRuntime={current_build:window.TASKY_BUILD,latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let onboardingStateV68=null;
+let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
 let settingsSection = 'profile';
 let projects = [];
@@ -1853,6 +1867,87 @@ function dismissPlatformAnnouncement(id){skipPlatformAnnouncement(id);}
 function platformModuleState(moduleId){return platformRuntime?.modules?.[moduleId]||null;}
 function openPlatformModuleUnavailable(moduleId){const st=platformModuleState(moduleId);showTaskyDialog({title:lang==='ar'?'الوحدة غير متاحة حاليًا':'Module currently unavailable',message:(lang==='ar'?(st?.message_ar||'هذه الوحدة غير متاحة حاليًا وفق إعدادات المنصة أو الباقة الحالية.'):(st?.message_en||st?.message_ar||'This module is currently unavailable under the platform or current plan settings.')),tone:'warning'});}
 
+
+/* ================= V68 FIRST COMPANY ONBOARDING ================= */
+function onboardingCollapseKeyV68(){return `tasky_onboarding_collapsed_v68_${currentWorkspaceId||'none'}`;}
+function ensureOnboardingContainerV68(){
+  let el=document.getElementById('taskyOnboardingV68');
+  if(!el){
+    el=document.createElement('div');el.id='taskyOnboardingV68';el.className='hidden';
+    const content=document.querySelector('.app .content');
+    if(content){
+      const release=document.getElementById('platformReleaseNotice');
+      const ann=document.getElementById('platformAnnouncementBanner');
+      if(release&&release.parentNode===content) release.insertAdjacentElement('afterend',el);
+      else if(ann&&ann.parentNode===content) ann.insertAdjacentElement('afterend',el);
+      else content.insertBefore(el,content.firstChild);
+    }
+  }
+  return el;
+}
+function onboardingStepMetaV68(){return [
+  {id:'account',ar:'إنشاء الحساب',en:'Create account',arSub:'حسابك جاهز',enSub:'Your account is ready'},
+  {id:'workspace',ar:'إنشاء الشركة',en:'Create company',arSub:'مساحة العمل جاهزة',enSub:'Workspace is ready'},
+  {id:'plan',ar:'اختيار الباقة',en:'Choose plan',arSub:'حدد الباقة المناسبة',enSub:'Pick the right plan'},
+  {id:'team',ar:'دعوة الفريق',en:'Invite team',arSub:'أرسل أول دعوة',enSub:'Send the first invite'},
+  {id:'project',ar:'إنشاء مشروع',en:'Create project',arSub:'أنشئ أول مشروع فعلي',enSub:'Create your first real project'},
+  {id:'task',ar:'إنشاء مهمة',en:'Create task',arSub:'أضف أول مهمة للفريق',enSub:'Add your first team task'}
+];}
+function onboardingActionLabelV68(id){const ar={plan:'اختيار',team:'دعوة',project:'إنشاء',task:'إضافة'},en={plan:'Choose',team:'Invite',project:'Create',task:'Add'};return (lang==='ar'?ar:en)[id]||'';}
+function onboardingNextStepV68(){if(!onboardingStateV68?.steps)return null;return onboardingStepMetaV68().find(x=>!onboardingStateV68.steps[x.id])?.id||null;}
+async function fetchOnboardingStateV68({render=true}={}){
+  if(!currentWorkspaceId||currentUserRole!=='admin'){onboardingStateV68=null;if(render)renderOnboardingV68();return null;}
+  try{
+    const {data,error}=await sb.rpc('tasky_onboarding_state_v68',{p_workspace_id:currentWorkspaceId});
+    if(error){console.warn('V68 onboarding unavailable; run V68 migration',error);onboardingStateV68=null;if(render)renderOnboardingV68();return null;}
+    const wasComplete=!!onboardingStateV68?.complete;
+    onboardingStateV68=data||null;
+    if(render)renderOnboardingV68();
+    if(!wasComplete&&onboardingStateV68?.complete&&!onboardingCompletedCelebratedV68){
+      onboardingCompletedCelebratedV68=true;
+      taskyToast(lang==='ar'?'🎉 شركتك جاهزة للعمل على تاسكي':'🎉 Your company is ready to work in Tasky',{tone:'success'});
+    }
+    return onboardingStateV68;
+  }catch(err){console.warn('V68 onboarding state failed',err);onboardingStateV68=null;if(render)renderOnboardingV68();return null;}
+}
+async function markOnboardingActionV68(action,metadata={}){
+  if(!currentWorkspaceId||currentUserRole!=='admin')return null;
+  try{
+    const {data,error}=await sb.rpc('tasky_onboarding_mark_action_v68',{p_workspace_id:currentWorkspaceId,p_action:action,p_metadata:metadata||{}});
+    if(error){console.warn('V68 onboarding action failed',action,error);return null;}
+    onboardingStateV68=data||onboardingStateV68;renderOnboardingV68();return onboardingStateV68;
+  }catch(err){console.warn('V68 onboarding action failed',action,err);return null;}
+}
+function toggleOnboardingCollapsedV68(){const el=ensureOnboardingContainerV68();const collapsed=!el.classList.contains('collapsed');el.classList.toggle('collapsed',collapsed);localStorage.setItem(onboardingCollapseKeyV68(),collapsed?'1':'0');}
+function renderOnboardingV68(){
+  const el=ensureOnboardingContainerV68();
+  const st=onboardingStateV68;
+  if(!st?.visible||currentUserRole!=='admin'||st.complete){el.className='hidden';el.innerHTML='';return;}
+  const steps=onboardingStepMetaV68(),next=onboardingNextStepV68(),collapsed=localStorage.getItem(onboardingCollapseKeyV68())==='1';
+  el.className=`tasky-onboarding-v68${collapsed?' collapsed':''}`;
+  el.innerHTML=`<div class="onboarding-v68-head"><div><h3>${lang==='ar'?'جهّز شركتك للعمل على تاسكي':'Set up your company in Tasky'}</h3><p>${lang==='ar'?'ست خطوات قصيرة توصلك من الحساب الجديد إلى أول مهمة حقيقية مع فريقك.':'Six short steps take you from a new account to your first real team task.'}</p></div><div style="display:flex;align-items:center;gap:8px"><span class="onboarding-v68-progress-copy">${Number(st.done_count||0)} / ${Number(st.total_count||6)}</span><button class="onboarding-v68-collapse" onclick="toggleOnboardingCollapsedV68()" aria-label="${lang==='ar'?'طي الإعداد':'Collapse setup'}"><svg><use href="#i-chevron"/></svg></button></div></div><div class="onboarding-v68-track"><i style="width:${Math.max(0,Math.min(100,Number(st.progress_percent||0)))}%"></i></div><div class="onboarding-v68-steps">${steps.map((x,i)=>{const done=!!st.steps?.[x.id];return `<div class="onboarding-v68-step ${done?'done':''} ${!done&&x.id===next?'next':''}"><div class="onboarding-v68-num">${done?'✓':i+1}</div><div class="onboarding-v68-copy"><b>${escapeHtml(lang==='ar'?x.ar:x.en)}</b><span>${escapeHtml(lang==='ar'?x.arSub:x.enSub)}</span></div>${!done&&['plan','team','project','task'].includes(x.id)?`<button onclick="runOnboardingActionV68('${x.id}')">${onboardingActionLabelV68(x.id)}</button>`:''}</div>`;}).join('')}</div>`;
+}
+function runOnboardingActionV68(step){
+  if(step==='plan'){openOnboardingPlanV68();return;}
+  if(step==='team'){setActiveNav('team');setTimeout(()=>openInviteModal(),60);return;}
+  if(step==='project'){setActiveNav('tasks');setTimeout(()=>openProjectModal(),60);return;}
+  if(step==='task'){setActiveNav('tasks');setTimeout(()=>openAddModal(),60);return;}
+}
+function openOnboardingPlanV68(){
+  if(currentUserRole!=='admin')return;
+  const cycle=onboardingStateV68?.selected_billing_cycle||billingCycle||'monthly';billingCycle=cycle;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'اختر باقة البداية':'Choose your starting plan'}</h3><div style="font-size:10.5px;color:var(--muted);margin-top:4px">${lang==='ar'?'يمكنك البدء بالمجانية والترقية لاحقًا في أي وقت.':'You can start free and upgrade at any time.'}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><div class="bplan-toggle" style="margin:4px 0 10px"><button class="${billingCycle==='monthly'?'active':''}" onclick="billingCycle='monthly';openOnboardingPlanV68()">${t('billMonthly')}</button><button class="${billingCycle==='yearly'?'active':''}" onclick="billingCycle='yearly';openOnboardingPlanV68()">${t('billYearly')}</button></div><div class="onboarding-v68-plan-grid">${['free','pro','business'].map(id=>`<div class="onboarding-v68-plan ${id===currentPlan?'current':''}"><b>${t('plan_'+id+'_name')}</b><small>${t('plan_'+id+'_desc')}</small><div style="font-size:11px;font-weight:800;color:var(--green)">${id==='free'?(lang==='ar'?'مجانية':'Free'):(PLANS[id].price===null?(lang==='ar'?'حسب الاتفاق':'Custom'):`${billingCycle==='monthly'?PLANS[id].price:PLANS[id].priceYear} ${lang==='ar'?'ر.س/شهر':'SAR/mo'}`)}</div><button class="${id==='free'?'secondary':''}" onclick="chooseOnboardingPlanV68('${id}')">${id==='free'?(lang==='ar'?'ابدأ بالمجانية':'Start free'):(lang==='ar'?'طلب هذه الباقة':'Request this plan')}</button></div>`).join('')}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function chooseOnboardingPlanV68(planId){
+  if(planId==='free'){
+    await markOnboardingActionV68('plan_reviewed',{selected_plan:'free',billing_cycle:billingCycle});
+    closeAddModal();taskyToast(lang==='ar'?'تم اختيار الباقة المجانية كبداية':'Free plan selected as your starting plan',{tone:'success'});return;
+  }
+  closeAddModal();
+  await applyPlanChange(planId);
+}
+
 async function loadWorkspaceAndData(authoritativeUser = null){
   const { data: { session } } = await sb.auth.getSession();
   if(!session) return false;
@@ -1943,12 +2038,14 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchSurveys();
   await fetchNotifications();
   await fetchPendingPlanRequest();
+  await fetchOnboardingStateV68({render:false});
   initTaskRealtime();
   applyCurrentUserProfile();
   renderTeamAvatarStack();
   renderRoleToggle();
   renderNav();
   renderAll();
+  renderOnboardingV68();
   return true;
 }
 
@@ -2307,6 +2404,9 @@ async function signOutUser(){
   currentUserId = null;
   currentUserEmail = null;
   currentUserRole = null;
+  onboardingStateV68 = null;
+  onboardingCompletedCelebratedV68 = false;
+  renderOnboardingV68();
   projects = [];
   activeProjectId = null;
   tasks = [];
@@ -3436,6 +3536,7 @@ function toggleLang(){
   renderAll();
   renderPlatformRuntimeUi();
   renderPlatformReleaseRuntimeV66();
+  renderOnboardingV68();
 }
 
 /* ================= THEME ================= */
@@ -5774,6 +5875,7 @@ ${data.detail}`;
 
   closeAddModal();
   await fetchTeamMembers();
+  await markOnboardingActionV68('team_invited',{email});
   renderModule();
   alert(lang==='ar'
     ? `تم إرسال الدعوة إلى ${email} ✅`
@@ -5992,6 +6094,7 @@ async function applyPlanChange(id){
     return;
   }
   pendingPlanRequest=data || {to_plan:id,billing_cycle:billingCycle,status:'pending'};
+  await markOnboardingActionV68('plan_reviewed',{selected_plan:id,billing_cycle:billingCycle});
   taskyToast(lang==='ar'?'تم تسجيل طلب تغيير الباقة':'Plan change request recorded',{tone:'success'});
   renderModule();
 }
@@ -6331,6 +6434,7 @@ async function submitAddProject(e){
   closeAddModal();
   await fetchProjects();
   await fetchProjectMemberships();
+  await markOnboardingActionV68('project_created',{project_id:data.id});
   activeProjectId = data.id;
   setActiveProject(data.id);
   if(canManageProjectClient(data.id)) taskyToast(lang==='ar'?'تم إنشاء المشروع وأصبحت مديره':'Project created; you are its manager',{tone:'success'});
@@ -6406,6 +6510,7 @@ async function submitAddTask(e){
   await logTaskActivity(data.id,'task_created',{title});
   closeAddModal();
   await fetchTasks();
+  await markOnboardingActionV68('task_created',{task_id:data.id,project_id:projectId});
   renderAll();
   taskyToast(lang==='ar'?'تم إنشاء المهمة':'Task created',{tone:'success'});
 }
@@ -8027,6 +8132,7 @@ function renderAll(){
   renderHomeStats();
   if(activeView==='board') renderBoard();
   if(activeView==='list') renderList();
+  renderOnboardingV68();
 }
 
 /* ================= INIT ================= */
