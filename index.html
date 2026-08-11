@@ -3107,25 +3107,25 @@ const STR = {
     anSourceDirect:"مباشر", anSourceSocial:"وسائل التواصل", anSourceSearch:"بحث Google", anSourceEmail:"البريد الإلكتروني", anSourceOther:"أخرى",
 
     /* -- External Integrations -- */
-    intIntro:"اربط تاسكي مباشرة بمنصات التواصل، أدوات التحليل، والبريد، لتحديث الإحصائيات والتقارير تلقائيًا دون إدخال يدوي.",
-    intSecurityNote:"لأسباب أمنية، مفاتيح الوصول (API keys) وتوكنات الدخول تُخزَّن وتُدار من خادم خلفي (Backend) وليس من المتصفح مباشرة. هذه الشاشة هي لوحة التحكم بالربط، وتُفعَّل فعليًا بمجرد ربطها بخادم Tasky.",
+    intIntro:"مركز يعرض التكاملات المخطط لها. الربط الحي والمزامنة الآلية غير مفعّلين في نسخة الإطلاق.",
+    intSecurityNote:"نسخة الإطلاق لا تجمع API keys أو OAuth tokens في المتصفح، ولا يوجد ربط حي حتى يتم بناء Backend آمن ومستقل لإدارة الأسرار والاتصالات.",
     intConnected:"متصل", intNotConnected:"غير متصل", intConnect:"ربط الحساب", intDisconnect:"قطع الاتصال",
     intLastSync:"آخر مزامنة", intLastSyncNow:"الآن",
-    intModalOAuthBody:"سيتم تحويلك لتسجيل الدخول عبر حساب الخدمة واعتماد الصلاحيات المطلوبة (OAuth).",
-    intModalKeyBody:"أدخل بيانات الاعتماد الخاصة بالخدمة. تُستخدم هذه الشاشة لأغراض العرض التوضيحي فقط.",
+    intModalOAuthBody:"OAuth غير مفعّل في نسخة الإطلاق؛ لن يتم تحويلك إلى خدمة خارجية.",
+    intModalKeyBody:"الربط الحي غير مفعّل في نسخة الإطلاق، ولا يتم إدخال مفاتيح أو أسرار هنا.",
     intFieldKey:"معرّف الحساب / مفتاح API", intFieldKeyPh:"مثال: xxxxxxxxxxxxxxxx",
     intAuthorize:"المتابعة وتسجيل الدخول", intSaveKey:"حفظ والاتصال",
     intCat_social:"وسائل التواصل", intCat_analytics:"تحليلات وأداء", intCat_comms:"البريد والتواصل", intCat_custom:"مخصص",
-    int_ga:"Google Analytics", int_ga_desc:"استيراد زيارات الموقع وسلوك المستخدمين تلقائيًا.",
-    int_meta:"Meta (فيسبوك وإنستقرام)", int_meta_desc:"جدولة المنشورات وسحب إحصائيات التفاعل.",
-    int_x:"منصة X", int_x_desc:"نشر ومتابعة أداء التغريدات والحملات.",
-    int_snap:"سناب شات", int_snap_desc:"ربط حساب الأعمال لمتابعة أداء المحتوى.",
-    int_tiktok:"تيك توك", int_tiktok_desc:"سحب مؤشرات المشاهدات والتفاعل.",
-    int_linkedin:"لينكدإن", int_linkedin_desc:"نشر ومتابعة أداء المحتوى المهني.",
-    int_gmail:"البريد الإلكتروني (Gmail)", int_gmail_desc:"إرسال مسودات التواصل الداخلي مباشرة.",
-    int_mailchimp:"Mailchimp", int_mailchimp_desc:"مزامنة النشرات البريدية ومعدلات الفتح.",
-    int_slack:"Slack", int_slack_desc:"إشعارات الفريق الفورية داخل قنواتكم.",
-    int_webhook:"Webhook / API مخصص", int_webhook_desc:"اربط أي نظام داخلي عبر نقطة اتصال مخصصة.",
+    int_ga:"Google Analytics", int_ga_desc:"مخطط: استيراد تحليلات الموقع بعد بناء Backend آمن.",
+    int_meta:"Meta (فيسبوك وإنستقرام)", int_meta_desc:"مخطط: نشر ومزامنة Meta بعد الإطلاق.",
+    int_x:"منصة X", int_x_desc:"مخطط: ربط X بعد الإطلاق.",
+    int_snap:"سناب شات", int_snap_desc:"مخطط: ربط Snapchat بعد الإطلاق.",
+    int_tiktok:"تيك توك", int_tiktok_desc:"مخطط: مزامنة TikTok بعد الإطلاق.",
+    int_linkedin:"لينكدإن", int_linkedin_desc:"مخطط: ربط LinkedIn بعد الإطلاق.",
+    int_gmail:"البريد الإلكتروني (Gmail)", int_gmail_desc:"مخطط: تكامل Gmail بعد الإطلاق.",
+    int_mailchimp:"Mailchimp", int_mailchimp_desc:"مخطط: تكامل Mailchimp بعد الإطلاق.",
+    int_slack:"Slack", int_slack_desc:"مخطط: إشعارات Slack بعد الإطلاق.",
+    int_webhook:"Webhook / API مخصص", int_webhook_desc:"مخطط: Webhook/API مخصص عبر Backend آمن بعد الإطلاق.",
 
     /* -- Team & Roles -- */
     nav_settings:"الإعدادات", nav_team:"الفريق والصلاحيات", nav_billing:"الباقة والاشتراك", nav_support:"الدعم الفني", nav_platform_admin:"لوحة تحكم تاسكي", grp_account:"الحساب",
@@ -3313,25 +3313,25 @@ const STR = {
     anSourceDirect:"Direct", anSourceSocial:"Social Media", anSourceSearch:"Google Search", anSourceEmail:"Email", anSourceOther:"Other",
 
     /* -- External Integrations -- */
-    intIntro:"Connect Tasky directly to social platforms, analytics tools, and email to keep stats and reports updated automatically without manual entry.",
-    intSecurityNote:"For security, API keys and login tokens are stored and managed on a backend server, not directly in the browser. This screen is the connection control panel, and becomes fully functional once wired to the Tasky backend.",
+    intIntro:"View planned integrations. Live connectivity and automatic sync are not enabled in the launch baseline.",
+    intSecurityNote:"The launch baseline does not collect API keys or OAuth tokens in the browser. Live connectivity remains disabled until a secure backend/secret-management layer is implemented.",
     intConnected:"Connected", intNotConnected:"Not Connected", intConnect:"Connect Account", intDisconnect:"Disconnect",
     intLastSync:"Last Sync", intLastSyncNow:"Just now",
     intModalOAuthBody:"You'll be redirected to sign in to the service and authorize the required permissions (OAuth).",
-    intModalKeyBody:"Enter the service credentials. This screen is for demonstration purposes only.",
+    intModalKeyBody:"Live connectivity is disabled in the launch baseline; credentials are not entered here.",
     intFieldKey:"Account ID / API Key", intFieldKeyPh:"e.g. xxxxxxxxxxxxxxxx",
     intAuthorize:"Continue & Sign In", intSaveKey:"Save & Connect",
     intCat_social:"Social Media", intCat_analytics:"Analytics & Performance", intCat_comms:"Email & Messaging", intCat_custom:"Custom",
-    int_ga:"Google Analytics", int_ga_desc:"Automatically import website visits and user behavior.",
+    int_ga:"Google Analytics", int_ga_desc:"Planned: import web analytics after a secure backend is implemented.",
     int_meta:"Meta (Facebook & Instagram)", int_meta_desc:"Schedule posts and pull engagement stats.",
     int_x:"X Platform", int_x_desc:"Publish and track post and campaign performance.",
-    int_snap:"Snapchat", int_snap_desc:"Connect your business account to track content performance.",
+    int_snap:"Snapchat", int_snap_desc:"Planned: Snapchat connectivity post-launch.",
     int_tiktok:"TikTok", int_tiktok_desc:"Pull view counts and engagement metrics.",
-    int_linkedin:"LinkedIn", int_linkedin_desc:"Publish and track professional content performance.",
-    int_gmail:"Email (Gmail)", int_gmail_desc:"Send internal communication drafts directly.",
-    int_mailchimp:"Mailchimp", int_mailchimp_desc:"Sync newsletters and open rates.",
-    int_slack:"Slack", int_slack_desc:"Instant team notifications inside your channels.",
-    int_webhook:"Custom Webhook / API", int_webhook_desc:"Connect any internal system via a custom endpoint.",
+    int_linkedin:"LinkedIn", int_linkedin_desc:"Planned: LinkedIn connectivity post-launch.",
+    int_gmail:"Email (Gmail)", int_gmail_desc:"Planned: Gmail integration post-launch.",
+    int_mailchimp:"Mailchimp", int_mailchimp_desc:"Planned: Mailchimp sync post-launch.",
+    int_slack:"Slack", int_slack_desc:"Planned: Slack notifications post-launch.",
+    int_webhook:"Custom Webhook / API", int_webhook_desc:"Planned: custom Webhook/API through a secure backend post-launch.",
 
     /* -- Team & Roles -- */
     nav_settings:"Settings", nav_team:"Team & Permissions", nav_billing:"Plan & Billing", nav_support:"Technical Support", nav_platform_admin:"Tasky Control Center", grp_account:"Account",
@@ -3560,30 +3560,25 @@ const TOP_POSTS = [
 ];
 
 let integrations = [
-  { id:"ga", cat:"analytics", authType:"key", connected:true, lastSync_ar:"قبل 12 دقيقة", lastSync_en:"12 minutes ago" },
-  { id:"meta", cat:"social", authType:"oauth", connected:true, lastSync_ar:"قبل ساعة", lastSync_en:"1 hour ago" },
+  { id:"ga", cat:"analytics", authType:"oauth", connected:false },
+  { id:"meta", cat:"social", authType:"oauth", connected:false },
   { id:"x", cat:"social", authType:"oauth", connected:false },
   { id:"snap", cat:"social", authType:"oauth", connected:false },
   { id:"tiktok", cat:"social", authType:"oauth", connected:false },
   { id:"linkedin", cat:"social", authType:"oauth", connected:false },
-  { id:"gmail", cat:"comms", authType:"oauth", connected:true, lastSync_ar:"قبل 5 دقائق", lastSync_en:"5 minutes ago" },
+  { id:"gmail", cat:"comms", authType:"oauth", connected:false },
   { id:"mailchimp", cat:"comms", authType:"key", connected:false },
   { id:"slack", cat:"comms", authType:"oauth", connected:false },
   { id:"webhook", cat:"custom", authType:"key", connected:false },
 ];
 
 /*
-  API INTEGRATION LAYER (stub)
-  ----------------------------
-  In production this function should call a backend endpoint that securely
-  holds each service's OAuth token / API key server-side, e.g.:
-    fetch(`/api/integrations/${serviceId}/summary`).then(r => r.json())
-  It must never call third-party APIs with secret keys directly from the browser.
-  Swapping this stub for a real fetch is the only change needed once the
-  backend endpoints exist — every module above already reads through here.
+  V94 launch boundary: live integration transport is intentionally disabled.
+  A future server-side integration layer must own secrets, OAuth callbacks,
+  token refresh, retries, rate limits and audit logs before this is enabled.
 */
 async function fetchExternalData(serviceId){
-  return { serviceId, mocked: true };
+  return { serviceId, available:false, configured:false, live_sync:false, source:'v94_launch_boundary' };
 }
 
 /*
@@ -6169,28 +6164,11 @@ function integrationsTemplate(){
     <div class="int-grid">${rows}</div>`;
 }
 function openIntegrationModal(id){
-  const i = integrations.find(x=>x.id===id);
-  const label = t('int_'+id);
-  const isOAuth = i.authType === 'oauth';
-  document.getElementById('addModalBody').innerHTML = `
-    <div class="modal-head"><h3>${label}</h3><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>
-    <p style="font-size:13px;color:var(--ink-soft);line-height:1.7;margin-bottom:16px;">${isOAuth ? t('intModalOAuthBody') : t('intModalKeyBody')}</p>
-    <form onsubmit="submitConnectIntegration(event,'${id}')">
-      ${!isOAuth ? `<div class="field"><label>${t('intFieldKey')}</label><input id="intKey" required placeholder="${t('intFieldKeyPh')}"></div>` : ''}
-      <button type="submit" class="submit-btn"><svg style="width:15px;height:15px"><use href="#i-plug"/></svg> ${isOAuth ? t('intAuthorize') : t('intSaveKey')}</button>
-    </form>`;
-  document.getElementById('addModalOverlay').classList.remove('hidden');
+  const label=t('int_'+id);
+  showTaskyDialog({title:label,message:lang==='ar'?'الربط الحي غير مفعّل في نسخة الإطلاق. لا يتم جمع API keys أو OAuth tokens داخل المتصفح.':'Live connectivity is disabled in the launch baseline. API keys and OAuth tokens are not collected in the browser.',tone:'info'});
 }
-function submitConnectIntegration(e, id){
-  e.preventDefault();
-  integrations = integrations.map(i => i.id===id ? { ...i, connected:true, lastSync_ar:'الآن', lastSync_en:'Just now' } : i);
-  closeAddModal();
-  renderModule();
-}
-function disconnectIntegration(id){
-  integrations = integrations.map(i => i.id===id ? { ...i, connected:false, lastSync_ar:null, lastSync_en:null } : i);
-  renderModule();
-}
+function submitConnectIntegration(e,id){e?.preventDefault?.();openIntegrationModal(id);}
+function disconnectIntegration(){taskyToast(lang==='ar'?'لا توجد اتصالات حية في نسخة الإطلاق':'There are no live connections in the launch baseline',{tone:'info'});}
 
 /* ================= TEAM & PERMISSIONS MODULE ================= */
 function projectAccessSectionHtml(){
@@ -10941,5 +10919,96 @@ taskyRerunAudit91=async function(section,btn){
 window.TASKY_READINESS_SECTIONS_V93=[...(window.TASKY_READINESS_SECTIONS_V92||[]),'reports'];
 </script>
 
+
+
+<!-- ================= V94 EXTERNAL INTEGRATIONS LAUNCH HARDENING ================= -->
+<style>
+.int94-shell{display:flex;flex-direction:column;gap:16px}.int94-hero,.int94-panel{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}.int94-hero{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.int94-hero h3,.int94-panel h4{margin:0}.int94-hero p,.int94-panel p{color:var(--muted);font-size:12px;line-height:1.75;margin:5px 0 0}.int94-boundary{border:1px solid color-mix(in srgb,var(--amber) 35%,var(--border));background:var(--amber-tint);border-radius:14px;padding:13px 15px;font-size:12px;line-height:1.8;color:var(--ink-soft)}.int94-boundary b{color:var(--ink)}.int94-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}.int94-card{border:1px solid var(--border);border-radius:15px;padding:15px;background:var(--card);display:flex;flex-direction:column;gap:10px;min-width:0}.int94-card-top{display:flex;align-items:center;gap:10px}.int94-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;color:#fff;font-weight:800;flex:none}.int94-card h4{font-size:13.5px}.int94-card p{font-size:11.5px;color:var(--muted);line-height:1.65;margin:0;flex:1}.int94-badges{display:flex;gap:6px;flex-wrap:wrap}.int94-badge{display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:4px 8px;font-size:9.5px;font-weight:800;color:var(--muted)}.int94-badge.planned{background:var(--amber-tint);color:#8a6510;border-color:color-mix(in srgb,var(--amber) 35%,var(--border))}.int94-disabled{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--muted);border-radius:10px;padding:8px 10px;font-size:11px;font-weight:800;cursor:not-allowed}.int94-status{display:inline-flex;align-items:center;border-radius:999px;padding:7px 10px;font-size:10.5px;font-weight:800;border:1px solid var(--border);white-space:nowrap}.int94-status.blocked{background:var(--danger-tint);color:var(--danger)}.int94-status.needs_signoff{background:var(--amber-tint);color:#8a6510}.int94-status.ready_with_warnings{background:var(--amber-tint);color:#8a6510}.int94-status.ready{background:var(--green-tint);color:var(--green)}.int94-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.int94-kpi{border:1px solid var(--border);border-radius:13px;padding:12px;background:var(--card)}.int94-kpi span{display:block;color:var(--muted);font-size:9.5px;margin-bottom:5px}.int94-kpi b{font-size:19px}.int94-kpi.critical b{color:var(--danger)}.int94-kpi.warning b{color:#9a6d13}.int94-kpi.info b{color:var(--blue)}.int94-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.int94-issue{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;border-top:1px solid var(--border);padding:11px 0}.int94-issue:first-of-type{border-top:0}.int94-issue b{font-size:11.5px}.int94-issue p{font-size:10.5px}.int94-count{min-width:32px;text-align:center;font-weight:800}.int94-issue.critical .int94-count{color:var(--danger)}.int94-issue.warning .int94-count{color:#9a6d13}.int94-signoff{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center;border-top:1px solid var(--border);padding:11px 0}.int94-signoff:first-of-type{border-top:0}.int94-signoff b{font-size:11.5px}.int94-signoff small{display:block;color:var(--muted);font-size:9.5px;line-height:1.55;margin-top:3px}.int94-btns{display:flex;gap:6px}.int94-mini{border:1px solid var(--border);background:var(--card);border-radius:9px;padding:6px 8px;font-size:9.5px;font-weight:800}.int94-mini.pass.active{background:var(--green-tint);color:var(--green);border-color:color-mix(in srgb,var(--green) 30%,var(--border))}.int94-mini.fail.active{background:var(--danger-tint);color:var(--danger);border-color:color-mix(in srgb,var(--danger) 30%,var(--border))}.int94-modules{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}.int94-module{border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:10px}.int94-module b{font-size:10.5px;display:block}.int94-module small{font-size:9px;color:var(--muted)}.int94-empty{text-align:center;color:var(--muted);font-size:11px;padding:16px}.int94-rule{border:1px solid color-mix(in srgb,var(--green) 25%,var(--border));background:var(--green-tint);border-radius:13px;padding:11px 13px;font-size:11px;line-height:1.75}.int94-rule b{color:var(--green)}
+@media(max-width:1050px){.int94-grid{grid-template-columns:repeat(2,1fr)}.int94-kpis{grid-template-columns:repeat(3,1fr)}}@media(max-width:700px){.int94-grid,.int94-kpis,.int94-modules{grid-template-columns:1fr}.int94-hero,.int94-signoff{grid-template-columns:1fr;display:grid}.int94-btns{justify-content:flex-start}}
+</style>
+<script>
+/* ================= V94 EXTERNAL INTEGRATIONS LAUNCH HARDENING ================= */
+window.TASKY_BUILD='V94';console.info('Tasky build',window.TASKY_BUILD);
+function int94L(ar,en){return lang==='ar'?ar:en}
+const int94Descriptions={
+ ga:["Google Analytics","تحليلات الويب — الربط الحي مؤجل حتى تتوفر طبقة OAuth/Backend آمنة.","Web analytics — live connection is deferred until a secure OAuth/backend layer exists."],
+ meta:["Meta","فيسبوك وإنستقرام — لا نشر أو مزامنة آلية في نسخة الإطلاق.","Facebook & Instagram — no automatic publishing or sync in the launch baseline."],
+ x:["X","منصة X — لا اتصال حي أو نشر مباشر في نسخة الإطلاق.","X — no live connection or direct publishing in the launch baseline."],
+ snap:["Snapchat","سناب شات — مزامنة الأداء مؤجلة لما بعد الإطلاق.","Snapchat — performance sync is post-launch."],
+ tiktok:["TikTok","تيك توك — مزامنة المشاهدات والتفاعل مؤجلة.","TikTok — views and engagement sync are deferred."],
+ linkedin:["LinkedIn","لينكدإن — النشر والمزامنة الآلية مؤجلان.","LinkedIn — automatic publishing and sync are deferred."],
+ gmail:["Gmail","Gmail — لا إرسال بريد عبر OAuth من Tasky في نسخة الإطلاق.","Gmail — Tasky does not send mail through OAuth in the launch baseline."],
+ mailchimp:["Mailchimp","Mailchimp — مزامنة النشرات والمؤشرات مؤجلة.","Mailchimp — newsletter and metrics sync are deferred."],
+ slack:["Slack","Slack — إشعارات القنوات الخارجية مؤجلة حتى بناء Backend.","Slack — external channel notifications are deferred until backend support exists."],
+ webhook:["Webhook / API","Webhook مخصص — لن نقبل URL أو Secret في المتصفح قبل طبقة تنفيذ خلفية آمنة.","Custom webhook — no URL or secret is accepted in the browser before a secure server-side execution layer exists."]
+};
+let int94State={catalog:null,loading:false,error:'',key:''},int94LaunchOpen=false,int94Audit={data:null,loading:false,error:'',key:''};
+
+// Kill the legacy demo connection state immediately. No service may appear connected in V94.
+integrations=(integrations||[]).map(i=>({...i,connected:false,lastSync_ar:null,lastSync_en:null,launchStatus:'planned'}));
+fetchExternalData=async function(serviceId){return {serviceId,available:false,configured:false,live_sync:false,source:'v94_launch_boundary'}};
+openIntegrationModal=function(id){showTaskyDialog({title:int94L('التكامل غير مفعّل بعد','Integration not enabled yet'),message:int94L('نسخة الإطلاق لا تجمع API keys أو OAuth tokens داخل المتصفح. سيتم تفعيل الربط الحي بعد بناء طبقة Backend/Secrets آمنة.','The launch baseline does not collect API keys or OAuth tokens in the browser. Live connections will be enabled after a secure backend/secret layer is implemented.'),tone:'info'})};
+submitConnectIntegration=function(e,id){e?.preventDefault?.();openIntegrationModal(id)};
+disconnectIntegration=function(){taskyToast(int94L('لا توجد اتصالات حية في V94','V94 has no live connections'),{tone:'info'})};
+
+async function fetchIntegrations94(force=false){
+ if(!currentWorkspaceId)return null;const key=currentWorkspaceId;
+ if(!force&&int94State.catalog&&int94State.key===key)return int94State.catalog;
+ if(int94State.loading)return int94State.catalog;int94State.loading=true;int94State.error='';int94State.key=key;
+ try{const {data,error}=await sb.rpc('tasky_integrations_catalog_v94',{p_workspace_id:currentWorkspaceId});if(error)throw error;int94State.catalog=data||{};const svc=Array.isArray(data?.services)?data.services:[];integrations=svc.map(x=>({...x,cat:x.category,authType:x.auth_type,connected:false,lastSync_ar:null,lastSync_en:null}));return int94State.catalog}
+ catch(err){int94State.error=err?.message||String(err);throw err}
+ finally{int94State.loading=false}
+}
+const taskyModuleDescriptorV83BaseV94=taskyModuleDescriptorV83;
+taskyModuleDescriptorV83=function(id){if(id==='integrations')return {key:'integrations94',load:()=>fetchIntegrations94()};return taskyModuleDescriptorV83BaseV94(id)};
+
+function int94ServiceName(id){return t('int_'+id)||int94Descriptions[id]?.[0]||id}
+function int94ServiceDesc(id){const d=int94Descriptions[id]||[id,'',''];return lang==='ar'?d[1]:d[2]}
+function int94AuthLabel(x){const a=x.auth_type||x.authType||'';if(a==='oauth')return 'OAuth';if(a==='api_key')return 'API Key';if(a==='server_secret')return int94L('Secret خلفي','Server secret');return a||'—'}
+function integrationsTemplate(){
+ if(int94LaunchOpen)return int94ReadinessTemplate();
+ if(int94State.loading&&!int94State.catalog)return `<div class="int94-shell"><div class="int94-panel"><div class="int94-empty">${int94L('جارٍ تجهيز مركز التكاملات…','Preparing Integration Center…')}</div></div></div>`;
+ if(int94State.error)return `<div class="int94-shell"><div class="int94-panel"><div class="int94-empty">${escapeHtml(int94State.error)}<br>${int94L('شغّل Migration V94 ثم أعد المحاولة.','Run Migration V94, then retry.')}</div><button class="primary-btn" style="display:block;margin:10px auto 0" onclick="taskyEnsureModuleLoadedV83('integrations',{force:true})">${int94L('إعادة المحاولة','Retry')}</button></div></div>`;
+ if(!int94State.catalog){setTimeout(()=>fetchIntegrations94().then(()=>{if(activeNav==='integrations')renderModule()}).catch(()=>{if(activeNav==='integrations')renderModule()}),0)}
+ const services=Array.isArray(int94State.catalog?.services)?int94State.catalog.services:(integrations||[]);
+ const rows=services.map(x=>{const id=x.id,label=int94ServiceName(id),color=INTEGRATION_COLORS[id]||'var(--green)';return `<div class="int94-card"><div class="int94-card-top"><div class="int94-icon" style="background:${color}">${escapeHtml(label.trim().charAt(0)||'•')}</div><div><h4>${escapeHtml(label)}</h4><div class="int94-badges"><span class="int94-badge planned">${int94L('بعد الإطلاق','Post-launch')}</span><span class="int94-badge">${escapeHtml(int94AuthLabel(x))}</span></div></div></div><p>${escapeHtml(int94ServiceDesc(id))}</p><button class="int94-disabled" disabled>${int94L('الربط الحي غير مفعّل في نسخة الإطلاق','Live connection disabled in launch baseline')}</button></div>`}).join('');
+ return `<div class="int94-shell"><div class="int94-hero"><div><h3>${int94L('مركز التكاملات الخارجية','External Integration Center')}</h3><p>${int94L('كتالوج واضح لما سنربطه لاحقًا، بدون أي حالة Connected وهمية وبدون إدخال أسرار في المتصفح.','A transparent catalog of planned connections, with no fake Connected states and no browser-side credential capture.')}</p></div>${currentUserRole==='admin'?`<button class="chip-btn" onclick="openInt94Launch()">${int94L('جاهزية الإطلاق','Launch readiness')}</button>`:''}</div><div class="int94-boundary"><b>${int94L('حدود V94:','V94 boundary:')}</b> ${int94L('لا يوجد حاليًا OAuth أو API Key connection أو مزامنة تلقائية أو Webhook execution. بيانات Analytics/Marketing تستمر من مصادر Tasky الداخلية والإدخال اليدوي المعتمد حتى بناء Backend آمن للتكاملات.','There is currently no OAuth/API-key connection, automatic sync or webhook execution. Analytics/Marketing continue from Tasky internal sources and approved manual input until a secure integration backend is built.')}</div><div class="int94-grid">${rows}</div></div>`;
+}
+
+// Commercial copy must not promise live integrations before the backend exists.
+const planFeatureListBaseV94=planFeatureList;
+planFeatureList=function(planId){
+ if(planId==='pro')return `<li><svg><use href="#i-check"/></svg>${int94L('مستخدمون غير محدودين — السعر لكل مستخدم','Unlimited users — priced per user')}</li><li><svg><use href="#i-check"/></svg>${int94L('المشاريع والمهام وإدارة الفريق','Projects, tasks & team management')}</li><li><svg><use href="#i-check"/></svg>${int94L('المحتوى والحملات والاستبيانات','Content, campaigns & surveys')}</li><li><svg><use href="#i-check"/></svg>${int94L('التقارير والتحليلات + مركز التكاملات (الربط الحي بعد الإطلاق)','Reports, analytics + Integration Center (live connections post-launch)')}</li><li><svg><use href="#i-check"/></svg>${int94L('50 دعوة حضور مجانية شهريًا','50 complimentary guest invitations / month')}</li>`;
+ return planFeatureListBaseV94(planId)
+};
+
+function openInt94Launch(){if(currentUserRole!=='admin')return;int94LaunchOpen=true;renderModule()}
+function closeInt94Launch(){int94LaunchOpen=false;renderModule()}
+async function fetchInt94Audit(force=false){if(currentUserRole!=='admin'||!currentWorkspaceId)return null;const key=currentWorkspaceId;if(!force&&int94Audit.data&&int94Audit.key===key)return int94Audit.data;if(int94Audit.loading)return int94Audit.data;int94Audit.loading=true;int94Audit.error='';int94Audit.key=key;try{const {data,error}=await sb.rpc('tasky_integrations_launch_readiness_v94',{p_workspace_id:currentWorkspaceId});if(error)throw error;int94Audit.data=data||{};if(activeNav==='integrations'&&int94LaunchOpen)renderModule();return int94Audit.data}catch(err){int94Audit.error=err?.message||String(err);if(activeNav==='integrations'&&int94LaunchOpen)renderModule();return null}finally{int94Audit.loading=false}}
+function int94StatusLabel(s){return ({blocked:int94L('محظور','Blocked'),needs_signoff:int94L('يحتاج اعتماد','Needs sign-off'),ready_with_warnings:int94L('جاهز مع تحذيرات','Ready with warnings'),ready:int94L('جاهز','Ready')})[s]||s}
+function int94SignLabel(k){return ({no_fake_connections:int94L('لا توجد حالات اتصال وهمية','No fake connection states'),no_browser_secrets:int94L('لا أسرار في المتصفح','No browser-side secrets'),access_boundary:int94L('حدود الوصول والصلاحيات','Access boundary'),analytics_manual_fallback:int94L('Analytics يعمل بدون تكامل حي','Analytics works without live integrations'),marketing_manual_boundary:int94L('حدود التسويق والنشر اليدوي','Marketing manual-publishing boundary'),commercial_copy_boundary:int94L('الوعود التجارية واضحة','Commercial copy is explicit'),disabled_connection_actions:int94L('أزرار الربط الحي معطلة بأمان','Live-connect actions are safely disabled')})[k]||k}
+function int94SignHelp(k){return ({no_fake_connections:int94L('افتح مركز التكاملات وتأكد أن Google Analytics/Meta/Gmail لا تظهر Connected أو Last Sync وهمية.','Open Integration Center and verify GA/Meta/Gmail never show fake Connected/Last Sync states.'),no_browser_secrets:int94L('اضغط أي خدمة وتأكد أنه لا يوجد حقل API Key/Token/Secret في المتصفح أو Local Storage.','Try each service and confirm there is no API key/token/secret field in the browser or Local Storage.'),access_boundary:int94L('جرّب Admin وMember وتأكد أن بوابة الجاهزية للمدير فقط، بينما الكتالوج لا يعرض بيانات حساسة.','Test Admin vs Member: readiness is admin-only and the catalog exposes no sensitive data.'),analytics_manual_fallback:int94L('افتح Analytics بدون أي Integration وتأكد أن مؤشرات V93 تستمر من بيانات Workspace الحقيقية.','Open Analytics with no integration and verify V93 KPIs still derive from real workspace data.'),marketing_manual_boundary:int94L('تحقق أن Marketing لا يدعي نشرًا أو مزامنة آلية وأن Performance اليدوي ما زال واضحًا.','Verify Marketing makes no automatic publishing/sync claim and manual performance input remains explicit.'),commercial_copy_boundary:int94L('افتح الباقات وتأكد أن Pro يذكر مركز التكاملات وأن الربط الحي بعد الإطلاق، ولا توجد مطالبة Live Integration جاهزة.','Open pricing and verify Pro says Integration Center/live connections post-launch rather than claiming active integrations.'),disabled_connection_actions:int94L('اضغط خدمة مخططة وتأكد أن النظام يعرض رسالة واضحة ولا يرسل طلبًا إلى /api/integrations أو طرف ثالث.','Click a planned service and verify a clear message appears with no request to /api/integrations or a third party.')})[k]||''}
+function int94SignStatus(s){return ({pending:int94L('لم يُختبر','Pending'),passed:int94L('نجح','Passed'),failed:int94L('فشل','Failed')})[s]||s}
+async function int94SetSignoff(key,status){const note='';const {error}=await sb.rpc('tasky_integrations_set_launch_signoff_v94',{p_workspace_id:currentWorkspaceId,p_check_key:key,p_status:status,p_note:note});if(error)return showTaskyDialog({title:int94L('تعذر حفظ الاختبار','Could not save sign-off'),message:error.message,tone:'error'});int94Audit.data=null;await fetchInt94Audit(true)}
+function int94ReadinessTemplate(){
+ if(currentUserRole!=='admin')return `<div class="int94-panel"><div class="int94-empty">${int94L('جاهزية التكاملات متاحة لمدير Workspace فقط.','Integration readiness is Workspace Admin only.')}</div></div>`;
+ if(!int94Audit.data&&!int94Audit.loading&&!int94Audit.error)setTimeout(()=>fetchInt94Audit(),0);
+ if(int94Audit.loading&&!int94Audit.data)return `<div class="int94-shell"><div class="int94-panel"><div class="int94-empty">${int94L('جارٍ تدقيق حدود التكاملات والصلاحيات…','Auditing integration boundaries and permissions…')}</div></div></div>`;
+ if(int94Audit.error)return `<div class="int94-shell"><div class="int94-panel"><div class="int94-empty">${escapeHtml(int94Audit.error)}<br>${int94L('شغّل Migration V94 ثم أعد المحاولة.','Run Migration V94, then retry.')}</div><button class="primary-btn" style="display:block;margin:10px auto 0" onclick="taskyRerunAudit91('integrations',this)">${int94L('إعادة المحاولة','Retry')}</button></div></div>`;
+ const d=int94Audit.data||{},issues=Array.isArray(d.issues)?d.issues:[],sign=Array.isArray(d.signoffs)?d.signoffs:[],mods=Array.isArray(d.scope)?d.scope:[],sum=d.summary||{},status=d.status||'needs_signoff';
+ return `<div class="int94-shell"><div class="int94-hero"><div><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:7px"><button class="chip-btn" onclick="closeInt94Launch()">← ${int94L('مركز التكاملات','Integration Center')}</button><button class="chip-btn" onclick="taskyRerunAudit91('integrations',this)">${int94L('إعادة الفحص','Re-run audit')}</button></div><h3>${int94L('جاهزية إطلاق التكاملات — V94','Integrations Launch Readiness — V94')}</h3><p>${int94L('التدقيق هنا يثبت أن نسخة الإطلاق صادقة وآمنة: لا اتصال وهمي، لا أسرار في المتصفح، ولا اعتماد تشغيلي على تكامل غير موجود.','This gate verifies the launch baseline is honest and safe: no fake connections, browser secrets, or operational dependency on an unimplemented integration.')}</p></div><div class="int94-status ${escapeHtml(status)}">● ${escapeHtml(int94StatusLabel(status))}</div></div><div class="int94-kpis"><div class="int94-kpi critical"><span>${int94L('مشاكل حرجة','Critical')}</span><b>${Number(d.critical_count||0)}</b></div><div class="int94-kpi warning"><span>${int94L('تحذيرات','Warnings')}</span><b>${Number(d.warning_count||0)}</b></div><div class="int94-kpi info"><span>${int94L('ملاحظات','Info')}</span><b>${Number(d.info_count||0)}</b></div><div class="int94-kpi"><span>${int94L('خدمات مخططة','Planned services')}</span><b>${Number(sum.planned_services||10)}</b></div><div class="int94-kpi"><span>${int94L('اختبارات ناجحة','Passed sign-offs')}</span><b>${sign.filter(x=>x.status==='passed').length} / 7</b></div></div><div class="int94-panel"><div class="int94-panel-head"><div><h4>${int94L('نتيجة التدقيق الآلي','Automated audit')}</h4><p>${int94L('يفحص صلاحيات قاعدة البيانات ومخطط التكاملات الحالي.','Checks database privileges and the current integration schema.')}</p></div></div>${issues.length?issues.map(i=>`<div class="int94-issue ${escapeHtml(i.severity||'info')}"><div><b>${escapeHtml(lang==='ar'?(i.title_ar||i.title_en):(i.title_en||i.title_ar))}</b><p>${escapeHtml(lang==='ar'?(i.detail_ar||i.detail_en):(i.detail_en||i.detail_ar))}</p></div><span class="int94-count">${Number(i.count||0)}</span></div>`).join(''):`<div class="int94-empty">✓ ${int94L('لم يرصد التدقيق الآلي مشاكل في حدود التكاملات الحالية.','No live integration-boundary problems were detected.')}</div>`}</div><div class="int94-panel"><div class="int94-panel-head"><div><h4>${int94L('اختبارات ما قبل الإطلاق','Pre-launch sign-off')}</h4><p>${int94L('جميع الاختبارات السبعة مطلوبة لاعتماد النسخة الحالية.','All seven tests are required for this launch boundary.')}</p></div></div>${sign.map(x=>`<div class="int94-signoff"><div><b>${escapeHtml(int94SignLabel(x.check_key))}</b><small>${escapeHtml(int94SignStatus(x.status))}${x.note?' · '+escapeHtml(x.note):''}</small><small>${escapeHtml(int94SignHelp(x.check_key))}</small></div><div class="int94-btns"><button class="int94-mini pass ${x.status==='passed'?'active':''}" onclick="int94SetSignoff('${x.check_key}','passed')">✓ ${int94L('نجح','Pass')}</button><button class="int94-mini fail ${x.status==='failed'?'active':''}" onclick="int94SetSignoff('${x.check_key}','failed')">× ${int94L('فشل','Fail')}</button></div></div>`).join('')}</div><div class="int94-panel"><div class="int94-panel-head"><div><h4>${int94L('نطاق الإطلاق','Launch scope')}</h4><p>${int94L('ما هو جاهز الآن وما تم تأجيله بوضوح.','What is launch-ready now versus explicitly deferred.')}</p></div></div><div class="int94-modules">${mods.map(m=>`<div class="int94-module"><b>${escapeHtml(lang==='ar'?(m.label_ar||m.label_en):(m.label_en||m.label_ar))}</b><small>${escapeHtml(m.version||'')}</small></div>`).join('')}</div></div><div class="int94-boundary"><b>${int94L('قرار V94:','V94 decision:')}</b> ${int94L('لا نفعّل OAuth/API/Webhook قبل وجود Backend آمن لإدارة الأسرار، refresh tokens، callbacks، retries، rate limits وaudit logs. إبقاء الربط معطّلًا أفضل من إطلاق Integration وهمي أو غير آمن.','OAuth/API/Webhook connections remain disabled until a secure backend manages secrets, refresh tokens, callbacks, retries, rate limits and audit logs. A disabled honest boundary is safer than a fake or insecure integration.')}</div><div class="int94-rule"><b>${int94L('قاعدة الإطلاق:','Launch rule:')}</b> ${int94L('Critical = 0 + نجاح اختبارات Sign-off السبعة. هذه النتيجة تعتمد مركز التكاملات كواجهة حالة آمنة، وليست اعتمادًا لتكاملات حية.','Critical = 0 + all seven sign-offs passed. This approves the Integration Center as a safe status surface, not as live third-party connectivity.')}</div></div>`;
+}
+
+const taskyRerunAudit91BaseV94=taskyRerunAudit91;
+taskyRerunAudit91=async function(section,btn){
+ if(section!=='integrations')return taskyRerunAudit91BaseV94(section,btn);
+ if(btn?.dataset?.auditBusy==='1')return;const old=btn?.innerHTML||'';if(btn){btn.dataset.auditBusy='1';btn.disabled=true;btn.classList.add('tasky-audit-refreshing')}
+ try{int94Audit.key='';int94Audit.data=null;int94Audit.error='';await fetchInt94Audit(true);if(int94Audit.error)throw new Error(int94Audit.error);taskyToast(int94L('اكتمل إعادة فحص التكاملات من Supabase','Integration audit refreshed from Supabase'),{tone:'success'})}
+ catch(err){showTaskyDialog({title:int94L('تعذرت إعادة الفحص','Audit refresh failed'),message:err?.message||String(err),tone:'error'})}
+ finally{if(btn){btn.disabled=false;btn.dataset.auditBusy='0';btn.classList.remove('tasky-audit-refreshing');btn.innerHTML=old}}
+};
+window.TASKY_READINESS_SECTIONS_V94=[...(window.TASKY_READINESS_SECTIONS_V93||[]),'integrations'];
+</script>
+<!-- ================= /V94 EXTERNAL INTEGRATIONS LAUNCH HARDENING ================= -->
 </body>
 </html>
