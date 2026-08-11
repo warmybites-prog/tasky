@@ -1753,8 +1753,9 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
       <div id="launchLegalV70" class="launch-v70-legal"><label><input id="launchLegalAcceptV70" type="checkbox"><span id="launchLegalTextV70"></span></label></div>
     </div>
     <input id="authEmail" type="email" placeholder="البريد الإلكتروني" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;font-size:14px;box-sizing:border-box;">
-    <input id="authPassword" type="password" placeholder="كلمة المرور" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:16px;font-size:14px;box-sizing:border-box;">
-    <button id="authSubmitBtn" onclick="handleAuthSubmit()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;margin-bottom:12px;cursor:pointer;">تسجيل الدخول</button>
+    <input id="authPassword" type="password" minlength="8" autocomplete="current-password" placeholder="كلمة المرور" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:16px;font-size:14px;box-sizing:border-box;">
+    <button id="authSubmitBtn" onclick="handleAuthSubmit()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;margin-bottom:8px;cursor:pointer;">تسجيل الدخول</button>
+    <button id="authForgotBtnV97" type="button" onclick="openPasswordResetRequestV97()" style="display:block;width:100%;background:none;border:none;color:var(--green);font-weight:700;font-size:12px;margin:0 0 12px;padding:2px;cursor:pointer;">نسيت كلمة المرور؟</button>
     <div style="font-size:12.5px;color:var(--muted);">
       <span id="authToggleText">ما عندك حساب؟</span>
       <button id="authToggleBtn" onclick="toggleAuthMode()" style="background:none;border:none;color:var(--green);font-weight:700;cursor:pointer;padding:0;">إنشاء حساب جديد</button>
@@ -1773,6 +1774,26 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
     <input id="inviteConfirmPassword" type="password" placeholder="تأكيد كلمة المرور" minlength="8" style="width:100%;padding:11px;border:1px solid var(--border);border-radius:9px;margin-bottom:14px;font-size:14px;box-sizing:border-box;background:var(--paper);color:var(--ink);">
     <div id="inviteLegalV70" class="launch-v70-legal" style="margin-bottom:12px"><label><input id="inviteLegalAcceptV70" type="checkbox"><span id="inviteLegalTextV70"></span></label></div>
     <button id="inviteSetupBtn" onclick="finishInviteSetup()" style="width:100%;background:var(--green);color:#fff;border:none;border-radius:10px;padding:12px;font-weight:700;font-size:14px;cursor:pointer;">تفعيل الحساب والدخول</button>
+  </div>
+</div>
+
+<!-- V97 account recovery: request reset email / set password after PASSWORD_RECOVERY -->
+<div id="authRecoveryV97" class="auth97-recovery-overlay hidden" role="dialog" aria-modal="true" aria-labelledby="authRecoveryTitleV97">
+  <div class="auth97-recovery-card">
+    <button class="auth97-recovery-close" type="button" onclick="closeAuthRecoveryV97()" aria-label="Close">×</button>
+    <div class="auth97-recovery-mark">✓</div>
+    <h2 id="authRecoveryTitleV97">استعادة كلمة المرور</h2>
+    <p id="authRecoveryCopyV97">أدخل بريدك وسنرسل رابط استعادة إذا كان الحساب مؤهلًا.</p>
+    <div id="authRecoveryMsgV97" class="auth97-recovery-msg hidden"></div>
+    <div id="authRecoveryRequestFieldsV97">
+      <input id="authRecoveryEmailV97" type="email" autocomplete="email" placeholder="البريد الإلكتروني">
+      <button id="authRecoverySendV97" class="auth97-recovery-primary" type="button" onclick="requestPasswordResetV97()">إرسال رابط الاستعادة</button>
+    </div>
+    <div id="authRecoveryUpdateFieldsV97" class="hidden">
+      <input id="authRecoveryPasswordV97" type="password" minlength="8" autocomplete="new-password" placeholder="كلمة المرور الجديدة">
+      <input id="authRecoveryConfirmV97" type="password" minlength="8" autocomplete="new-password" placeholder="تأكيد كلمة المرور">
+      <button id="authRecoveryUpdateV97" class="auth97-recovery-primary" type="button" onclick="finishPasswordRecoveryV97()" disabled>جارٍ التحقق من الرابط…</button>
+    </div>
   </div>
 </div>
 
@@ -8643,8 +8664,9 @@ function renderAll(){
 // Re-check the app state when Supabase reports a signed-in session.
 sb.auth.onAuthStateChange((event, session) => {
   const qs=new URLSearchParams(window.location.search);const publicInviteToken=qs.get('invite');const publicQuoteToken=qs.get('quote');const publicSurveyToken=qs.get('survey');const publicSalesQuoteToken=qs.get('salesquote');const publicInvoiceToken=qs.get('invoice');
+  if(event==='PASSWORD_RECOVERY'){window.__taskyV97RecoverySession=session||null;window.__taskyV97PendingBoot=false;}
   if(!publicInviteToken && !publicQuoteToken && !publicSurveyToken && !publicSalesQuoteToken && !publicInvoiceToken && event === 'SIGNED_IN' && session){
-    setTimeout(()=>{checkSession().catch(err=>console.error('Tasky V75.1 auth state refresh',err));},0);
+    setTimeout(()=>{if(window.__taskyV97AuthReady)checkSession().catch(err=>console.error('Tasky V97 auth state refresh',err));else window.__taskyV97PendingBoot=true;},0);
   }
 });
 
@@ -8663,7 +8685,7 @@ const taskyPublicSalesQuoteToken=taskyPublicParams.get('salesquote');
 const taskyPublicInvoiceToken=taskyPublicParams.get('invoice');
 loadPublicLaunchConfigV70();
 if(taskyPublicInvoiceToken||taskyPublicSalesQuoteToken||taskyPublicQuoteToken||taskyPublicInviteToken||taskyPublicSurveyToken)taskyBootHideV83();
-if(taskyPublicInvoiceToken) showPublicCrmInvoicePortal(taskyPublicInvoiceToken); else if(taskyPublicSalesQuoteToken) showPublicCrmQuotePortal(taskyPublicSalesQuoteToken); else if(taskyPublicQuoteToken) showPublicVendorQuotePortal(taskyPublicQuoteToken); else if(taskyPublicInviteToken) showPublicEventInvitation(taskyPublicInviteToken); else if(taskyPublicSurveyToken) showPublicSurveyPortal(taskyPublicSurveyToken); else checkSession();
+if(taskyPublicInvoiceToken) showPublicCrmInvoicePortal(taskyPublicInvoiceToken); else if(taskyPublicSalesQuoteToken) showPublicCrmQuotePortal(taskyPublicSalesQuoteToken); else if(taskyPublicQuoteToken) showPublicVendorQuotePortal(taskyPublicQuoteToken); else if(taskyPublicInviteToken) showPublicEventInvitation(taskyPublicInviteToken); else if(taskyPublicSurveyToken) showPublicSurveyPortal(taskyPublicSurveyToken); else window.__taskyV97PendingBoot=true;
 </script>
 
 <script>
@@ -11151,5 +11173,163 @@ taskyRerunAudit91=async function(section,btn){if(section!=='commercial_support')
 window.TASKY_READINESS_SECTIONS_V96=[...(window.TASKY_READINESS_SECTIONS_V95||[]),'commercial_support'];
 </script>
 <!-- ================= /V96 COMMERCIAL + SUPPORT LAUNCH HARDENING ================= -->
+
+<!-- ================= V97 AUTH + ONBOARDING + NOTIFICATIONS LAUNCH HARDENING ================= -->
+<style>
+.auth97-recovery-overlay{position:fixed;inset:0;z-index:320;background:rgba(18,41,26,.72);display:flex;align-items:center;justify-content:center;padding:20px;font-family:"IBM Plex Sans Arabic",sans-serif}.auth97-recovery-overlay.hidden{display:none!important}.auth97-recovery-card{width:min(420px,94vw);position:relative;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:28px;box-shadow:0 28px 80px rgba(0,0,0,.26);text-align:center}.auth97-recovery-close{position:absolute;top:12px;inset-inline-end:12px;width:32px;height:32px;border:1px solid var(--border);border-radius:9px;background:var(--paper);color:var(--ink);font-size:20px}.auth97-recovery-mark{width:48px;height:48px;border-radius:14px;background:var(--green-tint);color:var(--green);display:grid;place-items:center;margin:0 auto 12px;font-size:22px;font-weight:900}.auth97-recovery-card h2{font-size:19px;margin:0 0 7px}.auth97-recovery-card p{font-size:12.5px;line-height:1.75;color:var(--muted);margin:0 0 16px}.auth97-recovery-card input{width:100%;border:1px solid var(--border);border-radius:11px;background:var(--paper);color:var(--ink);padding:11px 12px;font-size:13.5px;margin-bottom:10px;outline:none}.auth97-recovery-card input:focus{border-color:var(--green);box-shadow:0 0 0 3px color-mix(in srgb,var(--green) 12%,transparent)}.auth97-recovery-primary{width:100%;border:0;border-radius:11px;background:var(--green);color:#fff;padding:11px 13px;font-size:13px;font-weight:800}.auth97-recovery-primary:disabled{opacity:.55;cursor:not-allowed}.auth97-recovery-msg{border-radius:10px;padding:9px 10px;margin-bottom:11px;font-size:11.5px;line-height:1.65;text-align:start}.auth97-recovery-msg.info{background:var(--blue-tint);color:var(--blue-deep)}.auth97-recovery-msg.success{background:var(--green-tint);color:var(--green)}.auth97-recovery-msg.error{background:var(--danger-tint);color:var(--danger)}
+.auth97-launchbar{display:flex;align-items:center;justify-content:space-between;gap:12px;border:1px solid color-mix(in srgb,var(--green) 25%,var(--border));background:linear-gradient(135deg,var(--green-tint),var(--card));border-radius:14px;padding:12px 14px}.auth97-launchbar b{font-size:12.5px}.auth97-launchbar span{display:block;color:var(--muted);font-size:10px;line-height:1.6;margin-top:2px}.auth97-shell{display:flex;flex-direction:column;gap:14px}.auth97-hero{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;border:1px solid var(--border);background:var(--card);border-radius:16px;padding:16px}.auth97-hero h3{font-size:16px;margin:0 0 5px}.auth97-hero p{font-size:10.5px;color:var(--muted);line-height:1.7;margin:0}.auth97-status{border-radius:999px;padding:6px 10px;font-size:10px;font-weight:900;white-space:nowrap}.auth97-status.blocked{background:var(--danger-tint);color:var(--danger)}.auth97-status.needs_signoff,.auth97-status.ready_with_warnings{background:var(--amber-tint);color:#8a6510}.auth97-status.ready{background:var(--green-tint);color:var(--green)}.auth97-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}.auth97-kpi,.auth97-panel{border:1px solid var(--border);background:var(--card);border-radius:14px;padding:13px}.auth97-kpi span{display:block;color:var(--muted);font-size:9px;margin-bottom:5px}.auth97-kpi b{font-size:20px}.auth97-kpi.critical b{color:var(--danger)}.auth97-kpi.warning b{color:#9a6d13}.auth97-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:9px}.auth97-panel-head h4{font-size:13px;margin:0}.auth97-panel-head p{font-size:9.5px;color:var(--muted);margin:3px 0 0;line-height:1.6}.auth97-issue,.auth97-signoff{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}.auth97-issue:last-child,.auth97-signoff:last-child{border-bottom:0}.auth97-issue b,.auth97-signoff b{font-size:11px}.auth97-issue p,.auth97-signoff small{display:block;margin:3px 0 0;color:var(--muted);font-size:9.5px;line-height:1.55}.auth97-issue.critical b{color:var(--danger)}.auth97-issue.warning b{color:#8a6510}.auth97-count{min-width:28px;height:24px;border-radius:999px;background:var(--paper);display:grid;place-items:center;font-size:9.5px;font-weight:900}.auth97-sign-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}.auth97-sign-actions button{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:5px 7px;font-size:8.5px;font-weight:800}.auth97-sign-actions button.pass{color:var(--green)}.auth97-sign-actions button.fail{color:var(--danger)}.auth97-empty{text-align:center;color:var(--muted);padding:22px 12px;font-size:11px}.auth97-boundary{border:1px solid #d4e3dd;background:var(--green-tint);border-radius:12px;padding:10px 12px;font-size:10px;line-height:1.7;color:var(--ink-soft)}
+@media(max-width:760px){.auth97-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.auth97-hero,.auth97-launchbar{flex-direction:column}.auth97-signoff{flex-direction:column}.auth97-sign-actions{justify-content:flex-start}}
+</style>
+<script>
+/* V97 scope: sign-up/login recovery, first-workspace bootstrap, onboarding integrity, and general notification privacy. */
+window.TASKY_BUILD='V97';
+let auth97LaunchOpen=false;
+let auth97RecoveryReady=false;
+let auth97RecoveryCanClose=false;
+let auth97Audit={data:null,error:'',loading:false,key:''};
+const auth97L=(ar,en)=>lang==='ar'?ar:en;
+
+function taskyAuthMessageV97(message,tone='error'){
+  const el=document.getElementById('authError');if(!el)return;
+  el.textContent=message||'';el.style.display=message?'block':'none';
+  el.style.background=tone==='success'?'var(--green-tint)':tone==='info'?'var(--blue-tint)':'var(--danger-tint)';
+  el.style.color=tone==='success'?'var(--green)':tone==='info'?'var(--blue-deep)':'var(--danger)';
+}
+function auth97RecoveryMarker(){const h=new URLSearchParams(location.hash.replace(/^#/,'')),q=new URLSearchParams(location.search);return h.get('type')==='recovery'||q.get('recovery')==='1'}
+function auth97CleanRecoveryUrl(){try{const u=new URL(location.href);u.hash='';u.searchParams.delete('recovery');history.replaceState({},document.title,u.pathname+(u.searchParams.toString()?('?'+u.searchParams.toString()):''));}catch(_){}}
+function auth97ResetRedirectUrl(){const u=new URL(location.href);u.hash='';u.search='';u.searchParams.set('recovery','1');return u.toString()}
+function auth97ShowRecoveryMessage(msg,tone='info'){const el=document.getElementById('authRecoveryMsgV97');if(!el)return;el.textContent=msg||'';el.className=`auth97-recovery-msg ${tone}${msg?'':' hidden'}`}
+function openPasswordResetRequestV97(){
+  const box=document.getElementById('authRecoveryV97');if(!box)return;
+  auth97RecoveryReady=false;auth97RecoveryCanClose=true;box.classList.remove('hidden');
+  document.getElementById('authRecoveryRequestFieldsV97')?.classList.remove('hidden');document.getElementById('authRecoveryUpdateFieldsV97')?.classList.add('hidden');
+  document.getElementById('authRecoveryTitleV97').textContent=auth97L('استعادة كلمة المرور','Reset password');
+  document.getElementById('authRecoveryCopyV97').textContent=auth97L('أدخل بريدك وسنرسل رابط استعادة إذا كان الحساب مؤهلًا. لن نكشف ما إذا كان البريد مسجلًا أم لا.','Enter your email and we will send a recovery link when eligible. We do not reveal whether the email is registered.');
+  const email=document.getElementById('authEmail')?.value?.trim()||'';const input=document.getElementById('authRecoveryEmailV97');if(input){input.value=email;setTimeout(()=>input.focus(),0)}auth97ShowRecoveryMessage('');
+}
+function openPasswordRecoveryUpdateV97(ready=false){
+  const box=document.getElementById('authRecoveryV97');if(!box)return;auth97RecoveryReady=!!ready;auth97RecoveryCanClose=!!ready;box.classList.remove('hidden');
+  document.getElementById('authRecoveryRequestFieldsV97')?.classList.add('hidden');document.getElementById('authRecoveryUpdateFieldsV97')?.classList.remove('hidden');
+  document.getElementById('authRecoveryTitleV97').textContent=auth97L('عيّن كلمة مرور جديدة','Set a new password');
+  document.getElementById('authRecoveryCopyV97').textContent=ready?auth97L('تم التحقق من رابط الاستعادة. استخدم 8 أحرف على الأقل.','Recovery link verified. Use at least 8 characters.'):auth97L('جارٍ التحقق من رابط الاستعادة…','Verifying recovery link…');
+  const btn=document.getElementById('authRecoveryUpdateV97');if(btn){btn.disabled=!ready;btn.textContent=ready?auth97L('حفظ كلمة المرور','Save password'):auth97L('جارٍ التحقق من الرابط…','Verifying link…')}
+  auth97ShowRecoveryMessage('');
+}
+function closeAuthRecoveryV97(){if(auth97RecoveryMarker()&&!auth97RecoveryReady&&!auth97RecoveryCanClose)return;document.getElementById('authRecoveryV97')?.classList.add('hidden')}
+async function requestPasswordResetV97(){
+  const input=document.getElementById('authRecoveryEmailV97'),btn=document.getElementById('authRecoverySendV97');const email=input?.value?.trim()?.toLowerCase()||'';
+  if(!email||!email.includes('@')){auth97ShowRecoveryMessage(auth97L('اكتب بريدًا إلكترونيًا صحيحًا.','Enter a valid email address.'),'error');return}
+  const old=btn?.textContent||'';if(btn){btn.disabled=true;btn.textContent=auth97L('جارٍ الإرسال…','Sending…')}
+  try{const {error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:auth97ResetRedirectUrl()});if(error)throw error;auth97ShowRecoveryMessage(auth97L('إذا كان البريد مرتبطًا بحساب مؤهل فسيصل رابط الاستعادة. افحص البريد الوارد والرسائل غير المرغوبة.','If the email belongs to an eligible account, a recovery link will arrive. Check your inbox and spam folder.'),'success')}
+  catch(err){console.warn('V97 password reset request',err);auth97ShowRecoveryMessage(auth97L('تعذر إرسال طلب الاستعادة الآن. حاول لاحقًا أو تواصل مع الدعم.','The recovery request could not be sent right now. Try again later or contact support.'),'error')}
+  finally{if(btn){btn.disabled=false;btn.textContent=old||auth97L('إرسال رابط الاستعادة','Send recovery link')}}
+}
+async function finishPasswordRecoveryV97(){
+  if(!auth97RecoveryReady)return;const p=document.getElementById('authRecoveryPasswordV97')?.value||'',c=document.getElementById('authRecoveryConfirmV97')?.value||'',btn=document.getElementById('authRecoveryUpdateV97');
+  if(p.length<8){auth97ShowRecoveryMessage(auth97L('استخدم 8 أحرف على الأقل.','Use at least 8 characters.'),'error');return}if(p!==c){auth97ShowRecoveryMessage(auth97L('كلمتا المرور غير متطابقتين.','Passwords do not match.'),'error');return}
+  const old=btn?.textContent||'';if(btn){btn.disabled=true;btn.textContent=auth97L('جارٍ الحفظ…','Saving…')}
+  try{const {error}=await sb.auth.updateUser({password:p});if(error)throw error;auth97CleanRecoveryUrl();auth97RecoveryReady=false;document.getElementById('authRecoveryV97')?.classList.add('hidden');await sb.auth.signOut();const auth=document.getElementById('authScreen');if(auth)auth.style.display='flex';document.querySelector('.app')?.style.setProperty('display','none');authMode='signin';document.getElementById('signupOnlyFields').style.display='none';document.getElementById('authSubmitBtn').textContent=auth97L('تسجيل الدخول','Sign in');document.getElementById('authForgotBtnV97').style.display='block';taskyAuthMessageV97(auth97L('تم تحديث كلمة المرور. سجّل الدخول بكلمة المرور الجديدة.','Password updated. Sign in with your new password.'),'success')}
+  catch(err){console.error('V97 password recovery',err);auth97ShowRecoveryMessage(err?.message||String(err),'error')}
+  finally{if(btn){btn.disabled=!auth97RecoveryReady;btn.textContent=old||auth97L('حفظ كلمة المرور','Save password')}}
+}
+
+// First verified sign-in bootstrap. V97 consumes the initial signup only once server-side.
+async function taskyBootstrapFirstWorkspaceV97(user){
+  if(!user?.id)return null;const meta=user.user_metadata||{},company=String(meta.tasky_pending_company_name||'').trim();
+  if(!company)return null;
+  const {data,error}=await sb.rpc('tasky_auth_bootstrap_after_signup_v97',{p_company_name:company});if(error)throw error;
+  const wsid=data?.workspace_id||data?.workspace?.id||null;if(wsid)await recordLegalAcceptanceV70(wsid,'workspace_signup_v97');
+  try{await sb.auth.updateUser({data:{...meta,tasky_pending_company_name:null,tasky_signup_bootstrapped_at:new Date().toISOString()}})}catch(err){console.warn('V97 bootstrap metadata cleanup',err)}
+  return data||null;
+}
+const loadWorkspaceAndDataBaseV97=loadWorkspaceAndData;
+loadWorkspaceAndData=async function(user){
+  try{await taskyBootstrapFirstWorkspaceV97(user)}catch(err){console.error('V97 first-workspace bootstrap',err);throw err}
+  return loadWorkspaceAndDataBaseV97(user)
+};
+
+// Signup flow is confirmation-safe: no authenticated RPC is attempted until a session exists.
+handleAuthSubmit=async function(){
+  if(taskyAuthBusyV751)return;const email=document.getElementById('authEmail').value.trim().toLowerCase(),password=document.getElementById('authPassword').value;taskyAuthMessageV97('');
+  if(!email||!password){taskyAuthMessageV97(auth97L('عبّي البريد وكلمة المرور','Enter your email and password'));return}
+  if(authMode==='signup'&&password.length<8){taskyAuthMessageV97(auth97L('استخدم كلمة مرور من 8 أحرف على الأقل.','Use a password with at least 8 characters.'));return}
+  taskyAuthSetBusyV751(true,authMode==='signup'?auth97L('جاري إنشاء الحساب…','Creating account…'):auth97L('جاري تسجيل الدخول…','Signing in…'));
+  try{
+    if(authMode==='signup'){
+      const fullName=document.getElementById('authFullName').value.trim(),company=document.getElementById('authCompany').value.trim();if(!fullName)throw new Error(auth97L('اكتب اسمك الكامل','Enter your full name'));if(company.length<2)throw new Error(auth97L('اكتب اسم شركتك أو فريقك','Enter your company or team name'));
+      const gate=await checkSignupGateV70(email);if(!gate.allowed)throw new Error(signupGateMessageV70(gate));const accepted=!productionLaunchV70.require_legal_acceptance||!!document.getElementById('launchLegalAcceptV70')?.checked;if(!accepted)throw new Error(auth97L('لازم توافق على شروط الاستخدام وسياسة الخصوصية لإكمال التسجيل.','You must accept the Terms of Use and Privacy Policy to continue.'));
+      const legalMeta=productionLaunchV70.require_legal_acceptance?{tasky_legal_accepted_at:new Date().toISOString(),tasky_terms_version:productionLaunchV70.terms_version||'current',tasky_privacy_version:productionLaunchV70.privacy_version||'current'}:{};
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:fullName,tasky_pending_company_name:company,...legalMeta}}});if(error)throw error;
+      if(data?.session?.user){await taskyBootstrapFirstWorkspaceV97(data.session.user);await checkSession();return}
+      authMode='signin';document.getElementById('signupOnlyFields').style.display='none';document.getElementById('authSubmitBtn').textContent=auth97L('تسجيل الدخول','Sign in');document.getElementById('authToggleText').textContent=auth97L('ما عندك حساب؟','No account?');document.getElementById('authToggleBtn').textContent=auth97L('إنشاء حساب جديد','Create account');document.getElementById('authForgotBtnV97').style.display='block';document.getElementById('authPassword').value='';taskyAuthMessageV97(auth97L('تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التحقق ثم عد إلى تاسكي؛ سيتم إنشاء مساحة العمل بعد أول دخول موثّق.','Account created. If email confirmation is enabled, open the verification email and return to Tasky; the workspace will be created after the first verified sign-in.'),'success');return;
+    }
+    const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;if(!data?.session?.user){const {data:s,error:se}=await sb.auth.getSession();if(se)throw se;if(!s?.session?.user)throw new Error(auth97L('تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة. حدّث الصفحة وحاول مرة أخرى.','Credentials were accepted but no session was created. Refresh and try again.'))}
+    await taskyBootstrapFirstWorkspaceV97(data?.session?.user||null);await checkSession()
+  }catch(ex){console.error('Tasky V97 auth flow',ex);taskyAuthMessageV97(ex?.message||String(ex));const auth=document.getElementById('authScreen');if(auth)auth.style.display='flex';document.querySelector('.app')?.style.setProperty('display','none')}
+  finally{taskyAuthSetBusyV751(false)}
+};
+const toggleAuthModeBaseV97=toggleAuthMode;
+toggleAuthMode=function(){toggleAuthModeBaseV97();const forgot=document.getElementById('authForgotBtnV97'),pass=document.getElementById('authPassword');if(forgot)forgot.style.display=authMode==='signin'?'block':'none';if(pass)pass.autocomplete=authMode==='signup'?'new-password':'current-password'};
+
+// Enter key support on auth and invite/recovery forms.
+setTimeout(()=>{['authEmail','authPassword','authFullName','authCompany'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleAuthSubmit()}}));['inviteNewPassword','inviteConfirmPassword'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finishInviteSetup()}}));['authRecoveryPasswordV97','authRecoveryConfirmV97'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finishPasswordRecoveryV97()}}));document.getElementById('authRecoveryEmailV97')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();requestPasswordResetV97()}})},0);
+
+// Supabase documents PASSWORD_RECOVERY as the event to prompt for a new password.
+sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){window.__taskyV97RecoverySession=session||null;setTimeout(()=>openPasswordRecoveryUpdateV97(!!session?.user),0)}});
+async function auth97VerifyRecoveryRedirectV97(){
+  if(window.__taskyV97RecoverySession?.user){openPasswordRecoveryUpdateV97(true);return}
+  if(!auth97RecoveryMarker())return;openPasswordRecoveryUpdateV97(false);
+  await new Promise(r=>setTimeout(r,700));
+  if(auth97RecoveryReady)return;
+  try{const {data}=await sb.auth.getSession();if(data?.session?.user){auth97RecoveryReady=true;auth97RecoveryCanClose=true;openPasswordRecoveryUpdateV97(true);return}}catch(err){console.warn('V97 recovery session verification',err)}
+  auth97RecoveryCanClose=true;document.getElementById('authRecoveryCopyV97').textContent=auth97L('تعذر التحقق من رابط الاستعادة. قد يكون منتهيًا أو مستخدمًا؛ اطلب رابطًا جديدًا.','The recovery link could not be verified. It may be expired or already used; request a new link.');auth97ShowRecoveryMessage(auth97L('يمكنك إغلاق هذه النافذة وطلب رابط استعادة جديد.','You can close this window and request a new recovery link.'),'error')
+}
+setTimeout(()=>auth97VerifyRecoveryRedirectV97(),0);
+
+// General notifications: data is returned through recipient-scoped SECURITY DEFINER RPCs.
+fetchNotifications=async function(){
+  if(!currentUserId||!currentWorkspaceId)return;let base=[];
+  try{const {data,error}=await sb.rpc('tasky_auth_notification_list_v97',{p_workspace_id:currentWorkspaceId,p_limit:40});if(error)throw error;base=Array.isArray(data)?data:[]}catch(err){console.warn('V97 notifications unavailable',err);base=[]}
+  let extra=[];try{if(typeof hrTablesV72!=='undefined'){const {data,error}=await sb.from('tasky_hr_automation_inbox_v79').select('id,workspace_id,user_id,event_id,type,task_id,metadata,is_read,read_at,created_at').eq('workspace_id',currentWorkspaceId).eq('user_id',currentUserId).order('created_at',{ascending:false}).limit(60);if(!error)extra=(data||[]).map(n=>({...n,actor_id:null,comment_id:null,_source:'hr79'}));else if(!/does not exist|schema cache/i.test(error.message||''))console.warn('V97 HR inbox merge',error)}}catch(err){console.warn('V97 HR inbox merge',err)}
+  userNotifications=[...base.map(n=>({...n,_source:'general'})),...extra].sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||''))).slice(0,80);updateNotificationBadge();const dd=document.getElementById('notifDropdown');if(dd&&!dd.classList.contains('hidden'))renderNotificationDropdown()
+};
+const openNotificationBaseV97=openNotification;
+openNotification=async function(id){const n=userNotifications.find(x=>String(x.id)===String(id));if(!n)return;if(n._source!=='hr79'&&!n.is_read){const {error}=await sb.rpc('tasky_auth_notification_mark_read_v97',{p_workspace_id:currentWorkspaceId,p_notification_id:id});if(error)console.warn('V97 mark notification read',error);/* The legacy navigator also contains a direct table UPDATE. Mark locally before delegating so that obsolete mutation path is skipped; a failed RPC will be corrected on the next fetch. */n.is_read=true;if(!error)updateNotificationBadge()}return openNotificationBaseV97(id)};
+markAllNotificationsRead=async function(){
+  const normalUnread=userNotifications.some(n=>n._source!=='hr79'&&!n.is_read),hrUnread=userNotifications.filter(n=>n._source==='hr79'&&!n.is_read).map(n=>n.id);
+  if(normalUnread){const {error}=await sb.rpc('tasky_auth_notification_mark_all_read_v97',{p_workspace_id:currentWorkspaceId});if(!error)userNotifications.filter(n=>n._source!=='hr79').forEach(n=>n.is_read=true);else console.warn('V97 mark all notifications',error)}
+  if(hrUnread.length){const {error}=await sb.from('tasky_hr_automation_inbox_v79').update({is_read:true,read_at:new Date().toISOString()}).eq('workspace_id',currentWorkspaceId).eq('user_id',currentUserId).in('id',hrUnread);if(!error)userNotifications.filter(n=>n._source==='hr79').forEach(n=>n.is_read=true)}
+  updateNotificationBadge();renderNotificationDropdown()
+};
+
+// Launch readiness lives under Settings > Security.
+function openAuth97Launch(){if(currentUserRole!=='admin')return;auth97LaunchOpen=true;activeNav='settings';settingsSection='security';renderNav();renderModule()}
+function closeAuth97Launch(){auth97LaunchOpen=false;renderModule()}
+async function fetchAuth97Audit(force=false){
+  if(!currentWorkspaceId||currentUserRole!=='admin')return null;const key=`${currentWorkspaceId}:v97`;if(!force&&auth97Audit.data&&auth97Audit.key===key)return auth97Audit.data;if(auth97Audit.loading)return auth97Audit.data;auth97Audit.loading=true;auth97Audit.error='';if(auth97LaunchOpen)renderModule();
+  try{const {data,error}=await sb.rpc('tasky_auth_launch_readiness_v97',{p_workspace_id:currentWorkspaceId});if(error)throw error;auth97Audit.data=data||{};auth97Audit.key=key;if(auth97LaunchOpen)renderModule();return data}catch(err){auth97Audit.error=err?.message||String(err);if(auth97LaunchOpen)renderModule();return null}finally{auth97Audit.loading=false}
+}
+function auth97StatusLabel(s){return({blocked:auth97L('محظور','Blocked'),needs_signoff:auth97L('يحتاج اعتماد','Needs sign-off'),ready_with_warnings:auth97L('جاهز مع تحذيرات','Ready with warnings'),ready:auth97L('جاهز','Ready')})[s]||s}
+function auth97SignLabel(k){return({signup_email_confirmation:auth97L('التسجيل وتأكيد البريد','Signup & email confirmation'),password_recovery:auth97L('استعادة كلمة المرور','Password recovery'),invite_activation:auth97L('تفعيل الدعوات','Invitation activation'),first_workspace_bootstrap:auth97L('إنشاء أول Workspace','First-workspace bootstrap'),session_logout_reentry:auth97L('الجلسة والخروج وإعادة الدخول','Session, logout & re-entry'),onboarding_progress:auth97L('تقدم Onboarding','Onboarding progress'),notifications_privacy:auth97L('خصوصية الإشعارات','Notification privacy')})[k]||k}
+function auth97SignHelp(k){return({signup_email_confirmation:auth97L('أنشئ حسابًا ببريد تجريبي جديد. اختبر الحالتين بحسب إعداد Supabase: جلسة فورية أو تأكيد البريد، وتأكد أن Workspace لا تُنشأ قبل جلسة موثقة.','Create a fresh test account. Test the configured Supabase path (immediate session or email confirmation) and verify no workspace is created before an authenticated session.'),password_recovery:auth97L('اضغط «نسيت كلمة المرور؟»، افتح البريد، ارجع إلى رابط recovery، عيّن كلمة مرور جديدة ثم سجّل الدخول بها.','Use “Forgot password?”, open the email, return through the recovery link, set a new password, then sign in with it.'),invite_activation:auth97L('أرسل دعوة حقيقية لمستخدم جديد وافتح رابطها؛ يجب إنشاء كلمة مرور وتفعيل عضوية واحدة فقط بدون Workspace جديدة.','Send a real invitation to a new user; the link must set a password and activate exactly one membership without creating a new workspace.'),first_workspace_bootstrap:auth97L('أنشئ حسابًا مباشرًا جديدًا وتأكد أن أول Workspace والمشروع الافتراضي يُنشآن مرة واحدة فقط بعد الجلسة الموثقة.','Create a direct new account and verify the first workspace/default project are created exactly once after authentication.'),session_logout_reentry:auth97L('سجّل الخروج ثم ادخل مجددًا، وحدث الصفحة أثناء الدخول؛ يجب ألا تُفقد الجلسة بسبب فشل Module ثانوي وألا يُنشأ Workspace إضافي.','Sign out/in and refresh during login; a secondary module failure must not destroy the valid session or create another workspace.'),onboarding_progress:auth97L('نفذ خطوات الباقة/دعوة الفريق/المشروع/المهمة وتأكد أن التقدم يأتي من V68 server state ويكتمل مرة واحدة.','Complete plan/team/project/task steps and verify progress comes from V68 server state and completes once.'),notifications_privacy:auth97L('بحسابين في نفس الشركة اختبر Mention/اعتماد، وتأكد أن كل مستخدم يرى ويعلّم كمقروء إشعاراته فقط، ثم أزل أحدهما وتأكد أن إشعارات Workspace لا تعود متاحة له.','With two users test mention/approval notifications: each user must see/mark only their own; then remove one user and verify workspace notifications are no longer accessible.')})[k]||''}
+function auth97SignStatus(s){return({pending:auth97L('لم يُختبر','Pending'),passed:auth97L('نجح','Passed'),failed:auth97L('فشل','Failed')})[s]||s}
+async function auth97SetSignoff(key,status){const {error}=await sb.rpc('tasky_auth_set_launch_signoff_v97',{p_workspace_id:currentWorkspaceId,p_check_key:key,p_status:status,p_note:''});if(error)return showTaskyDialog({title:auth97L('تعذر حفظ الاختبار','Could not save sign-off'),message:error.message,tone:'error'});auth97Audit.data=null;await fetchAuth97Audit(true)}
+function auth97ReadinessTemplate(){
+  if(currentUserRole!=='admin')return `<div class="auth97-panel"><div class="auth97-empty">${auth97L('جاهزية الدخول متاحة لمدير Workspace فقط.','Auth readiness is Workspace Admin only.')}</div></div>`;
+  if(!auth97Audit.data&&!auth97Audit.loading&&!auth97Audit.error)setTimeout(()=>fetchAuth97Audit(),0);if(auth97Audit.loading&&!auth97Audit.data)return `<div class="auth97-shell"><div class="auth97-panel"><div class="auth97-empty">${auth97L('جارٍ تدقيق التسجيل والجلسات وOnboarding والإشعارات…','Auditing signup, sessions, onboarding and notifications…')}</div></div></div>`;
+  if(auth97Audit.error)return `<div class="auth97-shell"><div class="auth97-panel"><div class="auth97-empty">${escapeHtml(auth97Audit.error)}<br>${auth97L('شغّل Migration V97 ثم أعد المحاولة.','Run Migration V97, then retry.')}</div><button class="primary-btn" style="display:block;margin:10px auto 0" onclick="taskyRerunAudit91('auth',this)">${auth97L('إعادة المحاولة','Retry')}</button></div></div>`;
+  const d=auth97Audit.data||{},issues=Array.isArray(d.issues)?d.issues:[],sign=Array.isArray(d.signoffs)?d.signoffs:[],sum=d.summary||{},status=d.status||'needs_signoff';
+  return `<div class="auth97-shell"><div class="auth97-hero"><div><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:7px"><button class="chip-btn" onclick="closeAuth97Launch()">← ${auth97L('الأمان','Security')}</button><button class="chip-btn" onclick="taskyRerunAudit91('auth',this)">${auth97L('إعادة الفحص','Re-run audit')}</button></div><h3>${auth97L('جاهزية التسجيل والدخول وOnboarding — V97','Auth, Access & Onboarding Launch Readiness — V97')}</h3><p>${auth97L('تدقيق حي لمسار التسجيل، أول Workspace، الدعوات، الاستعادة، الجلسات والإشعارات العامة.','Live audit of signup, first workspace, invitations, recovery, sessions and general notifications.')}</p></div><div class="auth97-status ${escapeHtml(status)}">● ${escapeHtml(auth97StatusLabel(status))}</div></div><div class="auth97-boundary"><b>${auth97L('حدود الإطلاق:','Launch boundary:')}</b> ${auth97L('Email/Password هو مسار الدخول الأساسي. SSO/SAML/SCIM/MFA الإلزامي وإدارة الأجهزة المتقدمة تبقى Post-Launch.','Email/password is the launch authentication path. SSO/SAML/SCIM, enforced MFA and advanced device/session management remain post-launch.')}</div><div class="auth97-kpis"><div class="auth97-kpi critical"><span>${auth97L('مشاكل حرجة','Critical')}</span><b>${Number(d.critical_count||0)}</b></div><div class="auth97-kpi warning"><span>${auth97L('تحذيرات','Warnings')}</span><b>${Number(d.warning_count||0)}</b></div><div class="auth97-kpi"><span>${auth97L('إشعارات غير مقروءة قديمة','Old unread notifications')}</span><b>${Number(sum.old_unread_notifications||0)}</b></div><div class="auth97-kpi"><span>${auth97L('اختبارات ناجحة','Passed sign-offs')}</span><b>${Number(sum.passed_signoffs||0)} / 7</b></div></div><div class="auth97-panel"><div class="auth97-panel-head"><div><h4>${auth97L('نتيجة التدقيق الآلي','Automated audit')}</h4><p>${auth97L('يفحص العلاقات والصلاحيات الممكن التحقق منها داخل Supabase. إعداد Redirect URL والبريد نفسه يحتاج اختبارًا يدويًا.','Checks relationships and permissions visible inside Supabase. Auth redirect/email delivery still requires a manual test.')}</p></div></div>${issues.length?issues.map(i=>`<div class="auth97-issue ${escapeHtml(i.severity||'info')}"><div><b>${escapeHtml(lang==='ar'?(i.title_ar||i.title_en):(i.title_en||i.title_ar))}</b><p>${escapeHtml(lang==='ar'?(i.detail_ar||i.detail_en):(i.detail_en||i.detail_ar))}</p></div><span class="auth97-count">${Number(i.count||0)}</span></div>`).join(''):`<div class="auth97-empty">✓ ${auth97L('لم يرصد التدقيق الآلي مشاكل حالية.','No current automated issues were detected.')}</div>`}</div><div class="auth97-panel"><div class="auth97-panel-head"><div><h4>${auth97L('اختبارات ما قبل الإطلاق','Pre-launch sign-off')}</h4><p>${auth97L('جميع الاختبارات السبعة إلزامية لأن البريد وRedirect والجلسات لا يمكن إثباتها بالكامل من SQL فقط.','All seven tests are mandatory because email delivery, redirects and browser sessions cannot be proven by SQL alone.')}</p></div></div>${sign.map(x=>`<div class="auth97-signoff"><div><b>${escapeHtml(auth97SignLabel(x.check_key))}</b><small>${escapeHtml(auth97SignStatus(x.status))} · ${escapeHtml(auth97SignHelp(x.check_key))}</small></div><div class="auth97-sign-actions"><button class="pass" onclick="auth97SetSignoff('${x.check_key}','passed')">✓ ${auth97L('نجح','Pass')}</button><button class="fail" onclick="auth97SetSignoff('${x.check_key}','failed')">× ${auth97L('فشل','Fail')}</button><button onclick="auth97SetSignoff('${x.check_key}','pending')">↺ ${auth97L('إعادة','Reset')}</button></div></div>`).join('')}</div></div>`
+}
+const settingsSecurityTemplateBaseV97=settingsSecurityTemplate;
+settingsSecurityTemplate=function(){if(auth97LaunchOpen&&currentUserRole==='admin')return auth97ReadinessTemplate();const html=settingsSecurityTemplateBaseV97();const bar=currentUserRole==='admin'?`<div class="auth97-launchbar"><div><b>${auth97L('جاهزية التسجيل والدخول','Auth & onboarding readiness')}</b><span>${auth97L('اختبر الاستعادة، أول Workspace، الدعوات، الجلسات وخصوصية الإشعارات قبل الإطلاق.','Test recovery, first workspace, invitations, sessions and notification privacy before launch.')}</span></div><button class="chip-btn" onclick="openAuth97Launch()"><svg style="width:14px;height:14px"><use href="#i-check"/></svg>${auth97L('جاهزية الإطلاق','Launch readiness')}</button></div>`:'';return `${bar}${html}`};
+
+const taskyRerunAudit91BaseV97=taskyRerunAudit91;
+taskyRerunAudit91=async function(section,btn){if(section!=='auth')return taskyRerunAudit91BaseV97(section,btn);if(btn?.dataset?.auditBusy==='1')return;const old=btn?.innerHTML||'';if(btn){btn.dataset.auditBusy='1';btn.disabled=true;btn.classList.add('tasky-audit-refreshing')}try{auth97Audit.key='';auth97Audit.data=null;auth97Audit.error='';await fetchAuth97Audit(true);if(auth97Audit.error)throw new Error(auth97Audit.error);taskyToast(auth97L('اكتملت إعادة فحص التسجيل والدخول من Supabase','Auth & onboarding audit refreshed from Supabase'),{tone:'success'})}catch(err){showTaskyDialog({title:auth97L('تعذرت إعادة الفحص','Audit refresh failed'),message:err?.message||String(err),tone:'error'})}finally{if(btn){btn.disabled=false;btn.dataset.auditBusy='0';btn.classList.remove('tasky-audit-refreshing');btn.innerHTML=old}}};
+window.TASKY_READINESS_SECTIONS_V97=[...(window.TASKY_READINESS_SECTIONS_V96||[]),'auth'];
+window.__taskyV97AuthReady=true;if(window.__taskyV97PendingBoot){window.__taskyV97PendingBoot=false;if(!auth97RecoveryMarker())setTimeout(()=>checkSession().catch(err=>console.error('Tasky V97 deferred auth boot',err)),0)}
+</script>
+<!-- ================= /V97 AUTH + ONBOARDING + NOTIFICATIONS LAUNCH HARDENING ================= -->
+
 </body>
 </html>
