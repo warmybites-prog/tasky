@@ -10119,5 +10119,69 @@ const hrOpenPayrollRunV75BaseV84=hrOpenPayrollRunV75;
 hrOpenPayrollRunV75=function(id){hrOpenPayrollRunV75BaseV84(id);const items=hrRunItemsV75(id);if(!items?.some(x=>Number(x.expense_reimbursements||0)))return;const modal=document.getElementById('addModalBody');if(!modal)return;const total=items.reduce((s,x)=>s+Number(x.expense_reimbursements||0),0),count=items.reduce((s,x)=>s+(Array.isArray(x.expense_claims_snapshot)?x.expense_claims_snapshot.length:0),0),note=document.createElement('div');note.className='hr84-note';note.style.marginTop='10px';note.innerHTML=`<b>${hrL72('تعويضات مصروفات V84','V84 expense reimbursements')}</b><div class="hr84-payroll-mini"><span>${hrL72('إجمالي التعويضات','Total reimbursements')}: <strong>${hr84Money(total)}</strong></span><span>${hrL72('المطالبات المرتبطة','Linked claims')}: <strong>${count}</strong></span></div><small>${hrL72('تضاف إلى Net Pay بشكل منفصل ولا تدخل في Gross Salary أو GOSI تلقائيًا.','Added separately to Net Pay and not automatically included in Gross Salary or GOSI.')}</small>`;modal.appendChild(note);};
 </script>
 
+<style>
+/* ================= V85 HR LAUNCH HARDENING ================= */
+.hr85-shell{display:grid;gap:14px}.hr85-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;padding:18px;border:1px solid var(--border);border-radius:18px;background:var(--card)}
+.hr85-hero h3{margin:0 0 4px;font-size:16px}.hr85-hero p{margin:0;color:var(--muted);font-size:10px;line-height:1.6}.hr85-status{display:inline-flex;align-items:center;gap:7px;padding:8px 11px;border-radius:999px;font-size:10px;font-weight:800;white-space:nowrap}.hr85-status.ready{background:rgba(42,108,46,.1);color:var(--green)}.hr85-status.ready_with_warnings,.hr85-status.needs_signoff{background:rgba(217,164,65,.13);color:#9b6810}.hr85-status.blocked{background:rgba(181,57,57,.11);color:var(--danger)}
+.hr85-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px}.hr85-kpi{padding:13px;border:1px solid var(--border);border-radius:15px;background:var(--card)}.hr85-kpi span{display:block;font-size:9px;color:var(--muted)}.hr85-kpi b{display:block;margin-top:4px;font-size:20px}.hr85-kpi.critical b{color:var(--danger)}.hr85-kpi.warning b{color:#a56b0b}
+.hr85-grid{display:grid;grid-template-columns:1.25fr .75fr;gap:12px}.hr85-panel{border:1px solid var(--border);border-radius:16px;background:var(--card);overflow:hidden}.hr85-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;padding:14px 15px;border-bottom:1px solid var(--border)}.hr85-panel-head h4{margin:0;font-size:12px}.hr85-panel-head p{margin:3px 0 0;color:var(--muted);font-size:9px}.hr85-list{display:grid}.hr85-issue{display:grid;grid-template-columns:auto 1fr auto;gap:10px;padding:12px 15px;border-bottom:1px solid var(--border);align-items:start}.hr85-issue:last-child{border-bottom:0}.hr85-dot{width:9px;height:9px;border-radius:50%;margin-top:4px;background:var(--muted)}.hr85-issue.critical .hr85-dot{background:var(--danger)}.hr85-issue.warning .hr85-dot{background:#d59a25}.hr85-issue b{font-size:10px}.hr85-issue p{font-size:9px;color:var(--muted);margin:3px 0 0;line-height:1.45}.hr85-count{font-size:9px;padding:3px 7px;border-radius:999px;background:var(--soft);font-weight:800}.hr85-empty{padding:28px;text-align:center;color:var(--muted);font-size:10px}
+.hr85-signoff{padding:11px 14px;border-bottom:1px solid var(--border);display:grid;gap:7px}.hr85-signoff:last-child{border-bottom:0}.hr85-signoff-top{display:flex;justify-content:space-between;gap:8px;align-items:center}.hr85-signoff b{font-size:10px}.hr85-signoff small{display:block;color:var(--muted);font-size:8.5px}.hr85-btns{display:flex;gap:5px;flex-wrap:wrap}.hr85-mini{border:1px solid var(--border);background:var(--card);padding:5px 8px;border-radius:8px;font:inherit;font-size:8.5px;cursor:pointer}.hr85-mini.pass{color:var(--green)}.hr85-mini.fail{color:var(--danger)}.hr85-mini.active{box-shadow:inset 0 0 0 1px currentColor;font-weight:800}.hr85-modules{display:flex;gap:7px;flex-wrap:wrap;padding:14px}.hr85-module{padding:8px 10px;border:1px solid var(--border);border-radius:10px;background:var(--soft)}.hr85-module b{display:block;font-size:9px}.hr85-module small{font-size:8px;color:var(--muted)}
+@media(max-width:900px){.hr85-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.hr85-grid{grid-template-columns:1fr}.hr85-hero{flex-direction:column}}@media(max-width:520px){.hr85-kpis{grid-template-columns:1fr 1fr}.hr85-issue{grid-template-columns:auto 1fr}.hr85-count{grid-column:2}}
+</style>
+<script>
+/* ================= V85 HR LAUNCH HARDENING & INTEGRITY AUDIT ================= */
+window.TASKY_BUILD='V85';
+let hr85State={loading:false,data:null,error:'',key:''};
+if(!HR_TABS_V72.some(x=>x[0]==='launch85')){
+  const ix=HR_TABS_V72.findIndex(x=>x[0]==='permissions');
+  HR_TABS_V72.splice(ix<0?HR_TABS_V72.length:ix,0,['launch85','جاهزية الإطلاق','Launch Readiness']);
+}
+
+// V81 replaced the visibility function and unintentionally bypassed the earlier V79 tab guard.
+// V85 makes the final visibility rules explicit instead of relying on override order.
+function hrTabVisible72(id){
+  if(id==='permissions')return currentUserRole==='admin';
+  if(id==='launch85'||id==='automation79'||id==='cases'||id==='workforce'||id==='analytics'||id==='offboarding')return hrCanManage72();
+  if(id==='recruitment')return hrCanRecruit72();
+  if(id==='compensation'||id==='calendar80'||id==='selfservice82'||id==='benefits83'||id==='expenses84')return true;
+  return true;
+}
+const hrBodyV72BaseV85=hrBodyV72;
+hrBodyV72=function(){if(hrActiveTabV72==='launch85')return hr85Template();return hrBodyV72BaseV85();};
+const hrPermissionsV72BaseV85=hrPermissionsV72;
+hrPermissionsV72=function(){if(currentUserRole!=='admin')return `<div class="hr72-panel"><div class="hr72-alert">${hrL72('إدارة أدوار HR متاحة لمدير مساحة العمل فقط.','HR role administration is limited to the Workspace Admin.')}</div></div>`;return hrPermissionsV72BaseV85();};
+const setHrTabV72BaseV85=setHrTabV72;
+setHrTabV72=function(id){setHrTabV72BaseV85(id);if(id==='launch85'&&hrCanManage72())setTimeout(()=>fetchHr85(),0);};
+
+function hr85Label(key){const m={privacy_rls:['عزل البيانات والصلاحيات','Privacy & RLS isolation'],employee_self_service:['الخدمة الذاتية للموظف','Employee self-service'],manager_approvals:['موافقات المدير','Manager approvals'],attendance_leave:['الحضور والإجازات','Attendance & leave'],documents_private:['خصوصية الوثائق','Private documents'],payroll_smoke:['اختبار الرواتب والتأمينات','Payroll & GOSI smoke test'],exit_workflow:['الخروج والتسوية النهائية','Exit & final settlement']};const x=m[key]||[key,key];return hrL72(x[0],x[1]);}
+function hr85StatusLabel(s){const m={ready:['جاهز للإطلاق','Ready to launch'],ready_with_warnings:['جاهز مع ملاحظات','Ready with warnings'],needs_signoff:['بانتظار اختبارات الاعتماد','Needs sign-off'],blocked:['غير جاهز — توجد مشاكل حرجة','Blocked — critical issues']};const x=m[s]||[s,s];return hrL72(x[0],x[1]);}
+function hr85SignStatus(s){const m={pending:['بانتظار الاختبار','Pending'],passed:['ناجح','Passed'],failed:['فشل','Failed'],not_applicable:['غير منطبق','N/A']};const x=m[s]||[s,s];return hrL72(x[0],x[1]);}
+async function fetchHr85(force=false){
+ if(!currentWorkspaceId||!hrCanManage72())return;
+ const key=currentWorkspaceId;if(hr85State.loading||(!force&&hr85State.key===key&&hr85State.data))return;
+ hr85State.loading=true;hr85State.error='';if(activeNav==='hr'&&hrActiveTabV72==='launch85')renderModule();
+ try{const {data,error}=await sb.rpc('tasky_hr_launch_readiness_v85',{p_workspace_id:currentWorkspaceId});if(error)throw error;hr85State.data=data||{};hr85State.key=key;}
+ catch(err){hr85State.error=err?.message||String(err);console.warn('HR V85 readiness',err);}
+ finally{hr85State.loading=false;if(activeNav==='hr'&&hrActiveTabV72==='launch85')renderModule();}
+}
+async function hr85SetSignoff(key,status){
+ let note=null;if(status==='failed'){note=prompt(hrL72('اكتب سبب فشل الاختبار أو المشكلة التي تحتاج إصلاحًا:','Describe why this test failed or what needs fixing:'))||null;}
+ try{const {error}=await sb.rpc('tasky_hr_set_launch_signoff_v85',{p_workspace_id:currentWorkspaceId,p_check_key:key,p_status:status,p_note:note});if(error)throw error;hr85State.key='';await fetchHr85(true);taskyToast(hrL72('تم تحديث اختبار الجاهزية','Readiness sign-off updated'),{tone:'success'});}catch(err){showTaskyDialog({title:'HR V85',message:err?.message||String(err),tone:'error'});}
+}
+function hr85Template(){
+ if(!hrCanManage72())return `<div class="hr72-panel"><div class="hr72-alert">${hrL72('جاهزية إطلاق HR متاحة لإدارة الموارد البشرية فقط.','HR launch readiness is available to HR management only.')}</div></div>`;
+ if(!hr85State.data&&!hr85State.loading&&!hr85State.error)setTimeout(()=>fetchHr85(),0);
+ if(hr85State.loading&&!hr85State.data)return `<div class="hr85-shell"><div class="hr72-panel"><div class="hr72-empty">${hrL72('جارٍ تدقيق ترابط وصلاحيات وبيانات HR...','Auditing HR permissions, links and data integrity…')}</div></div></div>`;
+ if(hr85State.error)return `<div class="hr85-shell"><div class="hr72-panel"><div class="hr72-alert">${escapeHtml(hr85State.error)}<br>${hrL72('شغّل Migration V85 ثم أعد المحاولة.','Run the V85 migration, then retry.')}</div><button class="primary-btn" style="margin-top:10px" onclick="fetchHr85(true)">${hrL72('إعادة المحاولة','Retry')}</button></div></div>`;
+ const d=hr85State.data||{},s=d.summary||{},issues=d.issues||[],sign=d.signoffs||[],mods=d.modules||[],status=d.status||'needs_signoff';
+ return `<div class="hr85-shell"><div class="hr85-hero"><div><h3>${hrL72('HR Launch Readiness — V85','HR Launch Readiness — V85')}</h3><p>${hrL72('تدقيق حي على بيانات مساحة العمل + اختبارات اعتماد يدوية قبل إطلاق الموارد البشرية للعملاء. لا يعتبر هذا بديلاً عن UAT الفعلي على بيئة الإنتاج.','Live workspace integrity audit plus manual sign-offs before launching HR to customers. This does not replace real production UAT.')}</p></div><div class="hr85-status ${escapeHtml(status)}">● ${escapeHtml(hr85StatusLabel(status))}</div></div>
+ <div class="hr85-kpis"><div class="hr85-kpi critical"><span>${hrL72('مشاكل حرجة','Critical')}</span><b>${Number(s.critical||0)}</b></div><div class="hr85-kpi warning"><span>${hrL72('تحذيرات','Warnings')}</span><b>${Number(s.warning||0)}</b></div><div class="hr85-kpi"><span>${hrL72('الموظفون النشطون','Active employees')}</span><b>${Number(s.active_employees||0)}</b></div><div class="hr85-kpi"><span>${hrL72('مسؤولو HR','HR owners')}</span><b>${Number(s.hr_owners||0)}</b></div><div class="hr85-kpi"><span>${hrL72('اختبارات معلقة','Pending tests')}</span><b>${Number(s.manual_pending||0)}</b></div></div>
+ <div class="hr85-grid"><div class="hr85-panel"><div class="hr85-panel-head"><div><h4>${hrL72('نتائج التدقيق الآلي','Automated integrity audit')}</h4><p>${hrL72('مشاكل فعلية في البيانات أو الترابط يجب التعامل معها قبل التشغيل.','Live data/link issues to resolve before production use.')}</p></div><button class="chip-btn" onclick="fetchHr85(true)">${hrL72('إعادة الفحص','Re-run audit')}</button></div><div class="hr85-list">${issues.length?issues.map(i=>`<div class="hr85-issue ${escapeHtml(i.severity||'')}"><span class="hr85-dot"></span><div><b>${escapeHtml(lang==='ar'?(i.title_ar||i.title_en):(i.title_en||i.title_ar))}</b><p>${escapeHtml(lang==='ar'?(i.detail_ar||i.detail_en):(i.detail_en||i.detail_ar))}</p></div><span class="hr85-count">${Number(i.count||0)}</span></div>`).join(''):`<div class="hr85-empty">✓ ${hrL72('لم يرصد التدقيق الآلي مشاكل في البيانات الحالية.','No live-data problems were detected by the automated audit.')}</div>`}</div></div>
+ <div class="hr85-panel"><div class="hr85-panel-head"><div><h4>${hrL72('اختبارات ما قبل الإطلاق','Pre-launch sign-off')}</h4><p>${hrL72('نفذ كل سيناريو فعليًا ثم سجّل النتيجة.','Run each scenario end-to-end, then record the result.')}</p></div></div>${sign.map(x=>`<div class="hr85-signoff"><div class="hr85-signoff-top"><div><b>${escapeHtml(hr85Label(x.check_key))}</b><small>${escapeHtml(hr85SignStatus(x.status))}${x.note?' · '+escapeHtml(x.note):''}</small></div></div><div class="hr85-btns"><button class="hr85-mini pass ${x.status==='passed'?'active':''}" onclick="hr85SetSignoff('${x.check_key}','passed')">✓ ${hrL72('نجح','Pass')}</button><button class="hr85-mini fail ${x.status==='failed'?'active':''}" onclick="hr85SetSignoff('${x.check_key}','failed')">× ${hrL72('فشل','Fail')}</button><button class="hr85-mini ${x.status==='not_applicable'?'active':''}" onclick="hr85SetSignoff('${x.check_key}','not_applicable')">— N/A</button></div></div>`).join('')}</div></div>
+ <div class="hr85-panel"><div class="hr85-panel-head"><div><h4>${hrL72('نطاق HR المشمول في التدقيق','HR scope covered by this release gate')}</h4><p>${hrL72('الهدف الآن تثبيت الحد الأدنى القابل للإطلاق، ثم تطوير المزايا المتقدمة لاحقًا.','The goal now is a launchable minimum baseline; advanced expansion can continue later.')}</p></div></div><div class="hr85-modules">${mods.map(m=>`<div class="hr85-module"><b>${escapeHtml(lang==='ar'?(m.label_ar||m.label_en):(m.label_en||m.label_ar))}</b><small>${escapeHtml(m.version||'')}</small></div>`).join('')}</div></div>
+ <div class="hr72-panel"><div class="hr721-privacy"><svg><use href="#i-lock"/></svg><div><b>${hrL72('قرار الإطلاق','Launch rule')}</b><br>${hrL72('لا تعتبر HR جاهزة للعملاء إذا كانت الحالة Blocked. بعد معالجة المشاكل الحرجة، نفذ اختبارات الـSign-off السبعة. Ready أو Ready with warnings هي الحالات المقبولة للإطلاق التجريبي، مع مراجعة التحذيرات.','Do not launch HR to customers while status is Blocked. Resolve critical issues, then complete the seven sign-off tests. Ready or Ready with warnings are acceptable for controlled launch after reviewing warnings.')}</div></div></div></div>`;
+}
+</script>
+
 </body>
 </html>
