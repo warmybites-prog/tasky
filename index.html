@@ -10786,5 +10786,160 @@ const taskyRerunAudit91BaseV92=taskyRerunAudit91;
 taskyRerunAudit91=async function(section,btn){if(section!=='inventory')return taskyRerunAudit91BaseV92(section,btn);if(btn?.dataset?.auditBusy==='1')return;const old=btn?.innerHTML||'';if(btn){btn.dataset.auditBusy='1';btn.disabled=true;btn.classList.add('tasky-audit-refreshing')}try{inv92State.key='';inv92State.error='';await fetchInv92(true);if(inv92State.error)throw new Error(inv92State.error);taskyToast(inv92L('اكتمل إعادة الفحص من بيانات Supabase الحالية','Audit refreshed from current Supabase data'),{tone:'success'})}catch(err){showTaskyDialog({title:inv92L('تعذرت إعادة الفحص','Audit refresh failed'),message:err?.message||String(err),tone:'error'})}finally{if(btn){btn.disabled=false;btn.dataset.auditBusy='0';btn.classList.remove('tasky-audit-refreshing');btn.innerHTML=old}}};
 window.TASKY_READINESS_SECTIONS_V92=[...(window.TASKY_READINESS_SECTIONS_V91||[]),'inventory'];
 </script>
+<style>
+/* ================= V93 REPORTS & ANALYTICS LAUNCH HARDENING ================= */
+.rep93-boundary{border:1px solid var(--border);background:var(--blue-tint);border-radius:13px;padding:12px 14px;font-size:12px;line-height:1.75;color:var(--ink-soft);margin-bottom:14px}.rep93-boundary b{color:var(--blue-deep)}
+.rep93-toolbar{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:14px}.rep93-toolbar h3{font-size:16px}.rep93-toolbar p{font-size:11.5px;color:var(--muted);margin:3px 0 0}.rep93-source-pill{display:inline-flex;gap:6px;align-items:center;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:4px 8px;font-size:10px;color:var(--ink-soft)}.rep93-source-pill i{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.rep93-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.rep93-kpi{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:15px}.rep93-kpi span{display:block;color:var(--muted);font-size:11px;margin-bottom:6px}.rep93-kpi b{display:block;font-size:22px;font-family:'Almarai',sans-serif}.rep93-kpi small{display:block;color:var(--muted);font-size:10px;margin-top:5px;line-height:1.55}.rep93-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px}.rep93-panel{background:var(--card);border:1px solid var(--border);border-radius:15px;padding:16px;min-width:0}.rep93-panel h3{font-size:14px;margin-bottom:12px}.rep93-progress-row{display:grid;grid-template-columns:minmax(120px,1fr) 2fr 75px;gap:9px;align-items:center;margin:10px 0;font-size:11.5px}.rep93-track{height:9px;background:var(--paper);border-radius:999px;overflow:hidden}.rep93-fill{height:100%;background:var(--green);border-radius:999px}.rep93-empty{padding:24px;text-align:center;color:var(--muted);font-size:12px}
+.rep93-shell{display:flex;flex-direction:column;gap:14px}.rep93-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px}.rep93-hero h3{font-size:18px}.rep93-hero p{font-size:11.5px;color:var(--muted);line-height:1.75;margin:5px 0 0;max-width:780px}.rep93-status{font-size:11px;font-weight:800;border:1px solid var(--border);border-radius:999px;padding:6px 10px;white-space:nowrap}.rep93-status.ready{color:var(--green);background:var(--green-tint)}.rep93-status.ready_with_warnings,.rep93-status.needs_signoff{color:#8A6510;background:var(--amber-tint)}.rep93-status.blocked{color:var(--danger);background:var(--danger-tint)}
+.rep93-readiness-kpis{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.rep93-readiness-kpi{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px}.rep93-readiness-kpi span{display:block;color:var(--muted);font-size:10px}.rep93-readiness-kpi b{font-size:19px}.rep93-readiness-kpi.critical b{color:var(--danger)}.rep93-readiness-kpi.warning b{color:#9A6D13}
+.rep93-issue{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}.rep93-issue:last-child{border-bottom:0}.rep93-issue b{font-size:12px}.rep93-issue p{font-size:10.5px;color:var(--muted);margin:4px 0 0;line-height:1.65}.rep93-count{font:800 13px 'IBM Plex Mono',monospace}.rep93-issue.critical .rep93-count{color:var(--danger)}.rep93-issue.warning .rep93-count{color:#9A6D13}.rep93-issue.info .rep93-count{color:var(--blue)}
+.rep93-signoff{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:11px 0;border-bottom:1px solid var(--border)}.rep93-signoff:last-child{border-bottom:0}.rep93-signoff b{font-size:12px}.rep93-signoff small{display:block;color:var(--muted);font-size:10px;line-height:1.55;margin-top:3px}.rep93-btns{display:flex;gap:5px}.rep93-mini{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:5px 8px;font-size:10px;font-weight:800}.rep93-mini.pass.active{background:var(--green-tint);color:var(--green)}.rep93-mini.fail.active{background:var(--danger-tint);color:var(--danger)}
+.rep93-sources{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}.rep93-source{border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:10px}.rep93-source b{display:block;font-size:11px}.rep93-source small{display:block;color:var(--muted);font-size:9.5px;margin-top:4px}.rep93-source.bad{border-color:#efc7c2;background:var(--danger-tint)}.rep93-note,.rep93-rule{border-radius:12px;padding:11px 13px;font-size:11px;line-height:1.7}.rep93-note{background:var(--blue-tint);border:1px solid #cbdde6}.rep93-rule{background:var(--green-tint);border:1px solid #d4e4ce}
+@media(max-width:1000px){.rep93-kpis,.rep93-readiness-kpis{grid-template-columns:repeat(2,1fr)}.rep93-grid{grid-template-columns:1fr}.rep93-sources{grid-template-columns:repeat(2,1fr)}}@media(max-width:650px){.rep93-kpis,.rep93-readiness-kpis,.rep93-sources{grid-template-columns:1fr}.rep93-progress-row{grid-template-columns:1fr}.rep93-hero,.rep93-signoff{flex-direction:column}.rep93-btns{width:100%}.rep93-mini{flex:1}}
+</style>
+<script>
+/* ================= V93 REPORTS & ANALYTICS LAUNCH HARDENING ================= */
+window.TASKY_BUILD='V93';console.info('Tasky build',window.TASKY_BUILD);
+const rep93L=(ar,en)=>lang==='ar'?ar:en;
+let rep93LaunchOpen=false;
+const rep93State={key:'',data:null,loading:false,error:''};
+
+function rep93ModuleAllowed(moduleId){try{return planAllows(currentPlan,moduleId)}catch(_){return false}}
+function rep93Loaders(){
+  const jobs=[];
+  if(rep93ModuleAllowed('events'))jobs.push(fetchEvents());
+  if(rep93ModuleAllowed('inventory'))jobs.push(fetchInventory());
+  if(rep93ModuleAllowed('budgets'))jobs.push(fetchBudgets());
+  if(rep93ModuleAllowed('content')||rep93ModuleAllowed('campaigns')||rep93ModuleAllowed('requests'))jobs.push(fetchMarketingData());
+  if(rep93ModuleAllowed('vendors'))jobs.push(fetchProcurementData());
+  return jobs;
+}
+async function loadReports93(){const jobs=rep93Loaders();if(jobs.length)await Promise.allSettled(jobs);return true}
+
+// Reports/Analytics now share one plan-aware lazy cache. This fixes the old reports loader
+// fetching Business-only procurement/inventory/budget data for Pro workspaces.
+const taskyModuleDescriptorV83BaseV93=taskyModuleDescriptorV83;
+taskyModuleDescriptorV83=function(id){
+  if(id==='reports'||id==='analytics')return {key:'reports93',load:()=>loadReports93()};
+  return taskyModuleDescriptorV83BaseV93(id);
+};
+
+function rep93DatasetDefs(){
+  return [
+    {key:'tasks',label:rep93L('المهام','Tasks'),module:'tasks',admin:false,get:()=>tasks.map(x=>({task_id:x.id,title_ar:x.ar||'',title_en:x.en||'',status:x.col||'',priority:x.priority||'',start_date:x.startDate||'',due_date:x.dueDate||'',overdue:x.overdue?'yes':'no',assignees:(x.assignees||[]).map(a=>a.fullName).join(' | '),cost:Number(x.cost||0)}))},
+    {key:'events',label:rep93L('الفعاليات','Events'),module:'events',admin:false,get:()=>events.map(e=>({event_id:e.id,title_ar:e.ar||'',title_en:e.en||'',start_at:e.startAt||'',end_at:e.endAt||'',location:e.location||'',status:e.status||'',capacity:Number(e.capacity||0),planning_budget:Number(e.budget||0)}))},
+    {key:'inventory',label:rep93L('المخزون','Inventory'),module:'inventory',admin:false,get:()=>inventory.filter(i=>i.active!==false).map(i=>({item_id:i.id,name_ar:i.ar||'',name_en:i.en||'',sku:i.sku||'',category_ar:i.cat_ar||'',category_en:i.cat_en||'',quantity:Number(i.qty||0),minimum_quantity:Number(i.min||0),unit_ar:i.unit_ar||'',unit_en:i.unit_en||'',unit_price:Number(i.price||0)}))},
+    {key:'marketing_content',label:rep93L('المحتوى التسويقي','Marketing content'),module:'content',admin:false,get:()=>contentItems.map(c=>({content_id:c.id,title_ar:c.ar||'',title_en:c.en||'',content_type:c.type||'',platform:c.platform||'',status:c.stage||'',publish_at:c.publishAt||'',published_at:c.publishedAt||''}))},
+    {key:'campaigns',label:rep93L('الحملات','Campaigns'),module:'campaigns',admin:false,get:()=>campaigns.map(c=>({campaign_id:c.id,code:c.code||'',name_ar:c.ar||'',name_en:c.en||'',status:c.status||'',start_date:c.startDate||'',end_date:c.endDate||'',kpi_label:c.kpiLabel||'',kpi_target:c.kpiTarget??''}))},
+    {key:'marketing_requests',label:rep93L('الطلبات التسويقية','Marketing requests'),module:'requests',admin:false,get:()=>requests.map(r=>({request_id:r.id,reference:r.ref||'',title:r.ar||r.en||'',department:r.dept_ar||r.dept_en||'',type:r.type||'',priority:r.priority||'',status:r.status||'',due_date:r.due||''}))},
+    {key:'budgets',label:rep93L('الميزانيات','Budgets'),module:'budgets',admin:true,get:()=>budgets.map(b=>({budget_id:b.id,name_ar:b.ar||'',name_en:b.en||'',status:b.status||'',period_start:b.periodStart||'',period_end:b.periodEnd||'',allocated_amount:Number(b.allocated||0),approved_net_usage:Number(b.spent||0),remaining_amount:Number(b.allocated||0)-Number(b.spent||0)}))},
+    {key:'vendors',label:rep93L('الموردون','Vendors'),module:'vendors',admin:true,get:()=>vendors.map(v=>({vendor_id:v.id,name_ar:v.ar||'',name_en:v.en||'',category:v.category||'',city:v.city||'',status:v.status||'',po_count:purchaseOrders.filter(p=>p.vendorId===v.id&&!['rejected','cancelled'].includes(p.status)).length,po_total:purchaseOrders.filter(p=>p.vendorId===v.id&&!['rejected','cancelled'].includes(p.status)).reduce((s,p)=>s+Number(p.totalAmount||0),0)}))},
+    {key:'purchase_orders',label:rep93L('أوامر الشراء','Purchase orders'),module:'vendors',admin:true,get:()=>purchaseOrders.map(p=>({purchase_order_id:p.id,po_number:p.poNumber||'',vendor:vendorById(p.vendorId)?L(vendorById(p.vendorId),''):'',status:p.status||'',delivery_date:p.deliveryDate||'',total_amount:Number(p.totalAmount||0),ordered_at:p.orderedAt||'',received_at:p.receivedAt||''}))},
+    {key:'supplier_invoices',label:rep93L('فواتير الموردين','Supplier invoices'),module:'vendors',admin:true,get:()=>supplierInvoices.map(i=>({invoice_id:i.id,invoice_number:i.invoiceNumber||'',vendor_invoice_number:i.vendorInvoiceNumber||'',vendor:vendorById(i.vendorId)?L(vendorById(i.vendorId),''):'',invoice_date:i.invoiceDate||'',due_date:i.dueDate||'',status:supplierInvoiceEffectiveStatus(i),total_amount:Number(i.totalAmount||0),paid_amount:supplierInvoicePaidAmount(i),remaining_amount:supplierInvoiceBalance(i)}))}
+  ];
+}
+function rep93DatasetVisible(d){return rep93ModuleAllowed(d.module)&&(!d.admin||currentUserRole==='admin')}
+function rep93VisibleDatasets(){return rep93DatasetDefs().filter(rep93DatasetVisible)}
+function rep93CsvCell(v){
+  if(v===null||v===undefined)v='';
+  let s=String(v).replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  // Protect spreadsheet users from CSV formula injection without changing the stored data.
+  if(/^[=+\-@]/.test(s.trimStart()))s="'"+s;
+  s=s.replace(/"/g,'""');
+  return /[",\n]/.test(s)?`"${s}"`:s;
+}
+function exportDataset93(key){
+  const d=rep93VisibleDatasets().find(x=>x.key===key);if(!d){taskyToast(rep93L('هذا التقرير غير متاح حسب الباقة أو الصلاحية الحالية.','This report is not available under the current plan/permission.'),{tone:'warning'});return}
+  const rows=d.get();if(!rows.length){taskyToast(rep93L('لا توجد بيانات متاحة للتصدير.','No data is available to export.'),{tone:'warning'});return}
+  const headers=Object.keys(rows[0]),lines=[headers.map(rep93CsvCell).join(',')];
+  for(const row of rows)lines.push(headers.map(h=>rep93CsvCell(row[h])).join(','));
+  const blob=new Blob(['\uFEFF'+lines.join('\n')],{type:'text/csv;charset=utf-8;'}),url=URL.createObjectURL(blob),a=document.createElement('a');
+  a.href=url;a.download=`tasky-${key}-${new Date().toISOString().slice(0,10)}.csv`;document.body.appendChild(a);a.click();a.remove();URL.revokeObjectURL(url);
+}
+// Retire the broad legacy exporter. All launch exports pass through the V93 dataset gate.
+exportDataset=function(key){return exportDataset93(key)};
+
+function rep93LatestMarketingMetrics(){
+  const latest=new Map();
+  for(const m of (marketingPerformance||[])){
+    const k=`${m.contentId||''}|${m.platform||''}`,old=latest.get(k),stamp=String(m.metricDate||m.createdAt||'');
+    if(!old||stamp>String(old.metricDate||old.createdAt||''))latest.set(k,m);
+  }
+  const a=[...latest.values()];return {rows:a,reach:a.reduce((s,x)=>s+Number(x.reach||0),0),engagements:a.reduce((s,x)=>s+Number(x.engagements||0),0),conversions:a.reduce((s,x)=>s+Number(x.conversions||0),0)};
+}
+function rep93AnalyticsData(){
+  const total=tasks.length,done=tasks.filter(x=>x.col==='done').length,overdue=tasks.filter(x=>x.overdue).length,completion=total?Math.round(done/total*100):0;
+  const now=Date.now(),upcoming=rep93ModuleAllowed('events')?events.filter(e=>!['completed','cancelled'].includes(e.status)&&(!e.startAt||new Date(e.startAt).getTime()>=now)).length:0;
+  const activeInv=rep93ModuleAllowed('inventory')?inventory.filter(i=>i.active!==false):[],low=activeInv.filter(i=>Number(i.qty||0)<=Number(i.min||0)).length;
+  const allocated=rep93ModuleAllowed('budgets')&&currentUserRole==='admin'?budgets.reduce((s,b)=>s+Number(b.allocated||0),0):0,spent=rep93ModuleAllowed('budgets')&&currentUserRole==='admin'?budgets.reduce((s,b)=>s+Number(b.spent||0),0):0;
+  const ap=rep93ModuleAllowed('vendors')&&currentUserRole==='admin'?supplierInvoices.filter(i=>!['rejected'].includes(i.status)).reduce((s,i)=>s+supplierInvoiceBalance(i),0):0;
+  const activeCampaigns=rep93ModuleAllowed('campaigns')?campaigns.filter(c=>['active','planned','draft'].includes(c.status)).length:0;
+  const m=rep93LatestMarketingMetrics();
+  return {total,done,overdue,completion,upcoming,activeInv:activeInv.length,low,allocated,spent,budgetPct:allocated?Math.min(999,Math.round(spent/allocated*100)):0,ap,activeCampaigns,marketing:m};
+}
+function rep93Progress(label,value,total,suffix=''){
+  const pct=total?Math.max(0,Math.min(100,Math.round(value/total*100))):0;
+  return `<div class="rep93-progress-row"><span>${escapeHtml(label)}</span><div class="rep93-track"><div class="rep93-fill" style="width:${pct}%"></div></div><b style="font-family:'IBM Plex Mono',monospace;font-size:11px">${escapeHtml(String(value))}${suffix}</b></div>`;
+}
+function reports93MainTemplate(){
+  const defs=rep93VisibleDatasets();
+  return `<div class="rep93-toolbar"><div><h3>${rep93L('التقارير والتصدير','Reports & Export')}</h3><p>${rep93L('تصدير CSV من البيانات التي تسمح لك الباقة وRLS برؤيتها فقط.','CSV exports are limited to data your plan and RLS already allow you to see.')}</p></div>${currentUserRole==='admin'?`<button class="chip-btn" onclick="openRep93Launch()">${rep93L('جاهزية الإطلاق','Launch readiness')}</button>`:''}</div>
+  <div class="rep93-boundary"><b>${rep93L('حدود الإطلاق:','Launch boundary:')}</b> ${rep93L('تم حذف مجموعات Demo القديمة من التقارير. لا يتم تصدير Media Relations أو Internal Comms أو Asset Library لأنها مؤجلة لما بعد الإطلاق، ولا يتم سحب HR/Payroll أو CRM الحساسة إلى التقرير العام.','Legacy demo datasets were removed. Media Relations, Internal Comms and Asset Library are post-launch, and sensitive HR/Payroll or CRM data are not pulled into general reports.')}</div>
+  <div class="section-card"><table><thead><tr><th>${rep93L('مجموعة البيانات','Dataset')}</th><th>${rep93L('السجلات المتاحة','Visible records')}</th><th>${rep93L('المصدر','Source')}</th><th></th></tr></thead><tbody>${defs.map(d=>{const rows=d.get();return `<tr><td><b>${escapeHtml(d.label)}</b>${d.admin?`<div style="font-size:9.5px;color:var(--muted)">${rep93L('تصدير إداري','Admin export')}</div>`:''}</td><td style="font-family:'IBM Plex Mono',monospace">${rows.length}</td><td><span class="rep93-source-pill"><i></i>${rep93L('بيانات تاسكي الحية','Live Tasky data')}</span></td><td><button class="chip-btn" onclick="exportDataset93('${d.key}')"><svg style="width:14px;height:14px"><use href="#i-download"/></svg>${rep93L('تصدير CSV','Export CSV')}</button></td></tr>`}).join('')||`<tr><td colspan="4"><div class="rep93-empty">${rep93L('لا توجد مجموعات تقارير متاحة في الباقة الحالية.','No report datasets are available under the current plan.')}</div></td></tr>`}</tbody></table></div>`;
+}
+function analytics93MainTemplate(){
+  const a=rep93AnalyticsData();
+  const marketingEnabled=rep93ModuleAllowed('campaigns')||rep93ModuleAllowed('content');
+  return `<div class="rep93-toolbar"><div><h3>${rep93L('الإحصائيات ومؤشرات الأداء','Analytics & KPIs')}</h3><p>${rep93L('كل رقم أدناه مشتق من بيانات مساحة العمل الحالية؛ لا توجد أرقام توضيحية ثابتة في V93.','Every number below is derived from current workspace data; V93 contains no illustrative KPI values.')}</p></div>${currentUserRole==='admin'?`<button class="chip-btn" onclick="openRep93Launch()">${rep93L('جاهزية الإطلاق','Launch readiness')}</button>`:''}</div>
+  <div class="rep93-boundary"><b>${rep93L('مصدر المؤشرات:','KPI source:')}</b> ${rep93L('مهام تاسكي والفعاليات والمخزون والميزانيات والمشتريات والتسويق المحملة حسب الباقة. قياسات التسويق نفسها تظل snapshots يدوياً حسب حدود V90.','Tasky tasks plus plan-enabled Events, Inventory, Budgets, Procurement and Marketing. Marketing performance remains user-entered snapshots under the V90 boundary.')}</div>
+  <div class="rep93-kpis"><div class="rep93-kpi"><span>${rep93L('إنجاز المهام','Task completion')}</span><b>${a.completion}%</b><small>${a.done} / ${a.total} ${rep93L('مهمة مكتملة','tasks completed')}</small></div><div class="rep93-kpi"><span>${rep93L('المهام المتأخرة','Overdue tasks')}</span><b>${a.overdue}</b><small>${rep93L('من المهام التي يسمح لك المشروع برؤيتها','Within project rows visible to you')}</small></div><div class="rep93-kpi"><span>${rep93L('الفعاليات القادمة','Upcoming events')}</span><b>${rep93ModuleAllowed('events')?a.upcoming:'—'}</b><small>${rep93ModuleAllowed('events')?rep93L('غير مكتملة أو ملغاة','Not completed/cancelled'):rep93L('غير متاحة في الباقة','Not available in plan')}</small></div><div class="rep93-kpi"><span>${rep93L('حملات نشطة','Active campaigns')}</span><b>${marketingEnabled?a.activeCampaigns:'—'}</b><small>${marketingEnabled?rep93L('من Marketing الحالي','From current Marketing data'):rep93L('غير متاحة في الباقة','Not available in plan')}</small></div></div>
+  <div class="rep93-grid"><div class="rep93-panel"><h3>${rep93L('صحة التشغيل','Operational health')}</h3>${rep93Progress(rep93L('المهام المكتملة','Completed tasks'),a.done,Math.max(1,a.total))}${rep93ModuleAllowed('inventory')?rep93Progress(rep93L('المخزون المنخفض','Low-stock items'),a.low,Math.max(1,a.activeInv)):''}${rep93ModuleAllowed('budgets')&&currentUserRole==='admin'?rep93Progress(rep93L('استخدام الميزانيات','Budget utilization'),Math.round(a.spent),Math.max(1,Math.round(a.allocated))):''}</div>
+  <div class="rep93-panel"><h3>${rep93L('مؤشرات إضافية','Additional live indicators')}</h3><div class="rep93-kpis" style="grid-template-columns:repeat(2,minmax(0,1fr))">${rep93ModuleAllowed('inventory')?`<div class="rep93-kpi"><span>${rep93L('أصناف نشطة','Active inventory items')}</span><b>${a.activeInv}</b><small>${a.low} ${rep93L('منخفض','low stock')}</small></div>`:''}${rep93ModuleAllowed('budgets')&&currentUserRole==='admin'?`<div class="rep93-kpi"><span>${rep93L('استخدام الميزانية','Budget usage')}</span><b>${a.budgetPct}%</b><small>${fmtMoney(a.spent)} / ${fmtMoney(a.allocated)}</small></div>`:''}${rep93ModuleAllowed('vendors')&&currentUserRole==='admin'?`<div class="rep93-kpi"><span>${rep93L('ذمم موردين مفتوحة','Supplier AP outstanding')}</span><b style="font-size:16px">${fmtMoney(a.ap)}</b><small>${rep93L('من فواتير الموردين المرئية','From visible supplier invoices')}</small></div>`:''}${marketingEnabled?`<div class="rep93-kpi"><span>${rep93L('Reach التسويق','Marketing reach')}</span><b>${Number(a.marketing.reach||0).toLocaleString('en-US')}</b><small>${rep93L('أحدث Snapshot لكل محتوى/منصة','Latest snapshot per content/platform')}</small></div>`:''}</div></div></div>`;
+}
+
+reportsTemplate=function(){return rep93LaunchOpen?rep93ReadinessTemplate():reports93MainTemplate()};
+analyticsTemplate=function(){return rep93LaunchOpen?rep93ReadinessTemplate():analytics93MainTemplate()};
+
+async function fetchRep93(force=false){
+  if(currentUserRole!=='admin'||!currentWorkspaceId)return null;const key=currentWorkspaceId;
+  if(!force&&rep93State.key===key&&rep93State.data)return rep93State.data;if(rep93State.loading)return rep93State.data;
+  rep93State.loading=true;rep93State.error='';if(rep93LaunchOpen)renderModule();
+  try{const {data,error}=await sb.rpc('tasky_reports_launch_readiness_v93',{p_workspace_id:currentWorkspaceId});if(error)throw error;rep93State.data=data;rep93State.key=key;return data}
+  catch(e){rep93State.error=e?.message||String(e);throw e}finally{rep93State.loading=false;if(rep93LaunchOpen)renderModule()}
+}
+async function rep93SetSignoff(key,status){const {error}=await sb.rpc('tasky_reports_set_launch_signoff_v93',{p_workspace_id:currentWorkspaceId,p_check_key:key,p_status:status,p_note:null});if(error){showTaskyDialog({title:rep93L('تعذّر حفظ الاختبار','Could not save sign-off'),message:error.message,tone:'error'});return}await fetchRep93(true)}
+function rep93StatusLabel(s){return ({ready:rep93L('جاهز','Ready'),ready_with_warnings:rep93L('جاهز مع تحذيرات','Ready with warnings'),needs_signoff:rep93L('بانتظار الاختبارات','Needs sign-off'),blocked:rep93L('محظور','Blocked')})[s]||s}
+function rep93SignLabel(k){return ({tenant_permissions:rep93L('عزل الشركات والصلاحيات','Tenant isolation & permissions'),source_accuracy:rep93L('دقة مصادر البيانات','Source accuracy'),safe_exports:rep93L('سلامة تصدير CSV','Safe CSV exports'),kpi_accuracy:rep93L('دقة حساب المؤشرات','KPI calculation accuracy'),lazy_loading:rep93L('Lazy Loading والباقة','Lazy loading & plan gates'),cross_module_consistency:rep93L('اتساق الوحدات المرتبطة','Cross-module consistency'),no_demo_claims:rep93L('عدم وجود Demo/Placeholder','No demo/placeholder claims')})[k]||k}
+function rep93SignHelp(k){return ({tenant_permissions:rep93L('اختبر عضوًا من Workspace آخر ومستخدمًا غير Admin، وتأكد أن التقارير لا تكشف بيانات خارج RLS.','Test another workspace and a non-admin user; reports must not expose data beyond RLS.'),source_accuracy:rep93L('قارن عددًا وعينة من Tasks/Events/Inventory مع الوحدة الأصلية وتأكد أن التقرير يطابقها.','Compare counts and sample rows against source modules and verify exact agreement.'),safe_exports:rep93L('صدّر CSV يحتوي نصًا يبدأ بـ = أو + وتأكد أنه لا يتحول إلى Formula عند فتحه في Excel/Sheets.','Export CSV with text beginning = or + and verify it is not evaluated as a spreadsheet formula.'),kpi_accuracy:rep93L('احسب يدويًا Completion/Overdue/Budget/AP لعينة وقارنها مع لوحة V93.','Manually calculate sample Completion/Overdue/Budget/AP values and compare with V93.'),lazy_loading:rep93L('جرّب Pro ثم Business: Reports/Analytics يجب ألا تجلب Inventory/Budgets/Procurement عندما تكون الوحدة غير متاحة.','Test Pro vs Business: Reports/Analytics must not fetch Inventory/Budgets/Procurement when unavailable.'),cross_module_consistency:rep93L('غيّر سجلًا في وحدة المصدر ثم أعد فتح/تحميل Analytics وتأكد أن القيمة الجديدة تظهر بدون Demo fallback.','Change a source-module record, reload Analytics, and verify the real value appears with no demo fallback.'),no_demo_claims:rep93L('تأكد أن 312K و7.6% وTraffic Sources وTop Posts القديمة لم تعد تظهر، ولا توجد عبارة Live Sync لخدمة غير متصلة فعليًا.','Verify old 312K/7.6%/Traffic Sources/Top Posts placeholders are gone and no unimplemented live-sync claim appears.')})[k]||''}
+function rep93ReadinessTemplate(){
+  if(currentUserRole!=='admin')return `<div class="rep93-panel"><div class="rep93-empty">${rep93L('جاهزية التقارير والتحليلات متاحة لمدير Workspace فقط.','Reports & Analytics readiness is Workspace Admin only.')}</div></div>`;
+  if(!rep93State.data&&!rep93State.loading&&!rep93State.error)setTimeout(()=>fetchRep93(),0);
+  if(rep93State.loading&&!rep93State.data)return `<div class="rep93-shell"><div class="rep93-panel"><div class="rep93-empty">${rep93L('جارٍ تدقيق مصادر التقارير وRLS والمؤشرات والتصدير...','Auditing reporting sources, RLS, KPIs and exports…')}</div></div></div>`;
+  if(rep93State.error)return `<div class="rep93-shell"><div class="rep93-panel"><div class="rep93-empty">${escapeHtml(rep93State.error)}<br>${rep93L('شغّل Migration V93 ثم أعد المحاولة.','Run Migration V93, then retry.')}</div><button class="primary-btn" style="display:block;margin:10px auto 0" onclick="taskyRerunAudit91('reports',this)">${rep93L('إعادة المحاولة','Retry')}</button></div></div>`;
+  const d=rep93State.data||{},issues=Array.isArray(d.issues)?d.issues:[],sign=Array.isArray(d.signoffs)?d.signoffs:[],sources=Array.isArray(d.sources)?d.sources:[],status=d.status||'needs_signoff';
+  return `<div class="rep93-shell"><div class="rep93-hero"><div><div style="display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:7px"><button class="chip-btn" onclick="closeRep93Launch()">← ${rep93L('التقارير والتحليلات','Reports & Analytics')}</button><button class="chip-btn" onclick="taskyRerunAudit91('reports',this)">${rep93L('إعادة الفحص','Re-run audit')}</button></div><h3>${rep93L('جاهزية إطلاق التقارير والتحليلات — V93','Reports & Analytics Launch Readiness — V93')}</h3><p>${rep93L('تدقيق حي على مصادر البيانات، RLS، دقة المؤشرات، حدود الباقة، تصدير CSV وعدم عرض أي أرقام تجريبية على أنها بيانات حقيقية.','Live audit of data sources, RLS, KPI integrity, plan boundaries, CSV export safety and removal of illustrative metrics.')}</p></div><div class="rep93-status ${escapeHtml(status)}">● ${escapeHtml(rep93StatusLabel(status))}</div></div>
+  <div class="rep93-readiness-kpis"><div class="rep93-readiness-kpi critical"><span>${rep93L('مشاكل حرجة','Critical')}</span><b>${Number(d.critical_count||0)}</b></div><div class="rep93-readiness-kpi warning"><span>${rep93L('تحذيرات','Warnings')}</span><b>${Number(d.warning_count||0)}</b></div><div class="rep93-readiness-kpi"><span>${rep93L('ملاحظات','Info')}</span><b>${Number(d.info_count||0)}</b></div><div class="rep93-readiness-kpi"><span>${rep93L('اختبارات ناجحة','Passed sign-offs')}</span><b>${sign.filter(x=>x.status==='passed').length} / 7</b></div></div>
+  <div class="rep93-panel"><h3>${rep93L('مصادر التقارير','Reporting sources')}</h3><div class="rep93-sources">${sources.map(s=>`<div class="rep93-source ${s.available&&s.rls?'':'bad'}"><b>${escapeHtml(lang==='ar'?(s.label_ar||s.label_en):(s.label_en||s.label_ar))}</b><small>${s.available?'✓ '+rep93L('الجدول موجود','table exists'):'× '+rep93L('غير موجود','missing')} · ${s.rls?'✓ RLS':'× RLS'}${s.optional?' · '+rep93L('حسب الباقة','plan-dependent'):''}</small></div>`).join('')}</div></div>
+  <div class="rep93-panel"><h3>${rep93L('نتيجة التدقيق الآلي','Automated audit')}</h3>${issues.length?issues.map(i=>`<div class="rep93-issue ${escapeHtml(i.severity||'info')}"><div><b>${escapeHtml(lang==='ar'?(i.title_ar||i.title_en):(i.title_en||i.title_ar))}</b><p>${escapeHtml(lang==='ar'?(i.detail_ar||i.detail_en):(i.detail_en||i.detail_ar))}</p></div><span class="rep93-count">${Number(i.count||0)}</span></div>`).join(''):`<div class="rep93-empty">✓ ${rep93L('لم يرصد التدقيق مشاكل في مصادر التقارير الحالية.','No live reporting-source issues were detected.')}</div>`}</div>
+  <div class="rep93-panel"><h3>${rep93L('اختبارات ما قبل الإطلاق','Pre-launch sign-off')}</h3>${sign.map(x=>`<div class="rep93-signoff"><div><b>${escapeHtml(rep93SignLabel(x.check_key))}</b><small>${escapeHtml(rep93SignHelp(x.check_key))}</small></div><div class="rep93-btns"><button class="rep93-mini pass ${x.status==='passed'?'active':''}" onclick="rep93SetSignoff('${x.check_key}','passed')">✓ ${rep93L('نجح','Pass')}</button><button class="rep93-mini fail ${x.status==='failed'?'active':''}" onclick="rep93SetSignoff('${x.check_key}','failed')">× ${rep93L('فشل','Fail')}</button></div></div>`).join('')}</div>
+  <div class="rep93-note"><b>${rep93L('تنظيف V93:','V93 cleanup:')}</b> ${rep93L('تم استبدال Analytics التجريبية بالكامل بمؤشرات حقيقية من Workspace، وإزالة التقارير التي كانت تعتمد على Media/Internal Comms/Asset demo arrays، وإضافة حماية CSV Formula Injection وحدود الباقة أثناء Lazy Loading.','Illustrative Analytics were replaced with live workspace KPIs, demo Media/Internal Comms/Asset exports were removed, CSV formula-injection protection was added, and lazy loading now honors plan/module gates.')}</div><div class="rep93-rule"><b>${rep93L('قاعدة الإطلاق:','Launch rule:')}</b> ${rep93L('Critical = 0 + نجاح اختبارات Sign-off السبعة.','Critical = 0 + all seven sign-offs passed.')}</div></div>`;
+}
+function openRep93Launch(){if(currentUserRole!=='admin'||!['reports','analytics'].includes(activeNav))return;rep93LaunchOpen=true;renderModule();const b=document.getElementById('breadcrumbLabel');if(b)b.textContent=rep93L('جاهزية التقارير والتحليلات','Reports & Analytics Readiness');fetchRep93()}
+function closeRep93Launch(){rep93LaunchOpen=false;renderModule();const b=document.getElementById('breadcrumbLabel');if(b)b.textContent=t(activeNav==='analytics'?'nav_analytics':'nav_reports')}
+
+// Extend the unified readiness refresh path without changing any prior section behavior.
+const taskyRerunAudit91BaseV93=taskyRerunAudit91;
+taskyRerunAudit91=async function(section,btn){
+  if(section!=='reports')return taskyRerunAudit91BaseV93(section,btn);
+  if(btn?.dataset?.auditBusy==='1')return;const old=btn?.innerHTML||'';
+  if(btn){btn.dataset.auditBusy='1';btn.disabled=true;btn.classList.add('tasky-audit-refreshing')}
+  try{rep93State.key='';rep93State.error='';await fetchRep93(true);if(rep93State.error)throw new Error(rep93State.error);taskyToast(rep93L('اكتمل إعادة الفحص من بيانات Supabase الحالية','Audit refreshed from current Supabase data'),{tone:'success'})}
+  catch(err){showTaskyDialog({title:rep93L('تعذرت إعادة الفحص','Audit refresh failed'),message:err?.message||String(err),tone:'error'})}
+  finally{if(btn){btn.disabled=false;btn.dataset.auditBusy='0';btn.classList.remove('tasky-audit-refreshing');btn.innerHTML=old}}
+};
+window.TASKY_READINESS_SECTIONS_V93=[...(window.TASKY_READINESS_SECTIONS_V92||[]),'reports'];
+</script>
+
 </body>
 </html>
