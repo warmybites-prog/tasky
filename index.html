@@ -1895,7 +1895,7 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V73.1'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V75.1'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1905,6 +1905,28 @@ if(!window.supabase){
 const sb = window.supabase.createClient(TASKY_SUPABASE_URL, TASKY_SUPABASE_PUBLISHABLE_KEY);
 
 let authMode = 'signin';
+let taskyAuthBusyV751 = false;
+let taskySessionCheckPromiseV751 = null;
+function taskyAuthSetBusyV751(busy, label=''){
+  taskyAuthBusyV751=!!busy;
+  const btn=document.getElementById('authSubmitBtn');
+  if(!btn)return;
+  btn.disabled=!!busy;
+  if(busy){
+    btn.dataset.taskyPrevLabel=btn.textContent||'';
+    btn.textContent=label||(lang==='ar'?'جاري تسجيل الدخول...':'Signing in...');
+  }else{
+    const fallback=authMode==='signup'?(lang==='ar'?'إنشاء الحساب':'Create account'):(lang==='ar'?'تسجيل الدخول':'Sign in');
+    btn.textContent=btn.dataset.taskyPrevLabel||fallback;
+    delete btn.dataset.taskyPrevLabel;
+  }
+}
+function taskyAuthShowErrorV751(message){
+  const box=document.getElementById('authError');
+  if(!box)return;
+  box.textContent=message||(lang==='ar'?'تعذّر إكمال العملية. حاول مرة أخرى.':'Could not complete the operation. Please try again.');
+  box.style.display='block';
+}
 let currentWorkspaceId = null;
 let currentWorkspaceName = null;
 let currentWorkspaceLogoUrl = null;
@@ -2258,22 +2280,27 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   renderNav();
   if(platformRuntimeBlocksApp()||platformReleaseRuntime?.hard_block) return true;
 
+  // V75.1 — keep core workspace access independent from optional product modules.
+  const safeWorkspaceLoadV751=async(label,fn)=>{
+    try{return await fn();}
+    catch(err){console.warn(`Tasky V75.1 non-blocking load: ${label}`,err);return null;}
+  };
   await fetchProjects();
   await fetchTeamMembers();
   await fetchProjectMemberships();
   await fetchTasks();
-  await fetchInventory();
-  await fetchEvents();
-  await fetchBudgets();
-  await fetchCrmData();
-  await fetchMarketingData();
-  await fetchProcurementData();
-  await fetchSurveys();
-  await fetchNotifications();
-  await fetchPendingPlanRequest();
-  await fetchCommercialRuntimeV69({render:false});
-  await fetchPricingCatalogV731({render:false});
-  await fetchOnboardingStateV68({render:false});
+  await safeWorkspaceLoadV751('inventory',()=>fetchInventory());
+  await safeWorkspaceLoadV751('events',()=>fetchEvents());
+  await safeWorkspaceLoadV751('budgets',()=>fetchBudgets());
+  await safeWorkspaceLoadV751('crm',()=>fetchCrmData());
+  await safeWorkspaceLoadV751('marketing',()=>fetchMarketingData());
+  await safeWorkspaceLoadV751('procurement',()=>fetchProcurementData());
+  await safeWorkspaceLoadV751('surveys',()=>fetchSurveys());
+  await safeWorkspaceLoadV751('notifications',()=>fetchNotifications());
+  await safeWorkspaceLoadV751('pending plan request',()=>fetchPendingPlanRequest());
+  await safeWorkspaceLoadV751('commercial runtime',()=>fetchCommercialRuntimeV69({render:false}));
+  await safeWorkspaceLoadV751('pricing catalog',()=>fetchPricingCatalogV731({render:false}));
+  await safeWorkspaceLoadV751('onboarding',()=>fetchOnboardingStateV68({render:false}));
   initTaskRealtime();
   applyCurrentUserProfile();
   renderTeamAvatarStack();
@@ -2688,35 +2715,75 @@ async function finishInviteSetup(){
 }
 
 async function handleAuthSubmit(){
-  const email = document.getElementById('authEmail').value.trim().toLowerCase();
-  const password = document.getElementById('authPassword').value;
-  const errBox = document.getElementById('authError');
-  errBox.style.display = 'none';
-  if(!email || !password){ errBox.textContent = 'عبّي البريد وكلمة المرور'; errBox.style.display='block'; return; }
-  if(authMode === 'signup'){
-    const fullName = document.getElementById('authFullName').value.trim();
-    const company = document.getElementById('authCompany').value.trim();
-    if(!fullName){ errBox.textContent = 'اكتب اسمك الكامل'; errBox.style.display='block'; return; }
-    let signupGate;try{signupGate=await checkSignupGateV70(email);}catch(ex){errBox.textContent=ex.message;errBox.style.display='block';return;}
-    if(!signupGate.allowed){errBox.textContent=signupGateMessageV70(signupGate);errBox.style.display='block';return;}
-    const legalAccepted=!productionLaunchV70.require_legal_acceptance||!!document.getElementById('launchLegalAcceptV70')?.checked;
-    if(!legalAccepted){errBox.textContent=lang==='ar'?'لازم توافق على شروط الاستخدام وسياسة الخصوصية لإكمال التسجيل.':'You must accept the Terms of Use and Privacy Policy to continue.';errBox.style.display='block';return;}
-    const legalMeta=productionLaunchV70.require_legal_acceptance?{tasky_legal_accepted_at:new Date().toISOString(),tasky_terms_version:productionLaunchV70.terms_version||'current',tasky_privacy_version:productionLaunchV70.privacy_version||'current'}:{};
-    const { data, error } = await sb.auth.signUp({ email, password, options: { data: { full_name: fullName, ...legalMeta } } });
-    if(error){ errBox.textContent = error.message; errBox.style.display='block'; return; }
-    if(data.user){
-      const claimed = await claimPendingInvite(data.user.id, email);
-      if(!claimed){
-        if(!company){ errBox.textContent = 'اكتب اسم شركتك أو فريقك (ما فيه دعوة معلّقة لهذا البريد)'; errBox.style.display='block'; return; }
-        try{await createWorkspaceForNewUser(data.user.id, company, email);}catch(ex){errBox.textContent=ex?.message||'تعذّر إنشاء مساحة العمل';errBox.style.display='block';return;}
+  if(taskyAuthBusyV751)return;
+  const email=document.getElementById('authEmail').value.trim().toLowerCase();
+  const password=document.getElementById('authPassword').value;
+  const errBox=document.getElementById('authError');
+  errBox.style.display='none';
+  if(!email||!password){taskyAuthShowErrorV751(lang==='ar'?'عبّي البريد وكلمة المرور':'Enter your email and password');return;}
+
+  taskyAuthSetBusyV751(true,authMode==='signup'
+    ?(lang==='ar'?'جاري إنشاء الحساب...':'Creating account...')
+    :(lang==='ar'?'جاري تسجيل الدخول...':'Signing in...'));
+
+  try{
+    if(authMode==='signup'){
+      const fullName=document.getElementById('authFullName').value.trim();
+      const company=document.getElementById('authCompany').value.trim();
+      if(!fullName)throw new Error(lang==='ar'?'اكتب اسمك الكامل':'Enter your full name');
+
+      const signupGate=await checkSignupGateV70(email);
+      if(!signupGate.allowed)throw new Error(signupGateMessageV70(signupGate));
+
+      const legalAccepted=!productionLaunchV70.require_legal_acceptance||!!document.getElementById('launchLegalAcceptV70')?.checked;
+      if(!legalAccepted)throw new Error(lang==='ar'
+        ?'لازم توافق على شروط الاستخدام وسياسة الخصوصية لإكمال التسجيل.'
+        :'You must accept the Terms of Use and Privacy Policy to continue.');
+
+      const legalMeta=productionLaunchV70.require_legal_acceptance
+        ?{tasky_legal_accepted_at:new Date().toISOString(),tasky_terms_version:productionLaunchV70.terms_version||'current',tasky_privacy_version:productionLaunchV70.privacy_version||'current'}
+        :{};
+      const {data,error}=await sb.auth.signUp({email,password,options:{data:{full_name:fullName,...legalMeta}}});
+      if(error)throw error;
+
+      if(data.user){
+        const claimed=await claimPendingInvite(data.user.id,email);
+        if(!claimed){
+          if(!company)throw new Error(lang==='ar'
+            ?'اكتب اسم شركتك أو فريقك (ما فيه دعوة معلّقة لهذا البريد)'
+            :'Enter your company/team name (there is no pending invitation for this email)');
+          await createWorkspaceForNewUser(data.user.id,company,email);
+        }
       }
+      alert(lang==='ar'
+        ?'تم إنشاء الحساب! تحقق من بريدك لو طلب منك تفعيل الحساب.'
+        :'Account created. Check your email if verification is required.');
+      await checkSession();
+      return;
     }
-    alert('تم إنشاء الحساب! تحقق من بريدك لو طلب منك تفعيل الحساب.');
-  } else {
-    const { error } = await sb.auth.signInWithPassword({ email, password });
-    if(error){ errBox.textContent = error.message; errBox.style.display='block'; return; }
+
+    const {data,error}=await sb.auth.signInWithPassword({email,password});
+    if(error)throw error;
+
+    if(!data?.session?.user){
+      const {data:sessionData,error:sessionError}=await sb.auth.getSession();
+      if(sessionError)throw sessionError;
+      if(!sessionData?.session?.user)throw new Error(lang==='ar'
+        ?'تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة. حدّث الصفحة وحاول مرة أخرى.'
+        :'Credentials were accepted but no session was created. Refresh and try again.');
+    }
+
+    await checkSession();
+  }catch(ex){
+    console.error('Tasky V75.1 auth flow',ex);
+    taskyAuthShowErrorV751(ex?.message||String(ex));
+    const authScreen=document.getElementById('authScreen');
+    const appEl=document.querySelector('.app');
+    if(authScreen)authScreen.style.display='flex';
+    if(appEl)appEl.style.display='none';
+  }finally{
+    taskyAuthSetBusyV751(false);
   }
-  checkSession();
 }
 async function signOutUser(){
   await sb.auth.signOut();
@@ -2738,50 +2805,80 @@ async function signOutUser(){
 }
 
 async function checkSession(){
-  const { data: { session } } = await sb.auth.getSession();
-  const appEl = document.querySelector('.app');
-  const authScreen = document.getElementById('authScreen');
+  if(taskySessionCheckPromiseV751)return taskySessionCheckPromiseV751;
 
-  if(!session || !session.user){
-    currentUserId = null;
-    currentUserEmail = null;
-    currentWorkspaceId = null;
-    currentWorkspaceName = null;
-    currentUserRole = null;
-    authScreen.style.display = 'flex';
-    appEl.style.display = 'none';
-    showInviteSetup(false);
-    renderRoleToggle();
-    renderNav();
-    return;
-  }
+  taskySessionCheckPromiseV751=(async()=>{
+    const appEl=document.querySelector('.app');
+    const authScreen=document.getElementById('authScreen');
 
-  // Do not expose the application until invite setup and membership resolution are complete.
-  authScreen.style.display = 'none';
-  appEl.style.display = 'none';
+    try{
+      const {data,error:sessionError}=await sb.auth.getSession();
+      if(sessionError)throw sessionError;
+      const session=data?.session||null;
 
-  const inviteState = await getAuthoritativeInviteState(session);
-  if(inviteState.invited){
-    showInviteSetup(true);
-    return;
-  }
+      if(!session||!session.user){
+        currentUserId=null;
+        currentUserEmail=null;
+        currentWorkspaceId=null;
+        currentWorkspaceName=null;
+        currentUserRole=null;
+        authScreen.style.display='flex';
+        appEl.style.display='none';
+        showInviteSetup(false);
+        renderRoleToggle();
+        renderNav();
+        return false;
+      }
 
-  showInviteSetup(false);
-  const loaded = await loadWorkspaceAndData(inviteState.user);
-  if(loaded){
-    appEl.style.display = 'flex';
-    return;
-  }
+      authScreen.style.display='none';
+      appEl.style.display='none';
 
-  // A valid Auth session without an active Tasky membership must never fall back to admin UI.
-  await sb.auth.signOut();
-  authScreen.style.display = 'flex';
-  appEl.style.display = 'none';
-  const errBox = document.getElementById('authError');
-  if(errBox){
-    errBox.textContent = 'هذا الحساب لا يملك عضوية نشطة في مساحة عمل تاسكي.';
-    errBox.style.display = 'block';
-  }
+      const inviteState=await getAuthoritativeInviteState(session);
+      if(inviteState.invited){
+        showInviteSetup(true);
+        return true;
+      }
+
+      showInviteSetup(false);
+      let loaded=false;
+      try{
+        loaded=await loadWorkspaceAndData(inviteState.user);
+      }catch(loadError){
+        // V75.1: do not destroy a valid session because one product module failed to load.
+        console.error('Tasky V75.1 workspace bootstrap failed',loadError);
+        authScreen.style.display='flex';
+        appEl.style.display='none';
+        taskyAuthShowErrorV751(lang==='ar'
+          ?`تم تسجيل الدخول بنجاح، لكن تعذّر تحميل بيانات مساحة العمل: ${loadError?.message||String(loadError)}`
+          :`Sign-in succeeded, but the workspace could not be loaded: ${loadError?.message||String(loadError)}`);
+        return false;
+      }
+
+      if(loaded){
+        appEl.style.display='flex';
+        authScreen.style.display='none';
+        return true;
+      }
+
+      // No active workspace membership is the only case that signs the user back out.
+      await sb.auth.signOut();
+      authScreen.style.display='flex';
+      appEl.style.display='none';
+      taskyAuthShowErrorV751(lang==='ar'
+        ?'تم تسجيل الدخول، لكن هذا الحساب لا يملك عضوية نشطة في مساحة عمل تاسكي.'
+        :'You signed in successfully, but this account has no active Tasky workspace membership.');
+      return false;
+    }catch(ex){
+      console.error('Tasky V75.1 session check',ex);
+      if(authScreen)authScreen.style.display='flex';
+      if(appEl)appEl.style.display='none';
+      taskyAuthShowErrorV751(ex?.message||String(ex));
+      return false;
+    }
+  })();
+
+  try{return await taskySessionCheckPromiseV751;}
+  finally{taskySessionCheckPromiseV751=null;}
 }
 
 /* ================= i18n ================= */
@@ -4681,72 +4778,7 @@ function exportEventPdf(eventId){
   const guestRows=invitations.map((inv,i)=>`<tr><td>${i+1}</td><td>${escapeHtml(inv.guestName)}</td><td>${inv.partySize}</td><td>${escapeHtml(eventInvitationStatusLabel(inv.status))}</td><td>${inv.checkedInAt?(lang==='ar'?'تم الحضور':'Checked in'):'—'}</td><td>${escapeHtml(eventInvitationContact(inv)||'—')}</td></tr>`).join('');
   const w=window.open('','_blank'); if(!w){taskyToast(lang==='ar'?'اسمح بالنوافذ المنبثقة لتصدير التقرير':'Allow pop-ups to export the report',{tone:'warning'});return;}
   w.document.write(`<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><title>${localeTitle}</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font-family:Arial,"Tahoma",sans-serif;color:#182018;margin:0;font-size:10.5px;line-height:1.55}.head{border-bottom:2px solid #2A6C2E;padding-bottom:12px;margin-bottom:14px}.report-tasky-brand{display:inline-flex;align-items:center;justify-content:center;background:#0F3B1D;border-radius:11px;padding:7px 11px;margin-bottom:8px}.report-tasky-brand svg{height:30px!important;width:auto!important;max-width:150px}.report-org-brand{display:flex;align-items:center;gap:10px;margin-bottom:9px}.report-org-brand img{width:58px;height:58px;object-fit:contain;border:1px solid #E5E8E1;border-radius:12px;padding:5px;background:#fff}.report-org-brand b{display:block;font-size:14px}.report-org-brand span{display:block;color:#6b746c;font-size:9.5px;margin-top:2px}.muted{color:#6b746c}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.grid.four{grid-template-columns:repeat(4,1fr)}.card{border:1px solid #dfe5dd;border-radius:8px;padding:8px}.card span{display:block;color:#6b746c;font-size:8.5px}.card b{font-size:12.5px}.section{margin-top:15px;break-inside:avoid}.section h2{font-size:13px;margin:0 0 7px;color:#2A6C2E}.info{border:1px solid #e1e6df;border-radius:8px;padding:9px;margin:6px 0}.note{font-size:8.5px;color:#6b746c;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9px}th,td{border:1px solid #dfe5dd;padding:6px;text-align:${dir==='rtl'?'right':'left'};vertical-align:top}th{background:#f2f5f0}.sub td{color:#5f685f;font-size:8.5px;background:#fafbf9}.footer{margin-top:16px;padding-top:8px;border-top:1px solid #dfe5dd;color:#7a8079;font-size:8.5px}@media print{button{display:none}.section{break-inside:avoid-page}}</style></head><body><div class="head">${brandHtml}<div class="muted">${lang==='ar'?'تقرير الفعالية':'Event Report'}</div><h1 style="font-size:19px;margin:6px 0 2px">${localeTitle}</h1><div class="muted">${escapeHtml(formatEventDate(ev.startAt))}${ev.endAt?' - '+escapeHtml(formatEventDate(ev.endAt)):''}</div></div><div class="grid"><div class="card"><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="card"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b></div></div><div class="grid four"><div class="card"><span>${lang==='ar'?'السعة المتوقعة للضيوف':'Expected guest capacity'}</span><b>${ev.capacity||'—'}</b></div><div class="card"><span>${lang==='ar'?'الحضور المؤكد':'Confirmed guests'}</span><b>${guestStats.confirmed}</b></div><div class="card"><span>${lang==='ar'?'تم تسجيل حضورهم':'Checked in'}</span><b>${guestStats.checkedIn}</b></div><div class="card"><span>${lang==='ar'?'فريق العمل المشارك':'Participating team'}</span><b>${participants.length}</b></div></div><div class="note">${lang==='ar'?'السعة المتوقعة للحضور تخص الضيوف المدعوين ولا تشمل أعضاء فريق العمل المشاركين.':'Expected attendance capacity applies to invited guests and excludes participating team members.'}</div>${ev.description?`<div class="section"><h2>${lang==='ar'?'الوصف':'Description'}</h2><div class="info">${escapeHtml(ev.description)}</div></div>`:''}<div class="section"><h2>${lang==='ar'?'الموقع والتواصل':'Location & Contact'}</h2><div class="info">${ev.location?`<b>${lang==='ar'?'الموقع':'Location'}:</b> ${escapeHtml(ev.location)}<br>`:''}${ev.googleMapsUrl?`<b>Google Maps:</b> ${escapeHtml(ev.googleMapsUrl)}<br>`:''}${ev.contactName?`<b>${lang==='ar'?'شخص التواصل':'Contact'}:</b> ${escapeHtml(ev.contactName)}<br>`:''}${ev.contactPhone?`<b>${lang==='ar'?'الهاتف':'Phone'}:</b> ${escapeHtml(ev.contactPhone)}<br>`:''}${ev.contactEmail?`<b>${lang==='ar'?'البريد':'Email'}:</b> ${escapeHtml(ev.contactEmail)}`:''}</div></div><div class="section"><h2>${lang==='ar'?'فريق العمل المشارك':'Participating Team'}</h2><div class="info">${escapeHtml(participants.map(p=>p.fullName).join('، ')||'—')}</div></div><div class="section"><h2>${lang==='ar'?'دعوات الحضور وحالة المشاركة':'Guest Invitations & RSVP'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'الضيف':'Guest'}</th><th>${lang==='ar'?'العدد':'Party'}</th><th>${lang==='ar'?'حالة المشاركة':'RSVP'}</th><th>${lang==='ar'?'الحضور':'Check-in'}</th><th>${lang==='ar'?'التواصل':'Contact'}</th></tr></thead><tbody>${guestRows||`<tr><td colspan="6">${lang==='ar'?'لا توجد دعوات حضور':'No guest invitations'}</td></tr>`}</tbody></table></div><div class="section"><h2>${lang==='ar'?'المهام والتكاليف':'Tasks & Costs'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'المهمة':'Task'}</th><th>${lang==='ar'?'المسؤولون':'Assignees'}</th><th>${lang==='ar'?'التكلفة':'Cost'}</th><th>${lang==='ar'?'الحالة':'Status'}</th></tr></thead><tbody>${taskRows||`<tr><td colspan="5">${lang==='ar'?'لا توجد مهام':'No tasks'}</td></tr>`}</tbody></table></div><div class="footer">${lang==='ar'?'تم إنشاء التقرير من منصة تاسكي':'Generated by Tasky'} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div>
-<script>
-/* ================= V75 COMPENSATION, PAYROLL PREPARATION & GOSI ================= */
-window.TASKY_BUILD='V75';
-Object.assign(hrV72,{payrollSettings:hrV72.payrollSettings||[],insuranceProfiles:hrV72.insuranceProfiles||[],payrollRuns:hrV72.payrollRuns||[],payrollItems:hrV72.payrollItems||[]});
-Object.assign(hrTablesV72,{payrollSettings:'tasky_hr_payroll_settings',insuranceProfiles:'tasky_hr_social_insurance_profiles',payrollRuns:'tasky_hr_payroll_runs',payrollItems:'tasky_hr_payroll_items'});
-let hrPayrollMonthV75=new Date().toISOString().slice(0,7);
-function hrCanPayrollV75(){return hrCanPayroll72();}
-function hrPayrollRunV75(id){return hrV72.payrollRuns.find(x=>String(x.id)===String(id));}
-function hrInsuranceProfileV75(empId){return hrV72.insuranceProfiles.find(x=>String(x.employee_id)===String(empId));}
-function hrLatestCompV75(empId,period=null){const d=period||`${hrPayrollMonthV75}-28`;return hrV72.compensation.filter(x=>String(x.employee_id)===String(empId)&&String(x.effective_from||'')<=d).sort((a,b)=>String(b.effective_from).localeCompare(String(a.effective_from))||String(b.created_at).localeCompare(String(a.created_at)))[0]||null;}
-function hrCoverageLabelV75(v){const m={unclassified:['غير مصنف','Unclassified'],saudi_legacy:['سعودي — النظام السابق','Saudi — legacy'],saudi_new_1445:['سعودي — نظام 1445 الجديد','Saudi — new 1445'],non_saudi:['غير سعودي — أخطار مهنية','Non-Saudi — occupational hazards'],gcc_manual:['خليجي — حماية ممتدة يدوية','GCC — manual extended protection'],excluded:['مستبعد/غير خاضع','Excluded / not covered']};return hrL72(...(m[v]||[v||'—',v||'—']));}
-function hrPayrollStatusV75(s){const m={draft:['مسودة','Draft',''],review:['مراجعة','Review','warn'],approved:['معتمد','Approved','ok'],locked:['مقفل','Locked','info'],paid:['مدفوع','Paid','ok'],cancelled:['ملغي','Cancelled','bad']};const x=m[s]||[s,s,''];return `<span class="hr72-pill ${x[2]}">${hrL72(x[0],x[1])}</span>`;}
-function hrSumV75(rows,key){return rows.reduce((s,x)=>s+Number(x[key]||0),0)}
-function hrRunItemsV75(runId){return hrV72.payrollItems.filter(x=>String(x.run_id)===String(runId));}
-function hrGosiRateSummaryV75(p,period){if(!p)return hrL72('يلزم تصنيف','Needs classification');const type=p.coverage_type;if(type==='saudi_legacy')return '9% + 0.75%';if(type==='saudi_new_1445'){const d=new Date(`${period||hrPayrollMonthV75}-01T00:00:00`),rate=d>=new Date('2028-07-01')?11:d>=new Date('2027-07-01')?10.5:d>=new Date('2026-07-01')?10:d>=new Date('2025-07-01')?9.5:9;return `${rate}% + 0.75%`;}if(type==='non_saudi')return hrL72('2% على صاحب العمل','2% employer');if(type==='gcc_manual')return `${Number(p.manual_employee_rate||0)}% / ${Number(p.manual_employer_rate||0)}%`;if(type==='excluded')return '0%';return hrL72('يلزم تصنيف','Needs classification');}
-function hrPayrollMonthLabelV75(run){if(!run)return '—';try{return new Intl.DateTimeFormat(lang==='ar'?'ar-SA':'en-US',{month:'long',year:'numeric'}).format(new Date(`${run.period_start}T12:00:00`))}catch(_){return run.period_start}}
-function hrGosiNeedsReviewV75(){return hrV72.payrollItems.some(x=>x.gosi_needs_review)}
 
-/* V75 replaces the compensation area with a payroll workspace. */
-hrCompensationV72=function(){
- const isPayroll=hrCanPayrollV75();
- if(!isPayroll){const slips=hrV72.payrollItems.filter(x=>String(x.employee_id)===String(hrContextV72.employee_id||'')).sort((a,b)=>String(hrPayrollRunV75(b.run_id)?.period_start||'').localeCompare(String(hrPayrollRunV75(a.run_id)?.period_start||'')));return `<div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hrL72('راتبي ومسيرات الرواتب','My pay & payslips')}</h3><p>${hrL72('تظهر المسيرات لك بعد اعتمادها من فريق الرواتب.','Payroll appears after it is approved by Payroll/HR.')}</p></div></div>${slips.map(i=>{const r=hrPayrollRunV75(i.run_id);return `<div class="hr75-self-slip"><div class="hr75-self-slip-top"><div><h4>${escapeHtml(hrPayrollMonthLabelV75(r))}</h4><p>${hrL72('الراتب الأساسي','Basic')} ${hrMoney72(i.basic_salary)} · ${hrCoverageLabelV75(i.gosi_coverage_type)}</p></div>${hrPayrollStatusV75(r?.status)}</div><div class="hr75-self-numbers"><div><span>${hrL72('الإجمالي','Gross')}</span><b>${hrMoney72(i.gross_pay)}</b></div><div><span>${hrL72('حصة الموظف — التأمينات','Employee GOSI')}</span><b>${hrMoney72(i.gosi_employee_amount)}</b></div><div><span>${hrL72('الاستقطاعات الأخرى','Other deductions')}</span><b>${hrMoney72(Number(i.recurring_deductions||0)+Number(i.unpaid_leave_deduction||0)+Number(i.attendance_deduction||0)+Number(i.other_deductions||0))}</b></div><div><span>${hrL72('صافي الراتب','Net pay')}</span><b>${hrMoney72(i.net_pay)}</b></div></div></div>`}).join('')||`<div class="hr72-empty">${hrL72('لا توجد مسيرات رواتب معتمدة ظاهرة لك حتى الآن.','No approved payroll items are visible to you yet.')}</div>`}</div>`;}
- const runs=[...hrV72.payrollRuns].sort((a,b)=>String(b.period_start).localeCompare(String(a.period_start))),selected=runs.find(r=>String(r.period_start||'').slice(0,7)===hrPayrollMonthV75)||runs[0],items=selected?hrRunItemsV75(selected.id):[];
- const gross=hrSumV75(items,'gross_pay'),empGosi=hrSumV75(items,'gosi_employee_amount'),erGosi=hrSumV75(items,'gosi_employer_amount'),net=hrSumV75(items,'net_pay'),cost=hrSumV75(items,'employer_total_cost');
- const profiles=hrV72.employees.filter(e=>['active','probation','leave'].includes(e.status)).map(e=>({e,p:hrInsuranceProfileV75(e.id),c:hrLatestCompV75(e.id)}));
- return `<div>
- <div class="hr75-note"><b>${hrL72('V75 — تجهيز الرواتب والتأمينات الاجتماعية','V75 — Payroll preparation & social insurance')}</b> · ${hrL72('الحسابات تساعد في تجهيز المسير داخل تاسكي ولا تُرسل أو تُسدد تلقائيًا إلى التأمينات الاجتماعية أو أي جهة حكومية. يجب تأكيد تصنيف كل موظف من فريق الرواتب.','Calculations prepare payroll inside Tasky; they are not filed or paid automatically to GOSI or any government service. Payroll must confirm each employee classification.')}</div>
- <div class="hr75-toolbar"><div class="left"><input class="hr75-month" type="month" value="${escapeHtml(hrPayrollMonthV75)}" onchange="hrPayrollMonthV75=this.value;renderModule()"><button class="primary-btn" onclick="hrCreatePayrollRunV75()">+ ${hrL72('إنشاء/إعادة بناء مسير الشهر','Create / rebuild month')}</button><button class="chip-btn" onclick="hrOpenGosiCalculatorV75()">${hrL72('حاسبة التأمينات','GOSI calculator')}</button></div><div class="right"><button class="chip-btn" onclick="hrOpenFormV72('payrollSettings75')">${hrL72('إعدادات الرواتب','Payroll settings')}</button></div></div>
- <div class="hr75-kpis"><div class="hr75-kpi"><span>${hrL72('إجمالي الرواتب','Gross payroll')}</span><b>${hrMoney72(gross)}</b><small>${items.length} ${hrL72('موظف','employees')}</small></div><div class="hr75-kpi"><span>${hrL72('تأمينات — الموظفين','Employee GOSI')}</span><b>${hrMoney72(empGosi)}</b><small>${hrL72('تُخصم من الصافي','deducted from net')}</small></div><div class="hr75-kpi"><span>${hrL72('تأمينات — صاحب العمل','Employer GOSI')}</span><b>${hrMoney72(erGosi)}</b><small>${hrL72('تكلفة على المنشأة','employer cost')}</small></div><div class="hr75-kpi"><span>${hrL72('صافي الرواتب','Net payroll')}</span><b>${hrMoney72(net)}</b><small>${selected?escapeHtml(hrPayrollMonthLabelV75(selected)):'—'}</small></div><div class="hr75-kpi"><span>${hrL72('إجمالي تكلفة المنشأة','Employer total cost')}</span><b>${hrMoney72(cost)}</b><small>${selected?hrPayrollStatusV75(selected.status):'—'}</small></div></div>
- <div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hrL72('مسيرات الرواتب','Payroll runs')}</h3><p>${hrL72('مسودة → مراجعة → اعتماد → إقفال → مدفوع. لا يمكن اعتماد مسير فيه ملف تأمينات غير مصنف.','Draft → review → approve → lock → paid. A run with unclassified insurance profiles cannot be approved.')}</p></div></div>${runs.map(r=>{const ri=hrRunItemsV75(r.id),review=ri.filter(x=>x.gosi_needs_review).length;return `<div class="hr75-run"><div class="hr75-run-main"><h4>${escapeHtml(hrPayrollMonthLabelV75(r))} ${hrPayrollStatusV75(r.status)}</h4><p>${hrDate72(r.period_start)} → ${hrDate72(r.period_end)} · ${ri.length} ${hrL72('موظف','employees')}${review?` · <span class="hr75-review">${review} ${hrL72('يحتاج مراجعة تأمينات','GOSI review')}</span>`:''}</p></div><div><small>${hrL72('الإجمالي','Gross')}</small><b>${hrMoney72(hrSumV75(ri,'gross_pay'))}</b></div><div><small>${hrL72('حصة الموظف','Employee GOSI')}</small><b>${hrMoney72(hrSumV75(ri,'gosi_employee_amount'))}</b></div><div><small>${hrL72('حصة المنشأة','Employer GOSI')}</small><b>${hrMoney72(hrSumV75(ri,'gosi_employer_amount'))}</b></div><div><small>${hrL72('الصافي','Net')}</small><b>${hrMoney72(hrSumV75(ri,'net_pay'))}</b></div><div><small>${hrL72('تكلفة المنشأة','Employer cost')}</small><b>${hrMoney72(hrSumV75(ri,'employer_total_cost'))}</b></div><div class="hr75-run-actions"><button class="platform-mini-btn" onclick="hrOpenPayrollRunV75('${r.id}')">${hrL72('فتح','Open')}</button></div></div>`}).join('')||`<div class="hr72-empty">${hrL72('لا توجد مسيرات بعد. اختر الشهر واضغط إنشاء مسير.','No payroll runs yet. Pick a month and create a run.')}</div>`}</div>
- <div class="hr72-panel" style="margin-top:10px"><div class="hr72-panel-head"><div><h3>${hrL72('ملفات التأمينات الاجتماعية','Social-insurance profiles')}</h3><p>${hrL72('لا يستنتج تاسكي النظام الجديد من تاريخ التوظيف وحده. يجب تأكيد وجود أو عدم وجود مدد اشتراك قبل 3 يوليو 2024.','Tasky does not infer the new regime from hire date alone. Confirm whether the employee had contribution periods before 3 July 2024.')}</p></div></div><div class="hr75-profile-grid">${profiles.map(({e,p,c})=>`<div class="hr75-profile"><div class="hr75-profile-top"><div><h4>${escapeHtml(hrName72(e))}</h4><p>${escapeHtml(e.employee_no||e.email||'')}</p></div>${p&&p.coverage_type!=='unclassified'?`<span class="hr72-pill ok">${hrCoverageLabelV75(p.coverage_type)}</span>`:`<span class="hr72-pill bad">${hrL72('يلزم تصنيف','Needs classification')}</span>`}</div><div class="hr75-rates"><div><span>${hrL72('الأساسي','Basic')}</span><b>${hrMoney72(c?.basic_salary||0)}</b></div><div><span>${hrL72('السكن','Housing')}</span><b>${hrMoney72(c?.housing_allowance||0)}</b></div><div><span>${hrL72('النسبة الحالية','Current')}</span><b>${escapeHtml(hrGosiRateSummaryV75(p,hrPayrollMonthV75))}</b></div></div><div class="hr75-profile-actions"><button class="platform-mini-btn" onclick="hrOpenInsuranceProfileV75('${e.id}')">${hrL72('إعداد','Configure')}</button><button class="platform-mini-btn" onclick="hrOpenGosiCalculatorV75('${e.id}')">${hrL72('احسب','Calculate')}</button></div></div>`).join('')||`<div class="hr72-empty">${hrL72('لا توجد ملفات موظفين نشطة.','No active employee profiles.')}</div>`}</div></div>
- <div class="hr72-panel" style="margin-top:10px"><div class="hr72-panel-head"><div><h3>${hrL72('هيكل التعويضات','Compensation history')}</h3><p>${hrL72('الراتب الأساسي والبدلات المتكررة التي تغذي المسير.','Recurring salary and allowances used to seed payroll.')}</p></div><button class="primary-btn" onclick="hrOpenFormV72('compensation')">+ ${hrL72('تحديث تعويض','Compensation update')}</button></div><div class="hr72-table-wrap"><table class="hr72-table"><thead><tr><th>${hrL72('الموظف','Employee')}</th><th>${hrL72('ساري من','Effective')}</th><th>${hrL72('الأساسي','Basic')}</th><th>${hrL72('السكن','Housing')}</th><th>${hrL72('بدلات أخرى','Other allowances')}</th><th>${hrL72('الإجمالي المتكرر','Recurring gross')}</th></tr></thead><tbody>${[...hrV72.compensation].sort((a,b)=>String(b.effective_from).localeCompare(String(a.effective_from))).map(c=>{const other=Number(c.transport_allowance||0)+Number(c.other_allowances||0)+Number(c.bonus||0),gross=Number(c.basic_salary||0)+Number(c.housing_allowance||0)+other;return `<tr><td>${escapeHtml(hrName72(hrEmp72(c.employee_id)))}</td><td>${hrDate72(c.effective_from)}</td><td>${hrMoney72(c.basic_salary)}</td><td>${hrMoney72(c.housing_allowance)}</td><td>${hrMoney72(other)}</td><td class="hr72-money">${hrMoney72(gross)}</td></tr>`}).join('')||`<tr><td colspan="6"><div class="hr72-empty">${hrL72('لا توجد بيانات تعويض.','No compensation data.')}</div></td></tr>`}</tbody></table></div></div>
- </div>`;
-};
-
-/* V75 bootstrap + data */
-fetchHrDataV72=async function(force=false){
- if(!currentWorkspaceId)return;if(hrLoadingV72)return;if(!force&&hrLoadedWorkspaceV72===currentWorkspaceId&&!hrMigrationMissingV72)return;
- hrLoadingV72=true;hrMigrationMissingV72=false;if(activeNav==='hr')renderModule();
- try{
-   const boot=await sb.rpc('tasky_hr_bootstrap_v75',{p_workspace_id:currentWorkspaceId});if(boot.error)throw boot.error;hrContextV72={...hrContextV72,...(boot.data||{})};
-   const entries=Object.entries(hrTablesV72).filter(([k])=>k!=='employees');
-   const rs=await Promise.all(entries.map(async([k,t])=>{const q=await sb.from(t).select('*').eq('workspace_id',currentWorkspaceId).limit(5000);return [k,q];}));
-   for(const [k,q] of rs){if(q.error){if(/does not exist|schema cache|relation|tasky_hr_/i.test(q.error.message||''))throw q.error;console.warn('HR V75',k,q.error);hrV72[k]=[];}else hrV72[k]=q.data||[];}
-   let employees=[];if(hrCanManage72()){const eq=await sb.from(hrTablesV72.employees).select('*').eq('workspace_id',currentWorkspaceId).limit(3000);if(eq.error)throw eq.error;employees=eq.data||[];}else{const dq=await sb.rpc('tasky_hr_directory_v721',{p_workspace_id:currentWorkspaceId});if(dq.error)throw dq.error;employees=dq.data||[];if(hrContextV72.employee_id){const own=await sb.from(hrTablesV72.employees).select('*').eq('id',hrContextV72.employee_id).maybeSingle();if(!own.error&&own.data){const i=employees.findIndex(e=>String(e.id)===String(own.data.id));if(i>=0)employees[i]={...employees[i],...own.data};else employees.push(own.data);}}}
-   hrV72.employees=employees;hrLoadedWorkspaceV72=currentWorkspaceId;
- }catch(err){console.error('HR V75 load',err);hrMigrationMissingV72=/does not exist|schema cache|tasky_hr_|bootstrap_v75|directory_v721/i.test(err?.message||'');}
- finally{hrLoadingV72=false;if(activeNav==='hr')renderModule();}
-};
-const hrTemplateV72BaseV75=hrTemplateV72;
-hrTemplateV72=function(){if(hrMigrationMissingV72)return `<div class="hr72-shell">${hrHeaderV72()}<div class="hr72-panel"><div class="hr72-alert">${hrL72('بيانات Payroll V75 غير مثبتة أو غير مكتملة. شغّل SQL الخاص بـ V75 بعد V74 ثم أعد المحاولة.','V75 Payroll data is not installed or incomplete. Run the V75 SQL after V74, then retry.')}</div><button class="primary-btn" style="margin-top:12px" onclick="fetchHrDataV72(true)">${hrL72('إعادة المحاولة','Retry')}</button></div></div>`;return hrTemplateV72BaseV75();};
-
-async function hrCreatePayrollRunV75(){if(!hrCanPayrollV75())return;try{const {data,error}=await sb.rpc('tasky_hr_create_payroll_run_v75',{p_workspace_id:currentWorkspaceId,p_month:`${hrPayrollMonthV75}-01`});if(error)throw error;await fetchHrDataV72(true);taskyToast(hrL72('تم إنشاء/إعادة بناء مسير الشهر','Monthly payroll run created/rebuilt'),{tone:'success'});if(data)hrOpenPayrollRunV75(data);}catch(err){showTaskyDialog({title:hrL72('مسير الرواتب','Payroll run'),message:err?.message||String(err),tone:'error'});}}
-function hrRunNextActionsV75(r){if(!r)return '';if(r.status==='draft')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','review')">${hrL72('إرسال للمراجعة','Send to review')}</button>`;if(r.status==='review')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','approved')">${hrL72('اعتماد المسير','Approve payroll')}</button>`;if(r.status==='approved')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','locked')">${hrL72('إقفال المسير','Lock payroll')}</button>`;if(r.status==='locked')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','paid')">${hrL72('تحديد كمدفوع','Mark paid')}</button>`;return '';}
-function hrOpenPayrollRunV75(id){const r=hrPayrollRunV75(id),items=hrRunItemsV75(id).sort((a,b)=>hrName72(hrEmp72(a.employee_id)).localeCompare(hrName72(hrEmp72(b.employee_id))));if(!r)return;const editable=['draft','review'].includes(r.status);document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('مسير','Payroll')} — ${escapeHtml(hrPayrollMonthLabelV75(r))}</h3><div style="font-size:9px;color:var(--muted)">${hrDate72(r.period_start)} → ${hrDate72(r.period_end)} · ${items.length} ${hrL72('موظف','employees')}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><div class="hr75-run-head"><div>${hrPayrollStatusV75(r.status)} ${items.some(x=>x.gosi_needs_review)?`<span class="hr75-review" style="margin-inline-start:8px">${hrL72('يوجد ملفات تأمينات تحتاج مراجعة','Insurance profiles need review')}</span>`:''}</div><div class="hr75-run-actions">${hrRunNextActionsV75(r)}</div></div><div class="hr72-table-wrap"><table class="hr72-table hr75-payroll-table"><thead><tr><th>${hrL72('الموظف','Employee')}</th><th>${hrL72('الإجمالي','Gross')}</th><th>${hrL72('أجر الاشتراك','GOSI wage')}</th><th>${hrL72('حصة الموظف','Employee GOSI')}</th><th>${hrL72('حصة المنشأة','Employer GOSI')}</th><th>${hrL72('استقطاعات أخرى','Other deductions')}</th><th>${hrL72('الصافي','Net')}</th><th>${hrL72('تكلفة المنشأة','Employer cost')}</th><th></th></tr></thead><tbody>${items.map(i=>{const ded=Number(i.recurring_deductions||0)+Number(i.unpaid_leave_deduction||0)+Number(i.attendance_deduction||0)+Number(i.other_deductions||0);return `<tr><td><b>${escapeHtml(hrName72(hrEmp72(i.employee_id)))}</b><br><small>${escapeHtml(hrCoverageLabelV75(i.gosi_coverage_type))}${i.gosi_needs_review?` · <span class="hr75-review">${hrL72('مراجعة','Review')}</span>`:''}</small></td><td class="money">${hrMoney72(i.gross_pay)}</td><td class="money">${hrMoney72(i.gosi_contributory_wage)}</td><td class="money">${hrMoney72(i.gosi_employee_amount)}</td><td class="money">${hrMoney72(i.gosi_employer_amount)}</td><td class="money">${hrMoney72(ded)}</td><td class="money">${hrMoney72(i.net_pay)}</td><td class="money">${hrMoney72(i.employer_total_cost)}</td><td>${editable?`<button class="platform-mini-btn" onclick="hrOpenPayrollItemV75('${i.id}')">${hrL72('تعديل','Adjust')}</button>`:`<button class="platform-mini-btn" onclick="hrOpenGosiCalculatorV75('${i.employee_id}','${r.period_end}')">${hrL72('تفصيل','Breakdown')}</button>`}</td></tr>`}).join('')}</tbody></table></div><div class="hr75-kpis" style="margin-top:10px"><div class="hr75-kpi"><span>${hrL72('الإجمالي','Gross')}</span><b>${hrMoney72(hrSumV75(items,'gross_pay'))}</b></div><div class="hr75-kpi"><span>${hrL72('حصة الموظفين','Employee GOSI')}</span><b>${hrMoney72(hrSumV75(items,'gosi_employee_amount'))}</b></div><div class="hr75-kpi"><span>${hrL72('حصة المنشأة','Employer GOSI')}</span><b>${hrMoney72(hrSumV75(items,'gosi_employer_amount'))}</b></div><div class="hr75-kpi"><span>${hrL72('الصافي','Net')}</span><b>${hrMoney72(hrSumV75(items,'net_pay'))}</b></div><div class="hr75-kpi"><span>${hrL72('تكلفة المنشأة','Employer cost')}</span><b>${hrMoney72(hrSumV75(items,'employer_total_cost'))}</b></div></div>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
-async function hrSetPayrollStatusV75(id,status){const label={review:hrL72('إرسال المسير للمراجعة؟','Send payroll to review?'),approved:hrL72('اعتماد المسير؟ لن يسمح النظام إذا توجد ملفات تأمينات غير مصنفة.','Approve payroll? Unclassified GOSI profiles will block approval.'),locked:hrL72('إقفال المسير؟ بعد الإقفال لا يمكن تعديله تلقائيًا.','Lock payroll? It cannot be edited automatically afterwards.'),paid:hrL72('تحديد المسير كمدفوع؟','Mark payroll as paid?')}[status]||status;if(!confirm(label))return;try{const {error}=await sb.rpc('tasky_hr_set_payroll_run_status_v75',{p_run_id:id,p_status:status,p_note:null});if(error)throw error;closeAddModal();await fetchHrDataV72(true);taskyToast(hrL72('تم تحديث حالة المسير','Payroll status updated'),{tone:'success'});hrOpenPayrollRunV75(id);}catch(err){showTaskyDialog({title:hrL72('مسير الرواتب','Payroll'),message:err?.message||String(err),tone:'error'});}}
-function hrOpenPayrollItemV75(id){const i=hrV72.payrollItems.find(x=>String(x.id)===String(id)),r=i?hrPayrollRunV75(i.run_id):null;if(!i)return;document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('تعديلات المسير','Payroll adjustments')}</h3><div style="font-size:9px;color:var(--muted)">${escapeHtml(hrName72(hrEmp72(i.employee_id)))} · ${escapeHtml(hrPayrollMonthLabelV75(r))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrSubmitFormV72(event,'payrollItem75','${i.id}')"><div class="hr72-form">${hrField72('hr75OvertimeAmount',hrL72('مبلغ العمل الإضافي','Overtime amount'),i.overtime_amount||0,'number')}${hrField72('hr75OtherEarnings',hrL72('إيرادات أخرى','Other earnings'),i.other_earnings||0,'number')}${hrField72('hr75UnpaidLeave',hrL72('خصم إجازة بدون راتب','Unpaid leave deduction'),i.unpaid_leave_deduction||0,'number')}${hrField72('hr75AttendanceDeduct',hrL72('خصم حضور — يدوي','Attendance deduction — manual'),i.attendance_deduction||0,'number')}${hrField72('hr75OtherDeduct',hrL72('استقطاعات أخرى','Other deductions'),i.other_deductions||0,'number')}<div class="field full"><label>${hrL72('مرجع الحضور لهذا الشهر','Attendance reference')}</label><div class="hr75-note" style="margin:0">${hrL72('إضافي مسجل','Recorded overtime')}: <b>${Number(i.attendance_overtime_minutes||0)} ${hrL72('دقيقة','min')}</b> · ${hrL72('تأخير','Late')}: <b>${Number(i.attendance_late_minutes||0)} ${hrL72('دقيقة','min')}</b> · ${hrL72('خروج مبكر','Early leave')}: <b>${Number(i.attendance_early_leave_minutes||0)} ${hrL72('دقيقة','min')}</b><br>${hrL72('V75 لا يحول هذه الدقائق تلقائيًا إلى مبالغ نظامية؛ يتم إدخال مبلغ الخصم/الإضافي المعتمد من سياسة الشركة.','V75 does not automatically convert these minutes into statutory amounts; enter the approved amount under the company policy.')}</div></div></div><button class="submit-btn" type="submit">${hrL72('حفظ وإعادة الحساب','Save & recalculate')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
-function hrOpenInsuranceProfileV75(empId){const e=hrEmp72(empId),p=hrInsuranceProfileV75(empId)||{};if(!e)return;const opts=[['unclassified',hrL72('غير مصنف — يمنع اعتماد المسير','Unclassified — blocks approval')],['saudi_legacy',hrL72('سعودي — لديه مدد اشتراك قبل 3 يوليو 2024 / النظام السابق','Saudi — prior contribution periods / legacy')],['saudi_new_1445',hrL72('سعودي — مشمول بنظام 1445 الجديد','Saudi — new 1445 regime')],['non_saudi',hrL72('غير سعودي — الأخطار المهنية فقط','Non-Saudi — occupational hazards only')],['gcc_manual',hrL72('مواطن خليجي — حماية ممتدة بنسب يدوية مؤكدة','GCC national — verified manual rates')],['excluded',hrL72('مستبعد/غير خاضع للحساب التلقائي','Excluded / no automatic calculation')]].map(([v,l])=>`<option value="${v}" ${p.coverage_type===v?'selected':''}>${escapeHtml(l)}</option>`).join('');document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('ملف التأمينات','Social-insurance profile')}</h3><div style="font-size:9px;color:var(--muted)">${escapeHtml(hrName72(e))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><div class="hr75-note"><b>${hrL72('تنبيه تصنيف النظام الجديد','New-regime classification note')}</b><br>${hrL72('بحسب التأمينات، نظام 1445 الجديد يطبق على الملتحقين الجدد بسوق العمل ممن لم تكن لديهم مدد اشتراك في التقاعد المدني أو التأمينات قبل 3 يوليو 2024. لذلك لا يعتمد تاسكي على تاريخ التوظيف فقط.','According to GOSI, the new 1445 regime applies to new labor-market entrants with no prior Civil Pension or Social Insurance contribution periods before 3 July 2024. Tasky therefore does not infer it from hire date alone.')}</div><form onsubmit="hrSubmitFormV72(event,'insurance75',null,'${e.id}')"><div class="hr72-form">${hrSelect72('hr75Coverage',hrL72('نوع التغطية','Coverage type'),opts)}${hrField72('hr75GosiNumber',hrL72('رقم المشترك/التأمينات — اختياري','GOSI number — optional'),p.gosi_number||'')}${hrField72('hr75GosiOverride',hrL72('أجر اشتراك يدوي — اختياري','Contributory wage override — optional'),p.contributory_wage_override||'','number')}${hrField72('hr75GccEmpRate',hrL72('نسبة الموظف للخليجي %','GCC employee rate %'),p.manual_employee_rate||'','number')}${hrField72('hr75GccErRate',hrL72('نسبة صاحب العمل للخليجي %','GCC employer rate %'),p.manual_employer_rate||'','number')}${hrSelect72('hr75Saned',hrL72('شمول ساند','SANED coverage'),`<option value="true" ${p.saned_applicable!==false?'selected':''}>${hrL72('مشمول','Covered')}</option><option value="false" ${p.saned_applicable===false?'selected':''}>${hrL72('غير مشمول','Not covered')}</option>`)}${hrSelect72('hr75OH',hrL72('الأخطار المهنية','Occupational hazards'),`<option value="true" ${p.occupational_hazard_applicable!==false?'selected':''}>${hrL72('مشمول','Covered')}</option><option value="false" ${p.occupational_hazard_applicable===false?'selected':''}>${hrL72('غير مشمول','Not covered')}</option>`)}${hrField72('hr75Verified',hrL72('تاريخ التحقق','Verified on'),p.verified_on||new Date().toISOString().slice(0,10),'date')}<div class="field full"><label>${hrL72('ملاحظة التحقق','Verification note')}</label><textarea id="hr75VerificationNote">${escapeHtml(p.verification_note||'')}</textarea></div></div><button class="submit-btn" type="submit">${hrL72('تأكيد ملف التأمينات','Confirm insurance profile')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
-function hrOpenGosiCalculatorV75(empId=null,period=null){const emp=empId?hrEmp72(empId):hrV72.employees.find(e=>['active','probation','leave'].includes(e.status)),comp=emp?hrLatestCompV75(emp.id,period||`${hrPayrollMonthV75}-28`):null,empOpts=hrV72.employees.filter(e=>['active','probation','leave'].includes(e.status)).map(e=>`<option value="${e.id}" ${emp&&e.id===emp.id?'selected':''}>${escapeHtml(hrName72(e))}</option>`).join('');document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('حاسبة التأمينات الاجتماعية','GOSI calculator')}</h3><div style="font-size:9px;color:var(--muted)">${hrL72('حساب مباشر من ملف الموظف والفترة','Direct calculation from employee profile and period')}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrCalculateGosiV75(event)"><div class="hr72-form">${hrSelect72('hr75CalcEmp',hrL72('الموظف','Employee'),empOpts)}${hrField72('hr75CalcPeriod',hrL72('الفترة','Period'),String(period||`${hrPayrollMonthV75}-01`).slice(0,7),'month')}${hrField72('hr75CalcBasic',hrL72('الراتب الأساسي','Basic salary'),comp?.basic_salary||0,'number')}${hrField72('hr75CalcHousing',hrL72('بدل السكن','Housing allowance'),comp?.housing_allowance||0,'number')}</div><button class="submit-btn" type="submit">${hrL72('احسب الآن','Calculate now')}</button></form><div id="hr75CalcResult"></div>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
-async function hrCalculateGosiV75(e){e.preventDefault();const id=document.getElementById('hr75CalcEmp')?.value,period=(document.getElementById('hr75CalcPeriod')?.value||hrPayrollMonthV75)+'-01',basic=Number(document.getElementById('hr75CalcBasic')?.value||0),housing=Number(document.getElementById('hr75CalcHousing')?.value||0),box=document.getElementById('hr75CalcResult');try{const {data,error}=await sb.rpc('tasky_hr_gosi_calculate_v75',{p_employee_id:id,p_period:period,p_basic:basic,p_housing:housing});if(error)throw error;box.innerHTML=`<div class="hr75-gosi-result"><div class="hr75-gosi-box primary"><span>${hrL72('أجر الاشتراك','Contributory wage')}</span><b>${hrMoney72(data.contributory_wage)}</b></div><div class="hr75-gosi-box"><span>${hrL72('حصة الموظف','Employee contribution')}</span><b>${hrMoney72(data.employee_amount)}</b></div><div class="hr75-gosi-box"><span>${hrL72('حصة صاحب العمل','Employer contribution')}</span><b>${hrMoney72(data.employer_amount)}</b></div></div><div class="hr75-breakdown"><div><span>${hrL72('التغطية','Coverage')}</span><b>${escapeHtml(hrCoverageLabelV75(data.coverage_type))}</b></div><div><span>${hrL72('المعاشات — الموظف','Pension — employee')}</span><b>${Number(data.pension_employee_rate||0)}%</b></div><div><span>${hrL72('المعاشات — صاحب العمل','Pension — employer')}</span><b>${Number(data.pension_employer_rate||0)}%</b></div><div><span>${hrL72('ساند — الموظف / صاحب العمل','SANED — employee / employer')}</span><b>${Number(data.saned_employee_rate||0)}% / ${Number(data.saned_employer_rate||0)}%</b></div><div><span>${hrL72('الأخطار المهنية — صاحب العمل','Occupational hazards — employer')}</span><b>${Number(data.occupational_hazard_employer_rate||0)}%</b></div><div><span>${hrL72('الإجمالي للتأمينات','Total contribution')}</span><b>${hrMoney72(data.total_amount)}</b></div></div>${data.needs_review?`<div class="hr72-alert" style="margin-top:8px">${escapeHtml(data.note||hrL72('يحتاج الملف مراجعة قبل اعتماد المسير.','Profile needs review before payroll approval.'))}</div>`:''}`;}catch(err){box.innerHTML=`<div class="hr72-alert">${escapeHtml(err?.message||String(err))}</div>`;}}
-
-const hrOpenFormV72BaseV75=hrOpenFormV72;
-hrOpenFormV72=function(type,id=null,parent=null){if(type==='payrollSettings75'){const s=hrV72.payrollSettings[0]||{};document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('إعدادات الرواتب','Payroll settings')}</h3></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrSubmitFormV72(event,'payrollSettings75')"><div class="hr72-form">${hrField72('hr75PayrollDay',hrL72('يوم تجهيز المسير','Payroll day'),s.payroll_day||27,'number')}<div class="field"><label>${hrL72('حساب التأمينات','GOSI calculation')}</label><select id="hr75GosiEnabled"><option value="true" ${s.gosi_enabled!==false?'selected':''}>${hrL72('مفعّل','Enabled')}</option><option value="false" ${s.gosi_enabled===false?'selected':''}>${hrL72('معطل','Disabled')}</option></select></div><div class="field"><label>${hrL72('عرض تكلفة صاحب العمل','Show employer cost')}</label><select id="hr75ShowCost"><option value="true" ${s.show_employer_cost!==false?'selected':''}>${hrL72('نعم','Yes')}</option><option value="false" ${s.show_employer_cost===false?'selected':''}>${hrL72('لا','No')}</option></select></div><div class="field full"><label>${hrL72('ملاحظات','Notes')}</label><textarea id="hr75PayrollNotes">${escapeHtml(s.notes||'')}</textarea></div></div><button class="submit-btn" type="submit">${hrL72('حفظ الإعدادات','Save settings')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');return;}return hrOpenFormV72BaseV75(type,id,parent);};
-const hrSubmitFormV72BaseV75=hrSubmitFormV72;
-hrSubmitFormV72=async function(e,type,id=null,parent=null){if(!String(type).endsWith('75'))return hrSubmitFormV72BaseV75(e,type,id,parent);e.preventDefault();const v=x=>document.getElementById(x)?.value||null,n=x=>Number(document.getElementById(x)?.value||0);try{if(type==='insurance75'){const payload={employee_id:parent,coverage_type:v('hr75Coverage'),gosi_number:v('hr75GosiNumber'),contributory_wage_override:v('hr75GosiOverride'),manual_employee_rate:v('hr75GccEmpRate'),manual_employer_rate:v('hr75GccErRate'),saned_applicable:v('hr75Saned')==='true',occupational_hazard_applicable:v('hr75OH')==='true',verified_on:v('hr75Verified'),verification_note:v('hr75VerificationNote'),effective_from:new Date().toISOString().slice(0,10)};const {error}=await sb.rpc('tasky_hr_save_social_insurance_profile_v75',{p_workspace_id:currentWorkspaceId,p_payload:payload});if(error)throw error;}else if(type==='payrollSettings75'){const payload={currency:'SAR',payroll_day:n('hr75PayrollDay'),gosi_enabled:v('hr75GosiEnabled')==='true',show_employer_cost:v('hr75ShowCost')==='true',notes:v('hr75PayrollNotes')};const {error}=await sb.rpc('tasky_hr_save_payroll_settings_v75',{p_workspace_id:currentWorkspaceId,p_payload:payload});if(error)throw error;}else if(type==='payrollItem75'){const payload={overtime_amount:n('hr75OvertimeAmount'),other_earnings:n('hr75OtherEarnings'),unpaid_leave_deduction:n('hr75UnpaidLeave'),attendance_deduction:n('hr75AttendanceDeduct'),other_deductions:n('hr75OtherDeduct')};const {error}=await sb.rpc('tasky_hr_update_payroll_item_v75',{p_item_id:id,p_payload:payload});if(error)throw error;}closeAddModal();await fetchHrDataV72(true);taskyToast(hrL72('تم حفظ تحديث الرواتب','Payroll update saved'),{tone:'success'});}catch(err){showTaskyDialog({title:'HR V75',message:err?.message||String(err),tone:'error'});}};
-</script>
 
 </body></html>`);
   w.document.close(); w.focus(); setTimeout(()=>w.print(),700);
@@ -7360,7 +7392,10 @@ window.addEventListener('resize', () => {
   const nowMobile = isMobileSidebar();
   if(nowMobile !== sidebarWasMobile){
     sidebarWasMobile = nowMobile;
-    initResponsiveSidebar();
+    document.getElementById('authPassword')?.addEventListener('keydown',e=>{
+  if(e.key==='Enter'){e.preventDefault();handleAuthSubmit();}
+});
+initResponsiveSidebar();
   }else{
     syncSidebarAria();
   }
@@ -8577,7 +8612,7 @@ function renderAll(){
 sb.auth.onAuthStateChange((event, session) => {
   const qs=new URLSearchParams(window.location.search);const publicInviteToken=qs.get('invite');const publicQuoteToken=qs.get('quote');const publicSurveyToken=qs.get('survey');const publicSalesQuoteToken=qs.get('salesquote');const publicInvoiceToken=qs.get('invoice');
   if(!publicInviteToken && !publicQuoteToken && !publicSurveyToken && !publicSalesQuoteToken && !publicInvoiceToken && event === 'SIGNED_IN' && session){
-    setTimeout(() => checkSession(), 0);
+    setTimeout(()=>{checkSession().catch(err=>console.error('Tasky V75.1 auth state refresh',err));},0);
   }
 });
 
@@ -9158,6 +9193,74 @@ hrSubmitFormV72=async function(e,type,id=null,parent=null){const v=x=>document.g
  closeAddModal();await hrV74Refresh();taskyToast(hrL72('تم حفظ تحديث V74','V74 update saved'),{tone:'success'});
  }catch(err){showTaskyDialog({title:'HR V74',message:err?.message||String(err),tone:'error'});}
 };
+</script>
+
+
+<script>
+/* ================= V75 COMPENSATION, PAYROLL PREPARATION & GOSI ================= */
+window.TASKY_BUILD='V75.1';
+Object.assign(hrV72,{payrollSettings:hrV72.payrollSettings||[],insuranceProfiles:hrV72.insuranceProfiles||[],payrollRuns:hrV72.payrollRuns||[],payrollItems:hrV72.payrollItems||[]});
+Object.assign(hrTablesV72,{payrollSettings:'tasky_hr_payroll_settings',insuranceProfiles:'tasky_hr_social_insurance_profiles',payrollRuns:'tasky_hr_payroll_runs',payrollItems:'tasky_hr_payroll_items'});
+let hrPayrollMonthV75=new Date().toISOString().slice(0,7);
+function hrCanPayrollV75(){return hrCanPayroll72();}
+function hrPayrollRunV75(id){return hrV72.payrollRuns.find(x=>String(x.id)===String(id));}
+function hrInsuranceProfileV75(empId){return hrV72.insuranceProfiles.find(x=>String(x.employee_id)===String(empId));}
+function hrLatestCompV75(empId,period=null){const d=period||`${hrPayrollMonthV75}-28`;return hrV72.compensation.filter(x=>String(x.employee_id)===String(empId)&&String(x.effective_from||'')<=d).sort((a,b)=>String(b.effective_from).localeCompare(String(a.effective_from))||String(b.created_at).localeCompare(String(a.created_at)))[0]||null;}
+function hrCoverageLabelV75(v){const m={unclassified:['غير مصنف','Unclassified'],saudi_legacy:['سعودي — النظام السابق','Saudi — legacy'],saudi_new_1445:['سعودي — نظام 1445 الجديد','Saudi — new 1445'],non_saudi:['غير سعودي — أخطار مهنية','Non-Saudi — occupational hazards'],gcc_manual:['خليجي — حماية ممتدة يدوية','GCC — manual extended protection'],excluded:['مستبعد/غير خاضع','Excluded / not covered']};return hrL72(...(m[v]||[v||'—',v||'—']));}
+function hrPayrollStatusV75(s){const m={draft:['مسودة','Draft',''],review:['مراجعة','Review','warn'],approved:['معتمد','Approved','ok'],locked:['مقفل','Locked','info'],paid:['مدفوع','Paid','ok'],cancelled:['ملغي','Cancelled','bad']};const x=m[s]||[s,s,''];return `<span class="hr72-pill ${x[2]}">${hrL72(x[0],x[1])}</span>`;}
+function hrSumV75(rows,key){return rows.reduce((s,x)=>s+Number(x[key]||0),0)}
+function hrRunItemsV75(runId){return hrV72.payrollItems.filter(x=>String(x.run_id)===String(runId));}
+function hrGosiRateSummaryV75(p,period){if(!p)return hrL72('يلزم تصنيف','Needs classification');const type=p.coverage_type;if(type==='saudi_legacy')return '9% + 0.75%';if(type==='saudi_new_1445'){const d=new Date(`${period||hrPayrollMonthV75}-01T00:00:00`),rate=d>=new Date('2028-07-01')?11:d>=new Date('2027-07-01')?10.5:d>=new Date('2026-07-01')?10:d>=new Date('2025-07-01')?9.5:9;return `${rate}% + 0.75%`;}if(type==='non_saudi')return hrL72('2% على صاحب العمل','2% employer');if(type==='gcc_manual')return `${Number(p.manual_employee_rate||0)}% / ${Number(p.manual_employer_rate||0)}%`;if(type==='excluded')return '0%';return hrL72('يلزم تصنيف','Needs classification');}
+function hrPayrollMonthLabelV75(run){if(!run)return '—';try{return new Intl.DateTimeFormat(lang==='ar'?'ar-SA':'en-US',{month:'long',year:'numeric'}).format(new Date(`${run.period_start}T12:00:00`))}catch(_){return run.period_start}}
+function hrGosiNeedsReviewV75(){return hrV72.payrollItems.some(x=>x.gosi_needs_review)}
+
+/* V75 replaces the compensation area with a payroll workspace. */
+hrCompensationV72=function(){
+ const isPayroll=hrCanPayrollV75();
+ if(!isPayroll){const slips=hrV72.payrollItems.filter(x=>String(x.employee_id)===String(hrContextV72.employee_id||'')).sort((a,b)=>String(hrPayrollRunV75(b.run_id)?.period_start||'').localeCompare(String(hrPayrollRunV75(a.run_id)?.period_start||'')));return `<div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hrL72('راتبي ومسيرات الرواتب','My pay & payslips')}</h3><p>${hrL72('تظهر المسيرات لك بعد اعتمادها من فريق الرواتب.','Payroll appears after it is approved by Payroll/HR.')}</p></div></div>${slips.map(i=>{const r=hrPayrollRunV75(i.run_id);return `<div class="hr75-self-slip"><div class="hr75-self-slip-top"><div><h4>${escapeHtml(hrPayrollMonthLabelV75(r))}</h4><p>${hrL72('الراتب الأساسي','Basic')} ${hrMoney72(i.basic_salary)} · ${hrCoverageLabelV75(i.gosi_coverage_type)}</p></div>${hrPayrollStatusV75(r?.status)}</div><div class="hr75-self-numbers"><div><span>${hrL72('الإجمالي','Gross')}</span><b>${hrMoney72(i.gross_pay)}</b></div><div><span>${hrL72('حصة الموظف — التأمينات','Employee GOSI')}</span><b>${hrMoney72(i.gosi_employee_amount)}</b></div><div><span>${hrL72('الاستقطاعات الأخرى','Other deductions')}</span><b>${hrMoney72(Number(i.recurring_deductions||0)+Number(i.unpaid_leave_deduction||0)+Number(i.attendance_deduction||0)+Number(i.other_deductions||0))}</b></div><div><span>${hrL72('صافي الراتب','Net pay')}</span><b>${hrMoney72(i.net_pay)}</b></div></div></div>`}).join('')||`<div class="hr72-empty">${hrL72('لا توجد مسيرات رواتب معتمدة ظاهرة لك حتى الآن.','No approved payroll items are visible to you yet.')}</div>`}</div>`;}
+ const runs=[...hrV72.payrollRuns].sort((a,b)=>String(b.period_start).localeCompare(String(a.period_start))),selected=runs.find(r=>String(r.period_start||'').slice(0,7)===hrPayrollMonthV75)||runs[0],items=selected?hrRunItemsV75(selected.id):[];
+ const gross=hrSumV75(items,'gross_pay'),empGosi=hrSumV75(items,'gosi_employee_amount'),erGosi=hrSumV75(items,'gosi_employer_amount'),net=hrSumV75(items,'net_pay'),cost=hrSumV75(items,'employer_total_cost');
+ const profiles=hrV72.employees.filter(e=>['active','probation','leave'].includes(e.status)).map(e=>({e,p:hrInsuranceProfileV75(e.id),c:hrLatestCompV75(e.id)}));
+ return `<div>
+ <div class="hr75-note"><b>${hrL72('V75 — تجهيز الرواتب والتأمينات الاجتماعية','V75 — Payroll preparation & social insurance')}</b> · ${hrL72('الحسابات تساعد في تجهيز المسير داخل تاسكي ولا تُرسل أو تُسدد تلقائيًا إلى التأمينات الاجتماعية أو أي جهة حكومية. يجب تأكيد تصنيف كل موظف من فريق الرواتب.','Calculations prepare payroll inside Tasky; they are not filed or paid automatically to GOSI or any government service. Payroll must confirm each employee classification.')}</div>
+ <div class="hr75-toolbar"><div class="left"><input class="hr75-month" type="month" value="${escapeHtml(hrPayrollMonthV75)}" onchange="hrPayrollMonthV75=this.value;renderModule()"><button class="primary-btn" onclick="hrCreatePayrollRunV75()">+ ${hrL72('إنشاء/إعادة بناء مسير الشهر','Create / rebuild month')}</button><button class="chip-btn" onclick="hrOpenGosiCalculatorV75()">${hrL72('حاسبة التأمينات','GOSI calculator')}</button></div><div class="right"><button class="chip-btn" onclick="hrOpenFormV72('payrollSettings75')">${hrL72('إعدادات الرواتب','Payroll settings')}</button></div></div>
+ <div class="hr75-kpis"><div class="hr75-kpi"><span>${hrL72('إجمالي الرواتب','Gross payroll')}</span><b>${hrMoney72(gross)}</b><small>${items.length} ${hrL72('موظف','employees')}</small></div><div class="hr75-kpi"><span>${hrL72('تأمينات — الموظفين','Employee GOSI')}</span><b>${hrMoney72(empGosi)}</b><small>${hrL72('تُخصم من الصافي','deducted from net')}</small></div><div class="hr75-kpi"><span>${hrL72('تأمينات — صاحب العمل','Employer GOSI')}</span><b>${hrMoney72(erGosi)}</b><small>${hrL72('تكلفة على المنشأة','employer cost')}</small></div><div class="hr75-kpi"><span>${hrL72('صافي الرواتب','Net payroll')}</span><b>${hrMoney72(net)}</b><small>${selected?escapeHtml(hrPayrollMonthLabelV75(selected)):'—'}</small></div><div class="hr75-kpi"><span>${hrL72('إجمالي تكلفة المنشأة','Employer total cost')}</span><b>${hrMoney72(cost)}</b><small>${selected?hrPayrollStatusV75(selected.status):'—'}</small></div></div>
+ <div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hrL72('مسيرات الرواتب','Payroll runs')}</h3><p>${hrL72('مسودة → مراجعة → اعتماد → إقفال → مدفوع. لا يمكن اعتماد مسير فيه ملف تأمينات غير مصنف.','Draft → review → approve → lock → paid. A run with unclassified insurance profiles cannot be approved.')}</p></div></div>${runs.map(r=>{const ri=hrRunItemsV75(r.id),review=ri.filter(x=>x.gosi_needs_review).length;return `<div class="hr75-run"><div class="hr75-run-main"><h4>${escapeHtml(hrPayrollMonthLabelV75(r))} ${hrPayrollStatusV75(r.status)}</h4><p>${hrDate72(r.period_start)} → ${hrDate72(r.period_end)} · ${ri.length} ${hrL72('موظف','employees')}${review?` · <span class="hr75-review">${review} ${hrL72('يحتاج مراجعة تأمينات','GOSI review')}</span>`:''}</p></div><div><small>${hrL72('الإجمالي','Gross')}</small><b>${hrMoney72(hrSumV75(ri,'gross_pay'))}</b></div><div><small>${hrL72('حصة الموظف','Employee GOSI')}</small><b>${hrMoney72(hrSumV75(ri,'gosi_employee_amount'))}</b></div><div><small>${hrL72('حصة المنشأة','Employer GOSI')}</small><b>${hrMoney72(hrSumV75(ri,'gosi_employer_amount'))}</b></div><div><small>${hrL72('الصافي','Net')}</small><b>${hrMoney72(hrSumV75(ri,'net_pay'))}</b></div><div><small>${hrL72('تكلفة المنشأة','Employer cost')}</small><b>${hrMoney72(hrSumV75(ri,'employer_total_cost'))}</b></div><div class="hr75-run-actions"><button class="platform-mini-btn" onclick="hrOpenPayrollRunV75('${r.id}')">${hrL72('فتح','Open')}</button></div></div>`}).join('')||`<div class="hr72-empty">${hrL72('لا توجد مسيرات بعد. اختر الشهر واضغط إنشاء مسير.','No payroll runs yet. Pick a month and create a run.')}</div>`}</div>
+ <div class="hr72-panel" style="margin-top:10px"><div class="hr72-panel-head"><div><h3>${hrL72('ملفات التأمينات الاجتماعية','Social-insurance profiles')}</h3><p>${hrL72('لا يستنتج تاسكي النظام الجديد من تاريخ التوظيف وحده. يجب تأكيد وجود أو عدم وجود مدد اشتراك قبل 3 يوليو 2024.','Tasky does not infer the new regime from hire date alone. Confirm whether the employee had contribution periods before 3 July 2024.')}</p></div></div><div class="hr75-profile-grid">${profiles.map(({e,p,c})=>`<div class="hr75-profile"><div class="hr75-profile-top"><div><h4>${escapeHtml(hrName72(e))}</h4><p>${escapeHtml(e.employee_no||e.email||'')}</p></div>${p&&p.coverage_type!=='unclassified'?`<span class="hr72-pill ok">${hrCoverageLabelV75(p.coverage_type)}</span>`:`<span class="hr72-pill bad">${hrL72('يلزم تصنيف','Needs classification')}</span>`}</div><div class="hr75-rates"><div><span>${hrL72('الأساسي','Basic')}</span><b>${hrMoney72(c?.basic_salary||0)}</b></div><div><span>${hrL72('السكن','Housing')}</span><b>${hrMoney72(c?.housing_allowance||0)}</b></div><div><span>${hrL72('النسبة الحالية','Current')}</span><b>${escapeHtml(hrGosiRateSummaryV75(p,hrPayrollMonthV75))}</b></div></div><div class="hr75-profile-actions"><button class="platform-mini-btn" onclick="hrOpenInsuranceProfileV75('${e.id}')">${hrL72('إعداد','Configure')}</button><button class="platform-mini-btn" onclick="hrOpenGosiCalculatorV75('${e.id}')">${hrL72('احسب','Calculate')}</button></div></div>`).join('')||`<div class="hr72-empty">${hrL72('لا توجد ملفات موظفين نشطة.','No active employee profiles.')}</div>`}</div></div>
+ <div class="hr72-panel" style="margin-top:10px"><div class="hr72-panel-head"><div><h3>${hrL72('هيكل التعويضات','Compensation history')}</h3><p>${hrL72('الراتب الأساسي والبدلات المتكررة التي تغذي المسير.','Recurring salary and allowances used to seed payroll.')}</p></div><button class="primary-btn" onclick="hrOpenFormV72('compensation')">+ ${hrL72('تحديث تعويض','Compensation update')}</button></div><div class="hr72-table-wrap"><table class="hr72-table"><thead><tr><th>${hrL72('الموظف','Employee')}</th><th>${hrL72('ساري من','Effective')}</th><th>${hrL72('الأساسي','Basic')}</th><th>${hrL72('السكن','Housing')}</th><th>${hrL72('بدلات أخرى','Other allowances')}</th><th>${hrL72('الإجمالي المتكرر','Recurring gross')}</th></tr></thead><tbody>${[...hrV72.compensation].sort((a,b)=>String(b.effective_from).localeCompare(String(a.effective_from))).map(c=>{const other=Number(c.transport_allowance||0)+Number(c.other_allowances||0)+Number(c.bonus||0),gross=Number(c.basic_salary||0)+Number(c.housing_allowance||0)+other;return `<tr><td>${escapeHtml(hrName72(hrEmp72(c.employee_id)))}</td><td>${hrDate72(c.effective_from)}</td><td>${hrMoney72(c.basic_salary)}</td><td>${hrMoney72(c.housing_allowance)}</td><td>${hrMoney72(other)}</td><td class="hr72-money">${hrMoney72(gross)}</td></tr>`}).join('')||`<tr><td colspan="6"><div class="hr72-empty">${hrL72('لا توجد بيانات تعويض.','No compensation data.')}</div></td></tr>`}</tbody></table></div></div>
+ </div>`;
+};
+
+/* V75 bootstrap + data */
+fetchHrDataV72=async function(force=false){
+ if(!currentWorkspaceId)return;if(hrLoadingV72)return;if(!force&&hrLoadedWorkspaceV72===currentWorkspaceId&&!hrMigrationMissingV72)return;
+ hrLoadingV72=true;hrMigrationMissingV72=false;if(activeNav==='hr')renderModule();
+ try{
+   const boot=await sb.rpc('tasky_hr_bootstrap_v75',{p_workspace_id:currentWorkspaceId});if(boot.error)throw boot.error;hrContextV72={...hrContextV72,...(boot.data||{})};
+   const entries=Object.entries(hrTablesV72).filter(([k])=>k!=='employees');
+   const rs=await Promise.all(entries.map(async([k,t])=>{const q=await sb.from(t).select('*').eq('workspace_id',currentWorkspaceId).limit(5000);return [k,q];}));
+   for(const [k,q] of rs){if(q.error){if(/does not exist|schema cache|relation|tasky_hr_/i.test(q.error.message||''))throw q.error;console.warn('HR V75',k,q.error);hrV72[k]=[];}else hrV72[k]=q.data||[];}
+   let employees=[];if(hrCanManage72()){const eq=await sb.from(hrTablesV72.employees).select('*').eq('workspace_id',currentWorkspaceId).limit(3000);if(eq.error)throw eq.error;employees=eq.data||[];}else{const dq=await sb.rpc('tasky_hr_directory_v721',{p_workspace_id:currentWorkspaceId});if(dq.error)throw dq.error;employees=dq.data||[];if(hrContextV72.employee_id){const own=await sb.from(hrTablesV72.employees).select('*').eq('id',hrContextV72.employee_id).maybeSingle();if(!own.error&&own.data){const i=employees.findIndex(e=>String(e.id)===String(own.data.id));if(i>=0)employees[i]={...employees[i],...own.data};else employees.push(own.data);}}}
+   hrV72.employees=employees;hrLoadedWorkspaceV72=currentWorkspaceId;
+ }catch(err){console.error('HR V75 load',err);hrMigrationMissingV72=/does not exist|schema cache|tasky_hr_|bootstrap_v75|directory_v721/i.test(err?.message||'');}
+ finally{hrLoadingV72=false;if(activeNav==='hr')renderModule();}
+};
+const hrTemplateV72BaseV75=hrTemplateV72;
+hrTemplateV72=function(){if(hrMigrationMissingV72)return `<div class="hr72-shell">${hrHeaderV72()}<div class="hr72-panel"><div class="hr72-alert">${hrL72('بيانات Payroll V75 غير مثبتة أو غير مكتملة. شغّل SQL الخاص بـ V75 بعد V74 ثم أعد المحاولة.','V75 Payroll data is not installed or incomplete. Run the V75 SQL after V74, then retry.')}</div><button class="primary-btn" style="margin-top:12px" onclick="fetchHrDataV72(true)">${hrL72('إعادة المحاولة','Retry')}</button></div></div>`;return hrTemplateV72BaseV75();};
+
+async function hrCreatePayrollRunV75(){if(!hrCanPayrollV75())return;try{const {data,error}=await sb.rpc('tasky_hr_create_payroll_run_v75',{p_workspace_id:currentWorkspaceId,p_month:`${hrPayrollMonthV75}-01`});if(error)throw error;await fetchHrDataV72(true);taskyToast(hrL72('تم إنشاء/إعادة بناء مسير الشهر','Monthly payroll run created/rebuilt'),{tone:'success'});if(data)hrOpenPayrollRunV75(data);}catch(err){showTaskyDialog({title:hrL72('مسير الرواتب','Payroll run'),message:err?.message||String(err),tone:'error'});}}
+function hrRunNextActionsV75(r){if(!r)return '';if(r.status==='draft')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','review')">${hrL72('إرسال للمراجعة','Send to review')}</button>`;if(r.status==='review')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','approved')">${hrL72('اعتماد المسير','Approve payroll')}</button>`;if(r.status==='approved')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','locked')">${hrL72('إقفال المسير','Lock payroll')}</button>`;if(r.status==='locked')return `<button class="primary-btn" onclick="hrSetPayrollStatusV75('${r.id}','paid')">${hrL72('تحديد كمدفوع','Mark paid')}</button>`;return '';}
+function hrOpenPayrollRunV75(id){const r=hrPayrollRunV75(id),items=hrRunItemsV75(id).sort((a,b)=>hrName72(hrEmp72(a.employee_id)).localeCompare(hrName72(hrEmp72(b.employee_id))));if(!r)return;const editable=['draft','review'].includes(r.status);document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('مسير','Payroll')} — ${escapeHtml(hrPayrollMonthLabelV75(r))}</h3><div style="font-size:9px;color:var(--muted)">${hrDate72(r.period_start)} → ${hrDate72(r.period_end)} · ${items.length} ${hrL72('موظف','employees')}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><div class="hr75-run-head"><div>${hrPayrollStatusV75(r.status)} ${items.some(x=>x.gosi_needs_review)?`<span class="hr75-review" style="margin-inline-start:8px">${hrL72('يوجد ملفات تأمينات تحتاج مراجعة','Insurance profiles need review')}</span>`:''}</div><div class="hr75-run-actions">${hrRunNextActionsV75(r)}</div></div><div class="hr72-table-wrap"><table class="hr72-table hr75-payroll-table"><thead><tr><th>${hrL72('الموظف','Employee')}</th><th>${hrL72('الإجمالي','Gross')}</th><th>${hrL72('أجر الاشتراك','GOSI wage')}</th><th>${hrL72('حصة الموظف','Employee GOSI')}</th><th>${hrL72('حصة المنشأة','Employer GOSI')}</th><th>${hrL72('استقطاعات أخرى','Other deductions')}</th><th>${hrL72('الصافي','Net')}</th><th>${hrL72('تكلفة المنشأة','Employer cost')}</th><th></th></tr></thead><tbody>${items.map(i=>{const ded=Number(i.recurring_deductions||0)+Number(i.unpaid_leave_deduction||0)+Number(i.attendance_deduction||0)+Number(i.other_deductions||0);return `<tr><td><b>${escapeHtml(hrName72(hrEmp72(i.employee_id)))}</b><br><small>${escapeHtml(hrCoverageLabelV75(i.gosi_coverage_type))}${i.gosi_needs_review?` · <span class="hr75-review">${hrL72('مراجعة','Review')}</span>`:''}</small></td><td class="money">${hrMoney72(i.gross_pay)}</td><td class="money">${hrMoney72(i.gosi_contributory_wage)}</td><td class="money">${hrMoney72(i.gosi_employee_amount)}</td><td class="money">${hrMoney72(i.gosi_employer_amount)}</td><td class="money">${hrMoney72(ded)}</td><td class="money">${hrMoney72(i.net_pay)}</td><td class="money">${hrMoney72(i.employer_total_cost)}</td><td>${editable?`<button class="platform-mini-btn" onclick="hrOpenPayrollItemV75('${i.id}')">${hrL72('تعديل','Adjust')}</button>`:`<button class="platform-mini-btn" onclick="hrOpenGosiCalculatorV75('${i.employee_id}','${r.period_end}')">${hrL72('تفصيل','Breakdown')}</button>`}</td></tr>`}).join('')}</tbody></table></div><div class="hr75-kpis" style="margin-top:10px"><div class="hr75-kpi"><span>${hrL72('الإجمالي','Gross')}</span><b>${hrMoney72(hrSumV75(items,'gross_pay'))}</b></div><div class="hr75-kpi"><span>${hrL72('حصة الموظفين','Employee GOSI')}</span><b>${hrMoney72(hrSumV75(items,'gosi_employee_amount'))}</b></div><div class="hr75-kpi"><span>${hrL72('حصة المنشأة','Employer GOSI')}</span><b>${hrMoney72(hrSumV75(items,'gosi_employer_amount'))}</b></div><div class="hr75-kpi"><span>${hrL72('الصافي','Net')}</span><b>${hrMoney72(hrSumV75(items,'net_pay'))}</b></div><div class="hr75-kpi"><span>${hrL72('تكلفة المنشأة','Employer cost')}</span><b>${hrMoney72(hrSumV75(items,'employer_total_cost'))}</b></div></div>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
+async function hrSetPayrollStatusV75(id,status){const label={review:hrL72('إرسال المسير للمراجعة؟','Send payroll to review?'),approved:hrL72('اعتماد المسير؟ لن يسمح النظام إذا توجد ملفات تأمينات غير مصنفة.','Approve payroll? Unclassified GOSI profiles will block approval.'),locked:hrL72('إقفال المسير؟ بعد الإقفال لا يمكن تعديله تلقائيًا.','Lock payroll? It cannot be edited automatically afterwards.'),paid:hrL72('تحديد المسير كمدفوع؟','Mark payroll as paid?')}[status]||status;if(!confirm(label))return;try{const {error}=await sb.rpc('tasky_hr_set_payroll_run_status_v75',{p_run_id:id,p_status:status,p_note:null});if(error)throw error;closeAddModal();await fetchHrDataV72(true);taskyToast(hrL72('تم تحديث حالة المسير','Payroll status updated'),{tone:'success'});hrOpenPayrollRunV75(id);}catch(err){showTaskyDialog({title:hrL72('مسير الرواتب','Payroll'),message:err?.message||String(err),tone:'error'});}}
+function hrOpenPayrollItemV75(id){const i=hrV72.payrollItems.find(x=>String(x.id)===String(id)),r=i?hrPayrollRunV75(i.run_id):null;if(!i)return;document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('تعديلات المسير','Payroll adjustments')}</h3><div style="font-size:9px;color:var(--muted)">${escapeHtml(hrName72(hrEmp72(i.employee_id)))} · ${escapeHtml(hrPayrollMonthLabelV75(r))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrSubmitFormV72(event,'payrollItem75','${i.id}')"><div class="hr72-form">${hrField72('hr75OvertimeAmount',hrL72('مبلغ العمل الإضافي','Overtime amount'),i.overtime_amount||0,'number')}${hrField72('hr75OtherEarnings',hrL72('إيرادات أخرى','Other earnings'),i.other_earnings||0,'number')}${hrField72('hr75UnpaidLeave',hrL72('خصم إجازة بدون راتب','Unpaid leave deduction'),i.unpaid_leave_deduction||0,'number')}${hrField72('hr75AttendanceDeduct',hrL72('خصم حضور — يدوي','Attendance deduction — manual'),i.attendance_deduction||0,'number')}${hrField72('hr75OtherDeduct',hrL72('استقطاعات أخرى','Other deductions'),i.other_deductions||0,'number')}<div class="field full"><label>${hrL72('مرجع الحضور لهذا الشهر','Attendance reference')}</label><div class="hr75-note" style="margin:0">${hrL72('إضافي مسجل','Recorded overtime')}: <b>${Number(i.attendance_overtime_minutes||0)} ${hrL72('دقيقة','min')}</b> · ${hrL72('تأخير','Late')}: <b>${Number(i.attendance_late_minutes||0)} ${hrL72('دقيقة','min')}</b> · ${hrL72('خروج مبكر','Early leave')}: <b>${Number(i.attendance_early_leave_minutes||0)} ${hrL72('دقيقة','min')}</b><br>${hrL72('V75 لا يحول هذه الدقائق تلقائيًا إلى مبالغ نظامية؛ يتم إدخال مبلغ الخصم/الإضافي المعتمد من سياسة الشركة.','V75 does not automatically convert these minutes into statutory amounts; enter the approved amount under the company policy.')}</div></div></div><button class="submit-btn" type="submit">${hrL72('حفظ وإعادة الحساب','Save & recalculate')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
+function hrOpenInsuranceProfileV75(empId){const e=hrEmp72(empId),p=hrInsuranceProfileV75(empId)||{};if(!e)return;const opts=[['unclassified',hrL72('غير مصنف — يمنع اعتماد المسير','Unclassified — blocks approval')],['saudi_legacy',hrL72('سعودي — لديه مدد اشتراك قبل 3 يوليو 2024 / النظام السابق','Saudi — prior contribution periods / legacy')],['saudi_new_1445',hrL72('سعودي — مشمول بنظام 1445 الجديد','Saudi — new 1445 regime')],['non_saudi',hrL72('غير سعودي — الأخطار المهنية فقط','Non-Saudi — occupational hazards only')],['gcc_manual',hrL72('مواطن خليجي — حماية ممتدة بنسب يدوية مؤكدة','GCC national — verified manual rates')],['excluded',hrL72('مستبعد/غير خاضع للحساب التلقائي','Excluded / no automatic calculation')]].map(([v,l])=>`<option value="${v}" ${p.coverage_type===v?'selected':''}>${escapeHtml(l)}</option>`).join('');document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('ملف التأمينات','Social-insurance profile')}</h3><div style="font-size:9px;color:var(--muted)">${escapeHtml(hrName72(e))}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><div class="hr75-note"><b>${hrL72('تنبيه تصنيف النظام الجديد','New-regime classification note')}</b><br>${hrL72('بحسب التأمينات، نظام 1445 الجديد يطبق على الملتحقين الجدد بسوق العمل ممن لم تكن لديهم مدد اشتراك في التقاعد المدني أو التأمينات قبل 3 يوليو 2024. لذلك لا يعتمد تاسكي على تاريخ التوظيف فقط.','According to GOSI, the new 1445 regime applies to new labor-market entrants with no prior Civil Pension or Social Insurance contribution periods before 3 July 2024. Tasky therefore does not infer it from hire date alone.')}</div><form onsubmit="hrSubmitFormV72(event,'insurance75',null,'${e.id}')"><div class="hr72-form">${hrSelect72('hr75Coverage',hrL72('نوع التغطية','Coverage type'),opts)}${hrField72('hr75GosiNumber',hrL72('رقم المشترك/التأمينات — اختياري','GOSI number — optional'),p.gosi_number||'')}${hrField72('hr75GosiOverride',hrL72('أجر اشتراك يدوي — اختياري','Contributory wage override — optional'),p.contributory_wage_override||'','number')}${hrField72('hr75GccEmpRate',hrL72('نسبة الموظف للخليجي %','GCC employee rate %'),p.manual_employee_rate||'','number')}${hrField72('hr75GccErRate',hrL72('نسبة صاحب العمل للخليجي %','GCC employer rate %'),p.manual_employer_rate||'','number')}${hrSelect72('hr75Saned',hrL72('شمول ساند','SANED coverage'),`<option value="true" ${p.saned_applicable!==false?'selected':''}>${hrL72('مشمول','Covered')}</option><option value="false" ${p.saned_applicable===false?'selected':''}>${hrL72('غير مشمول','Not covered')}</option>`)}${hrSelect72('hr75OH',hrL72('الأخطار المهنية','Occupational hazards'),`<option value="true" ${p.occupational_hazard_applicable!==false?'selected':''}>${hrL72('مشمول','Covered')}</option><option value="false" ${p.occupational_hazard_applicable===false?'selected':''}>${hrL72('غير مشمول','Not covered')}</option>`)}${hrField72('hr75Verified',hrL72('تاريخ التحقق','Verified on'),p.verified_on||new Date().toISOString().slice(0,10),'date')}<div class="field full"><label>${hrL72('ملاحظة التحقق','Verification note')}</label><textarea id="hr75VerificationNote">${escapeHtml(p.verification_note||'')}</textarea></div></div><button class="submit-btn" type="submit">${hrL72('تأكيد ملف التأمينات','Confirm insurance profile')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
+function hrOpenGosiCalculatorV75(empId=null,period=null){const emp=empId?hrEmp72(empId):hrV72.employees.find(e=>['active','probation','leave'].includes(e.status)),comp=emp?hrLatestCompV75(emp.id,period||`${hrPayrollMonthV75}-28`):null,empOpts=hrV72.employees.filter(e=>['active','probation','leave'].includes(e.status)).map(e=>`<option value="${e.id}" ${emp&&e.id===emp.id?'selected':''}>${escapeHtml(hrName72(e))}</option>`).join('');document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('حاسبة التأمينات الاجتماعية','GOSI calculator')}</h3><div style="font-size:9px;color:var(--muted)">${hrL72('حساب مباشر من ملف الموظف والفترة','Direct calculation from employee profile and period')}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrCalculateGosiV75(event)"><div class="hr72-form">${hrSelect72('hr75CalcEmp',hrL72('الموظف','Employee'),empOpts)}${hrField72('hr75CalcPeriod',hrL72('الفترة','Period'),String(period||`${hrPayrollMonthV75}-01`).slice(0,7),'month')}${hrField72('hr75CalcBasic',hrL72('الراتب الأساسي','Basic salary'),comp?.basic_salary||0,'number')}${hrField72('hr75CalcHousing',hrL72('بدل السكن','Housing allowance'),comp?.housing_allowance||0,'number')}</div><button class="submit-btn" type="submit">${hrL72('احسب الآن','Calculate now')}</button></form><div id="hr75CalcResult"></div>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');}
+async function hrCalculateGosiV75(e){e.preventDefault();const id=document.getElementById('hr75CalcEmp')?.value,period=(document.getElementById('hr75CalcPeriod')?.value||hrPayrollMonthV75)+'-01',basic=Number(document.getElementById('hr75CalcBasic')?.value||0),housing=Number(document.getElementById('hr75CalcHousing')?.value||0),box=document.getElementById('hr75CalcResult');try{const {data,error}=await sb.rpc('tasky_hr_gosi_calculate_v75',{p_employee_id:id,p_period:period,p_basic:basic,p_housing:housing});if(error)throw error;box.innerHTML=`<div class="hr75-gosi-result"><div class="hr75-gosi-box primary"><span>${hrL72('أجر الاشتراك','Contributory wage')}</span><b>${hrMoney72(data.contributory_wage)}</b></div><div class="hr75-gosi-box"><span>${hrL72('حصة الموظف','Employee contribution')}</span><b>${hrMoney72(data.employee_amount)}</b></div><div class="hr75-gosi-box"><span>${hrL72('حصة صاحب العمل','Employer contribution')}</span><b>${hrMoney72(data.employer_amount)}</b></div></div><div class="hr75-breakdown"><div><span>${hrL72('التغطية','Coverage')}</span><b>${escapeHtml(hrCoverageLabelV75(data.coverage_type))}</b></div><div><span>${hrL72('المعاشات — الموظف','Pension — employee')}</span><b>${Number(data.pension_employee_rate||0)}%</b></div><div><span>${hrL72('المعاشات — صاحب العمل','Pension — employer')}</span><b>${Number(data.pension_employer_rate||0)}%</b></div><div><span>${hrL72('ساند — الموظف / صاحب العمل','SANED — employee / employer')}</span><b>${Number(data.saned_employee_rate||0)}% / ${Number(data.saned_employer_rate||0)}%</b></div><div><span>${hrL72('الأخطار المهنية — صاحب العمل','Occupational hazards — employer')}</span><b>${Number(data.occupational_hazard_employer_rate||0)}%</b></div><div><span>${hrL72('الإجمالي للتأمينات','Total contribution')}</span><b>${hrMoney72(data.total_amount)}</b></div></div>${data.needs_review?`<div class="hr72-alert" style="margin-top:8px">${escapeHtml(data.note||hrL72('يحتاج الملف مراجعة قبل اعتماد المسير.','Profile needs review before payroll approval.'))}</div>`:''}`;}catch(err){box.innerHTML=`<div class="hr72-alert">${escapeHtml(err?.message||String(err))}</div>`;}}
+
+const hrOpenFormV72BaseV75=hrOpenFormV72;
+hrOpenFormV72=function(type,id=null,parent=null){if(type==='payrollSettings75'){const s=hrV72.payrollSettings[0]||{};document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hrL72('إعدادات الرواتب','Payroll settings')}</h3></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px"><use href="#i-x"/></svg></button></div><form onsubmit="hrSubmitFormV72(event,'payrollSettings75')"><div class="hr72-form">${hrField72('hr75PayrollDay',hrL72('يوم تجهيز المسير','Payroll day'),s.payroll_day||27,'number')}<div class="field"><label>${hrL72('حساب التأمينات','GOSI calculation')}</label><select id="hr75GosiEnabled"><option value="true" ${s.gosi_enabled!==false?'selected':''}>${hrL72('مفعّل','Enabled')}</option><option value="false" ${s.gosi_enabled===false?'selected':''}>${hrL72('معطل','Disabled')}</option></select></div><div class="field"><label>${hrL72('عرض تكلفة صاحب العمل','Show employer cost')}</label><select id="hr75ShowCost"><option value="true" ${s.show_employer_cost!==false?'selected':''}>${hrL72('نعم','Yes')}</option><option value="false" ${s.show_employer_cost===false?'selected':''}>${hrL72('لا','No')}</option></select></div><div class="field full"><label>${hrL72('ملاحظات','Notes')}</label><textarea id="hr75PayrollNotes">${escapeHtml(s.notes||'')}</textarea></div></div><button class="submit-btn" type="submit">${hrL72('حفظ الإعدادات','Save settings')}</button></form>`;document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');return;}return hrOpenFormV72BaseV75(type,id,parent);};
+const hrSubmitFormV72BaseV75=hrSubmitFormV72;
+hrSubmitFormV72=async function(e,type,id=null,parent=null){if(!String(type).endsWith('75'))return hrSubmitFormV72BaseV75(e,type,id,parent);e.preventDefault();const v=x=>document.getElementById(x)?.value||null,n=x=>Number(document.getElementById(x)?.value||0);try{if(type==='insurance75'){const payload={employee_id:parent,coverage_type:v('hr75Coverage'),gosi_number:v('hr75GosiNumber'),contributory_wage_override:v('hr75GosiOverride'),manual_employee_rate:v('hr75GccEmpRate'),manual_employer_rate:v('hr75GccErRate'),saned_applicable:v('hr75Saned')==='true',occupational_hazard_applicable:v('hr75OH')==='true',verified_on:v('hr75Verified'),verification_note:v('hr75VerificationNote'),effective_from:new Date().toISOString().slice(0,10)};const {error}=await sb.rpc('tasky_hr_save_social_insurance_profile_v75',{p_workspace_id:currentWorkspaceId,p_payload:payload});if(error)throw error;}else if(type==='payrollSettings75'){const payload={currency:'SAR',payroll_day:n('hr75PayrollDay'),gosi_enabled:v('hr75GosiEnabled')==='true',show_employer_cost:v('hr75ShowCost')==='true',notes:v('hr75PayrollNotes')};const {error}=await sb.rpc('tasky_hr_save_payroll_settings_v75',{p_workspace_id:currentWorkspaceId,p_payload:payload});if(error)throw error;}else if(type==='payrollItem75'){const payload={overtime_amount:n('hr75OvertimeAmount'),other_earnings:n('hr75OtherEarnings'),unpaid_leave_deduction:n('hr75UnpaidLeave'),attendance_deduction:n('hr75AttendanceDeduct'),other_deductions:n('hr75OtherDeduct')};const {error}=await sb.rpc('tasky_hr_update_payroll_item_v75',{p_item_id:id,p_payload:payload});if(error)throw error;}closeAddModal();await fetchHrDataV72(true);taskyToast(hrL72('تم حفظ تحديث الرواتب','Payroll update saved'),{tone:'success'});}catch(err){showTaskyDialog({title:'HR V75',message:err?.message||String(err),tone:'error'});}};
 </script>
 
 </body>
