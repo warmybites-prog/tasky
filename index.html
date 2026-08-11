@@ -271,6 +271,19 @@
   .bplan-features{display:flex;flex-direction:column;gap:9px;margin:16px 0 20px;flex:1;}
   .bplan-features li{display:flex;align-items:flex-start;gap:8px;font-size:12.5px;color:var(--ink-soft);list-style:none;}
   .bplan-features svg{width:14px;height:14px;color:var(--green);flex:none;margin-top:2px;}
+  .bplan-grid{grid-template-columns:repeat(4,minmax(0,1fr));}
+  .bplan-card.featured{border-color:rgba(11,77,64,.34);box-shadow:0 10px 28px rgba(11,77,64,.07);}
+  .bplan-eyebrow{display:inline-flex;align-items:center;width:max-content;gap:5px;padding:4px 8px;border-radius:999px;background:var(--green-tint);color:var(--green);font-size:10px;font-weight:800;margin-bottom:10px;}
+  .bplan-price-note{font-size:10.5px;color:var(--muted);line-height:1.6;margin-top:4px;min-height:17px;}
+  .pricing-model-switch{display:grid;grid-template-columns:1fr 1fr;gap:6px;padding:5px;background:var(--paper);border:1px solid var(--border);border-radius:12px;margin:12px 0 4px;}
+  .pricing-model-switch button{border:0;background:transparent;border-radius:9px;padding:8px 7px;font-size:10.5px;font-weight:800;color:var(--muted);line-height:1.35;}
+  .pricing-model-switch button.active{background:var(--card);color:var(--green);box-shadow:0 1px 5px rgba(11,77,64,.08);}
+  .pricing-estimate{margin:10px 0 0;padding:10px 11px;background:var(--paper);border:1px solid var(--border);border-radius:11px;font-size:10.5px;color:var(--ink-soft);line-height:1.65;}
+  .pricing-estimate b{color:var(--green);font-size:12px;}
+  .pricing-current-model{display:inline-flex;align-items:center;gap:5px;margin-top:6px;padding:4px 8px;border-radius:999px;background:var(--paper);border:1px solid var(--border);font-size:10.5px;color:var(--ink-soft);font-weight:700;}
+  .enterprise-card .bplan-price{font-size:20px;line-height:1.4;}
+  .enterprise-card .bplan-eyebrow{background:var(--blue-tint);color:var(--blue);}
+
   .lock-circle{width:46px;height:46px;border-radius:14px;background:var(--amber-tint);display:flex;align-items:center;justify-content:center;margin-bottom:14px;}
 
 
@@ -1868,7 +1881,7 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
 
 <script>
 // Tasky V6 — strict invite setup + database-enforced UI roles
-window.TASKY_BUILD = 'V73'; console.info('Tasky build', window.TASKY_BUILD);
+window.TASKY_BUILD = 'V73.1'; console.info('Tasky build', window.TASKY_BUILD);
 const TASKY_SUPABASE_URL = 'https://ghzgmrnqididkmocuzrf.supabase.co';
 const TASKY_SUPABASE_PUBLISHABLE_KEY = 'sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
 if(!window.supabase){
@@ -1951,6 +1964,7 @@ async function refreshPlatformRuntimeLive(){
   if(!currentWorkspaceId)return;
   const wasBlocked=platformRuntimeBlocksApp(),planBefore=currentPlan;
   await fetchCommercialRuntimeV69({render:false});
+  await fetchPricingCatalogV731({render:false});
   await fetchPlatformRuntime();
   await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
@@ -2220,6 +2234,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await syncLegalAcceptanceV70FromMetadata(currentWorkspaceId);
 
   await fetchCommercialRuntimeV69({render:false});
+  await fetchPricingCatalogV731({render:false});
   await fetchPlatformRuntime();
   await fetchPlatformReleaseRuntimeV66();
   renderPlatformRuntimeUi();
@@ -2243,6 +2258,7 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   await fetchNotifications();
   await fetchPendingPlanRequest();
   await fetchCommercialRuntimeV69({render:false});
+  await fetchPricingCatalogV731({render:false});
   await fetchOnboardingStateV68({render:false});
   initTaskRealtime();
   applyCurrentUserProfile();
@@ -3406,10 +3422,39 @@ async function fetchExternalData(serviceId){
   'modules' lists which nav sections a plan unlocks; 'all' unlocks everything.
 */
 const PLANS = {
-  free:     { id:"free",     price:0,   priceYear:0,   seats:5,        modules:["tasks","inventory","events","team"] },
-  pro:      { id:"pro",      price:149, priceYear:124, seats:25,       modules:["tasks","inventory","events","crm","hr","content","campaigns","budgets","vendors","media","requests","comms","assets","surveys","reports","analytics","integrations","team"] },
-  business: { id:"business", price:null,priceYear:null,seats:Infinity, modules:"all" },
+  free:     { id:"free",     price:0,  priceYear:0,  seats:3,        modules:["tasks","events","team"] },
+  pro:      { id:"pro",      price:25, priceYear:19, seats:Infinity, modules:["tasks","events","content","campaigns","requests","media","comms","assets","surveys","reports","analytics","integrations","team"] },
+  business: { id:"business", price:49, priceYear:39, seats:Infinity, modules:"all" },
 };
+let pricingRuntimeV731={currency:'SAR',free_internal_seat_limit:3,prices:{pro:{monthly_per_user:25,annual_per_user_month:19},business_flexible:{monthly_per_user:49,annual_per_user_month:39},business_all_employees:{monthly_per_user:37,annual_per_user_month:29}},enterprise:{enabled:true,min_internal_seats:50,sales_email:null},workspace:{base_plan:'free',pricing_model:'flexible_user',active_internal_seats:0,reserved_internal_seats:0}};
+let businessPricingModelV731='flexible_user';
+async function fetchPricingCatalogV731({render=false}={}){
+  if(!currentWorkspaceId)return pricingRuntimeV731;
+  try{
+    const {data,error}=await sb.rpc('tasky_pricing_catalog_v731',{p_workspace_id:currentWorkspaceId});
+    if(error){console.warn('V73.1 pricing catalog unavailable; run V73.1 migration',error);return pricingRuntimeV731;}
+    pricingRuntimeV731={...pricingRuntimeV731,...(data||{}),prices:{...pricingRuntimeV731.prices,...(data?.prices||{})},enterprise:{...pricingRuntimeV731.enterprise,...(data?.enterprise||{})},workspace:{...pricingRuntimeV731.workspace,...(data?.workspace||{})}};
+    const ps=pricingRuntimeV731.prices||{};
+    PLANS.free.seats=Number(pricingRuntimeV731.free_internal_seat_limit||3);
+    PLANS.pro.price=Number(ps.pro?.monthly_per_user??25);PLANS.pro.priceYear=Number(ps.pro?.annual_per_user_month??19);
+    PLANS.business.price=Number(ps.business_flexible?.monthly_per_user??49);PLANS.business.priceYear=Number(ps.business_flexible?.annual_per_user_month??39);
+    businessPricingModelV731=pricingRuntimeV731.workspace?.pricing_model==='all_employees'?'all_employees':businessPricingModelV731;
+    if(render){renderNav();renderModule();}
+    return pricingRuntimeV731;
+  }catch(err){console.warn('V73.1 pricing catalog failed',err);return pricingRuntimeV731;}
+}
+function pricingModelLabelV731(model){return model==='all_employees'?(lang==='ar'?'كل الموظفين':'All Employees'):model==='enterprise'?(lang==='ar'?'مؤسسي':'Enterprise'):(lang==='ar'?'مستخدمون مرنون':'Flexible Users');}
+function pricingSeatCountV731(){return Math.max(1,Number(pricingRuntimeV731?.workspace?.reserved_internal_seats||teamMembers.filter(m=>m.status==='active'||m.status==='invited').length||1));}
+function pricingUnitV731(planId,model='flexible_user'){
+  const p=pricingRuntimeV731?.prices||{};
+  if(planId==='pro')return Number(billingCycle==='yearly'?p.pro?.annual_per_user_month:p.pro?.monthly_per_user||0);
+  if(planId==='business'&&model==='all_employees')return Number(billingCycle==='yearly'?p.business_all_employees?.annual_per_user_month:p.business_all_employees?.monthly_per_user||0);
+  if(planId==='business')return Number(billingCycle==='yearly'?p.business_flexible?.annual_per_user_month:p.business_flexible?.monthly_per_user||0);
+  return 0;
+}
+function pricingCycleEstimateV731(planId,model='flexible_user'){const unit=pricingUnitV731(planId,model),seats=pricingSeatCountV731();return unit*seats*(billingCycle==='yearly'?12:1);}
+function pricingUnitLabelV731(planId,model='flexible_user'){const unit=pricingUnitV731(planId,model);if(!unit)return lang==='ar'?'مجانًا':'Free';return `${unit} ${lang==='ar'?'ر.س':'SAR'} <span class="unit">${model==='all_employees'?(lang==='ar'?'/ موظف / شهر':'/ employee / mo'):(lang==='ar'?'/ مستخدم / شهر':'/ user / mo')}</span>`;}
+
 function planAllows(planId, moduleId){
   const runtimeState=platformModuleState(moduleId);
   if(runtimeState) return !!runtimeState.enabled;
@@ -6107,8 +6152,9 @@ async function removeMember(id){
   teamMembers = teamMembers.filter(x=>x.id!==id);
   renderModule();
 }
-function openInviteModal(){
+async function openInviteModal(){
   if(currentUserRole !== 'admin') return;
+  try{const {data,error}=await sb.rpc('tasky_pricing_seat_allowance_v731',{p_workspace_id:currentWorkspaceId});if(!error&&data&&!data.can_invite){alert(t('seatsLimitReached'));return;}}catch(_){}
   const plan = PLANS[currentPlan];
   const reservedSeats = teamMembers.filter(m=>m.status==='active' || m.status==='invited').length;
   if(plan.seats!==Infinity && reservedSeats>=plan.seats){ alert(t('seatsLimitReached')); return; }
@@ -6137,6 +6183,7 @@ async function submitInvite(e){
     alert(lang==='ar' ? 'هذا البريد موجود في الفريق أو لديه دعوة معلّقة بالفعل.' : 'This email is already on the team or has a pending invite.');
     return;
   }
+  try{const {data,error}=await sb.rpc('tasky_pricing_seat_allowance_v731',{p_workspace_id:currentWorkspaceId});if(!error&&data&&!data.can_invite){alert(t('seatsLimitReached'));return;}}catch(_){}
 
   const btn = e.submitter || document.querySelector('#addModalBody .submit-btn');
   if(btn){ btn.disabled = true; btn.textContent = lang==='ar' ? 'جاري إرسال الدعوة...' : 'Sending invite...'; }
@@ -6287,7 +6334,7 @@ function settingsSecurityTemplate(){
   return `<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'تغيير كلمة المرور':'Change password'}</h3><p>${lang==='ar'?'يتم تحديث كلمة المرور مباشرة عبر Supabase Auth.':'Your password is updated directly through Supabase Auth.'}</p></div></div><form onsubmit="changeMyPassword(event)"><div class="settings-form-grid"><div class="settings-field"><label>${lang==='ar'?'كلمة المرور الجديدة':'New password'}</label><input id="settingsPassword" type="password" minlength="8" required autocomplete="new-password"></div><div class="settings-field"><label>${lang==='ar'?'تأكيد كلمة المرور':'Confirm password'}</label><input id="settingsPasswordConfirm" type="password" minlength="8" required autocomplete="new-password"></div></div><div class="settings-actions"><button class="primary-btn" type="submit"><svg><use href="#i-shield"/></svg>${lang==='ar'?'تحديث كلمة المرور':'Update password'}</button></div></form></div>`;
 }
 function settingsBillingTemplate(){
-  return `${commercialBillingPanelV69()}<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'الباقة والفوترة':'Plan & billing'}</h3><p>${lang==='ar'?'قاعدة البيانات هي مصدر الحقيقة للباقة. طلب التغيير لا يفعّل اشتراكًا مدفوعًا تلقائيًا.':'The database is the source of truth. A change request does not automatically activate a paid subscription.'}</p></div></div><div class="settings-plan-box"><div><span style="font-size:11px;color:var(--muted)">${lang==='ar'?'الباقة الحالية':'Current plan'}</span><div class="plan-title">${t('plan_'+currentPlan+'_name')}</div></div><button class="primary-btn" onclick="setActiveNav('billing')"><svg><use href="#i-crown"/></svg>${lang==='ar'?'عرض الباقات':'View plans'}</button></div>${pendingPlanRequest?`<div class="pending-plan-note">${lang==='ar'?`طلب معلّق: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`:`Pending request: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`}</div>`:''}</div>`;
+  return `${commercialBillingPanelV69()}<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'الباقة والفوترة':'Plan & billing'}</h3><p>${lang==='ar'?'قاعدة البيانات هي مصدر الحقيقة للباقة. طلب التغيير لا يفعّل اشتراكًا مدفوعًا تلقائيًا.':'The database is the source of truth. A change request does not automatically activate a paid subscription.'}</p></div></div><div class="settings-plan-box"><div><span style="font-size:11px;color:var(--muted)">${lang==='ar'?'الباقة الحالية':'Current plan'}</span><div class="plan-title">${t('plan_'+currentPlan+'_name')}</div>${currentPlan==='business'?`<span class="pricing-current-model">${pricingModelLabelV731(pricingRuntimeV731?.workspace?.pricing_model||'flexible_user')}</span>`:''}</div><button class="primary-btn" onclick="setActiveNav('billing')"><svg><use href="#i-crown"/></svg>${lang==='ar'?'عرض الباقات':'View plans'}</button></div>${pendingPlanRequest?`<div class="pending-plan-note">${lang==='ar'?`طلب معلّق: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`:`Pending request: ${t('plan_'+pendingPlanRequest.to_plan+'_name')}`}</div>`:''}</div>`;
 }
 async function saveMyProfile(e){
   e.preventDefault();
@@ -6316,63 +6363,67 @@ async function changeMyPassword(e){
 
 let billingCycle = 'monthly';
 function setBillingCycle(cycle){ billingCycle = cycle; renderModule(); }
-function planPriceDisplay(planId){
-  const p = PLANS[planId];
-  if(p.price===0) return `<div class="bplan-price">${t('billFree')}</div>`;
-  if(p.price===null) return `<div class="bplan-price" style="font-size:19px">${t('billContactUs')}</div>`;
-  const val = billingCycle==='monthly' ? p.price : p.priceYear;
-  return `<div class="bplan-price">${val}<span class="unit"> ${t('billPerMonth')}</span></div>`;
+function setBusinessPricingModelV731(model){businessPricingModelV731=model==='all_employees'?'all_employees':'flexible_user';renderModule();}
+function planPriceDisplay(planId,model='flexible_user'){
+  if(planId==='free') return `<div class="bplan-price">${t('billFree')}</div><div class="bplan-price-note">${lang==='ar'?`حتى ${Number(pricingRuntimeV731.free_internal_seat_limit||3)} مستخدمين داخليين`:`Up to ${Number(pricingRuntimeV731.free_internal_seat_limit||3)} internal users`}</div>`;
+  if(planId==='enterprise') return `<div class="bplan-price">${lang==='ar'?'عرض سعر مخصص':'Custom quote'}</div><div class="bplan-price-note">${lang==='ar'?'عقد، SLA وتكاملات حسب الاحتياج':'Contract, SLA and integrations tailored to your needs'}</div>`;
+  const unit=pricingUnitV731(planId,model);
+  return `<div class="bplan-price">${pricingUnitLabelV731(planId,model)}</div><div class="bplan-price-note">${billingCycle==='yearly'?(lang==='ar'?'السعر الشهري المكافئ عند الالتزام السنوي':'Monthly equivalent with annual commitment'):(lang==='ar'?'فوترة شهرية مرنة':'Flexible monthly billing')}</div>`;
 }
 function planFeatureList(planId){
-  const p = PLANS[planId];
-  const seatsLine = t('billSeatsLabel')(p.seats===Infinity ? '∞' : p.seats);
-  const modLine = p.modules==='all' ? t('billModulesAll') : t('billModulesSome');
-  const brandingLine = planId==='free' ? '' : `<li><svg><use href="#i-check"/></svg>${t('billCustomLogo')}</li>`;
-  const inviteLine = planId==='business' ? (lang==='ar'?'500 دعوة حضور مجانية شهريًا':'500 complimentary guest invitations / month') : planId==='pro' ? (lang==='ar'?'50 دعوة حضور مجانية شهريًا':'50 complimentary guest invitations / month') : (lang==='ar'?'دعوات الحضور عبر رصيد إضافي':'Guest invitations via add-on credits');
-  return `<li><svg><use href="#i-check"/></svg>${seatsLine}</li><li><svg><use href="#i-check"/></svg>${modLine}</li><li><svg><use href="#i-check"/></svg>${inviteLine}</li>${brandingLine}`;
+  const seatLimit=Number(pricingRuntimeV731.free_internal_seat_limit||3);
+  if(planId==='free')return `<li><svg><use href="#i-check"/></svg>${lang==='ar'?`حتى ${seatLimit} مستخدمين داخليين`:`Up to ${seatLimit} internal users`}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'المهام والمشاريع الأساسية':'Core tasks & projects'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'الفعاليات والتعاون الأساسي':'Events & basic collaboration'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'ابدأ بدون بطاقة بنكية':'Start without a credit card'}</li>`;
+  if(planId==='pro')return `<li><svg><use href="#i-check"/></svg>${lang==='ar'?'مستخدمون غير محدودين — السعر لكل مستخدم':'Unlimited users — priced per user'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'المشاريع والمهام وإدارة الفريق':'Projects, tasks & team management'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'المحتوى والحملات والاستبيانات':'Content, campaigns & surveys'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'التقارير والتحليلات والتكاملات':'Reports, analytics & integrations'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'50 دعوة حضور مجانية شهريًا':'50 complimentary guest invitations / month'}</li>`;
+  if(planId==='business')return `<li><svg><use href="#i-check"/></svg>${lang==='ar'?'كل ما في Pro':'Everything in Pro'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'CRM والمبيعات والفواتير والتحصيل':'CRM, sales, invoicing & collections'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'الموارد البشرية والحضور والإجازات':'HR, attendance & leave'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'المشتريات والموردون والميزانيات':'Procurement, vendors & budgets'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'صلاحيات وتقارير متقدمة + 500 دعوة':'Advanced controls & reports + 500 invitations'}</li>`;
+  return `<li><svg><use href="#i-check"/></svg>${lang==='ar'?'كل منتجات Tasky':'All Tasky products'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'SSO / سياسات أمان وSLA حسب الاتفاق':'SSO / security policies & SLA by agreement'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'تهيئة، ترحيل بيانات وتدريب':'Onboarding, migration & training'}</li><li><svg><use href="#i-check"/></svg>${lang==='ar'?'تكاملات واحتياجات مؤسسية مخصصة':'Custom enterprise integrations'}</li>`;
 }
 function billingTemplate(){
-  const plan = PLANS[currentPlan];
-  const seatsLimit = plan.seats===Infinity ? '∞' : plan.seats;
+  const seats=Number(pricingRuntimeV731?.workspace?.active_internal_seats||teamMembers.filter(m=>m.status==='active').length||0),freeLimit=Number(pricingRuntimeV731.free_internal_seat_limit||3),currentModel=pricingRuntimeV731?.workspace?.pricing_model||'flexible_user';
+  const businessModel=businessPricingModelV731==='all_employees'?'all_employees':'flexible_user';
+  const businessEstimate=pricingCycleEstimateV731('business',businessModel);
+  const proEstimate=pricingCycleEstimateV731('pro','flexible_user');
   return `${commercialBillingPanelV69()}
     <div class="section-card" style="padding:22px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:16px;">
-      <div>
-        <div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${t('billCurrentPlan')}</div>
-        <div style="font-size:20px;font-weight:800;font-family:'Almarai';color:var(--green)">${t('plan_'+currentPlan+'_name')}</div>
-      </div>
-      <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${t('billSeatsUsed')}</div><div style="font-family:'IBM Plex Mono',monospace;font-weight:700;">${teamMembers.filter(m=>m.status==='active').length} / ${seatsLimit}</div></div>
+      <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${t('billCurrentPlan')}</div><div style="font-size:20px;font-weight:800;font-family:'Almarai';color:var(--green)">${t('plan_'+currentPlan+'_name')}</div>${currentPlan==='business'?`<span class="pricing-current-model">${pricingModelLabelV731(currentModel)}</span>`:''}</div>
+      <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${lang==='ar'?'المستخدمون الداخليون':'Internal users'}</div><div style="font-family:'IBM Plex Mono',monospace;font-weight:700;">${seats}${currentPlan==='free'?` / ${freeLimit}`:''}</div></div>
       <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px;">${lang==='ar'?'حالة الفوترة':'Billing status'}</div><div style="font-weight:700;">${commercialStatusLabelV69(commercialRuntimeV69?.commercial_status)} · ${lang==='ar'?'التحصيل يدوي حاليًا':'Manual collection for now'}</div></div>
     </div>
-
-    ${pendingPlanRequest ? `<div class="pending-plan-note">${lang==='ar'?`يوجد طلب معلّق للانتقال إلى باقة «${t('plan_'+pendingPlanRequest.to_plan+'_name')}». الباقة الفعلية ستبقى «${t('plan_'+currentPlan+'_name')}» حتى اعتماد الطلب.`:`A request to switch to “${t('plan_'+pendingPlanRequest.to_plan+'_name')}” is pending. The active plan remains “${t('plan_'+currentPlan+'_name')}” until approved.`}</div>` : ''}
-
-    <div style="text-align:center;margin-top:10px;">
-      <h3 style="font-size:17px;margin-bottom:16px;">${t('billChoosePlan')}</h3>
-      <div class="bplan-toggle">
-        <button class="${billingCycle==='monthly'?'active':''}" onclick="setBillingCycle('monthly')">${t('billMonthly')}</button>
-        <button class="${billingCycle==='yearly'?'active':''}" onclick="setBillingCycle('yearly')">${t('billYearly')} <span style="opacity:.85">(${t('billSave')})</span></button>
-      </div>
-    </div>
-
+    ${pendingPlanRequest ? `<div class="pending-plan-note">${lang==='ar'?`يوجد طلب معلّق للانتقال إلى باقة «${t('plan_'+pendingPlanRequest.to_plan+'_name')}». لن تتغير الباقة الفعلية قبل اعتماد الطلب.`:`A request to switch to “${t('plan_'+pendingPlanRequest.to_plan+'_name')}” is pending. The active plan will not change until approval.`}</div>` : ''}
+    ${pricingRuntimeV731?.pending_model_request?`<div class="pending-plan-note">${lang==='ar'?`طلب تغيير نموذج التسعير إلى «${pricingModelLabelV731(pricingRuntimeV731.pending_model_request.to_model)}» بانتظار اعتماد فريق تاسكي.`:`Pricing-model change to “${pricingModelLabelV731(pricingRuntimeV731.pending_model_request.to_model)}” is awaiting Tasky approval.`}</div>`:''}
+    <div style="text-align:center;margin-top:10px;"><h3 style="font-size:17px;margin-bottom:7px;">${lang==='ar'?'اختر الطريقة الأنسب لشركتك':'Choose the model that fits your company'}</h3><p style="font-size:11.5px;color:var(--muted);margin-bottom:16px">${lang==='ar'?'سعر واضح لكل مستخدم، أو سعر أقل إذا اشتركت الشركة لكل موظفيها.':'Clear per-user pricing, or a lower rate when the company licenses all employees.'}</p><div class="bplan-toggle"><button class="${billingCycle==='monthly'?'active':''}" onclick="setBillingCycle('monthly')">${t('billMonthly')}</button><button class="${billingCycle==='yearly'?'active':''}" onclick="setBillingCycle('yearly')">${t('billYearly')} <span style="opacity:.85">(${lang==='ar'?'وفر حتى 24%':'save up to 24%'})</span></button></div></div>
     <div class="bplan-grid">
-      ${['free','pro','business'].map(id => {
-        const isCurrent = id===currentPlan;
-        return `
-        <div class="bplan-card ${isCurrent?'current':''}">
-          ${isCurrent?`<span class="bplan-badge-current">${t('billCurrentBadge')}</span>`:''}
-          <div class="bplan-name">${t('plan_'+id+'_name')}</div>
-          <div class="bplan-desc">${t('plan_'+id+'_desc')}</div>
-          ${planPriceDisplay(id)}
-          <ul class="bplan-features">${planFeatureList(id)}</ul>
-          ${isCurrent
-            ? `<button class="chip-btn" style="width:100%;justify-content:center" disabled>${t('billCurrentBadge')}</button>`
-            : `<button class="primary-btn" style="width:100%;justify-content:center" onclick="applyPlanChange('${id}')">${planRank(id)>planRank(currentPlan)?t('billUpgrade'):t('billDowngrade')}</button>`}
-        </div>`;
-      }).join('')}
+      <div class="bplan-card ${currentPlan==='free'?'current':''}">${currentPlan==='free'?`<span class="bplan-badge-current">${t('billCurrentBadge')}</span>`:''}<div class="bplan-name">${t('plan_free_name')}</div><div class="bplan-desc">${lang==='ar'?'للأفراد والفرق الصغيرة جدًا للبدء في إدارة العمل.':'For individuals and very small teams starting with work management.'}</div>${planPriceDisplay('free')}<ul class="bplan-features">${planFeatureList('free')}</ul>${currentPlan==='free'?`<button class="chip-btn" style="width:100%;justify-content:center" disabled>${t('billCurrentBadge')}</button>`:`<button class="primary-btn" style="width:100%;justify-content:center" onclick="applyPlanChange('free','flexible_user')">${t('billDowngrade')}</button>`}</div>
+      <div class="bplan-card featured ${currentPlan==='pro'?'current':''}">${currentPlan==='pro'?`<span class="bplan-badge-current">${t('billCurrentBadge')}</span>`:`<span class="bplan-eyebrow">${lang==='ar'?'للعمل والفرق':'WORK & TEAMS'}</span>`}<div class="bplan-name">${t('plan_pro_name')}</div><div class="bplan-desc">${lang==='ar'?'إدارة العمل والتسويق والتعاون للفرق النشطة.':'Work, marketing and collaboration for active teams.'}</div>${planPriceDisplay('pro')}<div class="pricing-estimate">${lang==='ar'?`تقدير ${pricingSeatCountV731()} مستخدم: `:`Estimate for ${pricingSeatCountV731()} users: `}<b>${Math.round(proEstimate).toLocaleString()} ${lang==='ar'?'ر.س':'SAR'}${billingCycle==='yearly'?(lang==='ar'?' / سنة':' / year'):(lang==='ar'?' / شهر':' / month')}</b></div><ul class="bplan-features">${planFeatureList('pro')}</ul>${currentPlan==='pro'?`<button class="chip-btn" style="width:100%;justify-content:center" disabled>${t('billCurrentBadge')}</button>`:`<button class="primary-btn" style="width:100%;justify-content:center" onclick="applyPlanChange('pro','flexible_user')">${planRank('pro')>planRank(currentPlan)?t('billUpgrade'):t('billDowngrade')}</button>`}</div>
+      <div class="bplan-card featured ${currentPlan==='business'?'current':''}">${currentPlan==='business'?`<span class="bplan-badge-current">${t('billCurrentBadge')}</span>`:`<span class="bplan-eyebrow">${lang==='ar'?'المنصة الكاملة':'FULL PLATFORM'}</span>`}<div class="bplan-name">${t('plan_business_name')}</div><div class="bplan-desc">${lang==='ar'?'أدر أقسام الشركة كلها من Tasky في اشتراك واحد.':'Run the company across Tasky products in one subscription.'}</div><div class="pricing-model-switch"><button class="${businessModel==='flexible_user'?'active':''}" onclick="setBusinessPricingModelV731('flexible_user')">${lang==='ar'?'مستخدمون مرنون':'Flexible Users'}</button><button class="${businessModel==='all_employees'?'active':''}" onclick="setBusinessPricingModelV731('all_employees')">${lang==='ar'?'كل الموظفين':'All Employees'}</button></div>${planPriceDisplay('business',businessModel)}<div class="pricing-estimate">${businessModel==='all_employees'?(lang==='ar'?'يشترط ترخيص جميع الموظفين الداخليين. ':'All internal employees must be licensed. '):''}${lang==='ar'?`التقدير الحالي (${pricingSeatCountV731()}): `:`Current estimate (${pricingSeatCountV731()}): `}<b>${Math.round(businessEstimate).toLocaleString()} ${lang==='ar'?'ر.س':'SAR'}${billingCycle==='yearly'?(lang==='ar'?' / سنة':' / year'):(lang==='ar'?' / شهر':' / month')}</b></div><ul class="bplan-features">${planFeatureList('business')}</ul>${currentPlan==='business'&&currentModel===businessModel?`<button class="chip-btn" style="width:100%;justify-content:center" disabled>${t('billCurrentBadge')}</button>`:currentPlan==='business'?`<button class="primary-btn" style="width:100%;justify-content:center" onclick="requestBusinessPricingModelV731('${businessModel}')">${lang==='ar'?'طلب تغيير نموذج التسعير':'Request pricing model change'}</button>`:`<button class="primary-btn" style="width:100%;justify-content:center" onclick="applyPlanChange('business','${businessModel}')">${t('billUpgrade')}</button>`}</div>
+      ${pricingRuntimeV731?.enterprise?.enabled===false?'':`<div class="bplan-card enterprise-card"><span class="bplan-eyebrow">${lang==='ar'?'للشركات الكبيرة':'ENTERPRISE'}</span><div class="bplan-name">${lang==='ar'?'مؤسسي':'Enterprise'}</div><div class="bplan-desc">${lang==='ar'?'للشركات التي تحتاج عقودًا، SLA، أمانًا أو تكاملات خاصة.':'For organizations needing contracts, SLA, security or custom integrations.'}</div>${planPriceDisplay('enterprise')}<ul class="bplan-features">${planFeatureList('enterprise')}</ul><button class="primary-btn" style="width:100%;justify-content:center" onclick="openEnterpriseInquiryV731()">${lang==='ar'?'تواصل مع المبيعات':'Contact sales'}</button></div>`}
     </div>`;
 }
-function planRank(id){ return { free:0, pro:1, business:2 }[id]; }
-async function applyPlanChange(id){
+function planRank(id){ return { free:0, pro:1, business:2, enterprise:3 }[id]??0; }
+async function requestBusinessPricingModelV731(model){
+  if(currentUserRole!=='admin'||currentPlan!=='business')return;
+  const current=pricingRuntimeV731?.workspace?.pricing_model||'flexible_user';
+  if(model===current){taskyToast(lang==='ar'?'هذا نموذج التسعير الحالي':'This pricing model is already active',{tone:'info'});return;}
+  if(pricingRuntimeV731?.pending_model_request){taskyToast(lang==='ar'?'يوجد طلب تغيير نموذج تسعير معلّق بالفعل':'A pricing-model change is already pending',{tone:'warning'});return;}
+  const estimate=pricingCycleEstimateV731('business',model);
+  const ok=await taskyConfirm(lang==='ar'?`سيتم إرسال طلب لتغيير نموذج Business إلى «${pricingModelLabelV731(model)}». التقدير الحالي ${Math.round(estimate).toLocaleString()} ر.س ${billingCycle==='yearly'?'للسنة':'للشهر'}، ولن يتغير الاشتراك قبل اعتماد فريق تاسكي.`:`A request will be sent to change Business pricing to “${pricingModelLabelV731(model)}”. Current estimate: ${Math.round(estimate).toLocaleString()} SAR ${billingCycle==='yearly'?'per year':'per month'}. Nothing changes until Tasky approves it.`,{title:lang==='ar'?'تغيير نموذج التسعير':'Change pricing model',tone:'warning',confirmText:lang==='ar'?'إرسال الطلب':'Send request'});
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_pricing_model_request_v731',{p_workspace_id:currentWorkspaceId,p_to_model:model,p_billing_cycle:billingCycle});
+  if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إرسال الطلب':'Could not send request',message:error.message,tone:'error'});return;}
+  await fetchPricingCatalogV731({render:false});taskyToast(lang==='ar'?'تم إرسال طلب تغيير نموذج التسعير':'Pricing-model change requested',{tone:'success'});renderModule();
+}
+function openEnterpriseInquiryV731(){
+  if(pricingRuntimeV731?.enterprise?.enabled===false){taskyToast(lang==='ar'?'طلبات Enterprise غير متاحة حاليًا':'Enterprise inquiries are currently unavailable',{tone:'warning'});return;}
+  if(currentUserRole!=='admin')return;
+  const me=currentMember(),sales=pricingRuntimeV731?.enterprise?.sales_email||'';
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'طلب باقة مؤسسية':'Enterprise inquiry'}</h3><div style="font-size:10.5px;color:var(--muted);margin-top:4px">${lang==='ar'?'سنراجع الاحتياج ونجهز عرضًا مناسبًا للشركة.':'We will review your requirements and prepare a tailored offer.'}${sales?` · ${escapeHtml(sales)}`:''}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div><form onsubmit="submitEnterpriseInquiryV731(event)"><div class="field"><label>${lang==='ar'?'اسم جهة التواصل':'Contact name'}</label><input id="entName" value="${escapeHtml(me?.fullName||'')}" required></div><div class="field"><label>${lang==='ar'?'البريد':'Email'}</label><input id="entEmail" type="email" value="${escapeHtml(currentUserEmail||'')}" required></div><div class="field"><label>${lang==='ar'?'الجوال — اختياري':'Phone — optional'}</label><input id="entPhone"></div><div class="field"><label>${lang==='ar'?'عدد الموظفين التقريبي':'Approx. employee count'}</label><input id="entCount" type="number" min="1" value="${Math.max(pricingSeatCountV731(),Number(pricingRuntimeV731?.enterprise?.min_internal_seats||50))}"></div><div class="field"><label>${lang==='ar'?'احتياجك':'Requirements'}</label><textarea id="entMessage" rows="4" placeholder="${lang==='ar'?'مثال: SSO، SLA، تكامل خاص، ترحيل بيانات...':'Example: SSO, SLA, custom integration, migration...'}"></textarea></div><button class="submit-btn" type="submit">${lang==='ar'?'إرسال الطلب':'Send inquiry'}</button></form>`;document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function submitEnterpriseInquiryV731(e){
+  e.preventDefault();const btn=e.submitter;if(btn)btn.disabled=true;
+  const payload={contact_name:document.getElementById('entName').value.trim(),contact_email:document.getElementById('entEmail').value.trim(),phone:document.getElementById('entPhone').value.trim()||null,employee_count:Number(document.getElementById('entCount').value||0)||null,message:document.getElementById('entMessage').value.trim()||null};
+  const {error}=await sb.rpc('tasky_enterprise_inquiry_create_v731',{p_workspace_id:currentWorkspaceId,p_payload:payload});
+  if(btn)btn.disabled=false;if(error){showTaskyDialog({title:lang==='ar'?'تعذّر إرسال الطلب':'Could not send inquiry',message:error.message,tone:'error'});return;}closeAddModal();taskyToast(lang==='ar'?'تم إرسال طلب Enterprise إلى فريق تاسكي':'Enterprise inquiry sent to Tasky',{tone:'success'});
+}
+async function applyPlanChange(id,pricingModel='flexible_user'){
   if(currentUserRole !== 'admin' || !currentWorkspaceId) return;
   if(id===currentPlan){ taskyToast(lang==='ar'?'هذه باقتك الحالية':'This is your current plan',{tone:'info'}); return; }
   const ok = await taskyConfirm(
@@ -6389,8 +6440,11 @@ async function applyPlanChange(id){
     return;
   }
   pendingPlanRequest=data || {to_plan:id,billing_cycle:billingCycle,status:'pending'};
+  if(!pendingPlanRequest?.id) await fetchPendingPlanRequest();
+  if(pendingPlanRequest?.id){try{const priced=await sb.rpc('tasky_pricing_attach_request_v731',{p_workspace_id:currentWorkspaceId,p_request_id:pendingPlanRequest.id,p_pricing_model:pricingModel});if(priced.error)console.warn('V73.1 pricing request metadata',priced.error);}catch(err){console.warn('V73.1 pricing request metadata',err);}}
   await fetchCommercialRuntimeV69({render:false});
-  await markOnboardingActionV68('plan_reviewed',{selected_plan:id,billing_cycle:billingCycle});
+  await fetchPricingCatalogV731({render:false});
+  await markOnboardingActionV68('plan_reviewed',{selected_plan:id,billing_cycle:billingCycle,pricing_model:pricingModel});
   taskyToast(lang==='ar'?'تم تسجيل طلب تغيير الباقة':'Plan change request recorded',{tone:'success'});
   renderModule();
 }
@@ -8781,7 +8835,7 @@ async function hrReturnAssetV721(id){const ok=await taskyConfirm(hrL72('تأكي
 </style>
 <script>
 /* ================= V73 ATTENDANCE, SHIFTS & TIME MANAGEMENT ================= */
-window.TASKY_BUILD='V73';
+window.TASKY_BUILD='V73.1';
 hrV72.attendanceSettings=hrV72.attendanceSettings||[];
 hrV72.shiftAssignments=hrV72.shiftAssignments||[];
 hrV72.attendanceCorrections=hrV72.attendanceCorrections||[];
