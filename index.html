@@ -14151,5 +14151,140 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v10514-media-prejoin-css">
+.meet10514-prejoin{display:flex;flex-direction:column;gap:12px}
+.meet10514-preview{position:relative;aspect-ratio:16/9;min-height:220px;border-radius:16px;overflow:hidden;background:#0b1815;border:1px solid #274139}
+.meet10514-preview video{width:100%;height:100%;object-fit:contain;background:#0b1815;transform:scaleX(-1)}
+.meet10514-preview .off{position:absolute;inset:0;display:grid;place-items:center;color:#d7e5e0;font-weight:850;font-size:11px;background:#10221e}
+.meet10514-device-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.meet10514-device-actions button{min-height:48px;border:1px solid var(--border);border-radius:12px;background:var(--card);font-weight:850;color:var(--ink)}
+.meet10514-device-actions button.on{background:#e9f5ef;color:#176347;border-color:#b9d9ca}
+.meet10514-device-actions button.off{background:#f6ecea;color:#93443d;border-color:#ead0cc}
+.meet10514-prejoin-note{font-size:8.5px;line-height:1.65;color:var(--muted);border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:9px}
+.meet10514-enter{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@media(max-width:600px){.meet10514-preview{min-height:190px}.meet10514-device-actions{grid-template-columns:1fr}.meet10514-enter button{width:100%}}
+</style>
+<script id="tasky-v10514-media-prejoin-js">
+window.TASKY_BUILD='V105.1.4';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV10514Prefs={mic:true,camera:true};
+let meetingV10514PreviewStream=null;
+let meetingV10514Pending={kind:null,roomCode:null};
+let meetingV10514GuestConfirmed=false;
+
+function meet10514L(ar,en){return lang==='ar'?ar:en}
+function meetingV10514VideoConstraints(){
+  const portrait=window.matchMedia?.('(orientation: portrait)')?.matches||innerHeight>innerWidth;
+  return portrait
+    ?{width:{ideal:720},height:{ideal:1280},aspectRatio:{ideal:.5625},facingMode:{ideal:'user'}}
+    :{width:{ideal:1280},height:{ideal:720},aspectRatio:{ideal:1.7777778},facingMode:{ideal:'user'}};
+}
+function meetingV10514StopPreview(){
+  if(meetingV10514PreviewStream){for(const t of meetingV10514PreviewStream.getTracks())try{t.stop()}catch(_){}}
+  meetingV10514PreviewStream=null;
+}
+async function meetingV10514AcquirePreview(){
+  meetingV10514StopPreview();
+  if(!navigator.mediaDevices?.getUserMedia)return;
+  if(!meetingV10514Prefs.mic&&!meetingV10514Prefs.camera){meetingV10514RenderPreview();return}
+  try{
+    meetingV10514PreviewStream=await navigator.mediaDevices.getUserMedia({
+      audio:meetingV10514Prefs.mic?{echoCancellation:true,noiseSuppression:true,autoGainControl:true}:false,
+      video:meetingV10514Prefs.camera?meetingV10514VideoConstraints():false
+    });
+  }catch(err){
+    console.warn('V105.1.4 prejoin media',err);
+    const tracks=[];
+    if(meetingV10514Prefs.mic){try{const a=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});tracks.push(...a.getAudioTracks())}catch(_){meetingV10514Prefs.mic=false}}
+    if(meetingV10514Prefs.camera){try{const v=await navigator.mediaDevices.getUserMedia({audio:false,video:meetingV10514VideoConstraints()});tracks.push(...v.getVideoTracks())}catch(_){meetingV10514Prefs.camera=false}}
+    meetingV10514PreviewStream=new MediaStream(tracks);
+  }
+  meetingV10514RenderPreview();
+}
+function meetingV10514RenderPreview(){
+  const v=document.getElementById('meet10514PreviewVideo'),off=document.getElementById('meet10514PreviewOff');
+  if(v){v.srcObject=meetingV10514PreviewStream||null;v.muted=true;v.playsInline=true;if(meetingV10514Prefs.camera&&meetingV10514PreviewStream?.getVideoTracks().length)v.play().catch(()=>{})}
+  if(off)off.style.display=meetingV10514Prefs.camera&&meetingV10514PreviewStream?.getVideoTracks().length?'none':'grid';
+  const mic=document.getElementById('meet10514MicBtn'),cam=document.getElementById('meet10514CamBtn');
+  if(mic){mic.className=meetingV10514Prefs.mic?'on':'off';mic.innerHTML=`${meetingV10514Prefs.mic?'🎙️':'🔇'} ${meetingV10514Prefs.mic?meet10514L('المايك يعمل','Microphone on'):meet10514L('المايك مغلق','Microphone off')}`}
+  if(cam){cam.className=meetingV10514Prefs.camera?'on':'off';cam.innerHTML=`${meetingV10514Prefs.camera?'📷':'🚫'} ${meetingV10514Prefs.camera?meet10514L('الكاميرا تعمل','Camera on'):meet10514L('الكاميرا مغلقة','Camera off')}`}
+}
+async function meetingV10514TogglePrejoin(kind){
+  meetingV10514Prefs[kind]=!meetingV10514Prefs[kind];
+  await meetingV10514AcquirePreview();
+}
+async function meetingV10514OpenPrejoin(kind,roomCode=null){
+  meetingV10514Pending={kind,roomCode};
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${meet10514L('قبل دخول الاجتماع','Before joining')}</h3><div class="subtle">${meet10514L('اختر الكاميرا والمايك قبل دخول غرفة الاجتماع. يمكنك تغييرهما لاحقًا من شريط التحكم.','Choose camera and microphone before entering the meeting. You can change them later from the meeting controls.')}</div></div><button class="modal-close" onclick="meetingV10514CancelPrejoin()">×</button></div>
+  <div class="meet10514-prejoin"><div class="meet10514-preview"><video id="meet10514PreviewVideo" autoplay muted playsinline></video><div id="meet10514PreviewOff" class="off">${meet10514L('الكاميرا مغلقة','Camera is off')}</div></div>
+  <div class="meet10514-device-actions"><button id="meet10514MicBtn" type="button" onclick="meetingV10514TogglePrejoin('mic')"></button><button id="meet10514CamBtn" type="button" onclick="meetingV10514TogglePrejoin('camera')"></button></div>
+  <div class="meet10514-prejoin-note">${meet10514L('لا يتم إرسال الصوت أو الصورة لأي مشارك أثناء هذه المعاينة. تبدأ المشاركة فقط بعد دخول الاجتماع.','Audio and video are not sent to any participant during this preview. Publishing begins only after you enter the meeting.')}</div>
+  <div class="meet10514-enter"><button class="chip-btn" type="button" onclick="meetingV10514CancelPrejoin()">${meet10514L('إلغاء','Cancel')}</button><button class="primary-btn" type="button" onclick="meetingV10514ConfirmPrejoin()">${meet10514L('دخول الاجتماع','Join meeting')}</button></div></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+  await meetingV10514AcquirePreview();
+}
+function meetingV10514CancelPrejoin(){meetingV10514StopPreview();meetingV10514Pending={kind:null,roomCode:null};closeAddModal()}
+async function meetingV10514ConfirmPrejoin(){
+  const p={...meetingV10514Pending};meetingV10514StopPreview();closeAddModal();
+  if(p.kind==='member')return meetingV10514JoinMemberNow(p.roomCode);
+  if(p.kind==='guest'){meetingV10514GuestConfirmed=true;return joinPublicMeetingGuestV102({preventDefault(){},submitter:null})}
+}
+
+/* Restore stable P2P as the active transport. V105 probing was suppressing peer creation,
+   especially when a guest completed admission asynchronously from the waiting room. */
+meetingV105Transport='mesh';
+async function meetingV10514JoinMemberNow(roomCode){
+  meetingV105Transport='mesh';
+  return joinMeetingRoomBaseV105(String(roomCode||'').trim().toUpperCase());
+}
+joinMeetingRoomV101=async function(roomCode){return meetingV10514OpenPrejoin('member',String(roomCode||'').trim().toUpperCase())};
+
+/* Guest gets the same device choice before the waiting-room request is submitted. */
+const meetingV10514GuestJoinBase=joinPublicMeetingGuestBaseV105;
+joinPublicMeetingGuestV102=async function(e){
+  e?.preventDefault?.();
+  if(!meetingV10514GuestConfirmed)return meetingV10514OpenPrejoin('guest',meetingGuestPublicV102?.roomCode||null);
+  meetingV10514GuestConfirmed=false;
+  meetingV105Transport='mesh';
+  return meetingV10514GuestJoinBase({preventDefault(){},submitter:e?.submitter||null});
+};
+
+/* Selected device state controls the actual room media request. */
+meetingGetLocalMediaV101=async function(){
+  meetingLocalStreamV101=new MediaStream();meetingCameraTrackV101=null;meetingLocalStateV101={mic:false,camera:false,screen:false};
+  if(!navigator.mediaDevices?.getUserMedia)return;
+  if(!meetingV10514Prefs.mic&&!meetingV10514Prefs.camera)return;
+  try{
+    const s=await navigator.mediaDevices.getUserMedia({
+      audio:meetingV10514Prefs.mic?{echoCancellation:true,noiseSuppression:true,autoGainControl:true}:false,
+      video:meetingV10514Prefs.camera?meetingV10514VideoConstraints():false
+    });
+    s.getTracks().forEach(t=>meetingLocalStreamV101.addTrack(t));
+  }catch(err){
+    console.warn('V105.1.4 selected media',err);
+    if(meetingV10514Prefs.mic){try{const a=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true},video:false});a.getTracks().forEach(t=>meetingLocalStreamV101.addTrack(t))}catch(_){}}
+    if(meetingV10514Prefs.camera){try{const v=await navigator.mediaDevices.getUserMedia({audio:false,video:meetingV10514VideoConstraints()});v.getTracks().forEach(t=>meetingLocalStreamV101.addTrack(t))}catch(_){}}
+  }
+  meetingCameraTrackV101=meetingLocalStreamV101.getVideoTracks()[0]||null;
+  meetingLocalStateV101.mic=meetingLocalStreamV101.getAudioTracks().length>0;
+  meetingLocalStateV101.camera=!!meetingCameraTrackV101;
+  if(meetingV10514Prefs.mic&&!meetingLocalStateV101.mic)taskyToast(meet10514L('تعذر تشغيل المايك. راجع صلاحية الموقع.','Microphone could not start. Check site permissions.'),{tone:'warning'});
+  if(meetingV10514Prefs.camera&&!meetingLocalStateV101.camera)taskyToast(meet10514L('تعذر تشغيل الكاميرا. راجع صلاحية الموقع.','Camera could not start. Check site permissions.'),{tone:'warning'});
+};
+
+/* Always allow the original Presence implementation to create WebRTC peers. */
+meetingSyncPresenceV101=meetingSyncPresenceBaseV105;
+
+const meetingV105DiagnosticsBaseV10514=meetingV105Diagnostics;
+meetingV105Diagnostics=function(){meetingV105Transport='mesh';meetingV105DiagnosticsBaseV10514()};
+
+const leaveMeetingRoomBaseV10514=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  meetingV10514StopPreview();meetingV10514GuestConfirmed=false;meetingV105Transport='mesh';
+  return leaveMeetingRoomBaseV10514(opts);
+};
+</script>
+
 </body>
 </html>
