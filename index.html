@@ -13103,5 +13103,288 @@ async function meetingV1046PrintReport(meetingId){
 meetingV1043PatchToolbar=function(){const tools=document.getElementById('meet103Tools');if(!tools)return;document.getElementById('meet1043SelfBtn')?.remove();meetingV1043SelfHidden=false;document.querySelector('[data-peer="local"]')?.classList.remove('meet1043-self-hidden');let sound=document.getElementById('meet1043SoundBtn');if(!sound){sound=document.createElement('button');sound.id='meet1043SoundBtn';sound.type='button';sound.className='meet103-pill meet1043-sound';sound.onclick=meetingV1043ToggleSound;tools.appendChild(sound)}sound.classList.toggle('active',meetingV1043SoundEnabled);sound.innerHTML=`${meetingV1043SoundEnabled?'🔔':'🔕'} <span>${meet103L('التنبيهات','Alerts')}</span>`};
 </script>
 
+
+<style id="tasky-v105-meeting-infra-css">
+.meet105-net{display:inline-flex;align-items:center;gap:5px;margin-inline-start:6px;border:1px solid rgba(255,255,255,.12);background:#10231f;color:#cfe2db;border-radius:999px;padding:4px 7px;font:800 8px Inter,'IBM Plex Sans Arabic'}
+.meet105-net i{width:7px;height:7px;border-radius:50%;background:#9ba6a2}.meet105-net.good i{background:#5fd39d}.meet105-net.fair i{background:#e2b64b}.meet105-net.poor i,.meet105-net.offline i{background:#e26058}.meet105-net.reconnecting i{background:#e2b64b;animation:meet105pulse 1s infinite}
+.meet105-transport{font-size:7px;color:#91aaa2;border-inline-start:1px solid rgba(255,255,255,.14);padding-inline-start:5px}
+@keyframes meet105pulse{50%{opacity:.3}}
+.meet105-diag{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:6px;margin-top:8px}
+.meet105-diag div{border:1px solid var(--border);background:var(--paper);border-radius:9px;padding:7px}.meet105-diag span{display:block;font-size:7px;color:var(--muted)}.meet105-diag b{font-size:10px}
+@media(max-width:650px){.meet105-diag{grid-template-columns:1fr 1fr}}
+</style>
+<script id="tasky-v105-meeting-infra-js">
+window.TASKY_BUILD='V105';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV105Transport='probing'; // probing | sfu | mesh
+let meetingV105SfuRoom=null;
+let meetingV105SfuToken=null;
+let meetingV105StatsTimer=null;
+let meetingV105Net={quality:'unknown',rtt:null,loss:null,bitrate:null,reconnecting:false};
+let meetingV105LastBytes=new Map();
+let meetingV105IceRetries=new Map();
+let meetingV105JoinProbe=false;
+let meetingV105LiveKitPromise=null;
+
+function meet105L(ar,en){return lang==='ar'?ar:en}
+function meetingV105LoadLiveKit(){
+  if(window.LivekitClient)return Promise.resolve(window.LivekitClient);
+  if(meetingV105LiveKitPromise)return meetingV105LiveKitPromise;
+  meetingV105LiveKitPromise=new Promise((resolve,reject)=>{
+    const s=document.createElement('script');
+    s.src='https://cdn.jsdelivr.net/npm/livekit-client@2.21.0/dist/livekit-client.umd.min.js';
+    s.async=true;s.crossOrigin='anonymous';
+    s.onload=()=>window.LivekitClient?resolve(window.LivekitClient):reject(new Error('LiveKit SDK did not initialize'));
+    s.onerror=()=>reject(new Error('Could not load LiveKit client SDK'));
+    document.head.appendChild(s);
+  });
+  return meetingV105LiveKitPromise;
+}
+function meetingV105PatchNetBadge(){
+  if(!meetingRoomV101)return;
+  const meta=document.getElementById('meet101RoomMeta')?.parentElement;if(!meta)return;
+  let el=document.getElementById('meet105Net');
+  if(!el){el=document.createElement('span');el.id='meet105Net';el.className='meet105-net';meta.appendChild(el)}
+  const q=meetingV105Net.reconnecting?'reconnecting':(!navigator.onLine?'offline':meetingV105Net.quality);
+  const label=q==='good'?meet105L('اتصال جيد','Good'):q==='fair'?meet105L('اتصال متوسط','Fair'):q==='poor'?meet105L('اتصال ضعيف','Poor'):q==='offline'?meet105L('غير متصل','Offline'):q==='reconnecting'?meet105L('إعادة اتصال…','Reconnecting…'):meet105L('فحص الاتصال','Checking');
+  el.className=`meet105-net ${q}`;el.innerHTML=`<i></i><span>${label}</span><span class="meet105-transport">${meetingV105Transport==='sfu'?'SFU':meetingV105Transport==='mesh'?'P2P':'AUTO'}</span>`;
+}
+function meetingV105QualityFrom(rtt,loss){
+  if(!navigator.onLine)return'offline';
+  if(loss==null&&rtt==null)return'unknown';
+  if((loss??0)<=2&&(rtt??0)<=180)return'good';
+  if((loss??0)<=6&&(rtt??0)<=400)return'fair';
+  return'poor';
+}
+async function meetingV105MeshStats(){
+  let rtts=[],lost=0,recv=0,bytes=0;
+  for(const [peer,pc] of meetingPeersV101){
+    if(!pc||pc.connectionState==='closed')continue;
+    try{
+      const stats=await pc.getStats();
+      stats.forEach(s=>{
+        if(s.type==='candidate-pair'&&s.state==='succeeded'&&s.nominated&&Number.isFinite(s.currentRoundTripTime))rtts.push(s.currentRoundTripTime*1000);
+        if(s.type==='inbound-rtp'&&!s.isRemote){
+          lost+=Number(s.packetsLost||0);recv+=Number(s.packetsReceived||0);bytes+=Number(s.bytesReceived||0);
+        }
+      });
+    }catch(_){}
+  }
+  const rtt=rtts.length?Math.round(rtts.reduce((a,b)=>a+b,0)/rtts.length):null;
+  const loss=(lost+recv)>0?Math.max(0,Math.round((lost/(lost+recv))*1000)/10):null;
+  meetingV105Net={...meetingV105Net,rtt,loss,quality:meetingV105QualityFrom(rtt,loss)};
+}
+function meetingV105StartStats(){
+  meetingV105StopStats();
+  const tick=async()=>{
+    if(!meetingRoomV101)return;
+    if(meetingV105Transport==='mesh')await meetingV105MeshStats();
+    meetingV105PatchNetBadge();
+  };
+  tick();meetingV105StatsTimer=setInterval(tick,4000);
+}
+function meetingV105StopStats(){if(meetingV105StatsTimer){clearInterval(meetingV105StatsTimer);meetingV105StatsTimer=null}}
+
+async function meetingV105TokenRequest(){
+  if(!meetingRoomV101)throw new Error('No active meeting');
+  const body={meeting_id:meetingRoomV101.id,peer_id:meetingPeerIdV101,display_name:meetingV103IsGuest()?meetingGuestSessionV102?.name:meetingV1045DisplayName()};
+  if(meetingV103IsGuest()){
+    body.guest_session_id=meetingGuestSessionV102?.id;
+    body.guest_session_token=meetingGuestSessionV102?.token;
+  }
+  const {data,error}=await sb.functions.invoke('meeting-livekit-token-v105',{body});
+  if(error)throw error;
+  if(!data?.enabled||!data?.server_url||!data?.token)throw new Error(data?.message||'SFU unavailable');
+  return data;
+}
+function meetingV105RemoteStream(identity){
+  let s=meetingRemoteStreamsV101.get(identity);
+  if(!s){s=new MediaStream();meetingRemoteStreamsV101.set(identity,s)}
+  return s;
+}
+async function meetingV105ConnectSfu(){
+  const LK=await meetingV105LoadLiveKit();
+  const auth=await meetingV105TokenRequest();
+  const room=new LK.Room({adaptiveStream:true,dynacast:true,disconnectOnPageLeave:false});
+  meetingV105SfuToken=auth;meetingV105SfuRoom=room;
+
+  room.on(LK.RoomEvent.TrackSubscribed,(track,pub,participant)=>{
+    const id=participant.identity,s=meetingV105RemoteStream(id),mst=track.mediaStreamTrack;
+    if(mst&&!s.getTracks().some(t=>t.id===mst.id))s.addTrack(mst);
+    const prev=meetingRemoteMetaV101.get(id)||{};
+    meetingRemoteMetaV101.set(id,{...prev,name:participant.name||prev.name||id,camera:pub.source===LK.Track.Source.Camera?true:prev.camera,mic:pub.source===LK.Track.Source.Microphone?true:prev.mic,screen:pub.source===LK.Track.Source.ScreenShare?true:prev.screen});
+    track.on?.('ended',()=>meetingRenderRoomV101());meetingRenderRoomV101();
+  });
+  room.on(LK.RoomEvent.TrackUnsubscribed,(track,pub,participant)=>{
+    const s=meetingRemoteStreamsV101.get(participant.identity),mst=track.mediaStreamTrack;
+    if(s&&mst){try{s.removeTrack(mst)}catch{}}
+    const prev=meetingRemoteMetaV101.get(participant.identity)||{};
+    meetingRemoteMetaV101.set(participant.identity,{...prev,camera:pub.source===LK.Track.Source.Camera?false:prev.camera,mic:pub.source===LK.Track.Source.Microphone?false:prev.mic,screen:pub.source===LK.Track.Source.ScreenShare?false:prev.screen});
+    meetingRenderRoomV101();
+  });
+  room.on(LK.RoomEvent.ParticipantConnected,p=>{
+    const prev=meetingRemoteMetaV101.get(p.identity)||{};meetingRemoteMetaV101.set(p.identity,{...prev,name:p.name||prev.name||p.identity});meetingRenderRoomV101();
+  });
+  room.on(LK.RoomEvent.ParticipantDisconnected,p=>{meetingRemoteStreamsV101.delete(p.identity);meetingRemoteMetaV101.delete(p.identity);meetingRenderRoomV101()});
+  room.on(LK.RoomEvent.ActiveSpeakersChanged,speakers=>{
+    document.querySelectorAll('.meet101-video-tile.meet1042-speaking').forEach(x=>x.classList.remove('meet1042-speaking'));
+    for(const p of speakers){
+      const id=p.isLocal?'local':p.identity;
+      document.querySelector(`.meet101-video-tile[data-peer="${CSS.escape(String(id))}"]`)?.classList.add('meet1042-speaking');
+    }
+  });
+  room.on(LK.RoomEvent.ConnectionQualityChanged,(q,p)=>{
+    if(p?.isLocal){
+      const map={excellent:'good',good:'good',poor:'poor',lost:'poor',unknown:'unknown'};
+      meetingV105Net.quality=map[String(q).toLowerCase()]||'fair';meetingV105PatchNetBadge();
+    }
+  });
+  room.on(LK.RoomEvent.Reconnecting,()=>{meetingV105Net.reconnecting=true;meetingV105PatchNetBadge();taskyToast(meet105L('ضعف الاتصال — تاسكي يعيد الاتصال تلقائيًا','Connection interrupted — Tasky is reconnecting automatically'),{tone:'warning'})});
+  room.on(LK.RoomEvent.Reconnected,()=>{meetingV105Net.reconnecting=false;meetingV105PatchNetBadge();taskyToast(meet105L('تمت استعادة الاتصال','Connection restored'),{tone:'success'})});
+  room.on(LK.RoomEvent.Disconnected,()=>{meetingV105Net.reconnecting=false;meetingV105PatchNetBadge()});
+
+  await room.connect(auth.server_url,auth.token,{autoSubscribe:true});
+  // Publish the already-authorized Tasky media tracks.
+  for(const t of meetingLocalStreamV101?.getTracks?.()||[]){
+    const source=t.kind==='audio'?LK.Track.Source.Microphone:LK.Track.Source.Camera;
+    await room.localParticipant.publishTrack(t,{source,simulcast:t.kind==='video'}).catch(e=>console.warn('V105 publish',e));
+  }
+  meetingV105Transport='sfu';meetingV105Net.reconnecting=false;meetingV105PatchNetBadge();meetingRenderRoomV101();
+}
+async function meetingV105FallbackMesh(reason){
+  console.warn('V105 SFU fallback to P2P',reason);
+  if(meetingV105SfuRoom){try{await meetingV105SfuRoom.disconnect()}catch{}meetingV105SfuRoom=null}
+  meetingV105Transport='mesh';meetingV105Net.reconnecting=false;meetingV105PatchNetBadge();
+  await meetingSyncPresenceV101();meetingV105StartStats();
+}
+async function meetingV105ActivateTransport(){
+  meetingV105Transport='probing';meetingV105JoinProbe=true;meetingV105PatchNetBadge();
+  try{await meetingV105ConnectSfu();meetingV105StartStats()}
+  catch(e){await meetingV105FallbackMesh(e)}
+  finally{meetingV105JoinProbe=false}
+}
+/* When SFU is active/probing, Supabase presence remains for Tasky collaboration
+   metadata but does not create mesh media peer connections. */
+const meetingSyncPresenceBaseV105=meetingSyncPresenceV101;
+meetingSyncPresenceV101=async function(){
+  if(meetingV105Transport==='mesh')return meetingSyncPresenceBaseV105();
+  const snap=meetingPresenceSnapshotV101();
+  for(const [peerId,meta] of snap.entries())meetingRemoteMetaV101.set(peerId,{...(meetingRemoteMetaV101.get(peerId)||{}),...meta});
+  meetingRenderRoomV101();
+  await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+};
+
+/* P2P fallback: ICE restart on failure and network recovery. */
+function meetingV105RestartPeer(peerId){
+  if(meetingV105Transport!=='mesh')return;
+  const pc=meetingPeersV101.get(peerId);if(!pc||pc.connectionState==='closed')return;
+  const tries=Number(meetingV105IceRetries.get(peerId)||0);
+  if(tries>=3)return;
+  meetingV105IceRetries.set(peerId,tries+1);
+  meetingV105Net.reconnecting=true;meetingV105PatchNetBadge();
+  setTimeout(async()=>{
+    try{
+      pc.restartIce?.();
+      if(pc.signalingState==='stable'){
+        const offer=await pc.createOffer({iceRestart:true});await pc.setLocalDescription(offer);
+        await meetingBroadcastSignalV101('offer',{sdp:pc.localDescription},peerId);
+      }
+    }catch(e){console.warn('V105 ICE restart',e)}
+  },Math.min(6000,700*(tries+1)));
+}
+const meetingEnsurePeerBaseV105=meetingEnsurePeerV101;
+meetingEnsurePeerV101=function(remotePeerId){
+  const pc=meetingEnsurePeerBaseV105(remotePeerId);
+  if(!pc.__taskyV105){
+    pc.__taskyV105=true;
+    const old=pc.onconnectionstatechange;
+    pc.onconnectionstatechange=()=>{old?.();if(pc.connectionState==='connected'){meetingV105IceRetries.set(remotePeerId,0);meetingV105Net.reconnecting=false}else if(['failed','disconnected'].includes(pc.connectionState))meetingV105RestartPeer(remotePeerId);meetingV105PatchNetBadge()};
+  }
+  return pc;
+};
+
+async function meetingV105SetSfuMic(on){
+  if(meetingV105Transport!=='sfu'||!meetingV105SfuRoom)return;
+  const LK=window.LivekitClient,pub=meetingV105SfuRoom.localParticipant.getTrackPublication(LK.Track.Source.Microphone);
+  if(pub?.track){if(on)await pub.track.unmute?.();else await pub.track.mute?.()}
+}
+async function meetingV105SetSfuCamera(on){
+  if(meetingV105Transport!=='sfu'||!meetingV105SfuRoom)return;
+  const LK=window.LivekitClient,pub=meetingV105SfuRoom.localParticipant.getTrackPublication(LK.Track.Source.Camera);
+  if(pub?.track){if(on)await pub.track.unmute?.();else await pub.track.mute?.()}
+}
+const toggleMeetingMicBaseV105=toggleMeetingMicV101;
+toggleMeetingMicV101=async function(){const before=meetingLocalStateV101.mic;await toggleMeetingMicBaseV105();if(before!==meetingLocalStateV101.mic)await meetingV105SetSfuMic(meetingLocalStateV101.mic).catch(()=>{})};
+const toggleMeetingCameraBaseV105=toggleMeetingCameraV101;
+toggleMeetingCameraV101=async function(){const before=meetingLocalStateV101.camera;await toggleMeetingCameraBaseV105();if(before!==meetingLocalStateV101.camera)await meetingV105SetSfuCamera(meetingLocalStateV101.camera).catch(()=>{})};
+
+const toggleMeetingScreenBaseV105=toggleMeetingScreenV101;
+toggleMeetingScreenV101=async function(){
+  if(meetingV105Transport!=='sfu')return toggleMeetingScreenBaseV105();
+  if(!meetingV105SfuRoom)return;
+  try{
+    const on=!meetingLocalStateV101.screen;
+    await meetingV105SfuRoom.localParticipant.setScreenShareEnabled(on,{audio:false});
+    meetingLocalStateV101.screen=on;
+    const LK=window.LivekitClient,pub=meetingV105SfuRoom.localParticipant.getTrackPublication(LK.Track.Source.ScreenShare);
+    meetingScreenTrackV101=on?(pub?.track?.mediaStreamTrack||null):null;
+    meetingRenderRoomV101();await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+  }catch(e){if(e?.name!=='NotAllowedError')showTaskyDialog({title:meet105L('تعذرت مشاركة الشاشة','Could not share screen'),message:e.message||String(e),tone:'error'})}
+};
+stopMeetingScreenV101=async function(){
+  if(meetingV105Transport==='sfu'&&meetingV105SfuRoom){
+    try{await meetingV105SfuRoom.localParticipant.setScreenShareEnabled(false)}catch{}
+    meetingScreenTrackV101=null;meetingLocalStateV101.screen=false;meetingRenderRoomV101();await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');return;
+  }
+  const old=meetingScreenTrackV101;meetingScreenTrackV101=null;if(old){try{old.onended=null;old.stop()}catch{}}
+  for(const pc of meetingPeersV101.values()){const sender=pc.getSenders().find(x=>x.track?.kind==='video');if(sender)await sender.replaceTrack(meetingCameraTrackV101||null)}
+  meetingLocalStateV101.screen=false;meetingRenderRoomV101();await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+};
+
+/* Activate hybrid transport after the existing secure join/session setup. */
+const joinMeetingRoomBaseV105=joinMeetingRoomV101;
+joinMeetingRoomV101=async function(roomCode){
+  meetingV105Transport='probing';
+  await joinMeetingRoomBaseV105(roomCode);
+  if(meetingRoomV101)await meetingV105ActivateTransport();
+};
+const joinPublicMeetingGuestBaseV105=joinPublicMeetingGuestV102;
+joinPublicMeetingGuestV102=async function(e){
+  meetingV105Transport='probing';
+  await joinPublicMeetingGuestBaseV105(e);
+  if(meetingRoomV101)await meetingV105ActivateTransport();
+};
+
+/* Diagnostics button inside the live room. */
+function meetingV105Diagnostics(){
+  const n=meetingV105Net;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${meet105L('تشخيص اتصال الاجتماع','Meeting connection diagnostics')}</h3><div class="subtle">${meet105L('قيم لحظية من المتصفح. لا يتم تسجيل محتوى الصوت أو الفيديو.','Live browser metrics. Audio/video content is not recorded.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div><div class="meet105-diag"><div><span>${meet105L('النقل','Transport')}</span><b>${meetingV105Transport==='sfu'?'SFU + TURN':meetingV105Transport==='mesh'?'P2P fallback':'Auto'}</b></div><div><span>RTT</span><b>${n.rtt==null?'—':Math.round(n.rtt)+' ms'}</b></div><div><span>${meet105L('فقد الحزم','Packet loss')}</span><b>${n.loss==null?'—':n.loss+'%'}</b></div><div><span>${meet105L('الحالة','Status')}</span><b>${n.reconnecting?meet105L('إعادة اتصال','Reconnecting'):meet105L('متصل','Connected')}</b></div></div><div class="meet101-note" style="margin-top:10px">${meetingV105Transport==='sfu'?meet105L('الوسائط تمر عبر LiveKit SFU، مع TURN عند الحاجة حسب إعداد البنية.','Media is routed by the LiveKit SFU, with TURN fallback when required by your deployment.'):meet105L('تاسكي يعمل حاليًا على P2P كمسار احتياطي لأن SFU غير متاح أو لم يتم تفعيله.','Tasky is currently using P2P fallback because SFU is unavailable or not enabled.')}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+const meetingV1045PatchToolbarBaseV105=meetingV1045PatchToolbar;
+meetingV1045PatchToolbar=function(){
+  meetingV1045PatchToolbarBaseV105();
+  const tools=document.getElementById('meet103Tools');if(!tools)return;
+  if(!document.getElementById('meet105DiagBtn')){
+    const b=document.createElement('button');b.id='meet105DiagBtn';b.type='button';b.className='meet103-pill';b.onclick=meetingV105Diagnostics;b.innerHTML=`📶 <span>${meet105L('الاتصال','Connection')}</span>`;tools.appendChild(b)
+  }
+  meetingV105PatchNetBadge();
+};
+const meetingRenderRoomBaseV105=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){meetingRenderRoomBaseV105();if(meetingRoomV101){meetingV1045PatchToolbar();meetingV105PatchNetBadge()}};
+
+window.addEventListener('offline',()=>{meetingV105Net.quality='offline';meetingV105PatchNetBadge()});
+window.addEventListener('online',()=>{meetingV105Net.reconnecting=true;meetingV105PatchNetBadge();if(meetingV105Transport==='mesh')for(const id of meetingPeersV101.keys())meetingV105RestartPeer(id)});
+try{navigator.connection?.addEventListener?.('change',()=>{if(meetingRoomV101&&meetingV105Transport==='mesh')for(const id of meetingPeersV101.keys())meetingV105RestartPeer(id)})}catch(_){}
+
+const leaveMeetingRoomBaseV105=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  meetingV105StopStats();
+  if(meetingV105SfuRoom){try{await meetingV105SfuRoom.disconnect()}catch{}meetingV105SfuRoom=null}
+  meetingV105Transport='probing';meetingV105Net={quality:'unknown',rtt:null,loss:null,bitrate:null,reconnecting:false};meetingV105IceRetries.clear();
+  return leaveMeetingRoomBaseV105(opts);
+};
+</script>
+
 </body>
 </html>
