@@ -15961,5 +15961,201 @@ setTimeout(()=>{
 },200);
 </script>
 
+
+<style id="tasky-v10622-meetings-sections-css">
+/* V106.2.2 — Meetings contains two first-class sections:
+   Meetings + Brainstorm Room. */
+.meet10622-tabs{
+  display:flex;align-items:center;gap:6px;
+  margin:0 0 14px;padding:5px;
+  width:max-content;max-width:100%;
+  border:1px solid var(--border);
+  background:var(--paper);
+  border-radius:12px;
+}
+.meet10622-tab{
+  min-height:36px;padding:7px 14px;
+  border:0;border-radius:9px;
+  background:transparent;color:var(--muted);
+  font:800 10px Inter,'IBM Plex Sans Arabic';
+  cursor:pointer;white-space:nowrap
+}
+.meet10622-tab.active{
+  background:var(--card);
+  color:var(--ink);
+  box-shadow:0 1px 3px rgba(20,35,30,.08)
+}
+.meet10622-brain-shell{display:flex;flex-direction:column;gap:14px}
+.meet10622-brain-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:14px;padding:18px;
+  border:1px solid var(--border);
+  background:var(--card);border-radius:16px
+}
+.meet10622-brain-head h2{margin:0 0 5px;font-size:18px}
+.meet10622-brain-head p{margin:0;color:var(--muted);font-size:10px;line-height:1.65;max-width:680px}
+.meet10622-room-grid{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:10px
+}
+.meet10622-room-card{
+  border:1px solid var(--border);background:var(--card);
+  border-radius:14px;padding:13px;
+  display:flex;flex-direction:column;gap:11px
+}
+.meet10622-room-top{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:10px
+}
+.meet10622-room-top h3{margin:0;font-size:13px;line-height:1.5}
+.meet10622-room-top p{margin:3px 0 0;color:var(--muted);font-size:9px;line-height:1.5}
+.meet10622-room-status{
+  display:inline-flex;align-items:center;
+  border:1px solid var(--border);background:var(--paper);
+  border-radius:999px;padding:4px 7px;
+  font-size:8px;font-weight:850;color:var(--ink-soft);white-space:nowrap
+}
+.meet10622-room-status.live{color:var(--green);border-color:#c8ddd4;background:var(--green-tint)}
+.meet10622-room-meta{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px
+}
+.meet10622-room-meta>div{
+  border:1px solid var(--border);background:var(--paper);
+  border-radius:10px;padding:8px
+}
+.meet10622-room-meta span{display:block;color:var(--muted);font-size:7.5px;margin-bottom:3px}
+.meet10622-room-meta b{display:block;font-size:9px;line-height:1.45}
+.meet10622-room-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:auto}
+.meet10622-room-actions button{min-height:38px}
+.meet10622-empty{
+  border:1px dashed var(--border);background:var(--paper);
+  border-radius:14px;padding:30px 16px;text-align:center;color:var(--muted);
+  font-size:10px;line-height:1.7
+}
+.meet10622-group-title{
+  display:flex;align-items:center;justify-content:space-between;
+  margin:3px 0 8px
+}
+.meet10622-group-title h3{margin:0;font-size:13px}
+.meet10622-group-title span{font-size:9px;color:var(--muted)}
+
+@media(max-width:700px){
+  .meet10622-tabs{width:100%;overflow-x:auto;scrollbar-width:none}
+  .meet10622-tabs::-webkit-scrollbar{display:none}
+  .meet10622-tab{flex:1;min-width:max-content}
+  .meet10622-brain-head{padding:14px;flex-direction:column}
+  .meet10622-room-grid{grid-template-columns:1fr}
+}
+@media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+  .meet10622-tabs{margin-bottom:9px}
+  .meet10622-brain-head{padding:11px 13px}
+  .meet10622-brain-head h2{font-size:15px}
+  .meet10622-brain-head p{font-size:9px}
+  .meet10622-room-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .meet10622-room-card{padding:10px}
+}
+</style>
+
+<script id="tasky-v10622-meetings-sections-js">
+window.TASKY_BUILD='V106.2.2';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingsSectionV10622='meetings';
+
+function meet10622L(ar,en){return lang==='ar'?ar:en}
+
+function meetingsTabsV10622(){
+  return `<div class="meet10622-tabs" role="tablist" aria-label="${meet10622L('أقسام الاجتماعات','Meeting sections')}">
+    <button type="button" class="meet10622-tab ${meetingsSectionV10622==='meetings'?'active':''}" role="tab" aria-selected="${meetingsSectionV10622==='meetings'}" onclick="setMeetingsSectionV10622('meetings')">${meet10622L('الاجتماعات','Meetings')}</button>
+    <button type="button" class="meet10622-tab ${meetingsSectionV10622==='brainstorm'?'active':''}" role="tab" aria-selected="${meetingsSectionV10622==='brainstorm'}" onclick="setMeetingsSectionV10622('brainstorm')">${meet10622L('غرفة العصف الذهني','Brainstorm Room')}</button>
+  </div>`;
+}
+
+function setMeetingsSectionV10622(section){
+  meetingsSectionV10622=section==='brainstorm'?'brainstorm':'meetings';
+  if(activeNav==='meetings')renderModule();
+}
+
+function meetingBrainstormRoomCardV10622(m){
+  const status=meetingStatusLabelV101(m.status);
+  const readable=['scheduled','live','ended','cancelled'].includes(m.status);
+  const canAdd=['scheduled','live'].includes(m.status);
+
+  return `<article class="meet10622-room-card">
+    <div class="meet10622-room-top">
+      <div>
+        <h3>${escapeHtml(m.title)}</h3>
+        <p>${escapeHtml(m.description||meet10622L('بدون وصف للاجتماع','No meeting description'))}</p>
+      </div>
+      <span class="meet10622-room-status ${escapeHtml(m.status)}">${escapeHtml(status)}</span>
+    </div>
+    <div class="meet10622-room-meta">
+      <div><span>${meet10622L('الموعد','When')}</span><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div>
+      <div><span>${meet10622L('المنظّم','Organizer')}</span><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div>
+    </div>
+    <div class="meet10622-room-actions">
+      ${readable?`<button type="button" class="primary-btn" onclick="brain106Open('${m.id}')">${canAdd?meet10622L('فتح الغرفة','Open room'):meet10622L('عرض الغرفة','View room')}</button>`:''}
+      ${m.status==='live'?`<button type="button" class="chip-btn" onclick="openMeetingJoinConfirmV101('${m.room_code}')">${meet10622L('دخول الاجتماع','Join meeting')}</button>`:''}
+    </div>
+  </article>`;
+}
+
+function meetingsBrainstormTemplateV10622(){
+  if(meetingsLoadingV101&&!meetingsV101.length){
+    return `<div class="meet10622-brain-shell"><div class="meet10622-empty">${meet10622L('جارٍ تحميل غرف العصف الذهني…','Loading brainstorm rooms…')}</div></div>`;
+  }
+  if(meetingsErrorV101){
+    return `<div class="meet10622-brain-shell"><div class="meet10622-empty"><b>${meet10622L('تعذّر تحميل الاجتماعات','Could not load meetings')}</b><br>${escapeHtml(meetingsErrorV101)}</div></div>`;
+  }
+
+  const active=meetingsV101.filter(m=>m.status==='live'||m.status==='scheduled');
+  const history=meetingsV101.filter(m=>m.status==='ended'||m.status==='cancelled');
+
+  return `<div class="meet10622-brain-shell">
+    <div class="meet10622-brain-head">
+      <div>
+        <h2>${meet10622L('غرفة العصف الذهني','Brainstorm Room')}</h2>
+        <p>${meet10622L('مساحة مرتبطة باجتماعات تاسكي لتجميع الأفكار والفرص والتحديات والقرارات. اختر اجتماعًا لفتح لوحته، وتبقى لوحات الاجتماعات السابقة متاحة كمرجع بعد انتهائها.','A workspace linked to Tasky meetings for capturing ideas, opportunities, challenges and decisions. Choose a meeting to open its board; completed meeting boards remain available as reference.')}</p>
+      </div>
+      ${active.length?`<button type="button" class="chip-btn" onclick="brain106Open('${active[0].id}')">${meet10622L('فتح أحدث غرفة','Open latest room')}</button>`:''}
+    </div>
+
+    <section>
+      <div class="meet10622-group-title"><h3>${meet10622L('الغرف الحالية','Current rooms')}</h3><span>${active.length}</span></div>
+      ${active.length?`<div class="meet10622-room-grid">${active.map(meetingBrainstormRoomCardV10622).join('')}</div>`:`<div class="meet10622-empty">${meet10622L('لا توجد اجتماعات مباشرة أو مجدولة حاليًا. أنشئ اجتماعًا جديدًا ليكون له لوح عصف ذهني خاص به.','There are no live or scheduled meetings. Create a meeting to get its own brainstorm board.')}</div>`}
+    </section>
+
+    ${history.length?`<section>
+      <div class="meet10622-group-title"><h3>${meet10622L('غرف الاجتماعات السابقة','Previous meeting rooms')}</h3><span>${history.length}</span></div>
+      <div class="meet10622-room-grid">${history.slice(0,18).map(meetingBrainstormRoomCardV10622).join('')}</div>
+    </section>`:''}
+  </div>`;
+}
+
+/* Wrap the final Meetings template so the section selector is always visible
+   directly after clicking Meetings in the main navigation. */
+const meetingsTemplateBaseV10622=meetingsTemplateV101;
+meetingsTemplateV101=function(){
+  const tabs=meetingsTabsV10622();
+  if(meetingsSectionV10622==='brainstorm'){
+    return `<div class="meet101-shell">${tabs}${meetingsBrainstormTemplateV10622()}</div>`;
+  }
+  const base=meetingsTemplateBaseV10622();
+  if(/^<div class="meet101-shell">/.test(base)){
+    return base.replace(/^<div class="meet101-shell">/,`<div class="meet101-shell">${tabs}`);
+  }
+  return `<div class="meet101-shell">${tabs}${base}</div>`;
+};
+
+/* When navigating away and back, default to Meetings only on a fresh app
+   session; retain the user's selected sub-section while staying in Meetings. */
+const setActiveNavBaseV10622=typeof setActiveNav==='function'?setActiveNav:null;
+if(setActiveNavBaseV10622){
+  setActiveNav=function(id,...args){
+    const was=activeNav;
+    const r=setActiveNavBaseV10622(id,...args);
+    if(id!=='meetings'&&was==='meetings')meetingsSectionV10622='meetings';
+    return r;
+  };
+}
+</script>
+
 </body>
 </html>
