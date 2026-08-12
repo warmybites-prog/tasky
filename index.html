@@ -14962,5 +14962,314 @@ meetingV103StopPolling=function(){
 };
 </script>
 
+
+<style id="tasky-v106-productivity-css">
+/* Remember me */
+.tasky-v106-remember{display:flex;align-items:flex-start;gap:8px;text-align:start;margin:-5px 0 14px;font-size:11px;color:var(--muted)}
+.tasky-v106-remember input{width:16px;height:16px;margin:1px 0 0;flex:none}
+.tasky-v106-remember small{display:block;font-size:9px;line-height:1.45;margin-top:2px}
+
+/* Project lifecycle */
+.projects-inline-head .tasky-v106-closed-btn{margin-inline-start:auto;margin-inline-end:4px;border:0;background:transparent;color:var(--muted);font-size:10px;cursor:pointer}
+.tasky-v106-project-actions{display:flex;gap:7px;flex-wrap:wrap;padding:10px 0 0;border-top:1px solid var(--border);margin-top:10px}
+.tasky-v106-closed-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.tasky-v106-closed-row{display:flex;align-items:center;justify-content:space-between;gap:10px;border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:10px}
+.tasky-v106-closed-row b{font-size:11px}.tasky-v106-closed-row small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+.tasky-v106-row-actions{display:flex;gap:5px;flex-wrap:wrap}
+
+/* Brainstorm room */
+#taskyV106Brainstorm{position:fixed;inset:0;z-index:31600;background:rgba(7,20,17,.96);display:none;color:#eef7f3}
+#taskyV106Brainstorm.show{display:flex;flex-direction:column}
+.brain106-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;padding:14px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
+.brain106-head h2{margin:0;font-size:17px}.brain106-head p{margin:3px 0 0;font-size:8.5px;color:#a8bdb5}
+.brain106-head-actions{display:flex;gap:7px}
+.brain106-head-actions button{border:1px solid rgba(255,255,255,.14);background:#143029;color:#fff;border-radius:10px;padding:8px 10px;font-weight:850}
+.brain106-compose{display:grid;grid-template-columns:160px minmax(0,1fr) auto;gap:8px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brain106-compose select,.brain106-compose input{background:#10251f;color:#fff;border:1px solid #29483f;border-radius:10px;padding:9px}
+.brain106-compose button{border:0;border-radius:10px;background:#2d8064;color:#fff;padding:9px 15px;font-weight:900}
+.brain106-board{display:grid;grid-template-columns:repeat(4,minmax(240px,1fr));gap:10px;padding:12px 16px 20px;overflow:auto;flex:1}
+.brain106-col{background:#0c211b;border:1px solid #244139;border-radius:15px;min-height:300px;padding:10px}
+.brain106-col-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}.brain106-col-head h3{font-size:11px;margin:0}.brain106-col-head span{font-size:8px;color:#9eb5ad}
+.brain106-note{background:#f7f0c9;color:#26312e;border-radius:12px;padding:10px;margin-bottom:8px;box-shadow:0 5px 18px rgba(0,0,0,.12)}
+.brain106-note.opportunity{background:#dff0e5}.brain106-note.challenge{background:#f3dfdc}.brain106-note.decision{background:#dfe8f5}
+.brain106-note p{font-size:10px;line-height:1.65;margin:0 0 9px;white-space:pre-wrap;overflow-wrap:anywhere}
+.brain106-note-meta{display:flex;align-items:center;justify-content:space-between;gap:7px;font-size:7.5px;color:#687570}
+.brain106-note-actions{display:flex;gap:4px}.brain106-note-actions button{border:1px solid rgba(0,0,0,.12);background:rgba(255,255,255,.55);border-radius:999px;padding:3px 6px;font-size:8px}
+.brain106-empty{text-align:center;color:#769188;font-size:9px;padding:28px 8px}
+@media(max-width:850px){.brain106-board{grid-template-columns:1fr 1fr}.brain106-compose{grid-template-columns:1fr}.brain106-compose button{width:100%}}
+@media(max-width:520px){.brain106-board{grid-template-columns:1fr}.brain106-head{padding:11px}.brain106-compose{padding:10px}.brain106-board{padding:10px}.brain106-head h2{font-size:15px}}
+</style>
+
+<script id="tasky-v106-productivity-js">
+window.TASKY_BUILD='V106';console.info('Tasky build',window.TASKY_BUILD);
+
+function tasky106L(ar,en){return lang==='ar'?ar:en}
+
+/* ============================================================
+   1) Remember me / password-manager integration
+   Password is NEVER stored in localStorage. We let the browser/OS password
+   manager store it through the Credential Management API when available.
+   Supabase session persistence remains the signed-in session layer.
+   ============================================================ */
+const TASKY_REMEMBER_KEY_V106='tasky_remember_login_v106';
+const TASKY_REMEMBER_EMAIL_V106='tasky_remember_email_v106';
+
+function tasky106InstallRememberUi(){
+  const pwd=document.getElementById('authPassword');
+  const email=document.getElementById('authEmail');
+  if(!pwd||!email||document.getElementById('taskyRememberV106'))return;
+
+  email.setAttribute('autocomplete','username email');
+  pwd.setAttribute('autocomplete','current-password');
+
+  const wrap=document.createElement('label');
+  wrap.id='taskyRememberV106';wrap.className='tasky-v106-remember';
+  wrap.innerHTML=`<input id="taskyRememberCheckV106" type="checkbox"><span><b>${tasky106L('تذكرني','Remember me')}</b><small>${tasky106L('يحفظ المتصفح بيانات الدخول في مدير كلمات المرور الآمن عند دعمه. تاسكي لا يخزن كلمة المرور كنص داخل المتصفح.','Your browser can securely save credentials in its password manager when supported. Tasky never stores the password as plain text.')}</small></span>`;
+  pwd.insertAdjacentElement('afterend',wrap);
+
+  const remembered=localStorage.getItem(TASKY_REMEMBER_KEY_V106)==='1';
+  document.getElementById('taskyRememberCheckV106').checked=remembered;
+  if(remembered){
+    const savedEmail=localStorage.getItem(TASKY_REMEMBER_EMAIL_V106)||'';
+    if(savedEmail&&!email.value)email.value=savedEmail;
+    tasky106TryPasswordManagerFill();
+  }
+}
+async function tasky106TryPasswordManagerFill(){
+  if(!('credentials' in navigator)||typeof window.PasswordCredential==='undefined')return;
+  try{
+    const c=await navigator.credentials.get({password:true,mediation:'optional'});
+    if(c?.type==='password'){
+      const email=document.getElementById('authEmail'),pwd=document.getElementById('authPassword');
+      if(email&&!email.value)email.value=c.id||'';
+      if(pwd&&!pwd.value)pwd.value=c.password||'';
+    }
+  }catch(_){}
+}
+async function tasky106RememberAfterLogin(email,password){
+  const checked=!!document.getElementById('taskyRememberCheckV106')?.checked;
+  if(!checked){
+    localStorage.removeItem(TASKY_REMEMBER_KEY_V106);
+    localStorage.removeItem(TASKY_REMEMBER_EMAIL_V106);
+    return;
+  }
+  localStorage.setItem(TASKY_REMEMBER_KEY_V106,'1');
+  localStorage.setItem(TASKY_REMEMBER_EMAIL_V106,email||'');
+  if('credentials' in navigator&&typeof window.PasswordCredential!=='undefined'){
+    try{
+      const cred=new PasswordCredential({id:email,password,name:email});
+      await navigator.credentials.store(cred);
+    }catch(e){console.warn('Tasky V106 password manager',e)}
+  }
+}
+setTimeout(tasky106InstallRememberUi,0);
+
+/* Wrap the latest auth flow so successful sign-in can hand credentials to the
+   browser's password manager without changing the Supabase auth contract. */
+const handleAuthSubmitBaseV106=handleAuthSubmit;
+handleAuthSubmit=async function(){
+  const email=document.getElementById('authEmail')?.value.trim()||'';
+  const password=document.getElementById('authPassword')?.value||'';
+  const mode=authMode;
+  await handleAuthSubmitBaseV106();
+  if(mode==='signin'){
+    try{
+      const {data}=await sb.auth.getSession();
+      if(data?.session?.user)await tasky106RememberAfterLogin(email,password);
+    }catch(_){}
+  }
+};
+
+/* ============================================================
+   2) Onboarding celebration only for a company that completes setup
+   during its first onboarding flow — not every login to an old workspace.
+   ============================================================ */
+const fetchOnboardingStateBaseV106=fetchOnboardingStateV68;
+fetchOnboardingStateV68=async function(opts={}){
+  const hadState=!!onboardingStateV68;
+  const wasComplete=!!onboardingStateV68?.complete;
+  const result=await fetchOnboardingStateBaseV106(opts);
+
+  /* The base V68 may show the old toast. Its guard is neutralized below for
+     subsequent fetches; first fetch of an already-complete workspace should
+     never be celebrated. */
+  if(!hadState&&result?.complete){
+    onboardingCompletedCelebratedV68=true;
+  }else if(hadState&&!wasComplete&&result?.complete){
+    const k=`tasky_company_ready_celebrated_v106_${currentWorkspaceId}`;
+    if(localStorage.getItem(k)!=='1'){
+      localStorage.setItem(k,'1');
+      taskyToast(tasky106L('🎉 شركتك أو فريقك جاهز للعمل على تاسكي','🎉 Your company or team is ready to work in Tasky'),{tone:'success'});
+    }
+    onboardingCompletedCelebratedV68=true;
+  }
+  return result;
+};
+/* Prevent old V68 from celebrating on first load by pre-marking only during
+   the first authoritative onboarding fetch. */
+const loadWorkspaceAndDataBaseV106=loadWorkspaceAndData;
+loadWorkspaceAndData=async function(...args){
+  const first=!currentWorkspaceId;
+  if(first)onboardingCompletedCelebratedV68=true;
+  const ok=await loadWorkspaceAndDataBaseV106(...args);
+  if(ok&&onboardingStateV68&&!onboardingStateV68.complete)onboardingCompletedCelebratedV68=false;
+  return ok;
+};
+
+/* ============================================================
+   3) Project close / reopen / delete
+   ============================================================ */
+let taskyClosedProjectsV106=[];
+
+async function tasky106FetchClosedProjects(){
+  if(!currentWorkspaceId)return[];
+  const {data,error}=await sb.rpc('tasky_project_closed_list_v106',{p_workspace_id:currentWorkspaceId});
+  if(error)throw error;
+  taskyClosedProjectsV106=Array.isArray(data)?data:[];
+  return taskyClosedProjectsV106;
+}
+async function tasky106CloseProject(projectId){
+  const p=projects.find(x=>x.id===projectId);if(!p)return;
+  const ok=await taskyConfirm(
+    tasky106L(`إغلاق مشروع "${p.name}"؟ سيختفي من قائمة المشاريع النشطة وتبقى بياناته محفوظة.`,`Close project "${p.name}"? It will leave the active list while its history remains preserved.`),
+    {title:tasky106L('إغلاق المشروع','Close project'),confirmText:tasky106L('إغلاق','Close')}
+  );
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_project_close_v106',{p_project_id:projectId});
+  if(error)return showTaskyDialog({title:tasky106L('تعذّر إغلاق المشروع','Could not close project'),message:error.message,tone:'error'});
+  closeAddModal();await Promise.all([fetchProjects(),fetchTasks(),fetchProjectMemberships()]);
+  renderNav();renderAll();taskyToast(tasky106L('تم إغلاق المشروع','Project closed'),{tone:'success'});
+}
+async function tasky106DeleteProject(projectId){
+  const p=projects.find(x=>x.id===projectId)||taskyClosedProjectsV106.find(x=>x.id===projectId);
+  const ok=await taskyConfirm(
+    tasky106L(`حذف مشروع "${p?.name||''}" نهائيًا؟ الحذف مسموح فقط للمشروع بدون مهام أو سجلات مرتبطة. للمشاريع المستخدمة استخدم الإغلاق.`,`Permanently delete "${p?.name||''}"? Deletion is allowed only when the project has no tasks or linked history. Close used projects instead.`),
+    {title:tasky106L('حذف المشروع نهائيًا','Permanently delete project'),tone:'danger',confirmText:tasky106L('حذف نهائي','Delete')}
+  );
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_project_delete_v106',{p_project_id:projectId});
+  if(error)return showTaskyDialog({title:tasky106L('تعذّر حذف المشروع','Could not delete project'),message:error.message,tone:'error'});
+  closeAddModal();await Promise.all([fetchProjects(),fetchTasks(),fetchProjectMemberships()]);
+  renderNav();renderAll();taskyToast(tasky106L('تم حذف المشروع','Project deleted'),{tone:'success'});
+}
+async function tasky106ReopenProject(projectId){
+  const {error}=await sb.rpc('tasky_project_reopen_v106',{p_project_id:projectId});
+  if(error)return showTaskyDialog({title:tasky106L('تعذّر إعادة فتح المشروع','Could not reopen project'),message:error.message,tone:'error'});
+  await fetchProjects();await tasky106FetchClosedProjects();renderNav();tasky106OpenClosedProjects();
+  taskyToast(tasky106L('تمت إعادة فتح المشروع','Project reopened'),{tone:'success'});
+}
+async function tasky106OpenClosedProjects(){
+  try{await tasky106FetchClosedProjects()}catch(e){return showTaskyDialog({title:tasky106L('تعذّر تحميل المشاريع المغلقة','Could not load closed projects'),message:e.message,tone:'error'})}
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${tasky106L('المشاريع المغلقة','Closed projects')}</h3><div class="subtle">${tasky106L('المشاريع المغلقة لا تظهر في الشريط الجانبي ويمكن إعادتها متى احتجت.','Closed projects stay out of the sidebar and can be reopened when needed.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="tasky-v106-closed-list">${taskyClosedProjectsV106.length?taskyClosedProjectsV106.map(p=>`<div class="tasky-v106-closed-row"><div><b>${escapeHtml(p.name)}</b><small>${escapeHtml(p.description||tasky106L('بدون وصف','No description'))}</small></div><div class="tasky-v106-row-actions"><button class="chip-btn" onclick="tasky106ReopenProject('${p.id}')">${tasky106L('إعادة فتح','Reopen')}</button>${currentUserRole==='admin'?`<button class="chip-btn" style="color:var(--danger)" onclick="tasky106DeleteProject('${p.id}')">${tasky106L('حذف','Delete')}</button>`:''}</div></div>`).join(''):`<div class="meet101-empty">${tasky106L('لا توجد مشاريع مغلقة.','No closed projects.')}</div>`}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+const renderNavBaseV106=renderNav;
+renderNav=function(){
+  renderNavBaseV106();
+  const head=document.querySelector('.projects-inline-head');
+  if(head&&!document.getElementById('taskyClosedProjectsBtnV106')){
+    const b=document.createElement('button');b.id='taskyClosedProjectsBtnV106';b.type='button';b.className='tasky-v106-closed-btn';
+    b.textContent=tasky106L('المغلقة','Closed');b.onclick=tasky106OpenClosedProjects;
+    head.insertBefore(b,head.querySelector('.projects-inline-plus'));
+  }
+};
+const projectAccessModalHtmlBaseV106=projectAccessModalHtml;
+projectAccessModalHtml=function(projectId){
+  let h=projectAccessModalHtmlBaseV106(projectId);
+  const p=projects.find(x=>x.id===projectId);
+  if(!p||!canManageProjectClient(projectId))return h;
+  const lifecycle=`<div class="tasky-v106-project-actions"><button class="chip-btn" onclick="tasky106CloseProject('${projectId}')">${tasky106L('إغلاق المشروع','Close project')}</button>${currentUserRole==='admin'?`<button class="chip-btn" style="color:var(--danger)" onclick="tasky106DeleteProject('${projectId}')">${tasky106L('حذف نهائي','Delete permanently')}</button>`:''}</div>`;
+  return h.replace(/<\/div>\s*$/i,lifecycle+'</div>');
+};
+
+/* ============================================================
+   4) Brainstorm room for Meetings
+   ============================================================ */
+let brain106MeetingId=null;
+let brain106Rows=[];
+let brain106Timer=null;
+
+function brain106EnsureDom(){
+  let el=document.getElementById('taskyV106Brainstorm');
+  if(!el){el=document.createElement('div');el.id='taskyV106Brainstorm';document.body.appendChild(el)}
+  return el;
+}
+function brain106Args(){
+  return {
+    p_meeting_id:brain106MeetingId,
+    p_guest_session_id:meetingGuestSessionV102?.id||null,
+    p_guest_session_token:meetingGuestSessionV102?.token||null
+  };
+}
+async function brain106Fetch(render=true){
+  if(!brain106MeetingId)return;
+  const {data,error}=await sb.rpc('tasky_meeting_brainstorm_list_v106',brain106Args());
+  if(error){console.warn('V106 brainstorm',error);return}
+  brain106Rows=Array.isArray(data)?data:[];
+  if(render)brain106Render();
+}
+function brain106CategoryLabel(c){
+  return ({idea:tasky106L('أفكار','Ideas'),opportunity:tasky106L('فرص','Opportunities'),challenge:tasky106L('تحديات','Challenges'),decision:tasky106L('قرارات','Decisions')})[c]||c;
+}
+function brain106Render(){
+  const el=brain106EnsureDom();
+  if(!brain106MeetingId){el.classList.remove('show');return}
+  const m=meetingsV101.find(x=>x.id===brain106MeetingId)||meetingRoomV101||{};
+  const active=['live','scheduled'].includes(m.status||meetingRoomV101?.status);
+  const cats=['idea','opportunity','challenge','decision'];
+  el.innerHTML=`<div class="brain106-head"><div><h2>💡 ${tasky106L('غرفة العصف الذهني','Brainstorm Room')} — ${escapeHtml(m.title||'')}</h2><p>${tasky106L('اجمع الأفكار والفرص والتحديات والقرارات في لوحة واحدة مرتبطة بالاجتماع.','Capture ideas, opportunities, challenges and decisions on one board linked to the meeting.')}</p></div><div class="brain106-head-actions"><button onclick="brain106Close()">× ${tasky106L('إغلاق','Close')}</button></div></div>
+  ${active?`<div class="brain106-compose"><select id="brain106Category">${cats.map(c=>`<option value="${c}">${brain106CategoryLabel(c)}</option>`).join('')}</select><input id="brain106Text" maxlength="1000" placeholder="${tasky106L('اكتب فكرة قصيرة…','Write a short idea…')}" onkeydown="if(event.key==='Enter')brain106Add()"><button onclick="brain106Add()">+ ${tasky106L('إضافة','Add')}</button></div>`:''}
+  <div class="brain106-board">${cats.map(c=>{const rows=brain106Rows.filter(x=>x.category===c);return`<section class="brain106-col"><div class="brain106-col-head"><h3>${brain106CategoryLabel(c)}</h3><span>${rows.length}</span></div>${rows.length?rows.map(n=>`<article class="brain106-note ${c}"><p>${escapeHtml(n.body)}</p><div class="brain106-note-meta"><span>${escapeHtml(n.author_name||tasky106L('مشارك','Participant'))}</span><div class="brain106-note-actions"><button onclick="brain106Vote('${n.id}')">${n.my_vote?'♥':'♡'} ${Number(n.vote_count||0)}</button>${n.can_delete?`<button onclick="brain106Delete('${n.id}')">×</button>`:''}</div></div></article>`).join(''):`<div class="brain106-empty">${tasky106L('لا توجد بطاقات بعد','No cards yet')}</div>`}</section>`}).join('')}</div>`;
+  el.classList.add('show');
+}
+async function brain106Open(meetingId){
+  brain106MeetingId=meetingId||meetingRoomV101?.id;if(!brain106MeetingId)return;
+  await brain106Fetch(false);brain106Render();
+  clearInterval(brain106Timer);brain106Timer=setInterval(()=>brain106Fetch(true),2000);
+}
+function brain106Close(){clearInterval(brain106Timer);brain106Timer=null;brain106MeetingId=null;brain106Rows=[];brain106EnsureDom().classList.remove('show')}
+async function brain106Add(){
+  const body=document.getElementById('brain106Text')?.value.trim()||'',category=document.getElementById('brain106Category')?.value||'idea';
+  if(!body)return;
+  const {error}=await sb.rpc('tasky_meeting_brainstorm_add_v106',{...brain106Args(),p_category:category,p_body:body});
+  if(error)return showTaskyDialog({title:tasky106L('تعذّرت إضافة الفكرة','Could not add idea'),message:error.message,tone:'error'});
+  document.getElementById('brain106Text').value='';await brain106Fetch();
+}
+async function brain106Vote(id){
+  const {error}=await sb.rpc('tasky_meeting_brainstorm_vote_v106',{...brain106Args(),p_note_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain106Fetch();
+}
+async function brain106Delete(id){
+  const ok=await taskyConfirm(tasky106L('حذف هذه البطاقة؟','Delete this card?'),{title:tasky106L('حذف بطاقة','Delete card'),tone:'danger',confirmText:tasky106L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_brainstorm_delete_v106',{...brain106Args(),p_note_id:id});
+  if(error)return showTaskyDialog({title:tasky106L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});await brain106Fetch();
+}
+
+/* Add Brainstorm entry to every meeting card. */
+const meetingCardBaseV106=meetingCardV101;
+meetingCardV101=function(m,past=false){
+  let h=meetingCardBaseV106(m,past);
+  const b=`<button class="chip-btn" onclick="brain106Open('${m.id}')">💡 ${tasky106L('عصف ذهني','Brainstorm')}</button>`;
+  return h.replace(/<\/div><\/article>\s*$/i,b+'</div></article>');
+};
+
+/* Add Brainstorm to live room toolbar for members and guests. */
+const meetingV1045PatchToolbarBaseV106=meetingV1045PatchToolbar;
+meetingV1045PatchToolbar=function(){
+  meetingV1045PatchToolbarBaseV106();
+  const tools=document.getElementById('meet103Tools');if(!tools||!meetingRoomV101)return;
+  if(!document.getElementById('brain106ToolbarBtn')){
+    const b=document.createElement('button');b.id='brain106ToolbarBtn';b.type='button';b.className='meet103-pill';
+    b.onclick=()=>brain106Open(meetingRoomV101.id);b.innerHTML=`💡 <span>${tasky106L('عصف ذهني','Brainstorm')}</span>`;
+    tools.appendChild(b);
+  }
+};
+const leaveMeetingRoomBaseV106=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){if(brain106MeetingId)brain106Close();return leaveMeetingRoomBaseV106(opts)};
+
+setTimeout(()=>{tasky106InstallRememberUi();try{renderNav()}catch(_){}},80);
+</script>
+
 </body>
 </html>
