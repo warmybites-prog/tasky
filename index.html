@@ -13768,5 +13768,158 @@ meetingCardV101=function(m,past=false){
 };
 </script>
 
+
+<style id="tasky-v10512-meeting-card-ui-css">
+.meet10512-card{
+  position:relative;
+  border:1px solid var(--border)!important;
+  border-radius:18px!important;
+  padding:16px!important;
+  gap:12px!important;
+  box-shadow:0 8px 24px rgba(16,39,33,.035);
+}
+.meet10512-card .meet101-card-head{align-items:flex-start!important;gap:12px}
+.meet10512-card .meet101-card-head h3{font-size:15px!important;line-height:1.5;margin-bottom:2px}
+.meet10512-card .meet101-card-head p{font-size:9px!important;line-height:1.55;margin:0;color:var(--muted)}
+.meet10512-badges{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-top:6px}
+.meet10512-badge{
+  display:inline-flex;align-items:center;gap:4px;padding:4px 7px;border-radius:999px;
+  border:1px solid var(--border);background:var(--paper);font-size:7.5px;font-weight:850;color:var(--ink-soft)
+}
+.meet10512-badge.external{background:#edf6e8;border-color:#cfe3c5;color:#397138}
+.meet10512-badge.live{background:#e9f6f1;border-color:#bcdcca;color:#13624a}
+.meet10512-card .meet1047-summary{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:8px!important;
+}
+.meet10512-card .meet1047-summary>div{
+  min-width:0;padding:10px!important;border-radius:12px!important;background:#f7f8f6!important;
+}
+.meet10512-card .meet1047-summary span{font-size:7.5px!important}
+.meet10512-card .meet1047-summary b{
+  display:block;font-size:9.5px!important;line-height:1.5;overflow-wrap:anywhere
+}
+.meet10512-card .meet1047-agenda{
+  margin:0!important;padding:10px 12px!important;border-radius:12px!important;
+  max-height:145px;overflow:auto;background:#f7f8f6!important
+}
+.meet10512-card .meet1044-stats{margin-top:0!important}
+.meet10512-actions{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+  padding-top:2px;
+}
+.meet10512-actions button{
+  width:100%!important;min-height:42px!important;margin:0!important;
+  justify-content:center!important;border-radius:11px!important;font-size:9.5px!important
+}
+.meet10512-actions .primary{
+  grid-column:1/-1;
+}
+.meet10512-actions .invite{
+  grid-column:1/-1;
+  background:#123f34!important;color:#fff!important;border-color:#123f34!important;
+  font-weight:900!important
+}
+.meet10512-actions .guest{
+  background:#edf6e8!important;color:#397138!important;border-color:#cfe3c5!important
+}
+.meet10512-actions .danger{color:var(--danger)!important}
+.meet10512-actions .minutes{
+  background:#f8f4e9!important;color:#6a5420!important;border-color:#e5dbc0!important
+}
+.meet10512-actions .permissions{
+  background:#f4f5f5!important;color:#4e5b57!important
+}
+@media(max-width:720px){
+  .meet10512-card{padding:13px!important;border-radius:16px!important}
+  .meet10512-card .meet101-card-head{flex-direction:column!important}
+  .meet10512-card .meet101-status{align-self:flex-start}
+  .meet10512-card .meet1047-summary{grid-template-columns:1fr 1fr!important}
+  .meet10512-card .meet1047-summary>div:last-child{grid-column:1/-1!important}
+  .meet10512-actions{grid-template-columns:1fr 1fr;gap:7px}
+  .meet10512-actions button{min-height:44px!important;font-size:10px!important}
+  .meet10512-actions .primary,.meet10512-actions .invite,.meet10512-actions .guest{
+    grid-column:1/-1;
+  }
+}
+@media(max-width:420px){
+  .meet10512-card .meet1047-summary{grid-template-columns:1fr!important}
+  .meet10512-card .meet1047-summary>div:last-child{grid-column:auto!important}
+  .meet10512-actions{grid-template-columns:1fr}
+  .meet10512-actions .primary,.meet10512-actions .invite,.meet10512-actions .guest{grid-column:auto}
+}
+</style>
+<script id="tasky-v10512-meeting-card-ui-js">
+window.TASKY_BUILD='V105.1.2';console.info('Tasky build',window.TASKY_BUILD);
+
+function meet10512L(ar,en){return lang==='ar'?ar:en}
+
+meetingCardV101=function(m,past=false){
+  const terminal=meetingV1046MemberTerminal(m);
+  const canJoin=!terminal;
+  const canManage=!!m.can_manage;
+  const d=meetingV1047DurationInfo(m);
+  const canMinutes=!!m.can_edit_minutes||!!m.has_minutes||canManage;
+  const rating=m.status==='ended'
+    ?`<div class="meet1047-rating-inline"><span class="label">${meet1047L('تقييم الجودة التقنية — الصوت، الفيديو، الاتصال','Technical quality — audio, video, connection')}</span>${meetingV1047RatingWidget(m.id,m.my_rating||0,false)}<span class="meet1047-rating-hint">${m.my_rating?`${m.my_rating}/5`:meet1047L('اضغط على عدد النجوم المناسب','Tap the desired number of stars')}</span></div>`
+    :'';
+
+  const agenda=m.agenda_html
+    ?`<div class="meet1047-agenda meet1051-rich-preview"><b>${meet10512L('الأجندة / الهدف:','Agenda / purpose:')}</b>${meetingV1051RichHtml(m.agenda_html)}</div>`
+    :(m.description?`<div class="meet1047-agenda"><b>${meet10512L('الأجندة / الهدف:','Agenda / purpose:')}</b> ${escapeHtml(m.description)}</div>`:'');
+
+  const statusBadges=`<div class="meet10512-badges">
+    ${m.allow_guests?`<span class="meet10512-badge external">↗ ${meet10512L('دخول خارجي','External guests')}</span>`:''}
+    ${m.status==='live'?`<span class="meet10512-badge live">● ${meet10512L('مباشر الآن','Live now')}</span>`:''}
+  </div>`;
+
+  const actions=[];
+  if(canJoin){
+    actions.push(`<button class="primary-btn primary" onclick="openMeetingJoinConfirmV101('${m.room_code}')"><svg><use href="#i-camera"/></svg>${m.status==='live'?meet102L('دخول الاجتماع','Join meeting'):meet102L('دخول الاجتماع','Join meeting')}</button>`);
+    /* Restore the invitation action that was accidentally dropped by later full card overrides. */
+    actions.push(`<button class="chip-btn invite" onclick="meetingShareInviteV103('${m.room_code}')">✉️ ${meet10512L('إرسال دعوة الاجتماع','Send meeting invitation')}</button>`);
+    actions.push(`<button class="chip-btn" onclick="meetingCopyLinkV101('${m.room_code}')">🔗 ${meet102L('رابط الأعضاء','Member link')}</button>`);
+    if(canManage&&m.allow_guests){
+      actions.push(`<button class="chip-btn guest" onclick="meetingCopyGuestLinkV102('${m.id}')">↗ ${meet102L('رابط ضيف بدون تسجيل','No-login guest link')}</button>`);
+    }
+  }
+  if(canManage&&m.status==='scheduled'){
+    actions.push(`<button class="chip-btn" onclick="openMeetingEditorV101('${m.id}')">✎ ${meet102L('تعديل','Edit')}</button>`);
+    actions.push(`<button class="chip-btn danger" onclick="cancelMeetingV1044('${m.id}')">× ${meet102L('إلغاء','Cancel')}</button>`);
+  }else if(canManage&&m.status==='live'){
+    actions.push(`<button class="chip-btn danger" onclick="cancelMeetingV1044('${m.id}')">× ${meet102L('إلغاء الاجتماع','Cancel meeting')}</button>`);
+  }
+  if(canMinutes){
+    actions.push(`<button class="chip-btn minutes" onclick="meetingV1046OpenMinutesReference('${m.id}')">📝 ${m.has_minutes?meet10512L('محضر الاجتماع','Meeting minutes'):meet10512L('إضافة محضر','Add minutes')}${m.minutes_status==='final'?` · ${meet10512L('معتمد','Final')}`:''}</button>`);
+  }
+  if(canManage){
+    actions.push(`<button class="chip-btn permissions" onclick="meetingV1046ManageEditors('${m.id}')">🔐 ${meet10512L('صلاحيات المحضر','Minutes access')}</button>`);
+  }
+
+  return `<article class="meet101-card meet1047-card meet10512-card ${escapeHtml(m.status)} ${past?'past':''}">
+    <div class="meet101-card-head">
+      <div>
+        <h3>${escapeHtml(m.title)}</h3>
+        <p>${escapeHtml(m.description||meet10512L('بدون أجندة مضافة','No agenda added'))}</p>
+        ${statusBadges}
+      </div>
+      <span class="meet101-status ${escapeHtml(m.status)}">${escapeHtml(meetingStatusLabelV101(m.status))}</span>
+    </div>
+    ${meetingV1044StatusNote(m)}
+    <div class="meet1047-summary">
+      <div><span>${meet102L('الموعد','When')}</span><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div>
+      <div><span>${escapeHtml(d.title)}</span><b class="${d.kind==='open'?'meet1047-duration-open':''}">${escapeHtml(d.label)}</b></div>
+      <div><span>${meet102L('المنظّم','Organizer')}</span><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div>
+    </div>
+    ${agenda}
+    ${meetingV1044StatsHtml(m)}
+    ${rating}
+    <div class="meet10512-actions">${actions.join('')}</div>
+  </article>`;
+};
+</script>
+
 </body>
 </html>
