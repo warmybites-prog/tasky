@@ -16674,5 +16674,276 @@ leaveMeetingRoomV101=async function(opts={}){if(brain107MeetingId)brain107Close(
 window.TASKY_BUILD='V107.1';console.info('Tasky build',window.TASKY_BUILD);
 </script>
 
+
+<style id="tasky-v108-brainstorm-rooms-css">
+/* Independent Brainstorm rooms — same Tasky design language */
+.brain108-head{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  padding:16px;border:1px solid var(--border);background:var(--card);border-radius:15px
+}
+.brain108-head h2{margin:0 0 4px;font-size:17px}
+.brain108-head p{margin:0;color:var(--muted);font-size:9.5px;line-height:1.65;max-width:680px}
+.brain108-head button{min-height:38px}
+.brain108-groups{display:flex;flex-direction:column;gap:15px}
+.brain108-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:9px}
+.brain108-card{
+  border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px;
+  display:flex;flex-direction:column;gap:10px
+}
+.brain108-card-head{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.brain108-card h3{margin:0;font-size:12.5px;line-height:1.5}
+.brain108-card p{margin:3px 0 0;color:var(--muted);font-size:8.5px;line-height:1.55}
+.brain108-type{
+  border:1px solid var(--border);background:var(--paper);border-radius:999px;
+  padding:3px 7px;font-size:7.5px;color:var(--ink-soft);white-space:nowrap
+}
+.brain108-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.brain108-meta>div{border:1px solid var(--border);background:var(--paper);border-radius:9px;padding:7px}
+.brain108-meta span{display:block;color:var(--muted);font-size:7px;margin-bottom:3px}
+.brain108-meta b{display:block;font-size:8.5px;line-height:1.45}
+.brain108-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto}
+.brain108-actions button{min-height:36px;font-size:9px}
+.brain108-empty{
+  border:1px dashed var(--border);background:var(--paper);border-radius:12px;
+  padding:24px 13px;text-align:center;color:var(--muted);font-size:9.5px;line-height:1.7
+}
+.brain108-section-title{display:flex;align-items:center;justify-content:space-between;margin:0 0 7px}
+.brain108-section-title h3{margin:0;font-size:12.5px}.brain108-section-title span{font-size:8px;color:var(--muted)}
+.brain108-form{display:grid;grid-template-columns:1fr;gap:10px}
+@media(max-width:700px){
+  .brain108-head{padding:13px;flex-direction:column}
+  .brain108-head button{width:100%}
+  .brain108-grid{grid-template-columns:1fr}
+}
+</style>
+
+<script id="tasky-v108-brainstorm-rooms-js">
+window.TASKY_BUILD='V108';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain108Rooms=[];
+let brain108Loading=false;
+let brain108Error='';
+
+function brain108L(ar,en){return lang==='ar'?ar:en}
+
+async function brain108FetchRooms(){
+  if(!currentWorkspaceId)return[];
+  brain108Loading=true;brain108Error='';
+  try{
+    const {data,error}=await sb.rpc('tasky_brainstorm_room_list_v108',{p_workspace_id:currentWorkspaceId});
+    if(error)throw error;
+    brain108Rooms=Array.isArray(data)?data:[];
+    return brain108Rooms;
+  }catch(e){
+    brain108Error=e?.message||String(e);brain108Rooms=[];return[];
+  }finally{brain108Loading=false}
+}
+
+function brain108OpenCreate(){
+  const meetings=meetingsV101.filter(m=>['scheduled','live'].includes(m.status));
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain108L('غرفة عصف ذهني جديدة','New brainstorm room')}</h3><div class="subtle">${brain108L('أنشئ مساحة مستقلة، أو اربطها باجتماع إذا احتجت. الربط اختياري.','Create an independent space, or optionally link it to a meeting.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <form class="brain108-form" onsubmit="brain108Create(event)">
+    <div class="field"><label>${brain108L('اسم الغرفة','Room name')}</label><input id="brain108Title" required maxlength="140" placeholder="${brain108L('مثال: أفكار المنتج الجديد','Example: New product ideas')}"></div>
+    <div class="field"><label>${brain108L('الوصف — اختياري','Description — optional')}</label><textarea id="brain108Desc" maxlength="1200" placeholder="${brain108L('الهدف أو موضوع العصف الذهني','Purpose or brainstorm topic')}"></textarea></div>
+    <div class="field"><label>${brain108L('ربط باجتماع — اختياري','Link to meeting — optional')}</label><select id="brain108Meeting"><option value="">${brain108L('بدون اجتماع — غرفة مستقلة','No meeting — independent room')}</option>${meetings.map(m=>`<option value="${m.id}">${escapeHtml(m.title)}</option>`).join('')}</select></div>
+    <div style="display:flex;gap:7px;justify-content:flex-end"><button type="button" class="chip-btn" onclick="closeAddModal()">${brain108L('إلغاء','Cancel')}</button><button type="submit" class="primary-btn">${brain108L('إنشاء الغرفة','Create room')}</button></div>
+  </form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+  setTimeout(()=>{if(typeof taskyEnhanceSelects==='function')taskyEnhanceSelects()},0);
+}
+
+async function brain108Create(e){
+  e.preventDefault();
+  const title=document.getElementById('brain108Title')?.value.trim()||'';
+  const description=document.getElementById('brain108Desc')?.value.trim()||'';
+  const meetingId=document.getElementById('brain108Meeting')?.value||null;
+  const {data,error}=await sb.rpc('tasky_brainstorm_room_create_v108',{
+    p_workspace_id:currentWorkspaceId,p_title:title,p_description:description||null,p_meeting_id:meetingId||null
+  });
+  if(error)return showTaskyDialog({title:brain108L('تعذّر إنشاء الغرفة','Could not create room'),message:error.message,tone:'error'});
+  closeAddModal();await brain108FetchRooms();renderModule();
+  taskyToast(brain108L('تم إنشاء غرفة العصف الذهني','Brainstorm room created'),{tone:'success'});
+  if(data?.id)setTimeout(()=>brain108OpenRoom(data.id),40);
+}
+
+async function brain108Archive(id){
+  const r=brain108Rooms.find(x=>x.id===id);if(!r)return;
+  const ok=await taskyConfirm(brain108L(`إغلاق غرفة "${r.title}"؟ ستبقى محفوظة للرجوع إليها.`,`Close "${r.title}"? It will remain saved for reference.`),{title:brain108L('إغلاق الغرفة','Close room'),confirmText:brain108L('إغلاق','Close')});
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_room_archive_v108',{p_room_id:id});
+  if(error)return showTaskyDialog({title:brain108L('تعذّر إغلاق الغرفة','Could not close room'),message:error.message,tone:'error'});
+  await brain108FetchRooms();renderModule();
+}
+
+function brain108Card(r){
+  const linked=!!r.meeting_id;
+  return `<article class="brain108-card">
+    <div class="brain108-card-head"><div><h3>${escapeHtml(r.title)}</h3><p>${escapeHtml(r.description||brain108L('بدون وصف','No description'))}</p></div><span class="brain108-type">${linked?brain108L('مرتبطة باجتماع','Meeting-linked'):brain108L('مستقلة','Independent')}</span></div>
+    <div class="brain108-meta">
+      <div><span>${brain108L('المالك','Owner')}</span><b>${escapeHtml(r.owner_name||'')}</b></div>
+      <div><span>${brain108L('الحالة','Status')}</span><b>${r.status==='active'?brain108L('نشطة','Active'):brain108L('مغلقة','Closed')}</b></div>
+      ${linked?`<div style="grid-column:1/-1"><span>${brain108L('الاجتماع','Meeting')}</span><b>${escapeHtml(r.meeting_title||'')}</b></div>`:''}
+    </div>
+    <div class="brain108-actions"><button class="primary-btn" onclick="brain108OpenRoom('${r.id}')">${r.status==='active'?brain108L('فتح الغرفة','Open room'):brain108L('عرض الغرفة','View room')}</button>${r.can_manage&&r.status==='active'?`<button class="chip-btn" onclick="brain108Archive('${r.id}')">${brain108L('إغلاق','Close')}</button>`:''}</div>
+  </article>`;
+}
+
+function meetingsBrainstormTemplateV108(){
+  if(brain108Loading&&!brain108Rooms.length)return `<div class="brain108-empty">${brain108L('جارٍ تحميل غرف العصف الذهني…','Loading brainstorm rooms…')}</div>`;
+  if(brain108Error)return `<div class="brain108-empty">${escapeHtml(brain108Error)}</div>`;
+  const active=brain108Rooms.filter(r=>r.status==='active');
+  const archived=brain108Rooms.filter(r=>r.status==='archived');
+  return `<div class="brain108-groups">
+    <div class="brain108-head"><div><h2>${brain108L('غرفة العصف الذهني','Brainstorm Room')}</h2><p>${brain108L('أنشئ مساحة حرة مستقلة للفريق في أي وقت، أو اربطها باجتماع عند الحاجة. كل غرفة تدعم الكتابة والرسم بالقلم والتصويت والعمل المشترك.','Create a free standalone team space at any time, or link it to a meeting when useful. Every room supports writing, stylus drawing, voting and collaboration.')}</p></div><button class="primary-btn" onclick="brain108OpenCreate()">${brain108L('غرفة جديدة','New room')}</button></div>
+    <section><div class="brain108-section-title"><h3>${brain108L('الغرف النشطة','Active rooms')}</h3><span>${active.length}</span></div>${active.length?`<div class="brain108-grid">${active.map(brain108Card).join('')}</div>`:`<div class="brain108-empty">${brain108L('لا توجد غرف عصف ذهني نشطة. أنشئ غرفة مستقلة وابدأ مباشرة.','No active brainstorm rooms. Create an independent room and start immediately.')}</div>`}</section>
+    ${archived.length?`<section><div class="brain108-section-title"><h3>${brain108L('الغرف المغلقة','Closed rooms')}</h3><span>${archived.length}</span></div><div class="brain108-grid">${archived.slice(0,24).map(brain108Card).join('')}</div></section>`:''}
+  </div>`;
+}
+
+/* Replace the old meeting-derived Brainstorm section with independent rooms. */
+meetingsBrainstormTemplateV10622=meetingsBrainstormTemplateV108;
+
+const setMeetingsSectionBaseV108=setMeetingsSectionV10622;
+setMeetingsSectionV10622=function(section){
+  meetingsSectionV10622=section==='brainstorm'?'brainstorm':'meetings';
+  if(meetingsSectionV10622==='brainstorm'){
+    brain108FetchRooms().finally(()=>{if(activeNav==='meetings'&&meetingsSectionV10622==='brainstorm')renderModule()});
+  }
+  if(activeNav==='meetings')renderModule();
+};
+
+/* Open a standalone/linked room using V108 canvas state. */
+async function brain108OpenRoom(roomId){
+  window.brain108RoomId=roomId;
+  const probe=await sb.rpc('tasky_brainstorm_canvas_state_v108',{p_room_id:roomId});
+  if(probe.error)return showTaskyDialog({title:brain108L('تعذّر فتح الغرفة','Could not open room'),message:probe.error.message,tone:'error'});
+  brain107MeetingId=null;
+  brain107Objects=Array.isArray(probe.data?.objects)?probe.data.objects:[];
+  brain107Strokes=Array.isArray(probe.data?.strokes)?probe.data.strokes:[];
+  brain107Presence=Array.isArray(probe.data?.presence)?probe.data.presence:[];
+  brain108RenderCanvasShell(probe.data?.room||{});
+  setTimeout(brain107Fit,50);
+  clearInterval(brain107Timer);brain107Timer=setInterval(brain108FetchCanvas,1000);
+  clearInterval(brain107PresenceTimer);brain108PresencePing();brain107PresenceTimer=setInterval(()=>brain108PresencePing(),4000);
+}
+
+function brain108RoomArgs(){return {p_room_id:window.brain108RoomId}}
+
+async function brain108FetchCanvas(){
+  if(!window.brain108RoomId)return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_canvas_state_v108',brain108RoomArgs());
+  if(error){console.warn('V108 canvas state',error);return}
+  brain107Objects=Array.isArray(data?.objects)?data.objects:[];
+  brain107Strokes=Array.isArray(data?.strokes)?data.strokes:[];
+  brain107Presence=Array.isArray(data?.presence)?data.presence:[];
+  window.brain108RoomMeta=data?.room||window.brain108RoomMeta||{};
+  brain107RenderData();
+}
+
+function brain108Editable(){return window.brain108RoomMeta?.status==='active'&&!!window.brain108RoomMeta?.can_edit}
+
+function brain108RenderCanvasShell(room){
+  window.brain108RoomMeta=room;
+  const el=brain107Shell(),editable=brain108Editable();
+  el.innerHTML=`<div class="brain107-top">
+    <div class="brain107-title"><h2>${brain108L('غرفة العصف الذهني','Brainstorm Room')} — ${escapeHtml(room.title||'')}</h2><p>${room.meeting_title?escapeHtml(room.meeting_title):brain108L('مساحة مستقلة للفريق','Independent team space')}</p></div>
+    <div class="brain107-top-actions"><span class="brain107-status"><i></i><span id="brain107PresenceCount">${brain108L('متصل','Connected')}</span></span><button type="button" onclick="brain107Fit()">${brain108L('ملاءمة','Fit')}</button><button type="button" onclick="brain108CloseCanvas()">×</button></div>
+  </div>
+  <div class="brain107-main"><aside class="brain107-tools">
+    <button type="button" class="brain107-tool ${brain107Tool==='select'?'active':''}" onclick="brain107SetTool('select')">${brain107SvgIcon('select')}</button>
+    <button type="button" class="brain107-tool ${brain107Tool==='hand'?'active':''}" onclick="brain107SetTool('hand')">${brain107SvgIcon('hand')}</button>
+    ${editable?`<button type="button" class="brain107-tool ${brain107Tool==='pen'?'active':''}" onclick="brain107SetTool('pen')">${brain107SvgIcon('pen')}</button><button type="button" class="brain107-tool" onclick="brain107ToggleCompose(true)">${brain107SvgIcon('note')}</button>`:''}
+  </aside><div class="brain107-stage-wrap" id="brain107StageWrap"><div class="brain107-stage ${brain107Tool==='pen'?'pen-mode':brain107Tool==='select'?'select-mode':''}" id="brain107Stage"><svg class="brain107-svg" id="brain107Svg" viewBox="0 0 4000 3000"></svg><div id="brain107Cards"></div><div id="brain107Cursors"></div></div>
+  ${!editable?`<div class="brain107-readonly">${brain108L('هذه الغرفة للعرض فقط','This room is read-only')}</div>`:''}
+  <div class="brain107-bottom"><button type="button" onclick="brain107Zoom(-.15)">−</button><span class="brain107-zoom" id="brain107Zoom">${Math.round(brain107Scale*100)}%</span><button type="button" onclick="brain107Zoom(.15)">+</button><button type="button" onclick="brain107Fit()">${brain108L('ملاءمة','Fit')}</button></div></div></div>
+  <div class="brain107-compose-panel" id="brain107Compose"><label>${brain108L('نوع البطاقة','Card type')}</label><select id="brain107Kind"><option value="idea">${brain108L('فكرة','Idea')}</option><option value="update">${brain108L('تحديث / خبر','Update / news')}</option><option value="question">${brain108L('سؤال','Question')}</option><option value="decision">${brain108L('قرار','Decision')}</option></select><label style="margin-top:8px">${brain108L('المحتوى','Content')}</label><textarea id="brain107Body" maxlength="1500"></textarea><div class="brain107-compose-actions"><button type="button" onclick="brain107ToggleCompose(false)">${brain108L('إلغاء','Cancel')}</button><button type="button" class="primary" onclick="brain108CreateCard()">${brain108L('إضافة للوحة','Add to canvas')}</button></div></div>`;
+  el.classList.add('show');brain107ApplyTransform();brain108BindStage();brain107RenderData();
+}
+
+function brain108BindStage(){
+  const wrap=document.getElementById('brain107StageWrap'),stage=document.getElementById('brain107Stage');
+  if(!wrap||!stage||wrap.__brain108)return;wrap.__brain108=true;
+  wrap.addEventListener('wheel',e=>{e.preventDefault();brain107Zoom(e.deltaY>0?-.1:.1,e.clientX,e.clientY)},{passive:false});
+  stage.addEventListener('pointerdown',brain108PointerDown);
+  window.addEventListener('pointermove',brain108PointerMove);
+  window.addEventListener('pointerup',brain108PointerUp);
+}
+
+function brain108PointerDown(e){
+  if(e.button!=null&&e.button!==0)return;
+  const card=e.target.closest?.('.brain107-card');
+  if(card&&brain107Tool==='select'&&brain108Editable()){
+    const o=brain107Objects.find(x=>x.id===card.dataset.id);if(!o||!o.can_move)return;
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain107Drag={id:o.id,dx:p.x-o.x,dy:p.y-o.y,lastX:o.x,lastY:o.y};card.classList.add('dragging');return;
+  }
+  if(brain107Tool==='pen'&&brain108Editable()){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain107Draw={points:[{x:p.x,y:p.y,p:e.pressure||.5}],pointerId:e.pointerId};return;
+  }
+  if(brain107Tool==='hand'||(!card&&brain107Tool==='select'))brain107Pan={x:e.clientX,y:e.clientY,tx:brain107Tx,ty:brain107Ty};
+}
+function brain108PointerMove(e){
+  if(brain107Drag){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),o=brain107Objects.find(x=>x.id===brain107Drag.id);
+    if(o){o.x=Math.max(0,Math.min(3760,p.x-brain107Drag.dx));o.y=Math.max(0,Math.min(2820,p.y-brain107Drag.dy));brain107Drag.lastX=o.x;brain107Drag.lastY=o.y;brain107RenderCards()}
+  }else if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),last=brain107Draw.points.at(-1);
+    if(!last||Math.hypot(p.x-last.x,p.y-last.y)>2){brain107Draw.points.push({x:p.x,y:p.y,p:e.pressure||.5});brain107RenderStrokes(true)}
+  }else if(brain107Pan){
+    brain107Tx=brain107Pan.tx+(e.clientX-brain107Pan.x);brain107Ty=brain107Pan.ty+(e.clientY-brain107Pan.y);brain107ApplyTransform();
+  }
+  if(Date.now()-brain107LastPresence>100){brain107LastPresence=Date.now();const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain108PresencePing(p.x,p.y)}
+}
+async function brain108PointerUp(e){
+  if(brain107Drag){
+    const d=brain107Drag;brain107Drag=null;
+    document.querySelector(`.brain107-card[data-id="${CSS.escape(d.id)}"]`)?.classList.remove('dragging');
+    await sb.rpc('tasky_brainstorm_canvas_move_v108',{p_room_id:window.brain108RoomId,p_object_id:d.id,p_x:Math.round(d.lastX),p_y:Math.round(d.lastY)});
+  }
+  if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const pts=brain107Draw.points;brain107Draw=null;
+    if(pts.length>1)await sb.rpc('tasky_brainstorm_canvas_stroke_add_v108',{p_room_id:window.brain108RoomId,p_points:pts,p_width:3.2,p_color:'#214f40'});
+    await brain108FetchCanvas();
+  }
+  brain107Pan=null;
+}
+async function brain108PresencePing(x=null,y=null){
+  if(!window.brain108RoomId)return;
+  sb.rpc('tasky_brainstorm_canvas_presence_v108',{p_room_id:window.brain108RoomId,p_cursor_x:x==null?null:Math.round(x),p_cursor_y:y==null?null:Math.round(y)}).catch?.(()=>{});
+}
+async function brain108CreateCard(){
+  const body=document.getElementById('brain107Body')?.value.trim()||'',kind=document.getElementById('brain107Kind')?.value||'idea';if(!body)return;
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect(),c=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_object_add_v108',{p_room_id:window.brain108RoomId,p_kind:kind,p_body:body,p_x:Math.round(c.x-115),p_y:Math.round(c.y-60)});
+  if(error)return showTaskyDialog({title:brain108L('تعذّرت إضافة البطاقة','Could not add card'),message:error.message,tone:'error'});
+  brain107ToggleCompose(false);await brain108FetchCanvas();
+}
+
+/* Reuse existing card UI but redirect vote/delete RPCs. */
+brain107Vote=async function(id){
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_vote_v108',{p_room_id:window.brain108RoomId,p_object_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain108FetchCanvas();
+};
+brain107DeleteObject=async function(id){
+  const ok=await taskyConfirm(brain108L('حذف هذه البطاقة؟','Delete this card?'),{title:brain108L('حذف البطاقة','Delete card'),tone:'danger',confirmText:brain108L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_object_delete_v108',{p_room_id:window.brain108RoomId,p_object_id:id});
+  if(error)return showTaskyDialog({title:brain108L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});await brain108FetchCanvas();
+};
+function brain108CloseCanvas(){
+  clearInterval(brain107Timer);clearInterval(brain107PresenceTimer);brain107Timer=null;brain107PresenceTimer=null;
+  window.brain108RoomId=null;window.brain108RoomMeta=null;brain107Objects=[];brain107Strokes=[];brain107Presence=[];
+  brain107Shell().classList.remove('show');
+}
+
+/* Load independent rooms when Brainstorm is initially rendered. */
+const meetingsTemplateBaseV108=meetingsTemplateV101;
+meetingsTemplateV101=function(){
+  if(meetingsSectionV10622==='brainstorm'&&!brain108Loading&&!brain108Rooms.length&&!brain108Error){
+    setTimeout(()=>brain108FetchRooms().then(()=>{if(activeNav==='meetings'&&meetingsSectionV10622==='brainstorm')renderModule()}),0);
+  }
+  return meetingsTemplateBaseV108();
+};
+</script>
+
 </body>
 </html>
