@@ -14533,5 +14533,80 @@ closeAddModal=function(){
 };
 </script>
 
+
+<script id="tasky-v10517-host-leave-lifecycle-js">
+window.TASKY_BUILD='V105.1.7';console.info('Tasky build',window.TASKY_BUILD);
+function meet10517L(ar,en){return lang==='ar'?ar:en}
+
+const leaveMeetingRoomBaseV10517=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  const room=meetingRoomV101;
+  const organizerLeaving=!!room && !opts?.silent && !meetingGuestSessionV102
+    && String(room.created_by)===String(currentUserId) && room.status==='live';
+
+  let originalCreator=null;
+  if(organizerLeaving){
+    originalCreator=room.created_by;
+    room.created_by='__tasky_host_left_without_ending__';
+  }
+
+  try{
+    const result=await leaveMeetingRoomBaseV10517(opts);
+    if(organizerLeaving){
+      taskyToast(
+        meet10517L(
+          'غادرت الاجتماع فقط. سيبقى مباشرًا حتى يتم إنهاؤه أو إلغاؤه صراحةً.',
+          'You left the meeting only. It remains live until explicitly ended or cancelled.'
+        ),
+        {tone:'success'}
+      );
+    }
+    return result;
+  }finally{
+    if(organizerLeaving && meetingRoomV101===room)room.created_by=originalCreator;
+  }
+};
+
+meetingV1051Heartbeat=async function(){
+  if(!meetingRoomV101||meetingGuestSessionV102||String(meetingRoomV101.created_by)!==String(currentUserId)||meetingRoomV101.status!=='live')return;
+  try{await sb.rpc('tasky_meeting_host_heartbeat_v1051',{p_meeting_id:meetingRoomV101.id})}
+  catch(e){console.warn('V105.1.7 host heartbeat',e)}
+};
+
+meetingSessionCheckV101=async function(){
+  if(!meetingRoomV101)return;
+  try{
+    let data,error;
+    if(meetingGuestSessionV102){
+      ({data,error}=await sb.rpc('tasky_public_meeting_guest_session_check_v1051',{
+        p_guest_session_id:meetingGuestSessionV102.id,
+        p_guest_session_token:meetingGuestSessionV102.token
+      }));
+    }else{
+      ({data,error}=await sb.rpc('tasky_meeting_session_check_v1051',{p_meeting_id:meetingRoomV101.id}));
+    }
+    if(error)throw error;
+    if(!data?.authorized){
+      const st=data?.status;
+      const msg=st==='cancelled'
+        ?meet10517L('تم إلغاء الاجتماع','The meeting was cancelled')
+        :st==='ended'
+          ?meet10517L('انتهى الاجتماع','The meeting ended')
+          :meet10517L('انتهت جلسة الاجتماع','The meeting session ended');
+      const mid=meetingRoomV101.id;
+      if(meetingGuestSessionV102){
+        const sess={...meetingGuestSessionV102};
+        meetingV1044LastGuestRating={id:sess.id,token:sess.token,meetingId:mid};
+        await leaveMeetingRoomV101({silent:true,skipFetch:true});
+        renderPublicMeetingGuestExitV1044(msg,mid);
+      }else{
+        await leaveMeetingRoomV101({silent:true});
+        taskyToast(msg,{tone:'warning'});
+      }
+    }
+  }catch(err){console.warn('V105.1.7 session check',err)}
+};
+</script>
+
 </body>
 </html>
