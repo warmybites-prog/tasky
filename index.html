@@ -16558,5 +16558,121 @@ const leaveMeetingRoomBaseV107=leaveMeetingRoomV101;
 leaveMeetingRoomV101=async function(opts={}){if(brain107MeetingId)brain107Close();return leaveMeetingRoomBaseV107(opts)};
 </script>
 
+
+<style id="tasky-v1071-meeting-action-buttons-css">
+/* ============================================================
+   V107.1 — Stronger button affordance on meeting cards
+   Keep Tasky visual language: no emoji, no decorative redesign.
+   ============================================================ */
+.meet10512-actions{
+  gap:7px!important;
+}
+.meet10512-actions button{
+  min-height:40px!important;
+  padding:8px 11px!important;
+  border-radius:9px!important;
+  border:1px solid var(--border)!important;
+  background:var(--paper)!important;
+  color:var(--ink)!important;
+  font-size:9.5px!important;
+  font-weight:800!important;
+  line-height:1.35!important;
+  box-shadow:0 1px 1px rgba(18,33,28,.03)!important;
+  transition:background .15s ease,border-color .15s ease,transform .08s ease,box-shadow .15s ease!important;
+  cursor:pointer!important;
+}
+.meet10512-actions button:hover{
+  background:var(--card)!important;
+  border-color:#bcc8c3!important;
+  box-shadow:0 2px 6px rgba(18,33,28,.07)!important;
+}
+.meet10512-actions button:active{
+  transform:translateY(1px)!important;
+  box-shadow:none!important;
+}
+.meet10512-actions button:focus-visible{
+  outline:2px solid var(--green)!important;
+  outline-offset:2px!important;
+}
+
+/* Primary meeting action */
+.meet10512-actions .primary{
+  background:var(--green)!important;
+  color:#fff!important;
+  border-color:var(--green)!important;
+  font-weight:900!important;
+}
+.meet10512-actions .primary:hover{
+  filter:brightness(.96);
+  background:var(--green)!important;
+  border-color:var(--green)!important;
+}
+
+/* Guest link remains a secondary positive action, but still looks clickable. */
+.meet10512-actions .guest{
+  background:var(--green-tint)!important;
+  color:var(--green)!important;
+  border-color:#c8ddd4!important;
+}
+
+/* Cancel / destructive action */
+.meet10512-actions .danger{
+  background:var(--card)!important;
+  color:var(--danger)!important;
+  border-color:#e1c9c6!important;
+}
+.meet10512-actions .danger:hover{
+  background:var(--danger-tint)!important;
+  border-color:#d9b7b3!important;
+}
+
+/* Minutes / permissions / brainstorm should look like actual controls,
+   not passive cards. */
+.meet10512-actions .minutes,
+.meet10512-actions .permissions,
+.meet10512-actions .tasky1062-brain-btn{
+  background:#f7f8f6!important;
+  color:var(--ink)!important;
+  border-color:#d5ddd9!important;
+}
+.meet10512-actions .tasky1062-brain-btn{
+  font-weight:900!important;
+}
+
+/* The invitation action is important but secondary to Join. */
+.meet10512-actions .invite{
+  background:#f5f7f6!important;
+  color:var(--ink)!important;
+  border-color:#ccd6d1!important;
+  font-weight:850!important;
+}
+
+/* Desktop: keep actions compact and button-like, not card-like. */
+@media(min-width:701px){
+  .meet10512-actions{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  }
+  .meet10512-actions button{
+    min-height:38px!important;
+  }
+}
+
+/* Mobile: preserve clear touch targets without oversized empty blocks. */
+@media(max-width:700px){
+  .meet10512-actions{
+    gap:6px!important;
+  }
+  .meet10512-actions button{
+    min-height:42px!important;
+    padding:8px 10px!important;
+    font-size:10px!important;
+  }
+}
+</style>
+
+<script id="tasky-v1071-meeting-action-buttons-js">
+window.TASKY_BUILD='V107.1';console.info('Tasky build',window.TASKY_BUILD);
+</script>
+
 </body>
 </html>
