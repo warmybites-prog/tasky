@@ -12759,5 +12759,260 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v1046-meeting-minutes-css">
+.meet1046-rating-inline{display:flex;flex-direction:column;gap:4px;margin-top:7px}
+.meet1046-rating-label{font-size:8.5px;color:var(--muted);font-weight:800}
+.meet1046-stars{display:flex;gap:3px;direction:ltr}
+.meet1046-stars button{border:0;background:transparent;padding:0 1px;font-size:18px;color:#c8cec9;cursor:pointer}
+.meet1046-stars button.active,.meet1046-stars button:hover{color:#e2a929}
+.meet1046-minutes-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.25);z-index:31300}
+.meet1046-minutes-panel{position:fixed;top:0;bottom:0;inset-inline-end:0;width:min(430px,94vw);z-index:31400;background:var(--card);border-inline-start:1px solid var(--border);box-shadow:0 0 30px rgba(0,0,0,.18);display:flex;flex-direction:column}
+.meet1046-minutes-head{padding:14px;border-bottom:1px solid var(--border);display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.meet1046-minutes-head h3{margin:0;font-size:15px}.meet1046-minutes-head p{margin:4px 0 0;color:var(--muted);font-size:8.5px;line-height:1.55}
+.meet1046-minutes-body{padding:12px;overflow:auto;display:flex;flex-direction:column;gap:10px;flex:1}
+.meet1046-shortcuts{display:flex;gap:5px;flex-wrap:wrap}
+.meet1046-shortcuts button{border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:5px 8px;font-size:8.5px;font-weight:800}
+.meet1046-minutes-text{width:100%;min-height:45vh;resize:vertical;border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:11px;font:500 10px/1.8 Inter,'IBM Plex Sans Arabic';color:var(--ink)}
+.meet1046-save-state{font-size:8px;color:var(--muted)}
+.meet1046-minutes-actions{display:flex;gap:6px;flex-wrap:wrap;padding:11px 12px;border-top:1px solid var(--border)}
+.meet1046-permissions{display:flex;flex-direction:column;gap:7px;margin-top:10px}
+.meet1046-perm-row{display:flex;justify-content:space-between;align-items:center;gap:8px;border:1px solid var(--border);border-radius:11px;padding:8px}
+.meet1046-report{line-height:1.8;font-size:10px}.meet1046-report pre{white-space:pre-wrap;font:inherit;background:var(--paper);border:1px solid var(--border);border-radius:10px;padding:10px}
+.meet1046-rating-guest{display:flex;justify-content:center;gap:4px;margin:10px 0}.meet1046-rating-guest button{border:0;background:transparent;font-size:30px;color:#c8cec9}.meet1046-rating-guest button:hover{color:#e2a929}
+@media(max-width:700px){.meet1046-minutes-panel{width:100vw}.meet1046-minutes-text{min-height:38vh}}
+</style>
+<script id="tasky-v1046-meeting-minutes-js">
+window.TASKY_BUILD='V104.6';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV1046MinutesCtx=null;
+let meetingV1046MinutesMeetingId=null;
+let meetingV1046MinutesSaveTimer=null;
+let meetingV1046MinutesSaving=false;
+
+function meet1046L(ar,en){return lang==='ar'?ar:en}
+function meetingV1046MemberTerminal(m){return !!m&&['ended','cancelled'].includes(m.status)}
+function meetingV1046RatingStars(meetingId,myRating=0,guest=false){
+  return `<div class="${guest?'meet1046-rating-guest':'meet1046-stars'}">${[1,2,3,4,5].map(n=>`<button type="button" class="${Number(myRating)>=n?'active':''}" title="${n}/5" onclick="${guest?`meetingV1046RateGuest('${meetingId}',${n})`:`meetingV1046RateMember('${meetingId}',${n})`}">★</button>`).join('')}</div>`;
+}
+async function meetingV1046RateMember(meetingId,n){
+  const {error}=await sb.rpc('tasky_meeting_rate_v1044',{p_meeting_id:meetingId,p_rating:n,p_comment:null});
+  if(error)return showTaskyDialog({title:meet1046L('تعذّر حفظ التقييم','Could not save rating'),message:error.message,tone:'error'});
+  taskyToast(meet1046L('تم حفظ تقييم الجودة التقنية','Technical-quality rating saved'),{tone:'success'});
+  await fetchMeetingsV101();if(activeNav==='meetings')renderModule();
+}
+async function meetingV1046RateGuest(meetingId,n){
+  const g=meetingV1044LastGuestRating;
+  if(!g||g.meetingId!==meetingId)return taskyToast(meet1046L('انتهت جلسة التقييم','Rating session expired'),{tone:'warning'});
+  const {error}=await sb.rpc('tasky_public_meeting_rate_v1044',{p_meeting_id:meetingId,p_guest_session_id:g.id,p_guest_session_token:g.token,p_rating:n,p_comment:null});
+  if(error)return showTaskyDialog({title:meet1046L('تعذّر حفظ التقييم','Could not save rating'),message:error.message,tone:'error'});
+  taskyToast(meet1046L('شكرًا، تم تقييم الجودة التقنية','Thanks — technical quality rated'),{tone:'success'});
+  document.querySelectorAll('.meet1046-rating-guest button').forEach((b,i)=>b.classList.toggle('active',i<n));
+}
+
+/* Use V104.6 list so cards know the current user's rating and minute status. */
+fetchMeetingsV101=async function(){
+  if(!currentWorkspaceId)return[];
+  meetingsLoadingV101=true;meetingsErrorV101='';
+  try{
+    const {data,error}=await sb.rpc('tasky_meeting_list_v1046',{p_workspace_id:currentWorkspaceId});
+    if(error)throw error;meetingsV101=Array.isArray(data)?data:[];return meetingsV101;
+  }catch(err){meetingsErrorV101=err?.message||String(err);console.warn('Tasky V104.6 meetings',err);meetingsV101=[];return[]}
+  finally{meetingsLoadingV101=false}
+};
+
+/* Terminal meetings no longer expose/copy a member join link. */
+const meetingCopyLinkBaseV1046=meetingCopyLinkV101;
+meetingCopyLinkV101=async function(roomCode){
+  const m=meetingsV101.find(x=>x.room_code===String(roomCode||'').toUpperCase());
+  if(meetingV1046MemberTerminal(m)){
+    return taskyToast(m.status==='ended'?meet1046L('انتهى الاجتماع وأُغلق رابط دخول الأعضاء','The meeting ended and the member join link is closed'):meet1046L('تم إلغاء الاجتماع وأُغلق رابط دخول الأعضاء','The meeting was cancelled and the member join link is closed'),{tone:'warning'});
+  }
+  return meetingCopyLinkBaseV1046(roomCode);
+};
+
+/* Deep member links resolve against canonical status before opening the join dialog. */
+taskyMeetingHandleDeepLinkV101=function(){
+  if(meetingDeepLinkHandledV101||!currentWorkspaceId)return;
+  const code=String(new URL(location.href).searchParams.get('meeting')||'').trim().toUpperCase();
+  const guest=new URL(location.href).searchParams.get('guest');
+  if(!code||guest)return;
+  meetingDeepLinkHandledV101=true;
+  setActiveNav('meetings');
+  taskyEnsureModuleLoadedV83('meetings',{force:true}).then(async()=>{
+    await fetchMeetingsV101();
+    const m=meetingsV101.find(x=>x.room_code===code);
+    if(m&&meetingV1046MemberTerminal(m)){
+      const u=new URL(location.href);u.searchParams.delete('meeting');history.replaceState({},'',u.toString());
+      return showTaskyDialog({title:m.status==='ended'?meet1046L('الاجتماع منتهي','Meeting ended'):meet1046L('الاجتماع ملغي','Meeting cancelled'),message:meet1046L('رابط دخول الأعضاء لم يعد صالحًا لهذا الاجتماع.','The member join link is no longer valid for this meeting.'),tone:'warning'});
+    }
+    setTimeout(()=>openMeetingJoinConfirmV101(code),80);
+  });
+};
+
+/* Rebuild cards: direct technical-quality stars + minutes + no terminal member links. */
+meetingCardV101=function(m,past=false){
+  const canJoin=!meetingV1046MemberTerminal(m),canManage=!!m.can_manage;
+  const canMinutes=!!m.can_edit_minutes||!!m.has_minutes||canManage;
+  const rating=m.status==='ended'?`<div class="meet1046-rating-inline"><span class="meet1046-rating-label">${meet1046L('قيّم الجودة التقنية للاجتماع','Rate the meeting technical quality')}</span>${meetingV1046RatingStars(m.id,m.my_rating||0,false)}</div>`:'';
+  return `<article class="meet101-card ${escapeHtml(m.status)} ${past?'past':''}">
+    <div class="meet101-card-head"><div><div class="meet102-title-row"><h3>${escapeHtml(m.title)}</h3>${m.allow_guests?`<span class="meet102-guest-badge">${meet102L('دخول خارجي','External guests')}</span>`:''}</div><p>${escapeHtml(m.description||meet102L('اجتماع عبر تاسكي','Tasky meeting'))}</p></div><span class="meet101-status ${escapeHtml(m.status)}">${escapeHtml(meetingStatusLabelV101(m.status))}</span></div>
+    ${meetingV1044StatusNote(m)}
+    <div class="meet101-meta"><div><span>${meet102L('الموعد','When')}</span><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div><div><span>${meet102L('المدة','Duration')}</span><b>${Number(m.duration_minutes||30)} ${meet102L('دقيقة','min')}</b></div><div><span>${meet102L('المنظّم','Organizer')}</span><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div></div>
+    ${meetingV1044StatsHtml(m)}${rating}
+    <div class="meet101-card-actions">
+      ${canJoin?`<button class="primary-btn" onclick="openMeetingJoinConfirmV101('${m.room_code}')"><svg><use href="#i-camera"/></svg>${m.status==='live'?meet102L('انضم الآن','Join now'):meet102L('دخول الاجتماع','Join meeting')}</button><button class="chip-btn" onclick="meetingCopyLinkV101('${m.room_code}')">${meet102L('رابط الأعضاء','Member link')}</button>`:''}
+      ${canManage&&m.allow_guests&&canJoin?`<button class="chip-btn meet102-guest-link-btn" onclick="meetingCopyGuestLinkV102('${m.id}')">${meet102L('رابط ضيف بدون تسجيل','No-login guest link')}</button>`:''}
+      ${canManage&&m.status==='scheduled'?`<button class="chip-btn" onclick="openMeetingEditorV101('${m.id}')">${meet102L('تعديل','Edit')}</button><button class="chip-btn" style="color:var(--danger)" onclick="cancelMeetingV1044('${m.id}')">${meet102L('إلغاء','Cancel')}</button>`:''}
+      ${canManage&&m.status==='live'?`<button class="chip-btn" style="color:var(--danger)" onclick="cancelMeetingV1044('${m.id}')">${meet102L('إلغاء الاجتماع','Cancel meeting')}</button>`:''}
+      ${canMinutes?`<button class="chip-btn" onclick="meetingV1046OpenMinutesReference('${m.id}')">📝 ${meet1046L('محضر الاجتماع','Meeting minutes')}</button>`:''}
+      ${canManage?`<button class="chip-btn" onclick="meetingV1046ManageEditors('${m.id}')">🔐 ${meet1046L('صلاحيات المحضر','Minutes access')}</button>`:''}
+    </div>
+  </article>`;
+};
+
+/* Direct technical-quality stars on the guest exit page. */
+renderPublicMeetingGuestExitV1044=function(message,meetingId){
+  const p=meetingGuestPublicV102;if(!p)return;
+  meet102GuestFrameV102(`<div class="meet102-guest-card meet102-exit"><div class="meet102-exit-check">✓</div><h1>${escapeHtml(message||meet102L('تمت مغادرة الاجتماع','You left the meeting'))}</h1><p>${meet1046L('قيّم الجودة التقنية للصوت والفيديو والاتصال.','Rate the technical quality of audio, video, and connection.')}</p>${meetingId?meetingV1046RatingStars(meetingId,0,true):''}<button class="chip-btn" style="margin-top:8px" onclick="showPublicMeetingGuestPortalV102('${escapeHtml(p.roomCode)}','${escapeHtml(p.guestToken)}')">${meet102L('العودة إلى صفحة الاجتماع','Back to meeting page')}</button></div>`);
+};
+
+/* ---------- Minutes permissions ---------- */
+async function meetingV1046ManageEditors(meetingId){
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_editors_v1046',{p_meeting_id:meetingId});
+  if(error)return showTaskyDialog({title:meet1046L('تعذّر تحميل الصلاحيات','Could not load permissions'),message:error.message,tone:'error'});
+  const enabled=new Set((data?.editor_user_ids||[]).map(String));
+  const members=teamMembers.filter(x=>x.status==='active'&&x.userId);
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${meet1046L('صلاحيات كتابة محضر الاجتماع','Meeting minutes editors')}</h3><div class="subtle">${meet1046L('المنظم ومديرو مساحة العمل لديهم الصلاحية تلقائيًا. يمكنك منح أي عضو مدعو للاجتماع — مثل السكرتير — صلاحية التوثيق.','Organizer and workspace admins have access automatically. You can grant any invited member — such as a secretary — permission to document the meeting.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+    <div class="meet1046-permissions">${members.map(m=>`<label class="meet1046-perm-row"><span><b>${escapeHtml(m.fullName||m.email)}</b><small style="display:block;color:var(--muted)">${escapeHtml(m.jobTitle||'')}</small></span><input type="checkbox" ${enabled.has(String(m.userId))?'checked':''} onchange="meetingV1046SetEditor('${meetingId}','${m.userId}',this.checked)"></label>`).join('')}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function meetingV1046SetEditor(meetingId,userId,enabled){
+  const {error}=await sb.rpc('tasky_meeting_minutes_set_editor_v1046',{p_meeting_id:meetingId,p_user_id:userId,p_enabled:enabled});
+  if(error)return showTaskyDialog({title:meet1046L('تعذّر تحديث الصلاحية','Could not update permission'),message:error.message,tone:'error'});
+  if(meetingRoomV101?.id===meetingId){meetingV1046MinutesCtx=null;meetingV1046EnsureContext(true)}
+  taskyToast(meet1046L('تم تحديث صلاحية المحضر','Minutes permission updated'),{tone:'success'});
+}
+
+/* ---------- Live side-panel minutes ---------- */
+async function meetingV1046EnsureContext(force=false){
+  if(!meetingRoomV101||meetingV103IsGuest())return null;
+  if(!force&&meetingV1046MinutesCtx&&meetingV1046MinutesMeetingId===meetingRoomV101.id)return meetingV1046MinutesCtx;
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_get_v1046',{p_meeting_id:meetingRoomV101.id});
+  if(error){console.warn('V104.6 minutes context',error);return null}
+  meetingV1046MinutesCtx=data||{};meetingV1046MinutesMeetingId=meetingRoomV101.id;
+  meetingV1046PatchMinutesButton();
+  return meetingV1046MinutesCtx;
+}
+function meetingV1046PatchMinutesButton(){
+  const tools=document.getElementById('meet103Tools');if(!tools||!meetingV1046MinutesCtx?.can_edit)return;
+  if(document.getElementById('meet1046MinutesBtn'))return;
+  const b=document.createElement('button');b.id='meet1046MinutesBtn';b.type='button';b.className='meet103-pill';
+  b.onclick=meetingV1046OpenLiveMinutes;b.innerHTML=`📝 <span>${meet1046L('المحضر','Minutes')}</span>`;tools.appendChild(b);
+}
+function meetingV1046ParticipantNames(){
+  const names=[meetingV1045DisplayName(),...meetingRemoteParticipantsV101().map(p=>p.name)].map(x=>String(x||'').trim()).filter(Boolean);
+  return [...new Set(names)];
+}
+function meetingV1046Insert(text){
+  const ta=document.getElementById('meet1046MinutesText');if(!ta)return;
+  const start=ta.selectionStart??ta.value.length,end=ta.selectionEnd??ta.value.length;
+  const prefix=start&&ta.value[start-1]!=='\n'?' ':'';
+  ta.setRangeText(prefix+text,start,end,'end');ta.focus();meetingV1046ScheduleSave();
+}
+function meetingV1046ShortcutHtml(){
+  const labels=[meet1046L('قرار: ','Decision: '),meet1046L('إجراء: ','Action: '),meet1046L('مسؤول: ','Owner: '),meet1046L('موعد: ','Due: '),meet1046L('متابعة: ','Follow-up: '),meet1046L('ملاحظة: ','Note: ')];
+  const people=meetingV1046ParticipantNames().map(n=>`@${n} `);
+  return [...labels,...people].map(x=>`<button type="button" onclick='meetingV1046Insert(${JSON.stringify(x)})'>${escapeHtml(x)}</button>`).join('');
+}
+async function meetingV1046OpenLiveMinutes(){
+  const ctx=await meetingV1046EnsureContext(true);if(!ctx?.can_edit)return;
+  document.getElementById('meet1046MinutesBackdrop')?.remove();document.getElementById('meet1046MinutesPanel')?.remove();
+  const back=document.createElement('div');back.id='meet1046MinutesBackdrop';back.className='meet1046-minutes-backdrop';back.onclick=meetingV1046CloseMinutes;
+  const panel=document.createElement('aside');panel.id='meet1046MinutesPanel';panel.className='meet1046-minutes-panel';
+  panel.innerHTML=`<div class="meet1046-minutes-head"><div><h3>📝 ${meet1046L('محضر الاجتماع','Meeting minutes')}</h3><p>${meet1046L('توثيق داخلي سريع. استخدم الاختصارات لإدراج القرارات والإجراءات وأسماء الحضور.','Fast internal documentation. Use shortcuts for decisions, actions, and participant names.')}</p></div><button class="modal-close" onclick="meetingV1046CloseMinutes()">×</button></div>
+    <div class="meet1046-minutes-body"><div class="meet1046-shortcuts">${meetingV1046ShortcutHtml()}</div>
+    <textarea id="meet1046MinutesText" class="meet1046-minutes-text" placeholder="${meet1046L('ابدأ توثيق الاجتماع هنا…','Start documenting the meeting here…')}" oninput="meetingV1046ScheduleSave()">${escapeHtml(ctx.content||'')}</textarea>
+    <span id="meet1046SaveState" class="meet1046-save-state">${ctx.updated_at?meet1046L('آخر حفظ: ','Last saved: ')+meetingDateV101(ctx.updated_at):meet1046L('لم يُحفظ بعد','Not saved yet')}</span></div>
+    <div class="meet1046-minutes-actions"><button class="primary-btn" onclick="meetingV1046SaveMinutes(true)">${meet1046L('حفظ الآن','Save now')}</button>${ctx.can_manage_editors?`<button class="chip-btn" onclick="meetingV1046ManageEditors('${meetingRoomV101.id}')">🔐 ${meet1046L('الصلاحيات','Permissions')}</button>`:''}</div>`;
+  document.body.append(back,panel);setTimeout(()=>document.getElementById('meet1046MinutesText')?.focus(),50);
+}
+function meetingV1046CloseMinutes(){clearTimeout(meetingV1046MinutesSaveTimer);meetingV1046SaveMinutes(false);document.getElementById('meet1046MinutesBackdrop')?.remove();document.getElementById('meet1046MinutesPanel')?.remove()}
+function meetingV1046ScheduleSave(){clearTimeout(meetingV1046MinutesSaveTimer);const s=document.getElementById('meet1046SaveState');if(s)s.textContent=meet1046L('تغييرات غير محفوظة…','Unsaved changes…');meetingV1046MinutesSaveTimer=setTimeout(()=>meetingV1046SaveMinutes(false),1800)}
+async function meetingV1046SaveMinutes(showToast=false){
+  const ta=document.getElementById('meet1046MinutesText');if(!ta||!meetingRoomV101||meetingV1046MinutesSaving)return;
+  meetingV1046MinutesSaving=true;
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_save_v1046',{p_meeting_id:meetingRoomV101.id,p_content:ta.value});
+  meetingV1046MinutesSaving=false;
+  if(error){const s=document.getElementById('meet1046SaveState');if(s)s.textContent=meet1046L('تعذّر الحفظ','Save failed');if(showToast)showTaskyDialog({title:meet1046L('تعذّر حفظ المحضر','Could not save minutes'),message:error.message,tone:'error'});return}
+  meetingV1046MinutesCtx={...(meetingV1046MinutesCtx||{}),content:ta.value,updated_at:data?.updated_at||new Date().toISOString()};
+  const s=document.getElementById('meet1046SaveState');if(s)s.textContent=meet1046L('تم الحفظ','Saved')+' · '+new Date().toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'});
+  if(showToast)taskyToast(meet1046L('تم حفظ محضر الاجتماع','Meeting minutes saved'),{tone:'success'});
+}
+
+/* ---------- Post-meeting minutes reference / export ---------- */
+async function meetingV1046OpenMinutesReference(meetingId){
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_get_v1046',{p_meeting_id:meetingId});
+  if(error)return showTaskyDialog({title:meet1046L('تعذّر تحميل المحضر','Could not load minutes'),message:error.message,tone:'error'});
+  const m=meetingsV101.find(x=>x.id===meetingId)||{};
+  const content=String(data?.content||'').trim();
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${meet1046L('محضر الاجتماع','Meeting minutes')} — ${escapeHtml(m.title||'')}</h3><div class="subtle">${data?.status==='final'?meet1046L('محضر معتمد','Final minutes'):meet1046L('مسودة محضر','Draft minutes')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+    <div class="meet1046-report">${content?`<pre>${escapeHtml(content)}</pre>`:`<div class="meet101-empty">${meet1046L('لا يوجد محتوى موثق في المحضر حتى الآن.','No minutes have been documented yet.')}</div>`}</div>
+    <div class="meet101-actions">${data?.can_edit?`<button class="primary-btn" onclick="closeAddModal();meetingV1046OpenMinutesForPast('${meetingId}')">${meet1046L('تعديل المحضر','Edit minutes')}</button>`:''}${content?`<button class="chip-btn" onclick="meetingV1046PrintReport('${meetingId}')">${meet1046L('استخراج تقرير','Export report')}</button><button class="chip-btn" onclick="meetingV1046CopyEmail('${meetingId}')">${meet1046L('نسخ نص بريد','Copy email text')}</button>`:''}${data?.can_edit&&m.status==='ended'&&data?.status!=='final'?`<button class="chip-btn" onclick="meetingV1046Finalize('${meetingId}')">${meet1046L('اعتماد المحضر','Finalize')}</button>`:''}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function meetingV1046OpenMinutesForPast(meetingId){
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_get_v1046',{p_meeting_id:meetingId});if(error||!data?.can_edit)return;
+  const fakeRoom=meetingRoomV101;meetingRoomV101=meetingsV101.find(x=>x.id===meetingId)||{id:meetingId,room_code:''};
+  meetingV1046MinutesCtx=data;meetingV1046MinutesMeetingId=meetingId;meetingV1046OpenLiveMinutes();
+  meetingRoomV101=fakeRoom;
+}
+async function meetingV1046Finalize(meetingId){
+  const ok=await taskyConfirm(meet1046L('اعتماد المحضر؟ سيظل محفوظًا كمرجع ويمكن لمدير الاجتماع فتحه لاحقًا.','Finalize the minutes as the meeting reference?'),{title:meet1046L('اعتماد المحضر','Finalize minutes')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_minutes_finalize_v1046',{p_meeting_id:meetingId});if(error)return showTaskyDialog({title:meet1046L('تعذّر الاعتماد','Could not finalize'),message:error.message,tone:'error'});
+  closeAddModal();await fetchMeetingsV101();renderModule();taskyToast(meet1046L('تم اعتماد محضر الاجتماع','Meeting minutes finalized'),{tone:'success'});
+}
+async function meetingV1046GetExportData(meetingId){
+  const {data,error}=await sb.rpc('tasky_meeting_minutes_get_v1046',{p_meeting_id:meetingId});if(error)throw error;
+  const m=meetingsV101.find(x=>x.id===meetingId)||{};
+  return {m,d:data||{}};
+}
+async function meetingV1046PrintReport(meetingId){
+  try{
+    const {m,d}=await meetingV1046GetExportData(meetingId);
+    const w=window.open('','_blank','noopener,noreferrer');if(!w)return;
+    const attendees=(d.attendee_names||[]).join('، ');
+    w.document.write(`<!doctype html><html lang="${lang}" dir="${lang==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><title>${escapeHtml(m.title||'Meeting minutes')}</title><style>body{font-family:Arial,sans-serif;max-width:850px;margin:40px auto;line-height:1.8;color:#17211f}h1{color:#0b4d40}.meta{color:#66736f;border-bottom:1px solid #ddd;padding-bottom:12px;margin-bottom:20px}pre{white-space:pre-wrap;font:inherit}</style></head><body><h1>${meet1046L('محضر اجتماع','Meeting Minutes')}: ${escapeHtml(m.title||'')}</h1><div class="meta">${meet1046L('الموعد','When')}: ${escapeHtml(meetingDateV101(m.scheduled_at))}<br>${meet1046L('المنظّم','Organizer')}: ${escapeHtml(meetingMemberNameV101(m.created_by))}<br>${meet1046L('الحضور','Attendees')}: ${escapeHtml(attendees||'—')}<br>${meet1046L('الحالة','Status')}: ${escapeHtml(d.status||'draft')}</div><pre>${escapeHtml(d.content||'')}</pre></body></html>`);w.document.close();w.focus();setTimeout(()=>w.print(),500);
+  }catch(e){showTaskyDialog({title:meet1046L('تعذّر إنشاء التقرير','Could not create report'),message:e.message,tone:'error'})}
+}
+async function meetingV1046CopyEmail(meetingId){
+  try{
+    const {m,d}=await meetingV1046GetExportData(meetingId);
+    const attendees=(d.attendee_names||[]).join('، ');
+    const subject=meet1046L(`محضر اجتماع: ${m.title||''}`,`Meeting Minutes: ${m.title||''}`);
+    const text=`${meet1046L('الموضوع','Subject')}: ${subject}\n\n${meet1046L('الزملاء الأعزاء،','Dear colleagues,')}\n\n${meet1046L('فيما يلي محضر الاجتماع:','Below are the meeting minutes:')}\n\n${meet1046L('الاجتماع','Meeting')}: ${m.title||''}\n${meet1046L('الموعد','When')}: ${meetingDateV101(m.scheduled_at)}\n${meet1046L('الحضور','Attendees')}: ${attendees||'—'}\n\n${d.content||''}\n\n${meet1046L('مع التحية،','Regards,')}\nTasky`;
+    await navigator.clipboard.writeText(text);taskyToast(meet1046L('تم نسخ نص البريد','Email text copied'),{tone:'success'});
+  }catch(e){showTaskyDialog({title:meet1046L('تعذّر نسخ البريد','Could not copy email text'),message:e.message,tone:'error'})}
+}
+
+/* Load permission context whenever an authenticated room renders. */
+const meetingRenderRoomBaseV1046=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  meetingRenderRoomBaseV1046();
+  if(!meetingRoomV101)return;
+  meetingV1046PatchMinutesButton();
+  meetingV1046EnsureContext();
+};
+
+/* Clear minutes state between rooms. */
+const leaveMeetingRoomBaseV1046=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  clearTimeout(meetingV1046MinutesSaveTimer);
+  document.getElementById('meet1046MinutesBackdrop')?.remove();document.getElementById('meet1046MinutesPanel')?.remove();
+  meetingV1046MinutesCtx=null;meetingV1046MinutesMeetingId=null;
+  return leaveMeetingRoomBaseV1046(opts);
+};
+</script>
+
 </body>
 </html>
