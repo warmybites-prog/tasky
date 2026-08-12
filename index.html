@@ -14286,5 +14286,159 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v10515-guest-entry-css">
+.meet10515-join-error{margin-top:8px;border:1px solid #edc8c4;background:#fff3f1;color:#923f38;border-radius:11px;padding:9px;font-size:8.5px;line-height:1.6}
+</style>
+<script id="tasky-v10515-guest-entry-js">
+window.TASKY_BUILD='V105.1.5';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV10515GuestDraft=null;
+let meetingV10515GuestBusy=false;
+
+function meet10515L(ar,en){return lang==='ar'?ar:en}
+
+function meetingV10515CaptureGuestDraft(){
+  const p=meetingGuestPublicV102;
+  const name=document.getElementById('meet102GuestName')?.value.trim()||'';
+  const email=document.getElementById('meet102GuestEmail')?.value.trim()||'';
+  const company=document.getElementById('meet102GuestCompany')?.value.trim()||'';
+  if(!p?.roomCode||!p?.guestToken)throw new Error(meet10515L('رابط الضيف غير مكتمل. افتح رابط الدعوة من جديد.','Guest link is incomplete. Open the invitation link again.'));
+  if(!name)throw new Error(meet10515L('أدخل اسمًا للضيف. يكفي حرف أو رقم أو رمز واحد.','Enter a guest name. A single letter, number, or symbol is enough.'));
+  return {roomCode:p.roomCode,guestToken:p.guestToken,name,email,company};
+}
+
+function meetingV10515GuestError(message){
+  document.getElementById('meet10515GuestError')?.remove();
+  const form=document.querySelector('.meet102-guest-form');
+  if(form){
+    const d=document.createElement('div');d.id='meet10515GuestError';d.className='meet10515-join-error full';
+    d.textContent=message;form.appendChild(d);
+  }
+  showTaskyDialog({title:meet10515L('تعذّر دخول الضيف','Guest could not join'),message,tone:'error'});
+}
+
+async function meetingV10515GuestJoinSubmit(){
+  if(meetingV10515GuestBusy||meetingRoomV101)return;
+  const g=meetingV10515GuestDraft;
+  if(!g)return meetingV10515GuestError(meet10515L('بيانات الضيف غير متوفرة. حاول الدخول مرة أخرى.','Guest details are missing. Try joining again.'));
+  meetingV10515GuestBusy=true;
+  try{
+    /* Request waiting-room admission directly from the captured guest data.
+       This avoids re-reading form elements after the prejoin modal is closed. */
+    const r=await sb.rpc('tasky_public_meeting_waiting_request_v103',{
+      p_room_code:g.roomCode,
+      p_guest_token:g.guestToken,
+      p_guest_name:g.name,
+      p_guest_email:g.email||null,
+      p_guest_company:g.company||null
+    });
+    if(r.error)throw r.error;
+
+    if(r.data?.waiting_required===false){
+      const j=await sb.rpc('tasky_public_meeting_guest_join_v102',{
+        p_room_code:g.roomCode,
+        p_guest_token:g.guestToken,
+        p_guest_name:g.name,
+        p_guest_email:g.email||null,
+        p_guest_company:g.company||null
+      });
+      if(j.error)throw j.error;
+      meetingV105Transport='mesh';
+      await meetingV103EnterGuestAfterAdmission(j.data,g);
+      meetingV10515GuestDraft=null;
+      return;
+    }
+
+    if(!r.data?.request_id||!r.data?.request_token){
+      throw new Error(meet10515L('لم يرجع خادم غرفة الانتظار بيانات طلب صالحة.','Waiting room did not return a valid admission request.'));
+    }
+
+    meetingV103WaitingRequest={
+      ...r.data,
+      roomCode:g.roomCode,
+      guestToken:g.guestToken,
+      name:g.name,
+      email:g.email,
+      company:g.company
+    };
+    meetingV103ShowGuestWaiting();
+    meetingV103PollGuestWaiting();
+  }catch(err){
+    meetingV10515GuestError(err?.message||String(err));
+  }finally{
+    meetingV10515GuestBusy=false;
+  }
+}
+
+/* Replace the V105.1.4 guest wrapper with a deterministic flow:
+   1) capture guest form before opening prejoin
+   2) preview camera/mic
+   3) submit waiting-room request from stored values
+   4) enter via the already-hardened V103 admission function. */
+joinPublicMeetingGuestV102=async function(e){
+  e?.preventDefault?.();
+  if(meetingRoomV101||meetingV10515GuestBusy)return;
+  if(!meetingV10514GuestConfirmed){
+    try{
+      meetingV10515GuestDraft=meetingV10515CaptureGuestDraft();
+      meetingV10514Pending={kind:'guest',roomCode:meetingV10515GuestDraft.roomCode};
+      return meetingV10514OpenPrejoin('guest',meetingV10515GuestDraft.roomCode);
+    }catch(err){
+      return meetingV10515GuestError(err?.message||String(err));
+    }
+  }
+  meetingV10514GuestConfirmed=false;
+  return meetingV10515GuestJoinSubmit();
+};
+
+meetingV10514ConfirmPrejoin=async function(){
+  const p={...meetingV10514Pending};
+  meetingV10514StopPreview();
+  closeAddModal();
+  if(p.kind==='member')return meetingV10514JoinMemberNow(p.roomCode);
+  if(p.kind==='guest'){
+    meetingV10514GuestConfirmed=true;
+    return meetingV10515GuestJoinSubmit();
+  }
+};
+
+meetingV10514CancelPrejoin=function(){
+  meetingV10514StopPreview();
+  meetingV10514Pending={kind:null,roomCode:null};
+  meetingV10514GuestConfirmed=false;
+  /* Keep form values visible, but discard the captured submission. */
+  meetingV10515GuestDraft=null;
+  closeAddModal();
+};
+
+/* Admission must always enter using restored P2P transport. */
+const meetingV103EnterGuestAfterAdmissionBaseV10515=meetingV103EnterGuestAfterAdmission;
+meetingV103EnterGuestAfterAdmission=async function(data,w){
+  meetingV105Transport='mesh';
+  await meetingV103EnterGuestAfterAdmissionBaseV10515(data,w);
+  meetingV105Transport='mesh';
+  /* Force one presence sync after subscription settles, covering mobile timing races. */
+  setTimeout(()=>{if(meetingRoomV101&&meetingSubscribedV101)meetingSyncPresenceV101().catch?.(()=>{})},350);
+};
+
+/* If the waiting request is cancelled or denied, allow a fresh prejoin attempt. */
+const meetingV103CancelGuestWaitBaseV10515=meetingV103CancelGuestWait;
+meetingV103CancelGuestWait=function(){
+  meetingV103CancelGuestWaitBaseV10515();
+  meetingV10515GuestDraft=null;
+  meetingV10514GuestConfirmed=false;
+};
+
+/* Reset guest submission state when leaving. */
+const leaveMeetingRoomBaseV10515=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  meetingV10515GuestDraft=null;
+  meetingV10515GuestBusy=false;
+  meetingV10514GuestConfirmed=false;
+  return leaveMeetingRoomBaseV10515(opts);
+};
+</script>
+
 </body>
 </html>
