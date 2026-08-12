@@ -12366,5 +12366,199 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v1044-meeting-lifecycle-css">
+.meet1044-rating{display:flex;flex-direction:column;gap:10px;align-items:center;margin:16px 0}
+.meet1044-stars{display:flex;gap:6px;direction:ltr}
+.meet1044-stars button{width:42px;height:42px;border:1px solid var(--border);border-radius:11px;background:var(--card);font-size:23px;line-height:1}
+.meet1044-stars button.active{background:var(--amber-tint);border-color:#e6c466}
+.meet1044-rating textarea{width:100%;min-height:74px;resize:vertical}
+.meet1044-stats{display:flex;gap:6px;flex-wrap:wrap;align-items:center;color:var(--muted);font-size:8.5px}
+.meet1044-stat{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:4px 7px}
+.meet1044-live-note{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-weight:850;font-size:8.5px}
+.meet1044-ended-note{color:var(--muted);font-weight:800;font-size:8.5px}
+.meet1044-card-code{display:none!important}
+</style>
+<script id="tasky-v1044-meeting-lifecycle-js">
+window.TASKY_BUILD='V104.4';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV1044LastGuestRating=null;
+let meetingV1044LastMemberMeeting=null;
+let meetingV1044RatingValue=0;
+
+function meetingV1044Total(m){return Number(m?.participant_count ?? (Number(m?.attendance_count||0)+Number(m?.guest_attendance_count||0)))}
+function meetingV1044StatsHtml(m){
+  const internal=Number(m?.attendance_count||0),guest=Number(m?.guest_attendance_count||0),total=meetingV1044Total(m);
+  const rCount=Number(m?.rating_count||0),avg=Number(m?.average_rating||0);
+  return `<div class="meet1044-stats">
+    <span class="meet1044-stat">👤 ${total} ${meet101L('مشارك فريد','unique participant(s)')}</span>
+    ${internal?`<span class="meet1044-stat">${internal} ${meet101L('داخلي','internal')}</span>`:''}
+    ${guest?`<span class="meet1044-stat">${guest} ${meet101L('خارجي','external')}</span>`:''}
+    ${rCount?`<span class="meet1044-stat">★ ${avg.toFixed(1)} · ${rCount}</span>`:''}
+  </div>`
+}
+function meetingV1044StatusNote(m){
+  if(m.status==='live')return `<span class="meet1044-live-note">● ${meet101L('مباشر الآن','Live now')}</span>`;
+  if(m.status==='ended')return `<span class="meet1044-ended-note">${m.ended_at?meet101L('انتهى ','Ended ')+meetingDateV101(m.ended_at):meet101L('منتهي','Ended')}</span>`;
+  if(m.status==='cancelled')return `<span class="meet1044-ended-note">${meet101L('تم إلغاء الاجتماع','Meeting cancelled')}</span>`;
+  return '';
+}
+function meetingV1044SetStars(n){
+  meetingV1044RatingValue=n;
+  document.querySelectorAll('[data-meet1044-star]').forEach(b=>b.classList.toggle('active',Number(b.dataset.meet1044Star)<=n));
+}
+function meetingV1044RatingModal(meetingId,guestCtx=null){
+  meetingV1044RatingValue=0;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${meet101L('قيّم الاجتماع','Rate this meeting')}</h3><div class="subtle">${meet101L('يساعدنا تقييمك على تحسين تجربة اجتماعات تاسكي.','Your rating helps us improve Tasky Meetings.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+    <div class="meet1044-rating"><div class="meet1044-stars">${[1,2,3,4,5].map(n=>`<button type="button" data-meet1044-star="${n}" onclick="meetingV1044SetStars(${n})">★</button>`).join('')}</div>
+    <textarea id="meet1044RatingNote" maxlength="1000" placeholder="${meet101L('ملاحظة اختيارية…','Optional note…')}"></textarea></div>
+    <button class="submit-btn" onclick="meetingV1044SubmitRating('${meetingId}',${guestCtx?`true`:'false'})">${meet101L('إرسال التقييم','Submit rating')}</button>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function meetingV1044SubmitRating(meetingId,isGuest){
+  if(!meetingV1044RatingValue)return taskyToast(meet101L('اختر تقييمًا من 1 إلى 5','Choose a rating from 1 to 5'),{tone:'warning'});
+  const note=document.getElementById('meet1044RatingNote')?.value.trim()||null;
+  let res;
+  if(isGuest){
+    const g=meetingV1044LastGuestRating;
+    if(!g||g.meetingId!==meetingId)return;
+    res=await sb.rpc('tasky_public_meeting_rate_v1044',{p_meeting_id:meetingId,p_guest_session_id:g.id,p_guest_session_token:g.token,p_rating:meetingV1044RatingValue,p_comment:note});
+  }else{
+    res=await sb.rpc('tasky_meeting_rate_v1044',{p_meeting_id:meetingId,p_rating:meetingV1044RatingValue,p_comment:note});
+  }
+  if(res.error)return showTaskyDialog({title:meet101L('تعذّر إرسال التقييم','Could not submit rating'),message:res.error.message,tone:'error'});
+  closeAddModal();taskyToast(meet101L('شكرًا، تم حفظ تقييمك','Thanks — your rating was saved'),{tone:'success'});
+  if(!isGuest){await fetchMeetingsV101();if(activeNav==='meetings')renderModule()}
+}
+
+/* Use the corrected V104.4 list with unique participant statistics. */
+fetchMeetingsV101=async function(){
+  if(!currentWorkspaceId)return[];
+  meetingsLoadingV101=true;meetingsErrorV101='';
+  try{
+    const {data,error}=await sb.rpc('tasky_meeting_list_v1044',{p_workspace_id:currentWorkspaceId});
+    if(error)throw error;meetingsV101=Array.isArray(data)?data:[];return meetingsV101;
+  }catch(err){meetingsErrorV101=err?.message||String(err);console.warn('Tasky V104.4 meetings',err);meetingsV101=[];return[]}
+  finally{meetingsLoadingV101=false}
+};
+
+/* Correct and simplify meeting cards. Never infer "live" from schedule time. */
+meetingCardV101=function(m,past=false){
+  const canJoin=!['ended','cancelled'].includes(m.status),canManage=!!m.can_manage;
+  return `<article class="meet101-card ${escapeHtml(m.status)} ${past?'past':''}">
+    <div class="meet101-card-head"><div><div class="meet102-title-row"><h3>${escapeHtml(m.title)}</h3>${m.allow_guests?`<span class="meet102-guest-badge">${meet102L('دخول خارجي','External guests')}</span>`:''}</div><p>${escapeHtml(m.description||meet102L('اجتماع عبر تاسكي','Tasky meeting'))}</p></div><span class="meet101-status ${escapeHtml(m.status)}">${escapeHtml(meetingStatusLabelV101(m.status))}</span></div>
+    ${meetingV1044StatusNote(m)}
+    <div class="meet101-meta"><div><span>${meet102L('الموعد','When')}</span><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div><div><span>${meet102L('المدة','Duration')}</span><b>${Number(m.duration_minutes||30)} ${meet102L('دقيقة','min')}</b></div><div><span>${meet102L('المنظّم','Organizer')}</span><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div></div>
+    ${meetingV1044StatsHtml(m)}
+    <div class="meet101-card-actions">
+      ${canJoin?`<button class="primary-btn" onclick="openMeetingJoinConfirmV101('${m.room_code}')"><svg><use href="#i-camera"/></svg>${m.status==='live'?meet102L('انضم الآن','Join now'):meet102L('دخول الاجتماع','Join meeting')}</button>`:''}
+      <button class="chip-btn" onclick="meetingCopyLinkV101('${m.room_code}')">${meet102L('رابط الأعضاء','Member link')}</button>
+      ${canManage&&m.allow_guests&&!past&&!['ended','cancelled'].includes(m.status)?`<button class="chip-btn meet102-guest-link-btn" onclick="meetingCopyGuestLinkV102('${m.id}')">${meet102L('رابط ضيف بدون تسجيل','No-login guest link')}</button>`:''}
+      ${canManage&&m.status==='scheduled'?`<button class="chip-btn" onclick="openMeetingEditorV101('${m.id}')">${meet102L('تعديل','Edit')}</button><button class="chip-btn" style="color:var(--danger)" onclick="cancelMeetingV1044('${m.id}')">${meet102L('إلغاء','Cancel')}</button>`:''}
+      ${canManage&&m.status==='live'?`<button class="chip-btn" style="color:var(--danger)" onclick="cancelMeetingV1044('${m.id}')">${meet102L('إلغاء الاجتماع','Cancel meeting')}</button>`:''}
+      ${m.status==='ended'?`<button class="chip-btn" onclick="meetingV1044RatingModal('${m.id}')">★ ${meet102L('تقييم الاجتماع','Rate meeting')}</button>`:''}
+    </div>
+  </article>`
+};
+
+async function cancelMeetingV1044(id){
+  const m=meetingByIdV101(id);if(!m?.can_manage)return;
+  const ok=await taskyConfirm(meet101L(`إلغاء اجتماع «${m.title}»؟ سيتم إخراج المشاركين وإغلاق جلسات الضيوف.`,`Cancel “${m.title}”? Participants will be removed and guest sessions closed.`),{title:meet101L('إلغاء الاجتماع','Cancel meeting'),tone:'danger',confirmText:meet101L('إلغاء الاجتماع','Cancel meeting')});
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_cancel_v1044',{p_meeting_id:id});
+  if(error)return showTaskyDialog({title:meet101L('تعذّر إلغاء الاجتماع','Could not cancel meeting'),message:error.message,tone:'error'});
+  if(meetingRoomV101?.id===id){await meetingBroadcastSignalV101('meeting-cancelled',{},'*');await leaveMeetingRoomV101({silent:true})}
+  else{await fetchMeetingsV101();renderModule()}
+  taskyToast(meet101L('تم إلغاء الاجتماع','Meeting cancelled'),{tone:'success'});
+}
+
+/* End lifecycle: refresh state and offer rating after the room closes. */
+const endMeetingBaseV1044=endMeetingV101;
+endMeetingV101=async function(){
+  if(!meetingRoomV101?.can_manage)return;
+  const endedId=meetingRoomV101.id;
+  const ok=await taskyConfirm(meet101L('إنهاء الاجتماع لجميع المشاركين؟','End the meeting for all participants?'),{title:meet101L('إنهاء الاجتماع','End meeting'),tone:'danger',confirmText:meet101L('إنهاء','End')});
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_end_v1044',{p_meeting_id:endedId});
+  if(error)return showTaskyDialog({title:meet101L('تعذّر إنهاء الاجتماع','Could not end meeting'),message:error.message,tone:'error'});
+  await meetingBroadcastSignalV101('meeting-ended',{},'*');
+  meetingV1044LastMemberMeeting=endedId;
+  await leaveMeetingRoomV101({silent:true});
+  await fetchMeetingsV101();if(activeNav==='meetings')renderModule();
+  taskyToast(meet101L('تم إنهاء الاجتماع','Meeting ended'),{tone:'success'});
+  setTimeout(()=>meetingV1044RatingModal(endedId),250);
+};
+
+/* Guest cancellation/end signals show the correct exit state and keep a rating token. */
+const meetingHandleSignalBaseV1044=meetingHandleSignalV101;
+meetingHandleSignalV101=async function(payload){
+  if(meetingGuestSessionV102&&['meeting-ended','meeting-cancelled'].includes(payload?.kind)){
+    const sess={...meetingGuestSessionV102},mid=meetingRoomV101?.id;
+    meetingV1044LastGuestRating={id:sess.id,token:sess.token,meetingId:mid};
+    await leaveMeetingRoomV101({silent:true,skipFetch:true});
+    renderPublicMeetingGuestExitV1044(payload.kind==='meeting-cancelled'?meet102L('تم إلغاء الاجتماع','The meeting was cancelled'):meet102L('أنهى المنظّم الاجتماع','The organizer ended the meeting'),mid);
+    return;
+  }
+  return meetingHandleSignalBaseV1044(payload);
+};
+function renderPublicMeetingGuestExitV1044(message,meetingId){
+  const p=meetingGuestPublicV102;if(!p)return;
+  meet102GuestFrameV102(`<div class="meet102-guest-card meet102-exit"><div class="meet102-exit-check">✓</div><h1>${escapeHtml(message||meet102L('تمت مغادرة الاجتماع','You left the meeting'))}</h1><p>${meet102L('شكرًا لمشاركتك. يمكنك تقييم تجربة الاجتماع قبل المغادرة.','Thanks for joining. You can rate the meeting experience before leaving.')}</p>${meetingId?`<button class="submit-btn" onclick="meetingV1044RatingModal('${meetingId}',true)">★ ${meet102L('تقييم الاجتماع','Rate meeting')}</button>`:''}<button class="chip-btn" style="margin-top:8px" onclick="showPublicMeetingGuestPortalV102('${escapeHtml(p.roomCode)}','${escapeHtml(p.guestToken)}')">${meet102L('العودة إلى صفحة الاجتماع','Back to meeting page')}</button></div>`);
+}
+
+/* Member session check uses immediate lifecycle state from V104.4. */
+meetingSessionCheckV101=async function(){
+  if(meetingGuestSessionV102){
+    try{
+      const {data,error}=await sb.rpc('tasky_public_meeting_guest_session_check_v102',{p_guest_session_id:meetingGuestSessionV102.id,p_guest_session_token:meetingGuestSessionV102.token});
+      if(error)throw error;
+      if(!data?.authorized){
+        const sess={...meetingGuestSessionV102},mid=meetingRoomV101?.id;
+        meetingV1044LastGuestRating={id:sess.id,token:sess.token,meetingId:mid};
+        const msg=data?.status==='ended'?meet102L('أنهى المنظّم الاجتماع','The organizer ended the meeting'):data?.status==='cancelled'?meet102L('تم إلغاء الاجتماع','The meeting was cancelled'):meet102L('انتهت صلاحية جلسة الضيف','Your guest session is no longer valid');
+        await leaveMeetingRoomV101({silent:true,skipFetch:true});renderPublicMeetingGuestExitV1044(msg,mid);
+      }
+    }catch(err){console.warn('V104.4 guest session check',err)}
+    return;
+  }
+  if(!meetingRoomV101)return;
+  try{
+    const {data,error}=await sb.rpc('tasky_meeting_session_check_v101',{p_meeting_id:meetingRoomV101.id});
+    if(error)throw error;
+    if(!data?.authorized||['ended','cancelled','missing'].includes(data?.status)){
+      const mid=meetingRoomV101.id;
+      const msg=data?.status==='ended'?meet101L('تم إنهاء الاجتماع','The meeting has ended'):data?.status==='cancelled'?meet101L('تم إلغاء الاجتماع','The meeting was cancelled'):meet101L('لم يعد لديك وصول إلى هذا الاجتماع','You no longer have access to this meeting');
+      await leaveMeetingRoomV101({silent:true});taskyToast(msg,{tone:'warning'});
+      if(data?.status==='ended')setTimeout(()=>meetingV1044RatingModal(mid),200);
+    }
+  }catch(err){console.warn('V104.4 meeting session check',err)}
+};
+
+/* Header should show participant count only, never the room code. */
+const meetingRenderRoomBaseV1044=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  meetingRenderRoomBaseV1044();
+  if(!meetingRoomV101)return;
+  const rem=meetingRemoteParticipantsV101();
+  const meta=document.getElementById('meet101RoomMeta');
+  if(meta)meta.textContent=`${rem.length+1} ${meet101L('مشارك','participants')}`;
+};
+
+/* Click-away behavior for reaction palette and meeting drawers/popovers. */
+document.addEventListener('pointerdown',e=>{
+  const react=document.getElementById('meet103Reactions');
+  if(react&&!react.contains(e.target)&&!e.target.closest?.('[onclick*="meetingToggleReactionsV103"]')){react.remove();meetingV103ReactionsOpen=false}
+  const drawer=document.getElementById('meet103Drawer');
+  if(drawer?.classList.contains('open')&&!drawer.contains(e.target)&&!e.target.closest?.('#meet103Tools'))meetingCloseDrawerV103();
+},true);
+
+/* Close reaction palette immediately after choosing an emoji. */
+const meetingV103ReactBaseV1044=meetingV103React;
+meetingV103React=async function(emoji){
+  document.getElementById('meet103Reactions')?.remove();meetingV103ReactionsOpen=false;
+  return meetingV103ReactBaseV1044(emoji);
+};
+</script>
+
 </body>
 </html>
