@@ -11626,7 +11626,7 @@ async function meetingToggleRecordingV103(){if(!meetingRoomV101?.can_manage)retu
 function meetingV103RecordingNotice(active){const meta=document.getElementById('meet101RoomMeta')?.parentElement;if(active){if(meta&&!document.getElementById('meet103RecordingBadge'))meta.insertAdjacentHTML('beforeend',` <span id="meet103RecordingBadge" class="meet103-recording"><i></i>${meet103L('تسجيل','REC')}</span>`);taskyToast(meet103L('بدأ منظم الاجتماع تسجيلًا محليًا','The organizer started a local recording'),{tone:'warning'})}else document.getElementById('meet103RecordingBadge')?.remove()}
 
 function meetingV103PrettyInvite(roomCode,guestUrl=null){const m=meetingsV101.find(x=>x.room_code===roomCode)||meetingRoomV101||{};const memberUrl=meetingLinkV101(roomCode);return `${meet103L('دعوة اجتماع تاسكي','Tasky meeting invitation')}\n${m.title||''}\n${meet103L('الموعد','When')}: ${m.scheduled_at?meetingDateV101(m.scheduled_at):''}\n${meet103L('الرابط','Link')}: ${guestUrl||memberUrl}\n${meet103L('رمز الاجتماع','Meeting code')}: ${roomCode}`}
-async function meetingShareInviteV103(roomCode){try{const m=meetingsV101.find(x=>x.room_code===roomCode);let guestUrl=null;if(m?.guest_access_enabled&&m?.can_manage){const r=await sb.rpc('tasky_meeting_guest_link_v102',{p_meeting_id:m.id});if(!r.error&&r.data?.guest_url)guestUrl=r.data.guest_url}const url=guestUrl||meetingLinkV101(roomCode),text=meetingV103PrettyInvite(roomCode,guestUrl);if(navigator.share)await navigator.share({title:m?.title||'Tasky Meeting',text,url});else{await navigator.clipboard.writeText(text);taskyToast(meet103L('تم نسخ دعوة الاجتماع','Meeting invitation copied'))}}catch(e){if(e?.name!=='AbortError')taskyToast(meet103L('تعذّر مشاركة الدعوة','Could not share invitation'),{tone:'error'})}}
+async function meetingShareInviteV103(roomCode){try{const m=meetingsV101.find(x=>x.room_code===roomCode);let guestUrl=null;if(m?.allow_guests&&m?.can_manage){const r=await sb.rpc('tasky_meeting_guest_link_v102',{p_meeting_id:m.id});if(!r.error&&r.data?.guest_url)guestUrl=r.data.guest_url}const url=guestUrl||meetingLinkV101(roomCode),text=meetingV103PrettyInvite(roomCode,guestUrl);if(navigator.share)await navigator.share({title:m?.title||'Tasky Meeting',text,url});else{await navigator.clipboard.writeText(text);taskyToast(meet103L('تم نسخ دعوة الاجتماع','Meeting invitation copied'))}}catch(e){if(e?.name!=='AbortError')taskyToast(meet103L('تعذّر مشاركة الدعوة','Could not share invitation'),{tone:'error'})}}
 
 const meetingCardBaseV103=meetingCardV101;meetingCardV101=function(m,past=false){let h=meetingCardBaseV103(m,past);if(!past&&!['ended','cancelled'].includes(m.status))h=h.replace('</div></article>',`<button class="chip-btn" onclick="meetingShareInviteV103('${m.room_code}')">✨ ${meet103L('دعوة','Invite')}</button></div></article>`);return h};
 const meetingRenderRoomBaseV103=meetingRenderRoomV101;meetingRenderRoomV101=function(){meetingRenderRoomBaseV103();if(!meetingRoomV101)return;const g=document.getElementById('meet101VideoGrid');if(g){const n=g.children.length;g.classList.remove('meet103-count-1','meet103-count-2','meet103-count-3','meet103-count-4','meet103-count-many','meet103-has-screen');g.classList.add(n<=1?'meet103-count-1':n===2?'meet103-count-2':n===3?'meet103-count-3':n===4?'meet103-count-4':'meet103-count-many');if(g.querySelector('.screen'))g.classList.add('meet103-has-screen')}meetingEnhanceRoomV103();if(meetingV103DrawerTab==='people'&&document.getElementById('meet103Drawer')?.classList.contains('open'))meetingV103RenderDrawer()};
@@ -11639,6 +11639,92 @@ function meetingV103ShowGuestWaiting(){let d=document.getElementById('meet103Gue
 let meetingV103GuestWaitTimer=null;async function meetingV103PollGuestWaiting(){clearInterval(meetingV103GuestWaitTimer);const run=async()=>{const w=meetingV103WaitingRequest;if(!w)return;try{const r=await sb.rpc('tasky_public_meeting_waiting_status_v103',{p_request_id:w.request_id,p_request_token:w.request_token});if(r.error)throw r.error;if(r.data?.status==='denied'){clearInterval(meetingV103GuestWaitTimer);meetingV103WaitingRequest=null;document.getElementById('meet103GuestWaiting')?.remove();return showTaskyDialog({title:meet103L('لم تتم الموافقة على الدخول','Admission was not approved'),message:meet103L('رفض منظم الاجتماع طلب الدخول.','The organizer denied the admission request.'),tone:'warning'})}if(r.data?.status==='admitted'){clearInterval(meetingV103GuestWaitTimer);const j=await sb.rpc('tasky_public_meeting_waiting_join_v103',{p_request_id:w.request_id,p_request_token:w.request_token,p_room_code:w.roomCode,p_guest_token:w.guestToken});if(j.error)throw j.error;document.getElementById('meet103GuestWaiting')?.remove();meetingV103WaitingRequest=null;await meetingV103EnterGuestAfterAdmission(j.data,w)}}catch(e){console.warn('V103 guest wait',e)}};await run();meetingV103GuestWaitTimer=setInterval(run,1800)}
 function meetingV103CancelGuestWait(){clearInterval(meetingV103GuestWaitTimer);meetingV103WaitingRequest=null;document.getElementById('meet103GuestWaiting')?.remove()}
 async function meetingV103EnterGuestAfterAdmission(data,w){meetingGuestSessionV102={id:data.guest_session_id,token:data.guest_session_token,name:data.guest_name||w.name,email:data.guest_email||w.email,company:data.guest_company||w.company,roomCode:w.roomCode,guestToken:w.guestToken};meetingRoomV101=data;meetingPeerIdV101=`guest:${data.guest_session_id}:${crypto.randomUUID?crypto.randomUUID():Date.now().toString(36)+Math.random().toString(36).slice(2)}`;meetingPeersV101.clear();meetingRemoteStreamsV101.clear();meetingRemoteMetaV101.clear();meetingPendingIceV101.clear();await meetingGetLocalMediaV101();meet102GuestScreen().classList.add('hidden');ensureMeetingRoomDomV101();meetingRenderRoomV101();const topic=`tasky-meeting-signal:${data.signal_token}`,presenceName=`${meet103L('ضيف','Guest')} · ${meetingGuestSessionV102.name}`;meetingChannelV101=sb.channel(topic,{config:{broadcast:{self:false},presence:{key:meetingPeerIdV101}}}).on('broadcast',{event:'signal'},({payload})=>meetingHandleSignalV101(payload)).on('presence',{event:'sync'},()=>meetingSyncPresenceV101()).subscribe(async status=>{if(status==='SUBSCRIBED'){meetingSubscribedV101=true;await meetingChannelV101.track({peer_id:meetingPeerIdV101,user_id:null,guest:true,name:presenceName,mic:meetingLocalStateV101.mic,camera:meetingLocalStateV101.camera,screen:false,joined_at:new Date().toISOString()}).catch(()=>{});meetingRenderRoomV101()}});meetingStartSessionWatchV101()}
+</script>
+
+
+<style id="tasky-v104-meetings-readiness-css">
+.meet104-ready-btn{border:1px solid #bdd5cb;background:#edf6f2;color:#0b4d40;border-radius:11px;padding:8px 11px;font-weight:800}
+.meet104-audit{display:flex;flex-direction:column;gap:12px}
+.meet104-hero{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;border:1px solid var(--border);background:var(--card);border-radius:18px;padding:16px}
+.meet104-hero h3{margin:0 0 6px;font-size:17px}.meet104-hero p{margin:0;color:var(--muted);font-size:10px;line-height:1.7;max-width:800px}
+.meet104-status{border-radius:999px;padding:6px 10px;font-size:9px;font-weight:900;border:1px solid var(--border)}
+.meet104-status.ready_for_controlled_beta{background:var(--green-tint);color:var(--green)}
+.meet104-status.ready_with_warnings,.meet104-status.needs_signoff{background:var(--amber-tint);color:#8a6419}
+.meet104-status.blocked{background:var(--danger-tint);color:var(--danger)}
+.meet104-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+.meet104-kpi{border:1px solid var(--border);border-radius:13px;background:var(--card);padding:11px}.meet104-kpi span{display:block;color:var(--muted);font-size:8.5px;margin-bottom:4px}.meet104-kpi b{font-size:16px}
+.meet104-kpi.critical b{color:var(--danger)}.meet104-kpi.warning b{color:#9a6d13}
+.meet104-panel{border:1px solid var(--border);border-radius:15px;background:var(--card);padding:13px}.meet104-panel h4{margin:0 0 4px;font-size:12px}.meet104-panel>p{margin:0 0 10px;color:var(--muted);font-size:9.5px;line-height:1.65}
+.meet104-issue{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:10px;border-top:1px solid var(--border);padding:9px 0}.meet104-issue:first-of-type{border-top:0}.meet104-issue b{font-size:10px}.meet104-issue p{font-size:9px;color:var(--muted);margin:3px 0 0;line-height:1.55}.meet104-issue.critical b{color:var(--danger)}.meet104-issue.warning b{color:#8a6419}.meet104-count{font-weight:900;font-size:11px}
+.meet104-sign{display:flex;justify-content:space-between;gap:10px;align-items:center;border-top:1px solid var(--border);padding:10px 0}.meet104-sign:first-of-type{border-top:0}.meet104-sign b{display:block;font-size:10px}.meet104-sign small{display:block;color:var(--muted);font-size:8.5px;margin-top:3px}.meet104-sign-actions{display:flex;gap:5px;flex-wrap:wrap}.meet104-sign-actions button{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:5px 7px;font-size:8.5px;font-weight:800}.meet104-sign-actions .pass.active{background:var(--green-tint);color:var(--green)}.meet104-sign-actions .fail.active{background:var(--danger-tint);color:var(--danger)}
+.meet104-boundary{border:1px solid #d5dff0;background:#f3f7fd;border-radius:13px;padding:11px;font-size:9.5px;line-height:1.7;color:var(--ink-soft)}
+.meet104-rule{border:1px solid #cfe2db;background:var(--green-tint);border-radius:13px;padding:11px;font-size:9.5px;line-height:1.7;color:var(--ink-soft)}
+@media(max-width:850px){.meet104-kpis{grid-template-columns:repeat(2,1fr)}.meet104-sign{align-items:flex-start;flex-direction:column}}
+</style>
+<script id="tasky-v104-meetings-readiness-js">
+window.TASKY_BUILD='V104';console.info('Tasky build',window.TASKY_BUILD);
+let meeting104LaunchOpen=false;
+let meeting104Audit={data:null,error:'',loading:false,key:null};
+function meet104L(ar,en){return lang==='ar'?ar:en}
+function meet104Status(s){const m={ready_for_controlled_beta:[ 'جاهز للبيتا المحدودة','Ready for controlled beta'],needs_signoff:['يحتاج اعتماد','Needs sign-off'],ready_with_warnings:['جاهز مع تحذيرات','Ready with warnings'],blocked:['محظور','Blocked']};const x=m[s]||[s,s];return meet104L(x[0],x[1])}
+function meet104SignLabel(k){const m={
+ member_access:['عزل الأعضاء والوصول','Member access & isolation'],
+ guest_waiting:['رابط الضيف وغرفة الانتظار','Guest link & waiting room'],
+ host_controls:['تحكم المنظم وطلبات المايك/المشاركة','Host controls & media requests'],
+ chat_mentions:['الدردشة والمنشن والرياكسنز','Chat, mentions & reactions'],
+ private_files:['المرفقات الخاصة والأنواع المسموحة','Private attachments & allow-list'],
+ mobile_media:['الكاميرا والجوال ومشاركة الشاشة','Mobile camera & screen sharing'],
+ network_boundary:['حدود الشبكة والاجتماعات الكبيرة','Network & large-meeting boundary']
+};const x=m[k]||[k,k];return meet104L(x[0],x[1])}
+function meet104SignHelp(k){const m={
+ member_access:['اختبر عضوًا مصرحًا وآخر غير مصرح في شركتين مختلفتين.','Test an authorized member and an unauthorized user across two workspaces.'],
+ guest_waiting:['اختبر رابط ضيف Incognito ثم قبول/رفض من المنظم وإلغاء الرابط.','Test an Incognito guest link, organizer admit/deny, and guest-link revocation.'],
+ host_controls:['اختبر كتم المنظم، طلب فتح المايك، وطلب المشاركة بدون تشغيل المايك قسرًا.','Test host mute, ask-to-unmute, and invite-to-speak without forced remote unmute.'],
+ chat_mentions:['اختبر عضوًا وضيفًا، @mention، الرسائل والرياكسنز.','Test member/guest chat, @mention, messages, and reactions.'],
+ private_files:['ارفع PDF/صورة كعضو، امنع الضيف، وتحقق أن Bucket خاص.','Upload PDF/image as a member, block guest upload, and verify the bucket is private.'],
+ mobile_media:['اختبر iPhone/Android/desktop والكاميرا الأمامية ومشاركة الشاشة حيث يدعمها المتصفح.','Test iPhone/Android/desktop, front camera, and screen sharing where the browser supports it.'],
+ network_boundary:['اعتمد هذه النسخة لمجموعة صغيرة فقط؛ TURN/SFU مطلوبان قبل التوسع العام.','Approve this build for small groups only; TURN/SFU are required before broad scale.']
+};const x=m[k]||['',''];return meet104L(x[0],x[1])}
+async function fetchMeeting104Audit(force=false){
+ if(!currentWorkspaceId||currentUserRole!=='admin')return null;
+ const key=`${currentWorkspaceId}:v104`;if(!force&&meeting104Audit.data&&meeting104Audit.key===key)return meeting104Audit.data;
+ if(meeting104Audit.loading)return meeting104Audit.data;meeting104Audit.loading=true;meeting104Audit.error='';
+ if(meeting104LaunchOpen)renderModule();
+ try{const {data,error}=await sb.rpc('tasky_meeting_launch_readiness_v104',{p_workspace_id:currentWorkspaceId});if(error)throw error;meeting104Audit.data=data||{};meeting104Audit.key=key;return data}
+ catch(e){meeting104Audit.error=e?.message||String(e);meeting104Audit.data=null;return null}
+ finally{meeting104Audit.loading=false;if(meeting104LaunchOpen)renderModule()}
+}
+async function meeting104SetSignoff(k,status){
+ const {error}=await sb.rpc('tasky_meeting_set_launch_signoff_v104',{p_workspace_id:currentWorkspaceId,p_check_key:k,p_status:status,p_notes:null});
+ if(error)return showTaskyDialog({title:meet104L('تعذّر حفظ الاعتماد','Could not save sign-off'),message:error.message,tone:'error'});
+ meeting104Audit.data=null;await fetchMeeting104Audit(true)
+}
+function openMeeting104Launch(){if(currentUserRole!=='admin')return;meeting104LaunchOpen=true;renderModule();fetchMeeting104Audit()}
+function closeMeeting104Launch(){meeting104LaunchOpen=false;renderModule()}
+function meeting104LaunchHtml(){
+ const d=meeting104Audit.data||{},sum=d.summary||{},issues=Array.isArray(d.issues)?d.issues:[],sign=Array.isArray(d.signoffs)?d.signoffs:[],status=d.status||(meeting104Audit.error?'blocked':'needs_signoff');
+ if(meeting104Audit.loading&&!meeting104Audit.data)return `<div class="meet104-audit"><div class="meet101-empty">${meet104L('جارٍ تشغيل تدقيق الاجتماعات…','Running meeting audit…')}</div></div>`;
+ if(meeting104Audit.error&&!meeting104Audit.data)return `<div class="meet104-audit"><div class="meet101-empty"><b>${meet104L('تعذّر تشغيل تدقيق الاجتماعات','Could not run Meetings audit')}</b><br>${escapeHtml(meeting104Audit.error)}<br><br><button class="chip-btn" onclick="fetchMeeting104Audit(true)">${meet104L('إعادة المحاولة','Retry')}</button></div></div>`;
+ return `<div class="meet104-audit">
+  <div class="meet104-hero"><div><div class="meet101-actions" style="margin-bottom:8px"><button class="chip-btn" onclick="closeMeeting104Launch()">← ${meet104L('الاجتماعات','Meetings')}</button><button class="chip-btn" onclick="fetchMeeting104Audit(true)">${meet104L('إعادة الفحص','Re-run audit')}</button></div><h3>${meet104L('جاهزية اجتماعات تاسكي — V104','Tasky Meetings Readiness — V104')}</h3><p>${meet104L('تدقيق إطلاق للاجتماعات، الضيوف، غرفة الانتظار، الدردشة، الملفات، تحكم المنظم وحدود WebRTC الحالية.','Launch audit for meetings, external guests, waiting room, chat, files, host controls, and the current WebRTC boundary.')}</p></div><span class="meet104-status ${escapeHtml(status)}">● ${escapeHtml(meet104Status(status))}</span></div>
+  <div class="meet104-kpis"><div class="meet104-kpi critical"><span>${meet104L('حرج','Critical')}</span><b>${Number(d.critical_count||0)}</b></div><div class="meet104-kpi warning"><span>${meet104L('تحذيرات','Warnings')}</span><b>${Number(d.warning_count||0)}</b></div><div class="meet104-kpi"><span>${meet104L('اجتماعات','Meetings')}</span><b>${Number(sum.meetings||0)}</b></div><div class="meet104-kpi"><span>${meet104L('جلسات ضيوف نشطة','Active guest sessions')}</span><b>${Number(sum.active_guest_sessions||0)}</b></div><div class="meet104-kpi"><span>${meet104L('الاعتمادات','Sign-offs')}</span><b>${Number(sum.passed_signoffs||0)} / 7</b></div></div>
+  <div class="meet104-panel"><h4>${meet104L('التدقيق الآلي','Automated audit')}</h4><p>${meet104L('يفحص RLS والصلاحيات والعلاقات والـBucket الخاص وسلامة الجلسات. الكاميرا والشبكات تحتاج اختبارًا فعليًا.','Checks RLS, grants, relationships, private storage, and session integrity. Camera/network behavior requires live testing.')}</p>${issues.length?issues.map(i=>`<div class="meet104-issue ${escapeHtml(i.severity||'warning')}"><div><b>${escapeHtml(lang==='ar'?(i.title_ar||i.title_en):(i.title_en||i.title_ar))}</b><p>${escapeHtml(lang==='ar'?(i.detail_ar||i.detail_en):(i.detail_en||i.detail_ar))}</p></div><span class="meet104-count">${Number(i.count||0)}</span></div>`).join(''):`<div class="meet101-empty">✓ ${meet104L('لا توجد مشاكل آلية في طبقة الاجتماعات.','No automated meeting-layer issues detected.')}</div>`}</div>
+  <div class="meet104-panel"><h4>${meet104L('اختبارات الاعتماد السبعة','Seven mandatory sign-offs')}</h4><p>${meet104L('مرّر الاختبارات على بيئة النشر الحقيقية قبل اعتماد البيتا.','Run these tests on the deployed environment before approving the beta.')}</p>${sign.map(x=>`<div class="meet104-sign"><div><b>${escapeHtml(meet104SignLabel(x.check_key))}</b><small>${escapeHtml(meet104SignHelp(x.check_key))}</small></div><div class="meet104-sign-actions"><button class="pass ${x.status==='passed'?'active':''}" onclick="meeting104SetSignoff('${x.check_key}','passed')">✓ ${meet104L('نجح','Pass')}</button><button class="fail ${x.status==='failed'?'active':''}" onclick="meeting104SetSignoff('${x.check_key}','failed')">× ${meet104L('فشل','Fail')}</button><button onclick="meeting104SetSignoff('${x.check_key}','pending')">↺</button></div></div>`).join('')}</div>
+  <div class="meet104-boundary"><b>${meet104L('حدود V104:','V104 boundary:')}</b> ${meet104L('الاجتماعات الحالية Mesh P2P عبر WebRTC/STUN. يمكن اعتمادها لبيتا محدودة ومجموعات صغيرة بعد نجاح الاختبارات، لكن TURN + SFU تبقيان شرطًا قبل تسويق اجتماعات كبيرة أو الاعتماد العام على شبكات الشركات المقيدة. التسجيل الحالي محلي على جهاز المنظم وليس تسجيلًا سحابيًا.','Meetings currently use WebRTC/STUN mesh P2P. They can be approved for a controlled small-group beta after sign-off, but TURN + SFU remain required before large-meeting marketing or broad use on restrictive corporate networks. Recording remains organizer-local, not cloud recording.')}</div>
+  <div class="meet104-rule"><b>${meet104L('قاعدة الاعتماد:','Approval rule:')}</b> ${meet104L('Critical = 0 + نجاح 7/7 = جاهز للبيتا المحدودة. لا تعني هذه الحالة جاهزية Public large-scale meetings.','Critical = 0 + 7/7 sign-offs = ready for controlled beta. This does not mean public large-scale meeting readiness.')}</div>
+ </div>`
+}
+const meetingsTemplateBaseV104=meetingsTemplateV101;
+meetingsTemplateV101=function(){
+ if(meeting104LaunchOpen)return meeting104LaunchHtml();
+ let h=meetingsTemplateBaseV104();
+ if(currentUserRole==='admin'){
+   const btn=`<button class="meet104-ready-btn" onclick="openMeeting104Launch()">✓ ${meet104L('جاهزية الاجتماعات','Meeting readiness')}</button>`;
+   h=h.replace('<div class="meet101-actions">','<div class="meet101-actions">'+btn);
+ }
+ h=h.replace(/V101 — Beta للاختبار/g,'V104 — Controlled Beta').replace(/V101 — Test Beta/g,'V104 — Controlled Beta');
+ return h
+};
 </script>
 
 </body>
