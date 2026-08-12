@@ -4868,6 +4868,74 @@ function exportEventPdf(eventId){
   w.document.write(`<!doctype html><html lang="${lang}" dir="${dir}"><head><meta charset="utf-8"><title>${localeTitle}</title><style>@page{size:A4;margin:13mm}*{box-sizing:border-box}body{font-family:Arial,"Tahoma",sans-serif;color:#182018;margin:0;font-size:10.5px;line-height:1.55}.head{border-bottom:2px solid #2A6C2E;padding-bottom:12px;margin-bottom:14px}.report-tasky-brand{display:inline-flex;align-items:center;justify-content:center;background:#0F3B1D;border-radius:11px;padding:7px 11px;margin-bottom:8px}.report-tasky-brand svg{height:30px!important;width:auto!important;max-width:150px}.report-org-brand{display:flex;align-items:center;gap:10px;margin-bottom:9px}.report-org-brand img{width:58px;height:58px;object-fit:contain;border:1px solid #E5E8E1;border-radius:12px;padding:5px;background:#fff}.report-org-brand b{display:block;font-size:14px}.report-org-brand span{display:block;color:#6b746c;font-size:9.5px;margin-top:2px}.muted{color:#6b746c}.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin:10px 0}.grid.four{grid-template-columns:repeat(4,1fr)}.card{border:1px solid #dfe5dd;border-radius:8px;padding:8px}.card span{display:block;color:#6b746c;font-size:8.5px}.card b{font-size:12.5px}.section{margin-top:15px;break-inside:avoid}.section h2{font-size:13px;margin:0 0 7px;color:#2A6C2E}.info{border:1px solid #e1e6df;border-radius:8px;padding:9px;margin:6px 0}.note{font-size:8.5px;color:#6b746c;margin-top:4px}table{width:100%;border-collapse:collapse;margin-top:6px;font-size:9px}th,td{border:1px solid #dfe5dd;padding:6px;text-align:${dir==='rtl'?'right':'left'};vertical-align:top}th{background:#f2f5f0}.sub td{color:#5f685f;font-size:8.5px;background:#fafbf9}.footer{margin-top:16px;padding-top:8px;border-top:1px solid #dfe5dd;color:#7a8079;font-size:8.5px}@media print{button{display:none}.section{break-inside:avoid-page}}</style></head><body><div class="head">${brandHtml}<div class="muted">${lang==='ar'?'تقرير الفعالية':'Event Report'}</div><h1 style="font-size:19px;margin:6px 0 2px">${localeTitle}</h1><div class="muted">${escapeHtml(formatEventDate(ev.startAt))}${ev.endAt?' - '+escapeHtml(formatEventDate(ev.endAt)):''}</div></div><div class="grid"><div class="card"><span>${lang==='ar'?'الميزانية':'Budget'}</span><b>${fmtMoney(ev.budget)}</b></div><div class="card"><span>${lang==='ar'?'تكلفة المهام':'Task costs'}</span><b>${fmtMoney(costs)}</b></div><div class="card"><span>${lang==='ar'?'المتبقي':'Remaining'}</span><b>${fmtMoney(remaining)}</b></div></div><div class="grid four"><div class="card"><span>${lang==='ar'?'السعة المتوقعة للضيوف':'Expected guest capacity'}</span><b>${ev.capacity||'—'}</b></div><div class="card"><span>${lang==='ar'?'الحضور المؤكد':'Confirmed guests'}</span><b>${guestStats.confirmed}</b></div><div class="card"><span>${lang==='ar'?'تم تسجيل حضورهم':'Checked in'}</span><b>${guestStats.checkedIn}</b></div><div class="card"><span>${lang==='ar'?'فريق العمل المشارك':'Participating team'}</span><b>${participants.length}</b></div></div><div class="note">${lang==='ar'?'السعة المتوقعة للحضور تخص الضيوف المدعوين ولا تشمل أعضاء فريق العمل المشاركين.':'Expected attendance capacity applies to invited guests and excludes participating team members.'}</div>${ev.description?`<div class="section"><h2>${lang==='ar'?'الوصف':'Description'}</h2><div class="info">${escapeHtml(ev.description)}</div></div>`:''}<div class="section"><h2>${lang==='ar'?'الموقع والتواصل':'Location & Contact'}</h2><div class="info">${ev.location?`<b>${lang==='ar'?'الموقع':'Location'}:</b> ${escapeHtml(ev.location)}<br>`:''}${ev.googleMapsUrl?`<b>Google Maps:</b> ${escapeHtml(ev.googleMapsUrl)}<br>`:''}${ev.contactName?`<b>${lang==='ar'?'شخص التواصل':'Contact'}:</b> ${escapeHtml(ev.contactName)}<br>`:''}${ev.contactPhone?`<b>${lang==='ar'?'الهاتف':'Phone'}:</b> ${escapeHtml(ev.contactPhone)}<br>`:''}${ev.contactEmail?`<b>${lang==='ar'?'البريد':'Email'}:</b> ${escapeHtml(ev.contactEmail)}`:''}</div></div><div class="section"><h2>${lang==='ar'?'فريق العمل المشارك':'Participating Team'}</h2><div class="info">${escapeHtml(participants.map(p=>p.fullName).join('، ')||'—')}</div></div><div class="section"><h2>${lang==='ar'?'دعوات الحضور وحالة المشاركة':'Guest Invitations & RSVP'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'الضيف':'Guest'}</th><th>${lang==='ar'?'العدد':'Party'}</th><th>${lang==='ar'?'حالة المشاركة':'RSVP'}</th><th>${lang==='ar'?'الحضور':'Check-in'}</th><th>${lang==='ar'?'التواصل':'Contact'}</th></tr></thead><tbody>${guestRows||`<tr><td colspan="6">${lang==='ar'?'لا توجد دعوات حضور':'No guest invitations'}</td></tr>`}</tbody></table></div><div class="section"><h2>${lang==='ar'?'المهام والتكاليف':'Tasks & Costs'}</h2><table><thead><tr><th>#</th><th>${lang==='ar'?'المهمة':'Task'}</th><th>${lang==='ar'?'المسؤولون':'Assignees'}</th><th>${lang==='ar'?'التكلفة':'Cost'}</th><th>${lang==='ar'?'الحالة':'Status'}</th></tr></thead><tbody>${taskRows||`<tr><td colspan="5">${lang==='ar'?'لا توجد مهام':'No tasks'}</td></tr>`}</tbody></table></div><div class="footer">${lang==='ar'?'تم إنشاء التقرير من منصة تاسكي':'Generated by Tasky'} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div>
 
 
+
+<style id="tasky-v1023-meeting-mobile-hotfix">
+body[data-meeting-open="true"] video,
+.tasky-meeting-room video,
+.meeting-room video,
+.meeting-grid video,
+.meeting-tile video,
+.meeting-video video {
+  display: block !important;
+  width: 100% !important;
+  height: 100% !important;
+  max-width: 100% !important;
+  max-height: 100% !important;
+  object-fit: contain !important;
+  object-position: center center !important;
+  background: linear-gradient(180deg,#04120f,#071d18) !important;
+}
+
+.meeting-tile,
+.meeting-video-card,
+.meeting-participant-card,
+.meeting-room-card {
+  overflow: hidden !important;
+  border-radius: 22px !important;
+}
+
+@media (max-width: 900px) {
+  .meeting-grid,
+  .meeting-stage-grid,
+  .meeting-participants-grid {
+    grid-template-columns: 1fr !important;
+    gap: 12px !important;
+  }
+
+  .meeting-tile,
+  .meeting-video-card,
+  .meeting-participant-card,
+  .meeting-room-card {
+    min-height: 34vh !important;
+    height: min(42vh, 360px) !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .meeting-tile,
+  .meeting-video-card,
+  .meeting-participant-card,
+  .meeting-room-card {
+    min-height: 30vh !important;
+    height: min(38vh, 320px) !important;
+    border-radius: 18px !important;
+  }
+}
+</style>
+<script id="tasky-v1023-meeting-mobile-hotfix-script">
+(function () {
+  function mark() {
+    try {
+      var inMeeting = /[?&]meeting=/.test(location.search) ||
+        !!document.querySelector('.meeting-room, .tasky-meeting-room, .meeting-grid');
+      if (inMeeting) document.body.setAttribute('data-meeting-open', 'true');
+    } catch (e) {}
+  }
+  document.addEventListener('DOMContentLoaded', mark);
+  setInterval(mark, 1000);
+})();
+</script>
+
 </body></html>`);  w.document.close(); w.focus(); setTimeout(()=>w.print(),700);
 }
 async function deleteEvent(id){
