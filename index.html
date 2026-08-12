@@ -16945,5 +16945,421 @@ meetingsTemplateV101=function(){
 };
 </script>
 
+
+<style id="tasky-v109-brainstorm-canvas-css">
+/* ============================================================
+   V109 — Brainstorm canvas hardening + shapes + connectors
+   ============================================================ */
+.brain109-shapes{position:absolute;inset:0;pointer-events:none}
+.brain109-shape{
+  position:absolute;display:grid;place-items:center;
+  border:2px solid #71827b;background:rgba(255,255,255,.72);
+  color:#53645e;touch-action:none;user-select:none;pointer-events:auto;
+  box-shadow:0 1px 4px rgba(20,35,30,.07)
+}
+.brain109-shape.rect{border-radius:8px}
+.brain109-shape.ellipse{border-radius:999px}
+.brain109-shape.dragging{opacity:.78;box-shadow:0 8px 20px rgba(0,0,0,.16);z-index:18}
+.brain109-connect-source{
+  outline:3px solid rgba(35,112,82,.28)!important;
+  outline-offset:3px!important
+}
+.brain109-connector{
+  fill:none;stroke:#61736c;stroke-width:2.2;
+  vector-effect:non-scaling-stroke;
+  pointer-events:stroke;cursor:pointer
+}
+.brain109-connector:hover{stroke:#1d624b;stroke-width:3}
+.brain109-shape-menu,.brain109-line-menu{
+  position:absolute;z-index:40;top:63px;inset-inline-start:60px;
+  display:none;gap:5px;padding:6px;
+  border:1px solid #d8e0dc;background:#fff;border-radius:10px;
+  box-shadow:0 10px 28px rgba(0,0,0,.15)
+}
+.brain109-shape-menu.show,.brain109-line-menu.show{display:flex}
+.brain109-shape-menu button,.brain109-line-menu button{
+  min-height:34px;border:1px solid #dbe2de;background:#fff;color:#344840;
+  border-radius:8px;padding:6px 10px;font-size:8.5px;font-weight:800
+}
+.brain109-hint{
+  position:absolute;z-index:9;top:10px;left:50%;transform:translateX(-50%);
+  display:none;padding:6px 10px;border:1px solid #cbdcd4;background:#f8fbf9;
+  color:#31594a;border-radius:999px;font-size:8px;white-space:nowrap;
+  box-shadow:0 3px 10px rgba(0,0,0,.06)
+}
+.brain109-hint.show{display:block}
+.brain109-card-readonly .brain107-card-foot button:first-child{display:none}
+.brain109-card-readonly .brain107-card-foot{justify-content:flex-end}
+.brain109-toolbar-sep{height:1px;background:rgba(255,255,255,.10);margin:2px 3px}
+.brain109-tool-label{
+  position:absolute;inset-inline-start:48px;padding:3px 6px;border-radius:6px;
+  background:#142b24;color:#fff;font-size:7px;white-space:nowrap;
+  opacity:0;pointer-events:none;transform:translateX(3px);transition:.12s
+}
+.brain107-tool:hover .brain109-tool-label{opacity:1}
+.brain109-empty-canvas{
+  position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);
+  color:#8a9892;text-align:center;font-size:9px;line-height:1.7;pointer-events:none
+}
+.brain109-empty-canvas b{display:block;color:#61716b;font-size:11px;margin-bottom:3px}
+@media(max-width:700px){
+  .brain109-shape-menu,.brain109-line-menu{inset-inline-start:51px;top:59px}
+  .brain109-tool-label{display:none}
+}
+</style>
+
+<script id="tasky-v109-brainstorm-canvas-js">
+window.TASKY_BUILD='V109';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain109Shapes=[];
+let brain109Connectors=[];
+let brain109ConnectStart=null;
+let brain109ConnectorStyle='line';
+let brain109ShapeDrag=null;
+let brain109Abort=null;
+
+function brain109L(ar,en){return lang==='ar'?ar:en}
+function brain109RoomMode(){return !!window.brain108RoomId}
+function brain109Editable(){return brain109RoomMode()&&brain108Editable()}
+function brain109CloseMenus(){
+  document.getElementById('brain109ShapeMenu')?.classList.remove('show');
+  document.getElementById('brain109LineMenu')?.classList.remove('show');
+}
+function brain109Hint(text=''){
+  const el=document.getElementById('brain109Hint');if(!el)return;
+  el.textContent=text;el.classList.toggle('show',!!text);
+}
+function brain109SetTool(tool){
+  brain107Tool=tool;
+  brain109ConnectStart=null;
+  brain109CloseMenus();
+  if(tool==='connect'){
+    brain109Hint(brain109L('اختر الفكرة أو الشكل الأول ثم اختر العنصر الثاني','Select the first idea or shape, then select the second'));
+  }else{
+    brain109Hint('');
+  }
+  brain108RenderCanvasShell(window.brain108RoomMeta||{});
+}
+function brain109ToggleShapeMenu(){
+  brain109CloseMenus();
+  document.getElementById('brain109ShapeMenu')?.classList.toggle('show');
+}
+function brain109ToggleLineMenu(){
+  brain109CloseMenus();
+  document.getElementById('brain109LineMenu')?.classList.toggle('show');
+}
+function brain109BeginConnector(style){
+  brain109ConnectorStyle=style;
+  brain109SetTool('connect');
+}
+function brain109NodeCenter(id){
+  const o=brain107Objects.find(x=>String(x.id)===String(id));
+  if(o)return{x:Number(o.x)+115,y:Number(o.y)+72};
+  const s=brain109Shapes.find(x=>String(x.id)===String(id));
+  if(s)return{x:Number(s.x)+Number(s.w)/2,y:Number(s.y)+Number(s.h)/2};
+  return null;
+}
+function brain109NodeExists(id){
+  return !!brain107Objects.find(x=>String(x.id)===String(id))||!!brain109Shapes.find(x=>String(x.id)===String(id));
+}
+function brain109RenderConnectors(){
+  const svg=document.getElementById('brain107Svg');if(!svg)return;
+  const strokes=brain107Strokes.map(st=>{
+    const pts=st.points||[];if(pts.length<2)return'';
+    const d=pts.map((p,i)=>`${i?'L':'M'} ${Number(p.x).toFixed(1)} ${Number(p.y).toFixed(1)}`).join(' ');
+    return `<path class="brain107-stroke" d="${d}" stroke="${escapeHtml(st.color||'#214f40')}" stroke-width="${Number(st.width||3)}"/>`;
+  }).join('');
+  const connectors=brain109Connectors.map(c=>{
+    const a=brain109NodeCenter(c.from_node_id),b=brain109NodeCenter(c.to_node_id);
+    if(!a||!b)return'';
+    const marker=c.style==='arrow'?' marker-end="url(#brain109Arrow)"':'';
+    return `<path class="brain109-connector" data-id="${c.id}" d="M ${a.x} ${a.y} L ${b.x} ${b.y}"${marker}></path>`;
+  }).join('');
+  svg.innerHTML=`<defs><marker id="brain109Arrow" markerWidth="9" markerHeight="9" refX="8" refY="4.5" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L9,4.5 L0,9 z" fill="#61736c"></path></marker></defs>${connectors}${strokes}`;
+}
+function brain109RenderShapes(){
+  const host=document.getElementById('brain109Shapes');if(!host)return;
+  host.innerHTML=brain109Shapes.map(s=>`<div class="brain109-shape ${escapeHtml(s.shape_type)} ${brain109ConnectStart===s.id?'brain109-connect-source':''}" data-shape-id="${s.id}" style="left:${Number(s.x)}px;top:${Number(s.y)}px;width:${Number(s.w)}px;height:${Number(s.h)}px"></div>`).join('');
+}
+function brain109RenderCards(){
+  const host=document.getElementById('brain107Cards');if(!host)return;
+  const editable=brain109Editable();
+  host.classList.toggle('brain109-card-readonly',!editable);
+  host.innerHTML=brain107Objects.map(o=>`<article class="brain107-card ${brain109ConnectStart===o.id?'brain109-connect-source':''}" data-id="${o.id}" data-kind="${escapeHtml(o.kind)}" style="left:${Number(o.x)}px;top:${Number(o.y)}px">
+    <div class="brain107-card-head"><span class="brain107-card-kind">${escapeHtml(brain107KindLabel(o.kind))}</span><span class="brain107-card-author">${escapeHtml(o.author_name||'')}</span></div>
+    <div class="brain107-card-body">${escapeHtml(o.body)}</div>
+    <div class="brain107-card-foot">${editable?`<button type="button" class="${o.my_vote?'voted':''}" onclick="event.stopPropagation();brain107Vote('${o.id}')">${brain109L('تصويت','Vote')} · ${Number(o.vote_count||0)}</button>`:'<span></span>'}<div class="actions">${o.can_delete&&editable?`<button type="button" onclick="event.stopPropagation();brain107DeleteObject('${o.id}')">${brain109L('حذف','Delete')}</button>`:''}</div></div>
+  </article>`).join('');
+  const empty=document.getElementById('brain109Empty');
+  if(empty)empty.style.display=(brain107Objects.length||brain109Shapes.length||brain107Strokes.length)?'none':'block';
+}
+function brain109RenderData(){
+  if(!brain109RoomMode())return;
+  brain109RenderConnectors();
+  brain109RenderShapes();
+  brain109RenderCards();
+  brain107RenderPresence();
+}
+
+/* Preserve meeting-linked V107 behavior when that legacy canvas is opened. */
+const brain107RenderDataBaseV109=brain107RenderData;
+brain107RenderData=function(){
+  if(brain109RoomMode())return brain109RenderData();
+  return brain107RenderDataBaseV109();
+};
+const brain107RenderStrokesBaseV109=brain107RenderStrokes;
+brain107RenderStrokes=function(includeDraft=false){
+  if(!brain109RoomMode())return brain107RenderStrokesBaseV109(includeDraft);
+  const svg=document.getElementById('brain107Svg');if(!svg)return;
+  const saved=[...brain107Strokes];
+  if(includeDraft&&brain107Draw?.points?.length)saved.push({id:'draft',points:brain107Draw.points,width:3.2,color:'#214f40'});
+  const real=brain107Strokes;brain107Strokes=saved;
+  brain109RenderConnectors();
+  brain107Strokes=real;
+};
+const brain107SetToolBaseV109=brain107SetTool;
+brain107SetTool=function(t){
+  if(brain109RoomMode())return brain109SetTool(t);
+  return brain107SetToolBaseV109(t);
+};
+
+/* Mode-aware vote/delete fixes a V108 regression where opening the older
+   meeting-linked canvas could accidentally call standalone-room RPCs. */
+brain107Vote=async function(id){
+  if(brain109RoomMode()){
+    if(!brain109Editable())return;
+    const {error}=await sb.rpc('tasky_brainstorm_canvas_vote_v109',{p_room_id:window.brain108RoomId,p_object_id:id});
+    if(error)return taskyToast(error.message,{tone:'warning'});
+    return brain108FetchCanvas();
+  }
+  const {error}=await sb.rpc('tasky_meeting_canvas_vote_v107',{...brain107SessionArgs(),p_object_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  return brain107Fetch();
+};
+brain107DeleteObject=async function(id){
+  if(brain109RoomMode()){
+    if(!brain109Editable())return;
+    const ok=await taskyConfirm(brain109L('حذف هذه البطاقة؟','Delete this card?'),{title:brain109L('حذف البطاقة','Delete card'),tone:'danger',confirmText:brain109L('حذف','Delete')});if(!ok)return;
+    const {error}=await sb.rpc('tasky_brainstorm_canvas_object_delete_v109',{p_room_id:window.brain108RoomId,p_object_id:id});
+    if(error)return showTaskyDialog({title:brain109L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});
+    return brain108FetchCanvas();
+  }
+  const ok=await taskyConfirm(brain109L('حذف هذه البطاقة؟','Delete this card?'),{title:brain109L('حذف البطاقة','Delete card'),tone:'danger',confirmText:brain109L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_canvas_object_delete_v107',{...brain107SessionArgs(),p_object_id:id});
+  if(error)return showTaskyDialog({title:brain109L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});
+  return brain107Fetch();
+};
+
+async function brain109FetchCanvas(){
+  if(!window.brain108RoomId)return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_canvas_state_v109',{p_room_id:window.brain108RoomId});
+  if(error){console.warn('V109 canvas state',error);return}
+  brain107Objects=Array.isArray(data?.objects)?data.objects:[];
+  brain107Strokes=Array.isArray(data?.strokes)?data.strokes:[];
+  brain107Presence=Array.isArray(data?.presence)?data.presence:[];
+  brain109Shapes=Array.isArray(data?.shapes)?data.shapes:[];
+  brain109Connectors=Array.isArray(data?.connectors)?data.connectors:[];
+  window.brain108RoomMeta=data?.room||window.brain108RoomMeta||{};
+  brain109RenderData();
+}
+brain108FetchCanvas=brain109FetchCanvas;
+
+async function brain109AddShape(type){
+  brain109CloseMenus();
+  if(!brain109Editable())return;
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect(),c=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const w=type==='ellipse'?180:200,h=type==='ellipse'?120:130;
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_shape_add_v109',{p_room_id:window.brain108RoomId,p_shape_type:type,p_x:Math.round(c.x-w/2),p_y:Math.round(c.y-h/2),p_w:w,p_h:h});
+  if(error)return showTaskyDialog({title:brain109L('تعذّرت إضافة الشكل','Could not add shape'),message:error.message,tone:'error'});
+  await brain109FetchCanvas();
+}
+async function brain109DeleteShape(id){
+  if(!brain109Editable())return;
+  const ok=await taskyConfirm(brain109L('حذف هذا الشكل والخطوط المرتبطة به؟','Delete this shape and its connected lines?'),{title:brain109L('حذف الشكل','Delete shape'),tone:'danger',confirmText:brain109L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_shape_delete_v109',{p_room_id:window.brain108RoomId,p_shape_id:id});
+  if(error)return showTaskyDialog({title:brain109L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});
+  await brain109FetchCanvas();
+}
+async function brain109ConnectorClick(nodeId){
+  if(!brain109Editable()||brain107Tool!=='connect')return;
+  if(!brain109ConnectStart){
+    brain109ConnectStart=nodeId;
+    brain109Hint(brain109L('الآن اختر الفكرة أو الشكل الثاني','Now select the second idea or shape'));
+    brain109RenderData();
+    return;
+  }
+  if(String(brain109ConnectStart)===String(nodeId)){
+    brain109ConnectStart=null;brain109Hint(brain109L('اختر العنصر الأول ثم الثاني','Select the first element, then the second'));brain109RenderData();return;
+  }
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_connector_add_v109',{
+    p_room_id:window.brain108RoomId,p_from_node_id:brain109ConnectStart,p_to_node_id:nodeId,p_style:brain109ConnectorStyle
+  });
+  brain109ConnectStart=null;
+  if(error)return showTaskyDialog({title:brain109L('تعذّر إنشاء الخط','Could not create connector'),message:error.message,tone:'error'});
+  brain109Hint(brain109L('تم إنشاء الخط. اختر عنصرًا أول لخط جديد.','Connector created. Select a first element for another line.'));
+  await brain109FetchCanvas();
+}
+async function brain109DeleteConnector(id){
+  if(!brain109Editable())return;
+  const ok=await taskyConfirm(brain109L('حذف هذا الخط؟','Delete this connector?'),{title:brain109L('حذف الخط','Delete connector'),tone:'danger',confirmText:brain109L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_canvas_connector_delete_v109',{p_room_id:window.brain108RoomId,p_connector_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+async function brain109UndoStroke(){
+  if(!brain109Editable())return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_canvas_stroke_undo_v109',{p_room_id:window.brain108RoomId});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  if(!data?.deleted)return taskyToast(brain109L('لا يوجد رسم حديث لك للتراجع عنه','No recent drawing of yours to undo'),{tone:'warning'});
+  await brain109FetchCanvas();
+}
+
+/* Stable input binding: abort old global listeners on every room render/open. */
+function brain109BindStage(){
+  brain109Abort?.abort();
+  brain109Abort=new AbortController();
+  const signal=brain109Abort.signal;
+  const wrap=document.getElementById('brain107StageWrap'),stage=document.getElementById('brain107Stage');
+  if(!wrap||!stage)return;
+  wrap.addEventListener('wheel',e=>{e.preventDefault();brain107Zoom(e.deltaY>0?-.1:.1,e.clientX,e.clientY)},{passive:false,signal});
+  stage.addEventListener('pointerdown',brain109PointerDown,{signal});
+  window.addEventListener('pointermove',brain109PointerMove,{signal});
+  window.addEventListener('pointerup',brain109PointerUp,{signal});
+  stage.addEventListener('click',e=>{
+    const connector=e.target.closest?.('.brain109-connector');
+    if(connector&&brain107Tool==='select'){e.stopPropagation();brain109DeleteConnector(connector.dataset.id)}
+  },{signal});
+}
+function brain109PointerDown(e){
+  if(e.button!=null&&e.button!==0)return;
+  const card=e.target.closest?.('.brain107-card');
+  const shape=e.target.closest?.('.brain109-shape');
+
+  if(brain107Tool==='connect'){
+    const id=card?.dataset.id||shape?.dataset.shapeId;
+    if(id){e.preventDefault();e.stopPropagation();brain109ConnectorClick(id)}
+    return;
+  }
+  if(shape&&brain107Tool==='select'&&brain109Editable()){
+    const s=brain109Shapes.find(x=>String(x.id)===String(shape.dataset.shapeId));if(!s||!s.can_move)return;
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain109ShapeDrag={id:s.id,dx:p.x-s.x,dy:p.y-s.y,lastX:s.x,lastY:s.y};
+    shape.classList.add('dragging');return;
+  }
+  if(card&&brain107Tool==='select'&&brain109Editable()){
+    const o=brain107Objects.find(x=>x.id===card.dataset.id);if(!o||!o.can_move)return;
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain107Drag={id:o.id,dx:p.x-o.x,dy:p.y-o.y,lastX:o.x,lastY:o.y};
+    card.classList.add('dragging');return;
+  }
+  if(brain107Tool==='pen'&&brain109Editable()){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain107Draw={points:[{x:p.x,y:p.y,p:e.pressure||.5}],pointerId:e.pointerId};return;
+  }
+  if(brain107Tool==='hand'||(!card&&!shape&&brain107Tool==='select')){
+    brain107Pan={x:e.clientX,y:e.clientY,tx:brain107Tx,ty:brain107Ty};
+  }
+}
+function brain109PointerMove(e){
+  if(brain109ShapeDrag){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),s=brain109Shapes.find(x=>x.id===brain109ShapeDrag.id);
+    if(s){s.x=Math.max(0,Math.min(4000-s.w,p.x-brain109ShapeDrag.dx));s.y=Math.max(0,Math.min(3000-s.h,p.y-brain109ShapeDrag.dy));brain109ShapeDrag.lastX=s.x;brain109ShapeDrag.lastY=s.y;brain109RenderShapes();brain109RenderConnectors()}
+  }else if(brain107Drag){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),o=brain107Objects.find(x=>x.id===brain107Drag.id);
+    if(o){o.x=Math.max(0,Math.min(3760,p.x-brain107Drag.dx));o.y=Math.max(0,Math.min(2820,p.y-brain107Drag.dy));brain107Drag.lastX=o.x;brain107Drag.lastY=o.y;brain109RenderCards();brain109RenderConnectors()}
+  }else if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),last=brain107Draw.points.at(-1);
+    if(!last||Math.hypot(p.x-last.x,p.y-last.y)>2){brain107Draw.points.push({x:p.x,y:p.y,p:e.pressure||.5});brain107RenderStrokes(true)}
+  }else if(brain107Pan){
+    brain107Tx=brain107Pan.tx+(e.clientX-brain107Pan.x);brain107Ty=brain107Pan.ty+(e.clientY-brain107Pan.y);brain107ApplyTransform();
+  }
+  if(Date.now()-brain107LastPresence>100){
+    brain107LastPresence=Date.now();const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain108PresencePing(p.x,p.y);
+  }
+}
+async function brain109PointerUp(e){
+  if(brain109ShapeDrag){
+    const d=brain109ShapeDrag;brain109ShapeDrag=null;
+    document.querySelector(`.brain109-shape[data-shape-id="${CSS.escape(d.id)}"]`)?.classList.remove('dragging');
+    const {error}=await sb.rpc('tasky_brainstorm_canvas_shape_move_v109',{p_room_id:window.brain108RoomId,p_shape_id:d.id,p_x:Math.round(d.lastX),p_y:Math.round(d.lastY)});
+    if(error)console.warn('V109 shape move',error);
+  }
+  if(brain107Drag){
+    const d=brain107Drag;brain107Drag=null;
+    document.querySelector(`.brain107-card[data-id="${CSS.escape(d.id)}"]`)?.classList.remove('dragging');
+    const {error}=await sb.rpc('tasky_brainstorm_canvas_move_v108',{p_room_id:window.brain108RoomId,p_object_id:d.id,p_x:Math.round(d.lastX),p_y:Math.round(d.lastY)});
+    if(error)console.warn('V109 card move',error);
+  }
+  if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const pts=brain107Draw.points;brain107Draw=null;
+    if(pts.length>1){
+      const {error}=await sb.rpc('tasky_brainstorm_canvas_stroke_add_v108',{p_room_id:window.brain108RoomId,p_points:pts,p_width:3.2,p_color:'#214f40'});
+      if(error)showTaskyDialog({title:brain109L('تعذّر حفظ الرسم','Could not save drawing'),message:error.message,tone:'error'});
+    }
+    await brain109FetchCanvas();
+  }
+  brain107Pan=null;
+}
+
+/* Full V109 shell fixes V108's tool-switch bug: changing tool no longer falls
+   back to the meeting-linked V107 renderer. */
+brain108RenderCanvasShell=function(room){
+  window.brain108RoomMeta=room;
+  const el=brain107Shell(),editable=brain109Editable();
+  el.innerHTML=`<div class="brain107-top">
+    <div class="brain107-title"><h2>${brain109L('غرفة العصف الذهني','Brainstorm Room')} — ${escapeHtml(room.title||'')}</h2><p>${room.meeting_title?escapeHtml(room.meeting_title):brain109L('مساحة مستقلة للفريق','Independent team space')}</p></div>
+    <div class="brain107-top-actions"><span class="brain107-status"><i></i><span id="brain107PresenceCount">${brain109L('متصل','Connected')}</span></span><button type="button" onclick="brain107Fit()">${brain109L('ملاءمة','Fit')}</button><button type="button" onclick="brain108CloseCanvas()">×</button></div>
+  </div>
+  <div class="brain107-main"><aside class="brain107-tools">
+    <button type="button" class="brain107-tool ${brain107Tool==='select'?'active':''}" onclick="brain109SetTool('select')">${brain107SvgIcon('select')}<span class="brain109-tool-label">${brain109L('تحديد','Select')}</span></button>
+    <button type="button" class="brain107-tool ${brain107Tool==='hand'?'active':''}" onclick="brain109SetTool('hand')">${brain107SvgIcon('hand')}<span class="brain109-tool-label">${brain109L('تحريك','Pan')}</span></button>
+    ${editable?`<div class="brain109-toolbar-sep"></div>
+    <button type="button" class="brain107-tool ${brain107Tool==='pen'?'active':''}" onclick="brain109SetTool('pen')">${brain107SvgIcon('pen')}<span class="brain109-tool-label">${brain109L('قلم','Pen')}</span></button>
+    <button type="button" class="brain107-tool" onclick="brain107ToggleCompose(true)">${brain107SvgIcon('note')}<span class="brain109-tool-label">${brain109L('بطاقة','Card')}</span></button>
+    <button type="button" class="brain107-tool" onclick="brain109ToggleShapeMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="5" width="16" height="14" rx="2"/></svg><span class="brain109-tool-label">${brain109L('شكل','Shape')}</span></button>
+    <button type="button" class="brain107-tool ${brain107Tool==='connect'?'active':''}" onclick="brain109ToggleLineMenu()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="5" cy="17" r="2"/><circle cx="19" cy="7" r="2"/><path d="M7 16L17 8"/></svg><span class="brain109-tool-label">${brain109L('ربط','Connect')}</span></button>
+    <button type="button" class="brain107-tool" onclick="brain109UndoStroke()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 8H4v-5"/><path d="M4 8c3-4 10-5 14-1 3 3 3 8 0 11"/></svg><span class="brain109-tool-label">${brain109L('تراجع عن الرسم','Undo drawing')}</span></button>`:''}
+  </aside>
+  <div class="brain107-stage-wrap" id="brain107StageWrap">
+    <div class="brain107-stage ${brain107Tool==='pen'?'pen-mode':brain107Tool==='select'?'select-mode':''}" id="brain107Stage">
+      <svg class="brain107-svg" id="brain107Svg" viewBox="0 0 4000 3000"></svg>
+      <div class="brain109-shapes" id="brain109Shapes"></div><div id="brain107Cards"></div><div id="brain107Cursors"></div>
+      <div id="brain109Empty" class="brain109-empty-canvas"><b>${brain109L('ابدأ من مساحة فارغة','Start with an empty canvas')}</b>${brain109L('أضف بطاقة أو شكلًا، ارسم بالقلم، ثم اربط العناصر بخطوط.','Add a card or shape, draw with the pen, then connect elements with lines.')}</div>
+    </div>
+    ${!editable?`<div class="brain107-readonly">${brain109L('هذه الغرفة للعرض فقط','This room is read-only')}</div>`:''}
+    <div id="brain109Hint" class="brain109-hint"></div>
+    <div class="brain107-bottom"><button type="button" onclick="brain107Zoom(-.15)">−</button><span class="brain107-zoom" id="brain107Zoom">${Math.round(brain107Scale*100)}%</span><button type="button" onclick="brain107Zoom(.15)">+</button><button type="button" onclick="brain107Fit()">${brain109L('ملاءمة','Fit')}</button></div>
+  </div></div>
+  <div id="brain109ShapeMenu" class="brain109-shape-menu"><button type="button" onclick="brain109AddShape('rect')">${brain109L('مستطيل','Rectangle')}</button><button type="button" onclick="brain109AddShape('ellipse')">${brain109L('دائرة / بيضاوي','Ellipse')}</button></div>
+  <div id="brain109LineMenu" class="brain109-line-menu"><button type="button" onclick="brain109BeginConnector('line')">${brain109L('خط','Line')}</button><button type="button" onclick="brain109BeginConnector('arrow')">${brain109L('سهم','Arrow')}</button></div>
+  <div class="brain107-compose-panel" id="brain107Compose"><label>${brain109L('نوع البطاقة','Card type')}</label><select id="brain107Kind"><option value="idea">${brain109L('فكرة','Idea')}</option><option value="update">${brain109L('تحديث / خبر','Update / news')}</option><option value="question">${brain109L('سؤال','Question')}</option><option value="decision">${brain109L('قرار','Decision')}</option></select><label style="margin-top:8px">${brain109L('المحتوى','Content')}</label><textarea id="brain107Body" maxlength="1500"></textarea><div class="brain107-compose-actions"><button type="button" onclick="brain107ToggleCompose(false)">${brain109L('إلغاء','Cancel')}</button><button type="button" class="primary" onclick="brain108CreateCard()">${brain109L('إضافة للوحة','Add to canvas')}</button></div></div>`;
+  el.classList.add('show');brain107ApplyTransform();brain109BindStage();brain109RenderData();
+};
+
+/* Open/fetch use the hardened state with shapes/connectors. */
+brain108OpenRoom=async function(roomId){
+  window.brain108RoomId=roomId;
+  const probe=await sb.rpc('tasky_brainstorm_canvas_state_v109',{p_room_id:roomId});
+  if(probe.error){window.brain108RoomId=null;return showTaskyDialog({title:brain109L('تعذّر فتح الغرفة','Could not open room'),message:probe.error.message,tone:'error'})}
+  brain107MeetingId=null;
+  brain107Objects=Array.isArray(probe.data?.objects)?probe.data.objects:[];
+  brain107Strokes=Array.isArray(probe.data?.strokes)?probe.data.strokes:[];
+  brain107Presence=Array.isArray(probe.data?.presence)?probe.data.presence:[];
+  brain109Shapes=Array.isArray(probe.data?.shapes)?probe.data.shapes:[];
+  brain109Connectors=Array.isArray(probe.data?.connectors)?probe.data.connectors:[];
+  brain107Tool='select';brain109ConnectStart=null;
+  brain108RenderCanvasShell(probe.data?.room||{});
+  setTimeout(brain107Fit,50);
+  clearInterval(brain107Timer);brain107Timer=setInterval(brain109FetchCanvas,1000);
+  clearInterval(brain107PresenceTimer);brain108PresencePing();brain107PresenceTimer=setInterval(()=>brain108PresencePing(),4000);
+};
+
+const brain108CloseCanvasBaseV109=brain108CloseCanvas;
+brain108CloseCanvas=function(){
+  brain109Abort?.abort();brain109Abort=null;brain109Shapes=[];brain109Connectors=[];brain109ConnectStart=null;
+  return brain108CloseCanvasBaseV109();
+};
+</script>
+
 </body>
 </html>
