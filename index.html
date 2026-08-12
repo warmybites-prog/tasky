@@ -15445,5 +15445,394 @@ meetingRenderRoomV101=function(){
 };
 </script>
 
+
+<style id="tasky-v1062-ui-mobile-landscape-css">
+/* ============================================================
+   V106.2 — Projects + Brainstorm visibility + mobile/landscape
+   ============================================================ */
+
+/* ---------- Project lifecycle — visible from sidebar ---------- */
+.project-item{position:relative}
+.tasky1062-project-name{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.tasky1062-project-menu{
+  width:28px;height:28px;min-width:28px;border:0;border-radius:8px;
+  background:transparent;color:#9fb09b;display:grid;place-items:center;
+  font-size:18px;line-height:1;padding:0;margin-inline-start:auto
+}
+.tasky1062-project-menu:hover{background:rgba(255,255,255,.10);color:#fff}
+.tasky1062-project-menu:focus-visible{outline:2px solid #8ec8b4;outline-offset:1px}
+.tasky1062-closed-btn{
+  border:1px solid rgba(255,255,255,.10)!important;
+  background:rgba(255,255,255,.05)!important;
+  color:#b5c7b0!important;border-radius:999px!important;
+  padding:3px 7px!important;font-size:9px!important;
+  line-height:1.4!important;text-transform:none!important;letter-spacing:0!important;
+}
+.tasky1062-project-menu-sheet{display:flex;flex-direction:column;gap:10px}
+.tasky1062-project-summary{
+  border:1px solid var(--border);background:var(--paper);border-radius:13px;padding:12px
+}
+.tasky1062-project-summary b{display:block;font-size:13px;margin-bottom:3px}
+.tasky1062-project-summary span{display:block;color:var(--muted);font-size:10px;line-height:1.55}
+.tasky1062-project-menu-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.tasky1062-project-menu-actions button{min-height:44px;justify-content:center}
+.tasky1062-project-menu-actions .close-project{background:#f6f2e7;color:#72591a;border-color:#e7dcc0}
+.tasky1062-project-menu-actions .delete-project{color:var(--danger);background:var(--danger-tint);border-color:#e8cbc8}
+
+/* ---------- Brainstorm discoverability ---------- */
+.tasky1062-brain-btn{
+  background:#eef7f1!important;color:#23644e!important;border-color:#cce2d8!important;font-weight:900!important
+}
+#brain106ToolbarBtn{background:#193b31!important;border-color:#326656!important}
+.brain106-head{padding-top:calc(14px + env(safe-area-inset-top))}
+.brain106-board{overscroll-behavior:contain}
+.brain106-note{touch-action:pan-y}
+
+/* ---------- Meeting phone portrait ---------- */
+@media(max-width:700px) and (orientation:portrait){
+  .meet101-room{
+    height:100dvh!important;
+    padding-top:env(safe-area-inset-top);
+    padding-bottom:env(safe-area-inset-bottom);
+  }
+  .meet101-room-top{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    gap:7px!important;
+    padding:8px 9px!important;
+    flex:none!important;
+  }
+  .meet101-room-top>div:last-child{
+    min-width:0!important;width:100%!important;
+    display:flex!important;flex-direction:column!important;gap:6px!important
+  }
+  .meet101-room-title h2{font-size:13px!important}
+  .meet101-room-title p{font-size:8px!important;margin-top:1px!important}
+  .meet103-tools{
+    width:100%!important;display:flex!important;flex-wrap:nowrap!important;
+    overflow-x:auto!important;overflow-y:hidden!important;gap:5px!important;
+    padding:1px 0 2px!important;scrollbar-width:none!important;
+    -webkit-overflow-scrolling:touch
+  }
+  .meet103-tools::-webkit-scrollbar{display:none}
+  .meet103-pill{
+    flex:0 0 auto!important;height:36px!important;min-width:36px!important;
+    padding:0 9px!important;border-radius:10px!important;font-size:8.5px!important
+  }
+  .meet101-room-main{min-height:0!important;flex:1!important}
+  .meet101-video-area{min-height:0!important;height:100%!important}
+  .meet101-video-grid{
+    min-height:0!important;height:100%!important;
+    padding:6px!important;gap:6px!important;overflow:auto!important;
+    align-content:stretch!important
+  }
+  .meet101-video-grid.meet103-count-1{
+    grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr)!important
+  }
+  .meet101-video-grid.meet103-count-2:not(.meet103-has-screen){
+    grid-template-columns:1fr!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    overflow:hidden!important
+  }
+  .meet101-video-grid.meet103-count-2:not(.meet103-has-screen) .meet101-video-tile{
+    min-height:0!important;height:100%!important;aspect-ratio:auto!important;max-width:none!important
+  }
+  .meet101-video-grid.meet103-count-3,
+  .meet101-video-grid.meet103-count-4,
+  .meet101-video-grid.meet103-count-many{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(145px,1fr)!important;align-content:start!important
+  }
+  .meet101-video-tile{
+    min-height:0!important;border-radius:13px!important;aspect-ratio:auto!important
+  }
+  .meet101-video-tile video{object-fit:contain!important;object-position:center!important}
+  .meet101-video-label{bottom:7px!important;inset-inline-start:7px!important;font-size:8px!important;padding:4px 7px!important}
+  .meet101-room-bottom{
+    flex:none!important;min-height:58px!important;padding:7px 8px!important;
+    padding-bottom:max(7px,env(safe-area-inset-bottom))!important;
+    gap:6px!important;justify-content:center!important;overflow-x:auto!important;
+    scrollbar-width:none!important
+  }
+  .meet101-room-bottom::-webkit-scrollbar{display:none}
+  .meet101-control{height:44px!important;min-width:44px!important;padding:0 10px!important;flex:0 0 auto!important}
+  .meet101-control span{display:none!important}
+
+  /* Chat/people/waiting becomes bottom sheet instead of a huge side column. */
+  .meet103-drawer{
+    top:auto!important;bottom:0!important;left:0!important;right:0!important;
+    inset-inline:0!important;width:100%!important;height:min(68dvh,570px)!important;
+    border-inline-start:0!important;border-top:1px solid rgba(255,255,255,.12)!important;
+    border-radius:20px 20px 0 0!important;
+    transform:translateY(105%)!important
+  }
+  html[dir=rtl] .meet103-drawer{transform:translateY(105%)!important}
+  .meet103-drawer.open{transform:translateY(0)!important}
+  .meet103-drawer-head{padding:11px 13px!important}
+  .meet103-tabs{padding:7px!important}
+  .meet103-drawer-body{padding:8px!important}
+  .meet103-chat-compose{padding-bottom:max(9px,env(safe-area-inset-bottom))!important}
+}
+
+/* ---------- Phone/tablet landscape: whole platform ---------- */
+@media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+  html,body,.app{height:100dvh!important;min-height:100dvh!important}
+  .sidebar{
+    width:min(300px,42vw)!important;
+    max-width:42vw!important;
+    padding:10px 11px!important;gap:8px!important
+  }
+  .sidebar-brand-row{min-height:32px!important;padding-bottom:4px!important}
+  .brand-wordmark{height:27px!important}
+  .workspace{min-height:38px!important;padding:5px 8px!important}
+  .workspace-logo{width:26px!important;height:26px!important}
+  .sidebar .new-task-btn{min-height:38px!important;padding:7px 10px!important}
+  nav.main-nav{gap:0!important}
+  .nav-group-label{padding-top:6px!important}
+  .nav-item,.project-item,.create-project-item{min-height:35px!important;padding-top:6px!important;padding-bottom:6px!important}
+  .projects-inline-list{max-height:125px!important}
+  .sidebar-bottom{padding-top:7px!important}
+  .topbar{height:48px!important;min-height:48px!important;max-height:48px!important;padding:5px 10px!important}
+  .breadcrumb{min-width:0!important}
+  .breadcrumb b{font-size:13px!important}
+  .topbar-right{gap:5px!important}
+  .topbar .search-box{display:none!important}
+  .topbar .icon-btn,.topbar .lang-btn,.sidebar-toggle-btn{height:36px!important;min-height:36px!important}
+  .content{padding:10px 12px 16px!important;gap:12px!important}
+  .stats-row{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:8px!important}
+  .stat-card{padding:10px 11px!important}
+  .stat-card .value{font-size:18px!important}
+  .board{grid-auto-columns:minmax(250px,42vw)!important}
+  .modal{
+    width:min(760px,92vw)!important;
+    max-width:92vw!important;
+    max-height:92dvh!important;
+    padding:15px!important
+  }
+  .overlay{padding:4dvh 12px!important}
+  .tasky-dialog-backdrop{align-items:center!important;padding:10px!important}
+  .tasky-dialog{width:min(520px,88vw)!important;border-radius:18px!important}
+}
+
+/* ---------- Phone/tablet landscape: meeting room ---------- */
+@media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+  .meet101-room{
+    height:100dvh!important;padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)!important
+  }
+  .meet101-room-top{
+    min-height:44px!important;padding:5px 8px!important;gap:7px!important;
+    display:flex!important;align-items:center!important
+  }
+  .meet101-room-title h2{font-size:12px!important}
+  .meet101-room-title p{font-size:7.5px!important;margin-top:1px!important}
+  .meet101-room-top>div:last-child{min-width:0!important;display:flex!important;align-items:center!important;gap:5px!important}
+  .meet103-tools{
+    display:flex!important;flex:1!important;flex-wrap:nowrap!important;overflow-x:auto!important;
+    scrollbar-width:none!important;gap:4px!important
+  }
+  .meet103-tools::-webkit-scrollbar{display:none}
+  .meet103-pill{height:32px!important;min-width:32px!important;padding:0 7px!important;font-size:8px!important;flex:0 0 auto!important}
+  .meet103-pill span{display:none!important}
+  .meet101-room-main{min-height:0!important;flex:1!important}
+  .meet101-video-area{min-height:0!important}
+  .meet101-video-grid{
+    height:100%!important;min-height:0!important;padding:5px!important;gap:5px!important;
+    overflow:hidden!important;align-content:stretch!important
+  }
+  .meet101-video-grid.meet103-count-1{
+    grid-template-columns:1fr!important;grid-template-rows:minmax(0,1fr)!important
+  }
+  .meet101-video-grid.meet103-count-2:not(.meet103-has-screen){
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:minmax(0,1fr)!important
+  }
+  .meet101-video-grid.meet103-count-3,
+  .meet101-video-grid.meet103-count-4{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important
+  }
+  .meet101-video-grid.meet103-count-many{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-auto-rows:minmax(0,1fr)!important;overflow:auto!important
+  }
+  .meet101-video-tile,.meet101-video-tile.portrait{
+    min-height:0!important;height:100%!important;aspect-ratio:auto!important;
+    max-width:none!important;border-radius:11px!important
+  }
+  .meet101-video-tile video{object-fit:contain!important}
+  .meet101-room-bottom{
+    min-height:50px!important;padding:4px 8px!important;gap:5px!important;flex:none!important
+  }
+  .meet101-control{height:40px!important;min-width:40px!important;padding:0 9px!important}
+  .meet101-control span{display:none!important}
+
+  /* In landscape, collaboration opens as a compact side drawer. */
+  .meet103-drawer{
+    top:0!important;bottom:0!important;width:min(350px,42vw)!important;height:100dvh!important;
+    border-radius:0!important
+  }
+  html[dir=ltr] .meet103-drawer{left:auto!important;right:0!important;transform:translateX(105%)!important}
+  html[dir=rtl] .meet103-drawer{right:auto!important;left:0!important;transform:translateX(-105%)!important}
+  .meet103-drawer.open{transform:translateX(0)!important}
+  .meet103-drawer-head{padding:8px 10px!important}
+  .meet103-tabs{padding:5px!important}
+  .meet103-drawer-body{padding:6px!important}
+  .meet103-chat-compose{padding:6px!important}
+  .meet103-chat-compose textarea{min-height:34px!important;max-height:70px!important}
+
+  #taskyV106Brainstorm .brain106-head{padding:7px 10px!important}
+  #taskyV106Brainstorm .brain106-head h2{font-size:13px!important}
+  #taskyV106Brainstorm .brain106-head p{display:none!important}
+  #taskyV106Brainstorm .brain106-compose{
+    grid-template-columns:130px minmax(0,1fr) auto!important;padding:7px 10px!important
+  }
+  #taskyV106Brainstorm .brain106-board{
+    grid-template-columns:repeat(4,minmax(190px,1fr))!important;padding:7px 10px 10px!important;gap:7px!important
+  }
+  #taskyV106Brainstorm .brain106-col{min-height:180px!important;padding:7px!important}
+}
+
+/* Brainstorm on narrow portrait uses horizontal lanes instead of giant vertical page. */
+@media(max-width:600px) and (orientation:portrait){
+  #taskyV106Brainstorm .brain106-head{padding:calc(10px + env(safe-area-inset-top)) 10px 8px!important}
+  #taskyV106Brainstorm .brain106-head p{font-size:8px!important}
+  #taskyV106Brainstorm .brain106-compose{padding:8px 10px!important}
+  #taskyV106Brainstorm .brain106-board{
+    display:grid!important;grid-template-columns:none!important;grid-auto-flow:column!important;
+    grid-auto-columns:minmax(270px,84vw)!important;overflow-x:auto!important;overflow-y:hidden!important;
+    scroll-snap-type:x mandatory!important;padding:9px 10px 14px!important
+  }
+  #taskyV106Brainstorm .brain106-col{scroll-snap-align:start!important;min-height:0!important;height:calc(100dvh - 215px)!important;overflow-y:auto!important}
+}
+</style>
+
+<script id="tasky-v1062-productivity-visibility-js">
+window.TASKY_BUILD='V106.2';console.info('Tasky build',window.TASKY_BUILD);
+
+function tasky1062L(ar,en){return lang==='ar'?ar:en}
+
+/* ---------- Project controls: no more hidden lifecycle action ---------- */
+function tasky1062OpenProjectMenu(projectId){
+  const p=projects.find(x=>x.id===projectId);if(!p)return;
+  const canManage=canManageProjectClient(projectId);
+  if(!canManage)return taskyToast(tasky1062L('لا تملك صلاحية إدارة هذا المشروع','You do not have permission to manage this project'),{tone:'warning'});
+
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${tasky1062L('إدارة المشروع','Project management')}</h3><div class="subtle">${tasky1062L('أغلق المشروع لإزالته من القائمة مع الاحتفاظ بالتاريخ، أو احذفه نهائيًا إذا كان فارغًا ولا توجد سجلات مرتبطة.','Close the project to remove it from the active list while preserving history, or permanently delete it only if it is empty and has no linked records.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="tasky1062-project-menu-sheet">
+    <div class="tasky1062-project-summary"><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.description||tasky1062L('بدون وصف','No description'))}</span></div>
+    <div class="tasky1062-project-menu-actions">
+      <button class="chip-btn close-project" onclick="tasky106CloseProject('${p.id}')">📁 ${tasky1062L('إغلاق المشروع','Close project')}</button>
+      ${currentUserRole==='admin'?`<button class="chip-btn delete-project" onclick="tasky106DeleteProject('${p.id}')">🗑 ${tasky1062L('حذف نهائي','Delete permanently')}</button>`:''}
+    </div>
+    <button class="chip-btn" onclick="closeAddModal();openProjectAccessModal('${p.id}')">🔐 ${tasky1062L('صلاحيات المشروع','Project permissions')}</button>
+  </div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+
+function tasky1062EnhanceProjectNav(){
+  const list=document.querySelector('.projects-inline-list');
+  if(!list)return;
+  const rows=[...list.querySelectorAll('.project-item:not(.create-project-item)')];
+
+  rows.forEach((row,i)=>{
+    const p=projects[i];if(!p)return;
+    row.dataset.projectId=p.id;
+
+    const name=row.querySelector('span:not(.dot)');
+    if(name)name.classList.add('tasky1062-project-name');
+
+    if(canManageProjectClient(p.id)&&!row.querySelector('.tasky1062-project-menu')){
+      const b=document.createElement('button');
+      b.type='button';b.className='tasky1062-project-menu';
+      b.title=tasky1062L('إدارة المشروع','Manage project');b.setAttribute('aria-label',b.title);
+      b.textContent='⋯';
+      b.onclick=e=>{e.preventDefault();e.stopPropagation();tasky1062OpenProjectMenu(p.id)};
+      row.appendChild(b);
+    }
+  });
+
+  const head=document.querySelector('.projects-inline-head');
+  if(head){
+    let closed=document.getElementById('taskyClosedProjectsBtnV106');
+    if(!closed){
+      closed=document.createElement('button');
+      closed.id='taskyClosedProjectsBtnV106';closed.type='button';
+      closed.onclick=e=>{e.preventDefault();e.stopPropagation();tasky106OpenClosedProjects()};
+      const plus=head.querySelector('.projects-inline-plus');
+      head.insertBefore(closed,plus||null);
+    }
+    closed.className='tasky1062-closed-btn';
+    closed.textContent=tasky1062L('المغلقة','Closed');
+  }
+}
+
+const renderNavBaseV1062=renderNav;
+renderNav=function(){
+  renderNavBaseV1062();
+  requestAnimationFrame(tasky1062EnhanceProjectNav);
+};
+
+/* ---------- Brainstorm: robust injection, independent of old brittle regex ---------- */
+const meetingCardBaseV1062=meetingCardV101;
+meetingCardV101=function(m,past=false){
+  let h=meetingCardBaseV1062(m,past);
+  if(h.includes(`brain106Open('${m.id}')`))return h;
+
+  const btn=`<button class="chip-btn tasky1062-brain-btn" onclick="brain106Open('${m.id}')">💡 ${tasky1062L('غرفة العصف الذهني','Brainstorm room')}</button>`;
+
+  /* Latest card ends with actions div + article, with whitespace/newlines between. */
+  if(/<\/div>\s*<\/article>\s*$/i.test(h)){
+    return h.replace(/<\/div>\s*<\/article>\s*$/i,btn+'</div></article>');
+  }
+  return h.replace(/<\/article>\s*$/i,`<div class="meet10512-actions">${btn}</div></article>`);
+};
+
+function tasky1062EnsureBrainstormToolbar(){
+  const tools=document.getElementById('meet103Tools');
+  if(!tools||!meetingRoomV101)return;
+  if(!document.getElementById('brain106ToolbarBtn')){
+    const b=document.createElement('button');
+    b.id='brain106ToolbarBtn';b.type='button';b.className='meet103-pill';
+    b.onclick=()=>brain106Open(meetingRoomV101.id);
+    b.innerHTML=`💡 <span>${tasky1062L('عصف ذهني','Brainstorm')}</span>`;
+    tools.appendChild(b);
+  }
+}
+const meetingRenderRoomBaseV1062=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  const r=meetingRenderRoomBaseV1062();
+  if(meetingRoomV101){
+    requestAnimationFrame(tasky1062EnsureBrainstormToolbar);
+  }
+  return r;
+};
+
+/* Better error feedback if the V106 SQL was not installed. */
+const brain106OpenBaseV1062=brain106Open;
+brain106Open=async function(meetingId){
+  brain106MeetingId=meetingId||meetingRoomV101?.id;
+  if(!brain106MeetingId)return;
+
+  const {data,error}=await sb.rpc('tasky_meeting_brainstorm_list_v106',brain106Args());
+  if(error){
+    brain106MeetingId=null;
+    return showTaskyDialog({
+      title:tasky1062L('تعذّر فتح غرفة العصف الذهني','Could not open Brainstorm Room'),
+      message:error.message?.includes('function')
+        ?tasky1062L('ميزة العصف الذهني تحتاج تشغيل ملف SQL الخاص بـ V106.2 في Supabase أولًا.','Brainstorm Room requires the V106.2 SQL migration to be run in Supabase first.')
+        :error.message,
+      tone:'error'
+    });
+  }
+  brain106Rows=Array.isArray(data)?data:[];
+  brain106Render();
+  clearInterval(brain106Timer);
+  brain106Timer=setInterval(()=>brain106Fetch(true),2000);
+};
+
+/* Re-run enhancements after initial application boot. */
+setTimeout(()=>{try{tasky1062EnhanceProjectNav()}catch(_){};try{tasky1062EnsureBrainstormToolbar()}catch(_){}},250);
+</script>
+
 </body>
 </html>
