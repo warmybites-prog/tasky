@@ -2901,7 +2901,11 @@ async function checkSession(){
     if(!currentWorkspaceId||appEl?.style.display==='none'){taskyBootReopenV83();taskyBootShowV83();}
 
     try{
-      const {data,error:sessionError}=await sb.auth.getSession();
+      const sessionResult=await Promise.race([
+        sb.auth.getSession(),
+        new Promise((_,reject)=>setTimeout(()=>reject(new Error(lang==='ar'?'انتهت مهلة التحقق من الجلسة. أعد المحاولة.':'Session check timed out. Please try again.')),8000))
+      ]);
+      const {data,error:sessionError}=sessionResult||{};
       if(sessionError)throw sessionError;
       const session=data?.session||null;
 
@@ -11527,7 +11531,7 @@ setTimeout(()=>{try{renderNav();if(currentWorkspaceId)taskyMeetingHandleDeepLink
 
 <script id="taskyV102GuestMeetingsScript">
 /* ================= V102 — EXTERNAL GUEST MEETINGS BETA ================= */
-window.TASKY_BUILD='V102.4';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V102.5';console.info('Tasky build',window.TASKY_BUILD);
 const meet102L=(ar,en)=>lang==='ar'?ar:en;
 let meetingGuestSessionV102=null;
 let meetingGuestPublicV102=null;
@@ -11576,5 +11580,43 @@ if(window.__taskyV102PublicMeeting){setTimeout(()=>showPublicMeetingGuestPortalV
 
 </script>
 <!-- ================= /V102 EXTERNAL GUEST MEETINGS ================= -->
+
+<script id="taskyV1025BootRecovery">
+/* ================= V102.5 — AUTH BOOT RECOVERY ================= */
+(function(){
+  let kicked=false;
+  function isPublicFlow(){
+    try{
+      const q=new URLSearchParams(location.search);
+      return !!(q.get('quote')||q.get('invite')||q.get('survey')||q.get('salesquote')||q.get('invoice')||(q.get('meeting')&&q.get('guest')));
+    }catch(_){return false}
+  }
+  function kick(){
+    if(kicked||isPublicFlow())return;
+    if(typeof checkSession!=='function')return;
+    kicked=true;
+    Promise.resolve().then(()=>checkSession()).catch(err=>{
+      console.error('Tasky V102.5 final auth boot recovery',err);
+      try{taskyBootHideV83()}catch(_){}
+      const auth=document.getElementById('authScreen');
+      const app=document.querySelector('.app');
+      if(auth)auth.style.display='flex';
+      if(app)app.style.display='none';
+      try{taskyAuthShowErrorV751(err?.message||String(err))}catch(_){}
+    });
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',()=>setTimeout(kick,0),{once:true});
+  else setTimeout(kick,0);
+  // Last-resort watchdog: never leave users trapped on the 8% splash.
+  setTimeout(()=>{
+    const boot=document.getElementById('taskyBootV83');
+    const pct=document.getElementById('taskyBootPctV83');
+    if(!isPublicFlow()&&boot&&!boot.classList.contains('hidden')&&String(pct?.textContent||'').trim()==='8%'){
+      kicked=false;
+      kick();
+    }
+  },2200);
+})();
+</script>
 </body>
 </html>
