@@ -12096,5 +12096,275 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v1043-meeting-focus-css">
+.meet1043-timer{display:inline-flex;align-items:center;gap:5px;margin-inline-start:7px;color:#b8ccc5;font:800 9px Inter,'IBM Plex Sans Arabic'}
+.meet1043-timer:before{content:'◷';font-size:12px}
+.meet1043-pin{position:absolute;top:10px;inset-inline-start:10px;z-index:6;width:30px;height:30px;border:1px solid rgba(255,255,255,.14);background:rgba(4,15,12,.68);color:#fff;border-radius:9px;display:grid;place-items:center;font-size:14px;opacity:.68}
+.meet1043-pin:hover,.meet1043-pin.active{opacity:1;background:#255f50;border-color:#75bea6}
+.meet1043-hand-chip{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;color:#ffd77d;font-size:9px;font-weight:900}
+.meet1043-speaker-chip{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;color:#86ddba;font-size:8.5px;font-weight:850}
+.meet1043-sound.active,.meet1043-self.active{background:#285f50!important;border-color:#6db49d!important}
+.meet1043-self-hidden{display:none!important}
+
+/* Focus layout for 3+ participants. Screen share always wins. */
+.meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen){
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(150px,1fr)!important;
+  align-content:start!important;
+}
+.meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen) .meet101-video-tile.meet1043-focus-main{
+  grid-column:1/-1!important;
+  min-height:min(56vh,620px)!important;
+}
+.meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen) .meet101-video-tile:not(.meet1043-focus-main){
+  min-height:150px!important;
+  aspect-ratio:16/9!important;
+}
+
+@media(max-width:700px){
+  .meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen){
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:auto!important;
+    overflow:auto!important;
+  }
+  .meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen) .meet101-video-tile.meet1043-focus-main{
+    grid-column:1/-1!important;
+    height:48vh!important;
+    min-height:300px!important;
+    aspect-ratio:auto!important;
+  }
+  .meet101-video-grid.meet1043-focus-mode:not(.meet103-has-screen) .meet101-video-tile:not(.meet1043-focus-main){
+    min-height:115px!important;
+    height:18vh!important;
+    max-height:180px!important;
+  }
+}
+</style>
+<script id="tasky-v1043-meeting-focus-js">
+window.TASKY_BUILD='V104.3';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV1043PinnedPeer=null;
+let meetingV1043AutoSpeakerPeer=null;
+let meetingV1043SelfHidden=false;
+let meetingV1043SoundEnabled=localStorage.getItem('tasky_meeting_sound_v1043')==='1';
+let meetingV1043TimerHandle=null;
+let meetingV1043RaisedLocal=false;
+let meetingV1043KnownWaitingIds=new Set();
+let meetingV1043WaitingInitialized=false;
+let meetingV1043LastChatCount=0;
+
+function meetingV1043FormatElapsed(ms){
+  const s=Math.max(0,Math.floor(ms/1000)),h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;
+  return h?`${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`:`${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+}
+function meetingV1043UpdateTimer(){
+  const el=document.getElementById('meet1043Timer');if(!el||!meetingRoomV101)return;
+  const start=meetingRoomV101.started_at?new Date(meetingRoomV101.started_at).getTime():Date.now();
+  el.textContent=meetingV1043FormatElapsed(Date.now()-start);
+}
+function meetingV1043StartTimer(){
+  if(meetingV1043TimerHandle)return;
+  meetingV1043UpdateTimer();
+  meetingV1043TimerHandle=setInterval(meetingV1043UpdateTimer,1000);
+}
+function meetingV1043StopTimer(){
+  clearInterval(meetingV1043TimerHandle);meetingV1043TimerHandle=null;
+}
+function meetingV1043Beep(kind='message'){
+  if(!meetingV1043SoundEnabled)return;
+  try{
+    const C=window.AudioContext||window.webkitAudioContext;if(!C)return;
+    const c=new C(),o=c.createOscillator(),g=c.createGain();
+    o.type='sine';o.frequency.value=kind==='waiting'?720:520;
+    g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.08,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.18);
+    o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.2);setTimeout(()=>c.close().catch(()=>{}),350);
+  }catch(_){}
+}
+function meetingV1043ToggleSound(){
+  meetingV1043SoundEnabled=!meetingV1043SoundEnabled;
+  localStorage.setItem('tasky_meeting_sound_v1043',meetingV1043SoundEnabled?'1':'0');
+  meetingV1043PatchToolbar();
+  taskyToast(meetingV1043SoundEnabled?meet103L('تم تشغيل تنبيهات الاجتماع','Meeting sounds enabled'):meet103L('تم كتم تنبيهات الاجتماع','Meeting sounds muted'),{tone:'success'});
+}
+function meetingV1043ToggleSelf(){
+  meetingV1043SelfHidden=!meetingV1043SelfHidden;
+  meetingV1043ApplyLayout();
+  meetingV1043PatchToolbar();
+  taskyToast(meetingV1043SelfHidden?meet103L('تم إخفاء صورتك لديك فقط','Your self-view is hidden locally'):meet103L('تم إظهار صورتك','Your self-view is visible'),{tone:'success'});
+}
+function meetingV1043TogglePin(peerId){
+  meetingV1043PinnedPeer=meetingV1043PinnedPeer===peerId?null:peerId;
+  meetingV1043ApplyLayout();
+}
+function meetingV1043PatchTimer(){
+  const meta=document.getElementById('meet101RoomMeta');
+  if(meta&&!document.getElementById('meet1043Timer'))meta.insertAdjacentHTML('afterend','<span id="meet1043Timer" class="meet1043-timer">00:00</span>');
+  meetingV1043StartTimer();
+}
+function meetingV1043PatchToolbar(){
+  const tools=document.getElementById('meet103Tools');if(!tools)return;
+  let sound=document.getElementById('meet1043SoundBtn');
+  if(!sound){
+    sound=document.createElement('button');sound.id='meet1043SoundBtn';sound.type='button';sound.className='meet103-pill meet1043-sound';sound.onclick=meetingV1043ToggleSound;tools.appendChild(sound);
+  }
+  sound.classList.toggle('active',meetingV1043SoundEnabled);
+  sound.innerHTML=`${meetingV1043SoundEnabled?'🔔':'🔕'} <span>${meet103L('التنبيهات','Alerts')}</span>`;
+  let self=document.getElementById('meet1043SelfBtn');
+  if(!self){
+    self=document.createElement('button');self.id='meet1043SelfBtn';self.type='button';self.className='meet103-pill meet1043-self';self.onclick=meetingV1043ToggleSelf;tools.appendChild(self);
+  }
+  self.classList.toggle('active',meetingV1043SelfHidden);
+  self.innerHTML=`${meetingV1043SelfHidden?'👁️':'🙈'} <span>${meetingV1043SelfHidden?meet103L('إظهار صورتي','Show self'):meet103L('إخفاء صورتي','Hide self')}</span>`;
+}
+function meetingV1043PatchPins(){
+  document.querySelectorAll('.meet101-video-tile').forEach(tile=>{
+    const peer=tile.dataset.peer;if(!peer)return;
+    let b=tile.querySelector('.meet1043-pin');
+    if(!b){b=document.createElement('button');b.type='button';b.className='meet1043-pin';b.title=meet103L('تثبيت المشارك','Pin participant');b.onclick=e=>{e.stopPropagation();meetingV1043TogglePin(peer)};tile.appendChild(b)}
+    b.classList.toggle('active',meetingV1043PinnedPeer===peer);b.textContent=meetingV1043PinnedPeer===peer?'📌':'📍';
+  });
+}
+function meetingV1043RaisedFor(peerId){
+  if(peerId==='local')return meetingV1043RaisedLocal;
+  return !!meetingRemoteMetaV101.get(peerId)?.raised_hand;
+}
+function meetingV1043ApplyLayout(){
+  const g=document.getElementById('meet101VideoGrid');if(!g)return;
+  const tiles=[...g.querySelectorAll('.meet101-video-tile')];
+  const local=g.querySelector('[data-peer="local"]');
+  local?.classList.toggle('meet1043-self-hidden',meetingV1043SelfHidden);
+  tiles.forEach(t=>t.classList.remove('meet1043-focus-main'));
+  g.classList.remove('meet1043-focus-mode');
+  const visible=tiles.filter(t=>!t.classList.contains('meet1043-self-hidden'));
+  if(g.querySelector('.screen'))return;
+  if(visible.length<3)return;
+  let peer=meetingV1043PinnedPeer;
+  if(peer&&!g.querySelector(`[data-peer="${CSS.escape(String(peer))}"]`))meetingV1043PinnedPeer=peer=null;
+  if(!peer)peer=meetingV1043AutoSpeakerPeer;
+  if(!peer||!g.querySelector(`[data-peer="${CSS.escape(String(peer))}"]`))peer=visible[0]?.dataset.peer;
+  const focus=peer?g.querySelector(`[data-peer="${CSS.escape(String(peer))}"]`):null;
+  if(focus&&!focus.classList.contains('meet1043-self-hidden')){g.classList.add('meet1043-focus-mode');focus.classList.add('meet1043-focus-main')}
+}
+function meetingV1043DecoratePeople(){
+  const body=document.getElementById('meet103DrawerBody');
+  if(!body||meetingV103DrawerTab!=='people')return;
+  const rows=[...body.querySelectorAll('.meet103-person')];
+  const data=[{peerId:'local'},...meetingRemoteParticipantsV101().map(p=>({peerId:p.peerId}))];
+  rows.forEach((row,i)=>{
+    const peer=data[i]?.peerId;if(!peer)return;
+    const h=row.querySelector('h4');if(!h)return;
+    if(meetingV1043RaisedFor(peer)&&!h.querySelector('.meet1043-hand-chip'))h.insertAdjacentHTML('beforeend',`<span class="meet1043-hand-chip">🙋 ${meet103L('رافع اليد','Hand raised')}</span>`);
+    const tile=document.querySelector(`.meet101-video-tile[data-peer="${CSS.escape(String(peer))}"]`);
+    if(tile?.classList.contains('meet1042-speaking')&&!h.querySelector('.meet1043-speaker-chip'))h.insertAdjacentHTML('beforeend',`<span class="meet1043-speaker-chip">● ${meet103L('يتحدث','Speaking')}</span>`);
+    const actions=row.querySelector('.meet103-inline');
+    if(actions&&!actions.querySelector('[data-meet1043-pin]')){
+      const b=document.createElement('button');b.className='meet103-mini';b.dataset.meet1043Pin='1';b.textContent=meetingV1043PinnedPeer===peer?meet103L('إلغاء التثبيت','Unpin'):meet103L('تثبيت','Pin');b.onclick=()=>{meetingV1043TogglePin(peer);meetingV103RenderDrawer()};actions.appendChild(b)
+    }
+  });
+}
+async function meetingV1043UpdatePresenceRaised(active){
+  meetingV1043RaisedLocal=!!active;
+  if(!meetingChannelV101||!meetingSubscribedV101)return;
+  const me=meetingMeV101();
+  try{
+    await meetingChannelV101.track({
+      peer_id:meetingPeerIdV101,user_id:meetingV103IsGuest()?null:currentUserId||null,guest:meetingV103IsGuest(),
+      name:meetingV103IsGuest()?`${meet103L('ضيف','Guest')} · ${me.fullName||''}`:(me.fullName||me.email||meet103L('مشارك','Participant')),
+      mic:meetingLocalStateV101.mic,camera:meetingLocalStateV101.camera,screen:meetingLocalStateV101.screen,
+      raised_hand:meetingV1043RaisedLocal,joined_at:new Date().toISOString()
+    });
+  }catch(e){console.warn('V104.3 presence hand',e)}
+}
+/* Upgrade the existing Ask to speak into a persistent raised-hand state. */
+async function meetingV1042RequestParticipation(){
+  if(!meetingRoomV101||meetingRoomV101.can_manage)return;
+  meetingV1042HandRaised=!meetingV1042HandRaised;
+  await meetingV1043UpdatePresenceRaised(meetingV1042HandRaised);
+  document.getElementById('meet1042HandBtn')?.classList.toggle('active',meetingV1042HandRaised);
+  await meetingBroadcastSignalV101('v1042-participation-request',{
+    active:meetingV1042HandRaised,
+    name:meetingMeV101()?.fullName||meetingGuestSessionV102?.name||meet103L('مشارك','Participant')
+  },'*');
+  meetingV103ShowReaction(meetingV1042HandRaised?'🙋':'👍',meetingMeV101()?.fullName||meetingGuestSessionV102?.name||'');
+  if(document.getElementById('meet103Drawer')?.classList.contains('open')&&meetingV103DrawerTab==='people')meetingV103RenderDrawer();
+  taskyToast(meetingV1042HandRaised?meet103L('تم رفع يدك وإرسال الطلب للمنظم','Your hand is raised and the organizer was notified'):meet103L('تم خفض يدك','Your hand is lowered'),{tone:'success'});
+}
+
+/* Sound for genuinely new chat messages. */
+const meetingV103FetchChatBaseV1043=meetingV103FetchChat;
+meetingV103FetchChat=async function(render=true){
+  const previousUnread=meetingV1042Unread;
+  await meetingV103FetchChatBaseV1043(render);
+  if(meetingV1042Unread>previousUnread)meetingV1043Beep('message');
+};
+
+/* Sound for newly arriving waiting-room requests. */
+const meetingV103FetchWaitingBaseV1043=meetingV103FetchWaiting;
+meetingV103FetchWaiting=async function(render=true){
+  const before=new Set(meetingV1043KnownWaitingIds);
+  const init=meetingV1043WaitingInitialized;
+  await meetingV103FetchWaitingBaseV1043(render);
+  const now=Array.isArray(meetingV103Waiting)?meetingV103Waiting:[];
+  if(!init){
+    now.forEach(w=>meetingV1043KnownWaitingIds.add(String(w.id)));
+    meetingV1043WaitingInitialized=true;
+    return;
+  }
+  const added=now.filter(w=>!before.has(String(w.id))).length;
+  now.forEach(w=>meetingV1043KnownWaitingIds.add(String(w.id)));
+  if(added)meetingV1043Beep('waiting');
+};
+
+/* Add raised-hand state to incoming signal immediately, while presence remains the durable room state. */
+const meetingHandleSignalBaseV1043=meetingHandleSignalV101;
+meetingHandleSignalV101=async function(payload){
+  if(payload?.kind==='v1042-participation-request'){
+    const meta=meetingRemoteMetaV101.get(payload.from)||{};
+    meetingRemoteMetaV101.set(payload.from,{...meta,raised_hand:payload.active!==false});
+    if(document.getElementById('meet103Drawer')?.classList.contains('open')&&meetingV103DrawerTab==='people')meetingV103RenderDrawer();
+  }
+  return meetingHandleSignalBaseV1043(payload);
+};
+
+/* Auto-focus the loudest current speaker at 3+ participants unless someone is pinned. */
+const meetingV1042UpdateSpeakersBaseV1043=meetingV1042UpdateSpeakers;
+meetingV1042UpdateSpeakers=function(){
+  meetingV1042UpdateSpeakersBaseV1043();
+  const g=document.getElementById('meet101VideoGrid');
+  if(!g||meetingV1043PinnedPeer||g.querySelector('.screen')){meetingV1043ApplyLayout();return}
+  const speaking=[...g.querySelectorAll('.meet101-video-tile.meet1042-speaking:not(.meet1043-self-hidden)')];
+  const next=speaking[0]?.dataset.peer||meetingV1043AutoSpeakerPeer;
+  if(next!==meetingV1043AutoSpeakerPeer){meetingV1043AutoSpeakerPeer=next;meetingV1043ApplyLayout()}
+};
+
+/* Preserve V103 drawer and add persistent hand / speaking / pin information. */
+const meetingV103RenderDrawerBaseV1043=meetingV103RenderDrawer;
+meetingV103RenderDrawer=function(){
+  meetingV103RenderDrawerBaseV1043();
+  meetingV1043DecoratePeople();
+};
+
+/* Enhance every room render. */
+const meetingRenderRoomBaseV1043=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  meetingRenderRoomBaseV1043();
+  if(!meetingRoomV101)return;
+  meetingV1043PatchTimer();
+  meetingV1043PatchToolbar();
+  meetingV1043PatchPins();
+  meetingV1043ApplyLayout();
+  if(document.getElementById('meet103Drawer')?.classList.contains('open')&&meetingV103DrawerTab==='people')meetingV1043DecoratePeople();
+};
+
+const leaveMeetingRoomBaseV1043=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  meetingV1043StopTimer();
+  meetingV1043PinnedPeer=null;meetingV1043AutoSpeakerPeer=null;meetingV1043SelfHidden=false;
+  meetingV1043RaisedLocal=false;meetingV1043KnownWaitingIds.clear();meetingV1043WaitingInitialized=false;
+  return leaveMeetingRoomBaseV1043(opts);
+};
+</script>
+
 </body>
 </html>
