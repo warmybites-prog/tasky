@@ -16157,5 +16157,406 @@ if(setActiveNavBaseV10622){
 }
 </script>
 
+
+<style id="tasky-v107-brainstorm-canvas-css">
+/* ============================================================
+   V107 — Live Brainstorm Canvas
+   Free spatial canvas, notes, updates, votes, drawing + stylus.
+   ============================================================ */
+#brain107CanvasShell{
+  position:fixed;inset:0;z-index:31750;
+  display:none;flex-direction:column;
+  background:#0b1815;color:#eef5f2;
+  overflow:hidden;
+}
+#brain107CanvasShell.show{display:flex}
+.brain107-top{
+  flex:none;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  min-height:54px;padding:8px 11px;
+  padding-top:max(8px,env(safe-area-inset-top));
+  border-bottom:1px solid rgba(255,255,255,.10);
+  background:#0f211c;
+}
+.brain107-title{min-width:0}
+.brain107-title h2{margin:0;font-size:14px;line-height:1.4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brain107-title p{margin:2px 0 0;color:#9eb1aa;font-size:8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brain107-top-actions{display:flex;align-items:center;gap:5px;flex:none}
+.brain107-top-actions button,.brain107-tool{
+  min-height:36px;border:1px solid rgba(255,255,255,.13);background:#142b24;color:#eef5f2;
+  border-radius:9px;padding:7px 10px;font:800 9px Inter,'IBM Plex Sans Arabic';cursor:pointer
+}
+.brain107-top-actions button:hover,.brain107-tool:hover{background:#19372d}
+.brain107-status{
+  display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border:1px solid rgba(255,255,255,.10);
+  border-radius:999px;color:#a9bbb4;font-size:8px;white-space:nowrap
+}
+.brain107-status i{width:7px;height:7px;border-radius:50%;background:#5ab78e}
+.brain107-main{min-height:0;flex:1;display:grid;grid-template-columns:52px minmax(0,1fr);overflow:hidden}
+.brain107-tools{
+  z-index:5;display:flex;flex-direction:column;gap:6px;padding:8px 7px;
+  border-inline-end:1px solid rgba(255,255,255,.09);background:#10221d;overflow-y:auto
+}
+.brain107-tool{
+  width:38px;height:38px;min-height:38px;padding:0;display:grid;place-items:center;
+  font-size:10px;color:#b7c8c2
+}
+.brain107-tool.active{background:#eaf3ee;color:#163f31;border-color:#d0e2d9}
+.brain107-tool svg{width:17px;height:17px}
+.brain107-stage-wrap{position:relative;overflow:hidden;background:#eef1ed;touch-action:none}
+.brain107-stage{
+  position:absolute;left:0;top:0;width:4000px;height:3000px;transform-origin:0 0;
+  background-color:#f4f5f2;
+  background-image:radial-gradient(circle,#cdd4d0 1px,transparent 1px);
+  background-size:24px 24px;
+  cursor:grab;
+}
+.brain107-stage.pen-mode{cursor:crosshair}
+.brain107-stage.select-mode{cursor:default}
+.brain107-svg{
+  position:absolute;inset:0;width:4000px;height:3000px;overflow:visible;pointer-events:none
+}
+.brain107-stroke{fill:none;stroke-linecap:round;stroke-linejoin:round;pointer-events:none}
+.brain107-card{
+  position:absolute;width:230px;min-height:125px;border:1px solid #d7ddd9;background:#fff;color:#1a2521;
+  border-radius:12px;padding:11px;box-shadow:0 2px 8px rgba(23,42,35,.10);
+  user-select:none;touch-action:none
+}
+.brain107-card[data-kind="idea"]{border-top:3px solid #8ba99b}
+.brain107-card[data-kind="update"]{border-top:3px solid #6f8ca7}
+.brain107-card[data-kind="question"]{border-top:3px solid #b39b69}
+.brain107-card[data-kind="decision"]{border-top:3px solid #7c8c78}
+.brain107-card-head{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:8px}
+.brain107-card-kind{font-size:7.5px;color:#6f7d78;border:1px solid #e2e7e4;border-radius:999px;padding:3px 6px;background:#f7f8f6}
+.brain107-card-author{font-size:7px;color:#84908c;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.brain107-card-body{
+  min-height:58px;font-size:10px;line-height:1.65;white-space:pre-wrap;overflow-wrap:anywhere;
+  user-select:text
+}
+.brain107-card-foot{display:flex;align-items:center;justify-content:space-between;gap:7px;margin-top:9px;padding-top:7px;border-top:1px solid #edf0ee}
+.brain107-card-foot button{border:1px solid #dfe5e1;background:#f8f9f7;color:#3d5049;border-radius:999px;padding:4px 7px;font-size:8px}
+.brain107-card-foot button.voted{background:#eaf3ee;color:#216149;border-color:#c9ddd4}
+.brain107-card-foot .actions{display:flex;gap:4px}
+.brain107-card.dragging{opacity:.88;box-shadow:0 8px 22px rgba(0,0,0,.18);z-index:20}
+.brain107-cursor{
+  position:absolute;pointer-events:none;z-index:35;transform:translate(-3px,-3px);
+  transition:left .08s linear,top .08s linear
+}
+.brain107-cursor-dot{width:8px;height:8px;border-radius:50%;background:#154d3b;border:2px solid #fff}
+.brain107-cursor-label{margin-top:3px;margin-inline-start:6px;background:#143d31;color:#fff;border-radius:6px;padding:2px 5px;font-size:7px;white-space:nowrap}
+.brain107-bottom{
+  position:absolute;z-index:7;bottom:10px;left:50%;transform:translateX(-50%);
+  display:flex;align-items:center;gap:5px;padding:5px;border:1px solid #d8dfdb;background:rgba(255,255,255,.94);
+  border-radius:11px;box-shadow:0 4px 14px rgba(0,0,0,.10)
+}
+.brain107-bottom button{min-width:34px;height:32px;border:1px solid #dfe5e1;background:#fff;color:#344740;border-radius:8px;font-size:9px}
+.brain107-zoom{min-width:52px;text-align:center;color:#5f6f69;font-size:8px}
+.brain107-readonly{
+  position:absolute;z-index:8;top:10px;left:50%;transform:translateX(-50%);
+  padding:6px 10px;border:1px solid #d6dfda;background:#fff;color:#5b6a65;border-radius:999px;font-size:8px
+}
+.brain107-compose-panel{
+  position:absolute;z-index:30;top:66px;inset-inline-start:64px;width:min(360px,calc(100vw - 82px));
+  border:1px solid #d9e0dc;background:#fff;color:#16231e;border-radius:14px;padding:11px;
+  box-shadow:0 12px 35px rgba(0,0,0,.18);display:none
+}
+.brain107-compose-panel.show{display:block}
+.brain107-compose-panel label{display:block;font-size:8px;color:#65746f;margin-bottom:5px}
+.brain107-compose-panel select,.brain107-compose-panel textarea{
+  width:100%;border:1px solid #dce3df;background:#fbfcfb;color:#18241f;border-radius:9px;padding:9px;font-size:10px
+}
+.brain107-compose-panel textarea{min-height:100px;resize:vertical;line-height:1.6}
+.brain107-compose-actions{display:flex;gap:6px;justify-content:flex-end;margin-top:8px}
+.brain107-compose-actions button{min-height:36px;border:1px solid #dce3df;border-radius:9px;background:#fff;color:#2f433b;padding:7px 11px;font-weight:800}
+.brain107-compose-actions .primary{background:#1d624b;color:#fff;border-color:#1d624b}
+.brain107-legend{
+  position:absolute;z-index:6;top:10px;inset-inline-end:10px;display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end;
+  max-width:420px
+}
+.brain107-chip{background:rgba(255,255,255,.92);border:1px solid #d9dfdc;color:#53635d;border-radius:999px;padding:4px 7px;font-size:7.5px}
+@media(max-width:700px){
+  .brain107-main{grid-template-columns:46px minmax(0,1fr)}
+  .brain107-tools{padding:6px 4px}
+  .brain107-tool{width:36px;height:36px}
+  .brain107-title p{display:none}
+  .brain107-status{display:none}
+  .brain107-card{width:205px}
+  .brain107-compose-panel{inset-inline-start:53px;width:calc(100vw - 65px)}
+}
+@media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+  .brain107-top{min-height:45px;padding:5px 8px}
+  .brain107-title h2{font-size:12px}
+  .brain107-main{grid-template-columns:45px minmax(0,1fr)}
+  .brain107-tool{width:34px;height:34px;min-height:34px}
+  .brain107-compose-panel{top:50px}
+  .brain107-card{width:205px;min-height:110px}
+}
+</style>
+
+<script id="tasky-v107-brainstorm-canvas-js">
+window.TASKY_BUILD='V107';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain107MeetingId=null;
+let brain107Objects=[];
+let brain107Strokes=[];
+let brain107Presence=[];
+let brain107Timer=null;
+let brain107PresenceTimer=null;
+let brain107Tool='select';
+let brain107Scale=1;
+let brain107Tx=0,brain107Ty=0;
+let brain107Pan=null;
+let brain107Draw=null;
+let brain107Drag=null;
+let brain107LastPresence=0;
+
+function brain107L(ar,en){return lang==='ar'?ar:en}
+function brain107Shell(){
+  let el=document.getElementById('brain107CanvasShell');
+  if(!el){el=document.createElement('div');el.id='brain107CanvasShell';document.body.appendChild(el)}
+  return el;
+}
+function brain107SessionArgs(){
+  return {
+    p_meeting_id:brain107MeetingId,
+    p_guest_session_id:meetingGuestSessionV102?.id||null,
+    p_guest_session_token:meetingGuestSessionV102?.token||null
+  };
+}
+function brain107KindLabel(kind){
+  return ({idea:brain107L('فكرة','Idea'),update:brain107L('تحديث','Update'),question:brain107L('سؤال','Question'),decision:brain107L('قرار','Decision')})[kind]||kind;
+}
+function brain107CanEdit(){
+  const m=meetingsV101.find(x=>x.id===brain107MeetingId)||meetingRoomV101;
+  return !!m&&['scheduled','live'].includes(m.status);
+}
+function brain107SvgIcon(name){
+  const icons={
+    select:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M5 3l13 8-6 2 3 6-2 1-3-6-5 4z"/></svg>',
+    pen:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 20l4-1 10-10-3-3L5 16zM13 8l3 3"/></svg>',
+    note:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M8 9h8M8 13h6"/></svg>',
+    hand:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M8 11V6a2 2 0 014 0v4-6a2 2 0 014 0v7-4a2 2 0 014 0v5-2a2 2 0 014 0v5c0 4-3 6-7 6h-1c-3 0-5-1-7-4l-2-3a2 2 0 013-2l2 2"/></svg>',
+    erase:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 15l8-10 8 7-7 8H8z"/><path d="M11 20h9"/></svg>'
+  };
+  return icons[name]||'';
+}
+function brain107RenderShell(){
+  const el=brain107Shell();
+  const m=meetingsV101.find(x=>x.id===brain107MeetingId)||meetingRoomV101||{};
+  const editable=brain107CanEdit();
+  el.innerHTML=`<div class="brain107-top">
+    <div class="brain107-title"><h2>${brain107L('غرفة العصف الذهني','Brainstorm Room')} — ${escapeHtml(m.title||'')}</h2><p>${brain107L('مساحة حرة مشتركة للكتابة والرسم والتصويت والتحديثات المباشرة','Shared free canvas for writing, drawing, voting and live updates')}</p></div>
+    <div class="brain107-top-actions"><span class="brain107-status"><i></i><span id="brain107PresenceCount">${brain107L('متصل','Connected')}</span></span><button type="button" onclick="brain107Fit()">${brain107L('ملاءمة','Fit')}</button><button type="button" onclick="brain107Close()">×</button></div>
+  </div>
+  <div class="brain107-main">
+    <aside class="brain107-tools">
+      <button type="button" class="brain107-tool ${brain107Tool==='select'?'active':''}" title="${brain107L('تحديد وتحريك','Select & move')}" onclick="brain107SetTool('select')">${brain107SvgIcon('select')}</button>
+      <button type="button" class="brain107-tool ${brain107Tool==='hand'?'active':''}" title="${brain107L('تحريك اللوحة','Pan canvas')}" onclick="brain107SetTool('hand')">${brain107SvgIcon('hand')}</button>
+      ${editable?`<button type="button" class="brain107-tool ${brain107Tool==='pen'?'active':''}" title="${brain107L('قلم','Pen')}" onclick="brain107SetTool('pen')">${brain107SvgIcon('pen')}</button><button type="button" class="brain107-tool" title="${brain107L('بطاقة جديدة','New card')}" onclick="brain107ToggleCompose(true)">${brain107SvgIcon('note')}</button>`:''}
+    </aside>
+    <div class="brain107-stage-wrap" id="brain107StageWrap">
+      <div class="brain107-stage ${brain107Tool==='pen'?'pen-mode':brain107Tool==='select'?'select-mode':''}" id="brain107Stage">
+        <svg class="brain107-svg" id="brain107Svg" viewBox="0 0 4000 3000"></svg>
+        <div id="brain107Cards"></div><div id="brain107Cursors"></div>
+      </div>
+      ${!editable?`<div class="brain107-readonly">${brain107L('هذه الغرفة للعرض فقط بعد انتهاء الاجتماع','This room is read-only after the meeting ends')}</div>`:''}
+      <div class="brain107-legend"><span class="brain107-chip">${brain107L('فكرة','Idea')}</span><span class="brain107-chip">${brain107L('تحديث','Update')}</span><span class="brain107-chip">${brain107L('سؤال','Question')}</span><span class="brain107-chip">${brain107L('قرار','Decision')}</span></div>
+      <div class="brain107-bottom"><button type="button" onclick="brain107Zoom(-.15)">−</button><span class="brain107-zoom" id="brain107Zoom">${Math.round(brain107Scale*100)}%</span><button type="button" onclick="brain107Zoom(.15)">+</button><button type="button" onclick="brain107Fit()">${brain107L('ملاءمة','Fit')}</button></div>
+    </div>
+  </div>
+  <div class="brain107-compose-panel" id="brain107Compose">
+    <label>${brain107L('نوع البطاقة','Card type')}</label><select id="brain107Kind"><option value="idea">${brain107L('فكرة','Idea')}</option><option value="update">${brain107L('تحديث / خبر','Update / news')}</option><option value="question">${brain107L('سؤال','Question')}</option><option value="decision">${brain107L('قرار','Decision')}</option></select>
+    <label style="margin-top:8px">${brain107L('المحتوى','Content')}</label><textarea id="brain107Body" maxlength="1500" placeholder="${brain107L('اكتب هنا…','Write here…')}"></textarea>
+    <div class="brain107-compose-actions"><button type="button" onclick="brain107ToggleCompose(false)">${brain107L('إلغاء','Cancel')}</button><button type="button" class="primary" onclick="brain107CreateCard()">${brain107L('إضافة للوحة','Add to canvas')}</button></div>
+  </div>`;
+  el.classList.add('show');
+  brain107ApplyTransform();brain107BindStage();brain107RenderData();
+}
+function brain107SetTool(t){brain107Tool=t;brain107RenderShell()}
+function brain107ToggleCompose(show){
+  const p=document.getElementById('brain107Compose');if(!p)return;
+  p.classList.toggle('show',!!show);
+  if(show)setTimeout(()=>document.getElementById('brain107Body')?.focus(),30);
+}
+function brain107ScreenToCanvas(clientX,clientY){
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect();
+  return {x:(clientX-r.left-brain107Tx)/brain107Scale,y:(clientY-r.top-brain107Ty)/brain107Scale};
+}
+function brain107ApplyTransform(){
+  const s=document.getElementById('brain107Stage');if(!s)return;
+  s.style.transform=`translate(${brain107Tx}px,${brain107Ty}px) scale(${brain107Scale})`;
+  const z=document.getElementById('brain107Zoom');if(z)z.textContent=Math.round(brain107Scale*100)+'%';
+}
+function brain107Zoom(delta,clientX=null,clientY=null){
+  const wrap=document.getElementById('brain107StageWrap');if(!wrap)return;
+  const r=wrap.getBoundingClientRect(),cx=clientX??(r.left+r.width/2),cy=clientY??(r.top+r.height/2);
+  const before=brain107ScreenToCanvas(cx,cy),next=Math.max(.35,Math.min(2.2,brain107Scale+delta));
+  brain107Scale=next;
+  brain107Tx=(cx-r.left)-before.x*next;brain107Ty=(cy-r.top)-before.y*next;brain107ApplyTransform();
+}
+function brain107Fit(){
+  const wrap=document.getElementById('brain107StageWrap');if(!wrap)return;
+  if(!brain107Objects.length&&!brain107Strokes.length){brain107Scale=.85;brain107Tx=30;brain107Ty=30;brain107ApplyTransform();return}
+  let minX=99999,minY=99999,maxX=0,maxY=0;
+  for(const o of brain107Objects){minX=Math.min(minX,o.x);minY=Math.min(minY,o.y);maxX=Math.max(maxX,o.x+240);maxY=Math.max(maxY,o.y+150)}
+  for(const st of brain107Strokes){for(const p of st.points||[]){minX=Math.min(minX,p.x);minY=Math.min(minY,p.y);maxX=Math.max(maxX,p.x);maxY=Math.max(maxY,p.y)}}
+  if(minX===99999){minX=0;minY=0;maxX=800;maxY=600}
+  const r=wrap.getBoundingClientRect(),w=Math.max(300,maxX-minX+100),h=Math.max(250,maxY-minY+100);
+  brain107Scale=Math.max(.35,Math.min(1.35,Math.min(r.width/w,r.height/h)));
+  brain107Tx=(r.width-w*brain107Scale)/2-minX*brain107Scale+50*brain107Scale;
+  brain107Ty=(r.height-h*brain107Scale)/2-minY*brain107Scale+50*brain107Scale;
+  brain107ApplyTransform();
+}
+function brain107BindStage(){
+  const wrap=document.getElementById('brain107StageWrap'),stage=document.getElementById('brain107Stage');
+  if(!wrap||!stage||wrap.__brain107)return;wrap.__brain107=true;
+  wrap.addEventListener('wheel',e=>{e.preventDefault();brain107Zoom(e.deltaY>0?-.1:.1,e.clientX,e.clientY)},{passive:false});
+  stage.addEventListener('pointerdown',brain107PointerDown);
+  window.addEventListener('pointermove',brain107PointerMove);
+  window.addEventListener('pointerup',brain107PointerUp);
+}
+function brain107PointerDown(e){
+  if(e.button!=null&&e.button!==0)return;
+  const card=e.target.closest?.('.brain107-card');
+  if(card&&brain107Tool==='select'&&brain107CanEdit()){
+    const o=brain107Objects.find(x=>x.id===card.dataset.id);if(!o||!o.can_move)return;
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain107Drag={id:o.id,dx:p.x-o.x,dy:p.y-o.y,lastX:o.x,lastY:o.y};
+    card.classList.add('dragging');card.setPointerCapture?.(e.pointerId);return;
+  }
+  if(brain107Tool==='pen'&&brain107CanEdit()){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    brain107Draw={points:[{x:p.x,y:p.y,p:e.pressure||.5}],pointerId:e.pointerId};
+    e.target.setPointerCapture?.(e.pointerId);return;
+  }
+  if(brain107Tool==='hand'||(!card&&brain107Tool==='select')){
+    brain107Pan={x:e.clientX,y:e.clientY,tx:brain107Tx,ty:brain107Ty};return;
+  }
+}
+function brain107PointerMove(e){
+  if(brain107Drag){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),o=brain107Objects.find(x=>x.id===brain107Drag.id);
+    if(o){o.x=Math.max(0,Math.min(3760,p.x-brain107Drag.dx));o.y=Math.max(0,Math.min(2820,p.y-brain107Drag.dy));brain107Drag.lastX=o.x;brain107Drag.lastY=o.y;brain107RenderCards()}
+  }else if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);
+    const last=brain107Draw.points[brain107Draw.points.length-1];
+    if(!last||Math.hypot(p.x-last.x,p.y-last.y)>2){brain107Draw.points.push({x:p.x,y:p.y,p:e.pressure||.5});brain107RenderStrokes(true)}
+  }else if(brain107Pan){
+    brain107Tx=brain107Pan.tx+(e.clientX-brain107Pan.x);brain107Ty=brain107Pan.ty+(e.clientY-brain107Pan.y);brain107ApplyTransform();
+  }
+  if(Date.now()-brain107LastPresence>100){
+    brain107LastPresence=Date.now();
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain107PresencePing(p.x,p.y);
+  }
+}
+async function brain107PointerUp(e){
+  if(brain107Drag){
+    const d=brain107Drag;brain107Drag=null;
+    document.querySelector(`.brain107-card[data-id="${CSS.escape(d.id)}"]`)?.classList.remove('dragging');
+    const {error}=await sb.rpc('tasky_meeting_canvas_move_v107',{...brain107SessionArgs(),p_object_id:d.id,p_x:Math.round(d.lastX),p_y:Math.round(d.lastY)});
+    if(error)console.warn('V107 move',error);
+  }
+  if(brain107Draw&&e.pointerId===brain107Draw.pointerId){
+    const pts=brain107Draw.points;brain107Draw=null;
+    if(pts.length>1){
+      const {error}=await sb.rpc('tasky_meeting_canvas_stroke_add_v107',{...brain107SessionArgs(),p_points:pts,p_width:3.2,p_color:'#214f40'});
+      if(error)showTaskyDialog({title:brain107L('تعذّر حفظ الرسم','Could not save drawing'),message:error.message,tone:'error'});
+      else await brain107Fetch();
+    }
+  }
+  brain107Pan=null;
+}
+function brain107RenderData(){brain107RenderStrokes();brain107RenderCards();brain107RenderPresence()}
+function brain107RenderStrokes(includeDraft=false){
+  const svg=document.getElementById('brain107Svg');if(!svg)return;
+  const all=[...brain107Strokes];
+  if(includeDraft&&brain107Draw?.points?.length)all.push({id:'draft',points:brain107Draw.points,width:3.2,color:'#214f40'});
+  svg.innerHTML=all.map(st=>{
+    const pts=st.points||[];if(pts.length<2)return'';
+    const d=pts.map((p,i)=>`${i?'L':'M'} ${Number(p.x).toFixed(1)} ${Number(p.y).toFixed(1)}`).join(' ');
+    return `<path class="brain107-stroke" d="${d}" stroke="${escapeHtml(st.color||'#214f40')}" stroke-width="${Number(st.width||3)}"/>`;
+  }).join('');
+}
+function brain107RenderCards(){
+  const host=document.getElementById('brain107Cards');if(!host)return;
+  host.innerHTML=brain107Objects.map(o=>`<article class="brain107-card" data-id="${o.id}" data-kind="${escapeHtml(o.kind)}" style="left:${Number(o.x)}px;top:${Number(o.y)}px">
+    <div class="brain107-card-head"><span class="brain107-card-kind">${escapeHtml(brain107KindLabel(o.kind))}</span><span class="brain107-card-author">${escapeHtml(o.author_name||'')}</span></div>
+    <div class="brain107-card-body">${escapeHtml(o.body)}</div>
+    <div class="brain107-card-foot"><button type="button" class="${o.my_vote?'voted':''}" onclick="event.stopPropagation();brain107Vote('${o.id}')">${brain107L('تصويت','Vote')} · ${Number(o.vote_count||0)}</button><div class="actions">${o.can_delete?`<button type="button" onclick="event.stopPropagation();brain107DeleteObject('${o.id}')">${brain107L('حذف','Delete')}</button>`:''}</div></div>
+  </article>`).join('');
+}
+function brain107RenderPresence(){
+  const host=document.getElementById('brain107Cursors');if(!host)return;
+  host.innerHTML=(brain107Presence||[]).filter(p=>!p.is_me).map(p=>`<div class="brain107-cursor" style="left:${Number(p.cursor_x||0)}px;top:${Number(p.cursor_y||0)}px"><div class="brain107-cursor-dot"></div><div class="brain107-cursor-label">${escapeHtml(p.display_name||brain107L('مشارك','Participant'))}</div></div>`).join('');
+  const c=document.getElementById('brain107PresenceCount');if(c)c.textContent=`${Number(brain107Presence?.length||1)} ${brain107L('متصل','online')}`;
+}
+async function brain107Fetch(){
+  if(!brain107MeetingId)return;
+  const {data,error}=await sb.rpc('tasky_meeting_canvas_state_v107',brain107SessionArgs());
+  if(error){console.warn('V107 canvas state',error);return}
+  brain107Objects=Array.isArray(data?.objects)?data.objects:[];
+  brain107Strokes=Array.isArray(data?.strokes)?data.strokes:[];
+  brain107Presence=Array.isArray(data?.presence)?data.presence:[];
+  brain107RenderData();
+}
+async function brain107PresencePing(x=null,y=null){
+  if(!brain107MeetingId)return;
+  const args={...brain107SessionArgs(),p_cursor_x:x==null?null:Math.round(x),p_cursor_y:y==null?null:Math.round(y)};
+  sb.rpc('tasky_meeting_canvas_presence_v107',args).catch?.(()=>{});
+}
+async function brain107CreateCard(){
+  const body=document.getElementById('brain107Body')?.value.trim()||'',kind=document.getElementById('brain107Kind')?.value||'idea';
+  if(!body)return;
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect();
+  const center=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const {error}=await sb.rpc('tasky_meeting_canvas_object_add_v107',{...brain107SessionArgs(),p_kind:kind,p_body:body,p_x:Math.round(center.x-115),p_y:Math.round(center.y-60)});
+  if(error)return showTaskyDialog({title:brain107L('تعذّرت إضافة البطاقة','Could not add card'),message:error.message,tone:'error'});
+  brain107ToggleCompose(false);await brain107Fetch();
+}
+async function brain107Vote(id){
+  const {error}=await sb.rpc('tasky_meeting_canvas_vote_v107',{...brain107SessionArgs(),p_object_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain107Fetch();
+}
+async function brain107DeleteObject(id){
+  const ok=await taskyConfirm(brain107L('حذف هذه البطاقة؟','Delete this card?'),{title:brain107L('حذف البطاقة','Delete card'),tone:'danger',confirmText:brain107L('حذف','Delete')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_meeting_canvas_object_delete_v107',{...brain107SessionArgs(),p_object_id:id});
+  if(error)return showTaskyDialog({title:brain107L('تعذّر الحذف','Could not delete'),message:error.message,tone:'error'});await brain107Fetch();
+}
+async function brain107Open(meetingId){
+  brain107MeetingId=meetingId||meetingRoomV101?.id;if(!brain107MeetingId)return;
+  const probe=await sb.rpc('tasky_meeting_canvas_state_v107',brain107SessionArgs());
+  if(probe.error){brain107MeetingId=null;return showTaskyDialog({title:brain107L('تعذّر فتح مساحة العصف الذهني','Could not open brainstorm canvas'),message:probe.error.message,tone:'error'})}
+  brain107Objects=Array.isArray(probe.data?.objects)?probe.data.objects:[];
+  brain107Strokes=Array.isArray(probe.data?.strokes)?probe.data.strokes:[];
+  brain107Presence=Array.isArray(probe.data?.presence)?probe.data.presence:[];
+  brain107RenderShell();setTimeout(brain107Fit,50);
+  clearInterval(brain107Timer);brain107Timer=setInterval(brain107Fetch,1000);
+  clearInterval(brain107PresenceTimer);brain107PresencePing();brain107PresenceTimer=setInterval(()=>brain107PresencePing(),4000);
+}
+function brain107Close(){
+  clearInterval(brain107Timer);clearInterval(brain107PresenceTimer);brain107Timer=null;brain107PresenceTimer=null;
+  brain107MeetingId=null;brain107Objects=[];brain107Strokes=[];brain107Presence=[];
+  brain107Shell().classList.remove('show');
+}
+
+/* Make the first-class Brainstorm section open the live canvas rather than the older lane board. */
+const brain106OpenLegacyV107=brain106Open;
+brain106Open=async function(meetingId){return brain107Open(meetingId)};
+
+/* Section copy now describes the free canvas accurately. */
+const meetingsBrainstormTemplateBaseV107=meetingsBrainstormTemplateV10622;
+meetingsBrainstormTemplateV10622=function(){
+  let h=meetingsBrainstormTemplateBaseV107();
+  h=h.replace(
+    brain107L('مساحة مرتبطة باجتماعات تاسكي لتجميع الأفكار والفرص والتحديات والقرارات. اختر اجتماعًا لفتح لوحته، وتبقى لوحات الاجتماعات السابقة متاحة كمرجع بعد انتهائها.','A workspace linked to Tasky meetings for capturing ideas, opportunities, challenges and decisions. Choose a meeting to open its board; completed meeting boards remain available as reference.'),
+    brain107L('مساحة حرة مشتركة لكل اجتماع للكتابة والرسم بالقلم وإضافة التحديثات والتصويت مباشرة. تبقى اللوحة محفوظة كمرجع بعد انتهاء الاجتماع.','A free shared canvas for every meeting with live writing, stylus drawing, updates and voting. The canvas stays preserved as reference after the meeting ends.')
+  );
+  return h;
+};
+
+/* Cleanup if participant leaves the meeting while canvas is open. */
+const leaveMeetingRoomBaseV107=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){if(brain107MeetingId)brain107Close();return leaveMeetingRoomBaseV107(opts)};
+</script>
+
 </body>
 </html>
