@@ -15271,5 +15271,179 @@ leaveMeetingRoomV101=async function(opts={}){if(brain106MeetingId)brain106Close(
 setTimeout(()=>{tasky106InstallRememberUi();try{renderNav()}catch(_){}},80);
 </script>
 
+
+<script id="tasky-v1061-camera-reenable-js">
+window.TASKY_BUILD='V106.1';console.info('Tasky build',window.TASKY_BUILD);
+
+function tasky1061L(ar,en){return lang==='ar'?ar:en}
+
+/* Re-acquire a camera track on demand when the participant entered with camera
+   disabled. The earlier toggle logic could only enable/disable an existing
+   track, so a participant who joined without creating a camera track had
+   nothing to re-enable later. */
+async function tasky1061AcquireCameraTrack(){
+  if(!navigator.mediaDevices?.getUserMedia){
+    throw new Error(tasky1061L('المتصفح لا يدعم تشغيل الكاميرا.','This browser does not support camera access.'));
+  }
+
+  const stream=await navigator.mediaDevices.getUserMedia({
+    audio:false,
+    video:typeof meetingV10514VideoConstraints==='function'
+      ?meetingV10514VideoConstraints()
+      :{facingMode:{ideal:'user'},width:{ideal:1280},height:{ideal:720}}
+  });
+
+  const track=stream.getVideoTracks()[0];
+  if(!track)throw new Error(tasky1061L('لم يتم العثور على كاميرا متاحة.','No available camera was found.'));
+
+  /* Keep only the track we are adopting. */
+  for(const t of stream.getTracks()){
+    if(t!==track){try{t.stop()}catch(_){}}
+  }
+
+  track.enabled=true;
+  track.onended=()=>{
+    if(meetingCameraTrackV101===track){
+      meetingCameraTrackV101=null;
+      meetingLocalStateV101.camera=false;
+      try{meetingRenderRoomV101()}catch(_){}
+      try{meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*')}catch(_){}
+    }
+  };
+
+  meetingCameraTrackV101=track;
+
+  if(!meetingLocalStreamV101)meetingLocalStreamV101=new MediaStream();
+  /* Remove any stale ended video tracks before adding the new camera. */
+  for(const old of meetingLocalStreamV101.getVideoTracks()){
+    if(old!==track){
+      try{meetingLocalStreamV101.removeTrack(old)}catch(_){}
+      try{old.stop()}catch(_){}
+    }
+  }
+  meetingLocalStreamV101.addTrack(track);
+
+  return track;
+}
+
+async function tasky1061PublishCameraTrack(track){
+  if(!track)return;
+
+  if(meetingV105Transport==='sfu'&&meetingV105SfuRoom&&window.LivekitClient){
+    try{
+      await meetingV105SfuRoom.localParticipant.publishTrack(track,{
+        source:window.LivekitClient.Track.Source.Camera,
+        simulcast:true
+      });
+      return;
+    }catch(e){
+      console.warn('V106.1 SFU camera publish fallback',e);
+    }
+  }
+
+  /* P2P: replace video sender track when one exists. If a peer connection was
+     created while camera was off, addTrack creates a sender and renegotiate. */
+  for(const [peerId,pc] of meetingPeersV101.entries()){
+    if(!pc||pc.connectionState==='closed')continue;
+    try{
+      let sender=pc.getSenders().find(s=>s.track?.kind==='video');
+      if(sender){
+        await sender.replaceTrack(track);
+      }else{
+        pc.addTrack(track,meetingLocalStreamV101);
+        if(pc.signalingState==='stable'){
+          const offer=await pc.createOffer();
+          await pc.setLocalDescription(offer);
+          await meetingBroadcastSignalV101('offer',{sdp:pc.localDescription},peerId);
+        }
+      }
+    }catch(e){
+      console.warn('V106.1 camera publish peer',peerId,e);
+    }
+  }
+}
+
+async function tasky1061UnpublishCameraTrack(track){
+  if(!track)return;
+
+  if(meetingV105Transport==='sfu'&&meetingV105SfuRoom&&window.LivekitClient){
+    try{
+      const pub=meetingV105SfuRoom.localParticipant.getTrackPublication(window.LivekitClient.Track.Source.Camera);
+      if(pub?.track){
+        await meetingV105SfuRoom.localParticipant.unpublishTrack(pub.track);
+      }
+    }catch(e){console.warn('V106.1 SFU camera unpublish',e)}
+  }
+
+  for(const pc of meetingPeersV101.values()){
+    try{
+      const sender=pc.getSenders().find(s=>s.track===track||s.track?.kind==='video');
+      if(sender)await sender.replaceTrack(null);
+    }catch(_){}
+  }
+}
+
+/* Full replacement of camera toggle:
+   - camera ON with existing live track -> disable/remove as before
+   - camera OFF because no track ever existed -> request permission now, add a
+     new track, and publish it to all existing peers
+   - if permission was previously denied, the browser will ask again only when
+     platform policy allows; otherwise Tasky gives a clear permission message. */
+toggleMeetingCameraV101=async function(){
+  if(!meetingRoomV101)return;
+
+  const current=meetingCameraTrackV101;
+  const liveCurrent=current&&current.readyState==='live';
+
+  if(meetingLocalStateV101.camera&&liveCurrent){
+    meetingLocalStateV101.camera=false;
+    current.enabled=false;
+    await tasky1061UnpublishCameraTrack(current);
+
+    try{meetingLocalStreamV101?.removeTrack(current)}catch(_){}
+    try{current.stop()}catch(_){}
+    if(meetingCameraTrackV101===current)meetingCameraTrackV101=null;
+
+    meetingRenderRoomV101();
+    await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+    return;
+  }
+
+  try{
+    const track=await tasky1061AcquireCameraTrack();
+    meetingLocalStateV101.camera=true;
+    await tasky1061PublishCameraTrack(track);
+    meetingRenderRoomV101();
+    await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+    taskyToast(tasky1061L('تم تشغيل الكاميرا','Camera enabled'),{tone:'success'});
+  }catch(err){
+    meetingLocalStateV101.camera=false;
+    meetingRenderRoomV101();
+
+    const denied=err?.name==='NotAllowedError'||err?.name==='PermissionDeniedError';
+    showTaskyDialog({
+      title:tasky1061L('تعذّر تشغيل الكاميرا','Could not enable camera'),
+      message:denied
+        ?tasky1061L(
+          'إذن الكاميرا مرفوض لهذا الموقع. اسمح لتاسكي باستخدام الكاميرا من إعدادات المتصفح/الموقع ثم اضغط زر الكاميرا مرة أخرى.',
+          'Camera permission is blocked for this site. Allow camera access in the browser/site settings, then press the camera button again.'
+        )
+        :(err?.message||String(err)),
+      tone:'warning'
+    });
+  }
+};
+
+/* Make local toolbar state accurately reflect that no camera track exists. */
+const meetingRenderRoomBaseV1061=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  if(meetingCameraTrackV101?.readyState==='ended'){
+    meetingCameraTrackV101=null;
+    meetingLocalStateV101.camera=false;
+  }
+  return meetingRenderRoomBaseV1061();
+};
+</script>
+
 </body>
 </html>
