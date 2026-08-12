@@ -14440,5 +14440,98 @@ leaveMeetingRoomV101=async function(opts={}){
 };
 </script>
 
+
+<style id="tasky-v10516-guest-prejoin-layer-css">
+/*
+  Guest portal is z-index:39000.
+  The shared Tasky modal/dialog layers were below it, so the prejoin screen
+  actually opened but was hidden behind the full-screen guest portal.
+*/
+#addModalOverlay{z-index:43000!important}
+#taskyDialogBackdrop{z-index:43100!important}
+#detailModalOverlay,#eventModalOverlay,#eventTaskModalOverlay,#budgetModalOverlay,#aiModalOverlay{z-index:43000!important}
+.tasky-select-menu{z-index:43200!important}
+
+.meet10516-guest-progress{
+  grid-column:1/-1;
+  display:none;
+  border:1px solid #cfe0d9;
+  background:#f4faf7;
+  color:#286451;
+  border-radius:11px;
+  padding:9px 11px;
+  font-size:9px;
+  line-height:1.6;
+  font-weight:800;
+}
+.meet10516-guest-progress.show{display:block}
+</style>
+
+<script id="tasky-v10516-guest-prejoin-layer-js">
+window.TASKY_BUILD='V105.1.6';console.info('Tasky build',window.TASKY_BUILD);
+
+function meet10516L(ar,en){return lang==='ar'?ar:en}
+
+function meetingV10516SetGuestProgress(text=''){
+  let el=document.getElementById('meet10516GuestProgress');
+  const form=document.querySelector('.meet102-guest-form');
+  if(!el&&form){
+    el=document.createElement('div');
+    el.id='meet10516GuestProgress';
+    el.className='meet10516-guest-progress';
+    form.appendChild(el);
+  }
+  if(el){
+    el.textContent=text;
+    el.classList.toggle('show',!!text);
+  }
+}
+
+/* Keep the existing deterministic V105.1.5 guest flow, but make the transition
+   visible before opening the prejoin modal. */
+const joinPublicMeetingGuestBaseV10516=joinPublicMeetingGuestV102;
+joinPublicMeetingGuestV102=async function(e){
+  e?.preventDefault?.();
+
+  if(!meetingV10514GuestConfirmed){
+    meetingV10516SetGuestProgress(
+      meet10516L(
+        'جاري فتح إعدادات الكاميرا والمايك…',
+        'Opening camera and microphone settings…'
+      )
+    );
+  }
+
+  try{
+    return await joinPublicMeetingGuestBaseV10516(e);
+  }finally{
+    /* If the prejoin modal is now visible, remove the inline transition note.
+       If an error occurred, the error dialog is above the guest portal now. */
+    setTimeout(()=>meetingV10516SetGuestProgress(''),250);
+  }
+};
+
+/* When opening the prejoin screen from the guest portal, explicitly mark it as
+   a guest modal for predictable full-screen layering on iOS Safari. */
+const meetingV10514OpenPrejoinBaseV10516=meetingV10514OpenPrejoin;
+meetingV10514OpenPrejoin=async function(kind,roomCode=null){
+  const overlay=document.getElementById('addModalOverlay');
+  overlay?.classList.toggle('meet10516-guest-prejoin-overlay',kind==='guest');
+
+  try{
+    return await meetingV10514OpenPrejoinBaseV10516(kind,roomCode);
+  }catch(err){
+    overlay?.classList.remove('meet10516-guest-prejoin-overlay');
+    throw err;
+  }
+};
+
+const closeAddModalBaseV10516=closeAddModal;
+closeAddModal=function(){
+  document.getElementById('addModalOverlay')?.classList.remove('meet10516-guest-prejoin-overlay');
+  return closeAddModalBaseV10516();
+};
+</script>
+
 </body>
 </html>
