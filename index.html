@@ -12560,5 +12560,204 @@ meetingV103React=async function(emoji){
 };
 </script>
 
+
+<style id="tasky-v1045-meeting-privacy-ux-css">
+/* Meeting room sits at z-index 26000; all Tasky dialogs used from inside the room must sit above it. */
+#taskyDialogBackdrop{z-index:32050!important}
+#addModalOverlay,#detailModalOverlay,#eventModalOverlay,#eventTaskModalOverlay,#budgetModalOverlay,#aiModalOverlay{z-index:32000!important}
+.meet101-video-tile:not(.has-video):not(.screen) video{display:none!important}
+.meet1045-speaking-chip{display:inline-flex;align-items:center;gap:4px;margin-inline-start:6px;padding:2px 6px;border-radius:999px;background:#e6f5ef;color:#176347;font-size:8px;font-weight:900}
+.meet1045-chat-hand{margin-top:8px;width:100%;border:1px solid rgba(255,255,255,.12);background:#17382f;color:#fff;border-radius:10px;padding:8px;font-size:9px;font-weight:850}
+.meet1045-chat-hand.active{background:#5c3920;border-color:#8b5b32}
+.meet1045-host-muted{display:inline-flex;align-items:center;gap:5px;color:#ffd6ce;font-size:8px;font-weight:850;margin-inline-start:5px}
+</style>
+<script id="tasky-v1045-meeting-privacy-ux-js">
+window.TASKY_BUILD='V104.5';console.info('Tasky build',window.TASKY_BUILD);
+
+let meetingV1045HostMuted=false;
+const meetingV1045StartedAt=new Map();
+
+function meetingV1045NormalizeName(v){
+  return String(v||'').trim().toLocaleLowerCase(lang==='ar'?'ar':'en');
+}
+function meetingV1045DisplayName(){
+  const me=meetingMeV101?.()||{};
+  const raw=String(me.fullName||'').trim();
+  if(raw && !raw.includes('@')) return raw;
+  const member=meetingMemberV101?.(currentUserId);
+  const candidate=String(member?.fullName||member?.invitedName||'').trim();
+  if(candidate && !candidate.includes('@')) return candidate;
+  return meet103L('عضو تاسكي','Tasky member');
+}
+function meetingV1045GuestOrMemberInvite(){
+  if(!meetingRoomV101)return;
+  return meetingShareInviteV103(meetingRoomV101.room_code);
+}
+function meetingV1045PatchToolbar(){
+  const tools=document.getElementById('meet103Tools');if(!tools)return;
+  /* Hide-self was redundant with the camera control and could confuse camera state. */
+  document.getElementById('meet1043SelfBtn')?.remove();
+  meetingV1043SelfHidden=false;
+  document.querySelector('[data-peer="local"]')?.classList.remove('meet1043-self-hidden');
+
+  let invite=document.getElementById('meet1045InviteBtn');
+  if(!invite){
+    invite=document.createElement('button');
+    invite.id='meet1045InviteBtn';invite.type='button';invite.className='meet103-pill';
+    invite.onclick=meetingV1045GuestOrMemberInvite;
+    invite.innerHTML=`✉️ <span>${meet103L('دعوة','Invite')}</span>`;
+    tools.appendChild(invite);
+  }
+}
+/* Keep external guest links available to the organizer after leaving the room,
+   as long as the meeting itself is still scheduled/live. */
+const meetingCardBaseV1045=meetingCardV101;
+meetingCardV101=function(m,past=false){
+  let h=meetingCardBaseV1045(m,past);
+  if(m?.can_manage&&m?.allow_guests&&['scheduled','live'].includes(m.status)&&!h.includes('meetingCopyGuestLinkV102')){
+    h=h.replace('</div></article>',`<button class="chip-btn meet102-guest-link-btn" onclick="meetingCopyGuestLinkV102('${m.id}')">${meet102L('رابط ضيف بدون تسجيل','No-login guest link')}</button></div></article>`);
+  }
+  return h;
+};
+
+/* Reaction palette: replace 😂 with 🙂 and keep click-away behavior from V104.4. */
+meetingToggleReactionsV103=function(){
+  const old=document.getElementById('meet103Reactions');
+  if(old){old.remove();meetingV103ReactionsOpen=false;return}
+  const d=document.createElement('div');d.id='meet103Reactions';d.className='meet103-reactions';
+  d.innerHTML=['👍','👏','❤️','🙂','🎉','🤔','🙋'].map(x=>`<button onclick="meetingV103React('${x}')">${x}</button>`).join('');
+  document.body.appendChild(d);meetingV103ReactionsOpen=true;
+};
+
+/* Privacy: a host can force mute, but never force unmute.
+   After a host mute, the participant cannot locally reopen the mic until the host sends
+   an explicit request and the participant accepts it. */
+const toggleMeetingMicBaseV1045=toggleMeetingMicV101;
+toggleMeetingMicV101=async function(){
+  const tracks=meetingLocalStreamV101?.getAudioTracks?.()||[];
+  const wantsOn=!!tracks.length&&!tracks[0].enabled;
+  if(wantsOn&&meetingV1045HostMuted){
+    taskyToast(meet103L('المنظّم كتم مايكك. انتظر طلب فتح المايك ثم وافق عليه بنفسك.','The organizer muted you. Wait for an unmute request and approve it yourself.'),{tone:'warning'});
+    return;
+  }
+  return toggleMeetingMicBaseV1045();
+};
+meetingV103HandleControl=async function(payload){
+  const a=payload?.action;
+  if(a==='mute'){
+    const tracks=meetingLocalStreamV101?.getAudioTracks?.()||[];
+    tracks.forEach(t=>t.enabled=false);
+    meetingLocalStateV101.mic=false;
+    meetingV1045HostMuted=true;
+    meetingRenderRoomV101();
+    await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+    return taskyToast(meet103L('قام المنظّم بكتم مايكك. لا يمكن إعادة فتحه إلا بعد طلب من المنظّم وموافقتك.','The organizer muted your microphone. It can only be reopened after an organizer request and your approval.'),{tone:'warning'});
+  }
+  if(a==='request_unmute'||a==='invite_speak'){
+    const msg=a==='request_unmute'
+      ?meet103L('يطلب المنظّم منك فتح المايك. لن يتم تشغيله إلا إذا وافقت.','The organizer is asking you to unmute. Your microphone will turn on only if you approve.')
+      :meet103L('يدعوك المنظّم للمشاركة. هل توافق على تشغيل المايك؟','The organizer invites you to speak. Do you approve turning on your microphone?');
+    if(await taskyConfirm(msg,{title:meet103L('إذن المايك','Microphone permission')})){
+      const tracks=meetingLocalStreamV101?.getAudioTracks?.()||[];
+      if(!tracks.length)return taskyToast(meet103L('لا يوجد مسار مايك مصرح به','No authorized microphone track'),{tone:'warning'});
+      meetingV1045HostMuted=false;
+      tracks.forEach(t=>t.enabled=true);meetingLocalStateV101.mic=true;
+      meetingRenderRoomV101();await meetingBroadcastSignalV101('media-state',{state:meetingLocalStateV101},'*');
+    }
+  }
+};
+
+/* Robust timer: use canonical started_at if present; otherwise keep one stable client
+   timestamp per meeting instead of resetting it on every room render. */
+function meetingV1045StartTime(){
+  if(!meetingRoomV101)return Date.now();
+  const id=String(meetingRoomV101.id||meetingRoomV101.room_code||'room');
+  const canonical=meetingRoomV101.started_at||meetingByIdV101?.(meetingRoomV101.id)?.started_at;
+  if(canonical){
+    const t=new Date(canonical).getTime();
+    if(Number.isFinite(t)){meetingV1045StartedAt.set(id,t);return t}
+  }
+  if(!meetingV1045StartedAt.has(id))meetingV1045StartedAt.set(id,Date.now());
+  return meetingV1045StartedAt.get(id);
+}
+meetingV1043UpdateTimer=function(){
+  const el=document.getElementById('meet1043Timer');if(!el||!meetingRoomV101)return;
+  el.textContent=meetingV1043FormatElapsed(Date.now()-meetingV1045StartTime());
+};
+
+/* Chat should show names, not emails. Also show "speaking now" beside the sender name. */
+function meetingV1045SpeakingNames(){
+  const out=new Set();
+  const local=document.querySelector('.meet101-video-tile[data-peer="local"].meet1042-speaking');
+  if(local)out.add(meetingV1045NormalizeName(meetingV1045DisplayName()));
+  for(const p of meetingRemoteParticipantsV101()){
+    const tile=document.querySelector(`.meet101-video-tile[data-peer="${CSS.escape(String(p.peerId))}"].meet1042-speaking`);
+    if(tile)out.add(meetingV1045NormalizeName(p.name||''));
+  }
+  return out;
+}
+function meetingV1045PatchChatSpeaking(){
+  if(meetingV103DrawerTab!=='chat')return;
+  const speaking=meetingV1045SpeakingNames();
+  document.querySelectorAll('#meet103DrawerBody .meet103-chat-msg').forEach(row=>{
+    const b=row.querySelector('b');if(!b)return;
+    b.querySelector('.meet1045-speaking-chip')?.remove();
+    const raw=[...b.childNodes].filter(n=>n.nodeType===Node.TEXT_NODE).map(n=>n.textContent).join('').trim();
+    if(speaking.has(meetingV1045NormalizeName(raw))){
+      b.insertAdjacentHTML('beforeend',`<span class="meet1045-speaking-chip">● ${meet103L('يتحدث الآن','Speaking now')}</span>`);
+    }
+  });
+}
+function meetingV1045PatchChatParticipation(){
+  if(meetingV103DrawerTab!=='chat'||meetingRoomV101?.can_manage)return;
+  const compose=document.getElementById('meet103ChatCompose');if(!compose)return;
+  let b=document.getElementById('meet1045ChatHandBtn');
+  if(!b){
+    b=document.createElement('button');b.id='meet1045ChatHandBtn';b.type='button';b.className='meet1045-chat-hand';
+    b.onclick=meetingV1042RequestParticipation;compose.appendChild(b);
+  }
+  b.classList.toggle('active',!!meetingV1042HandRaised);
+  b.textContent=meetingV1042HandRaised?`🙋 ${meet103L('إلغاء طلب المشاركة','Cancel participation request')}`:`🙋 ${meet103L('طلب المشاركة','Ask to speak')}`;
+}
+const meetingV103RenderDrawerBaseV1045=meetingV103RenderDrawer;
+meetingV103RenderDrawer=function(){
+  meetingV103RenderDrawerBaseV1045();
+  meetingV1045PatchChatParticipation();
+  meetingV1045PatchChatSpeaking();
+};
+
+/* Keep the speaking state next to chat names updated without rebuilding the chat. */
+const meetingV1042UpdateSpeakersBaseV1045=meetingV1042UpdateSpeakers;
+meetingV1042UpdateSpeakers=function(){
+  meetingV1042UpdateSpeakersBaseV1045();
+  meetingV1045PatchChatSpeaking();
+};
+
+/* Camera-off must remove the remote video image immediately; only avatar/name remains. */
+const meetingRenderRoomBaseV1045=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  meetingRenderRoomBaseV1045();
+  if(!meetingRoomV101)return;
+  meetingV1045PatchToolbar();
+  const meta=document.getElementById('meet101RoomMeta');
+  if(meta&&meetingV1045HostMuted&&!meetingLocalStateV101.mic&&!meetingRoomV101.can_manage){
+    meta.insertAdjacentHTML('afterend',`<span class="meet1045-host-muted">🔒 ${meet103L('مكتوم بواسطة المنظّم','Muted by organizer')}</span>`);
+  }
+  /* Ensure stale video frames are hidden whenever presence reports camera off. */
+  for(const p of meetingRemoteParticipantsV101()){
+    const tile=document.querySelector(`.meet101-video-tile[data-peer="${CSS.escape(String(p.peerId))}"]`);
+    const metaP=meetingRemoteMetaV101.get(p.peerId)||{};
+    tile?.classList.toggle('has-video',metaP.camera!==false||metaP.screen===true);
+  }
+};
+
+/* When leaving/rejoining, do not carry a host-mute lock into a different session. */
+const leaveMeetingRoomBaseV1045=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  meetingV1045HostMuted=false;
+  return leaveMeetingRoomBaseV1045(opts);
+};
+</script>
+
 </body>
 </html>
