@@ -13921,5 +13921,235 @@ meetingCardV101=function(m,past=false){
 };
 </script>
 
+
+<style id="tasky-v10513-meeting-audio-css">
+#meet10513AudioUnlock{
+  position:fixed;left:50%;bottom:94px;transform:translateX(-50%);
+  z-index:31950;display:none;align-items:center;gap:8px;
+  border:1px solid #6cae98;background:#123f34;color:#fff;
+  border-radius:999px;padding:10px 16px;box-shadow:0 10px 30px rgba(0,0,0,.22);
+  font:900 10px Inter,'IBM Plex Sans Arabic';cursor:pointer
+}
+#meet10513AudioUnlock.show{display:flex}
+.meet10513-audio-sink{position:fixed!important;width:1px!important;height:1px!important;opacity:.001!important;pointer-events:none!important;left:-10000px!important;top:-10000px!important}
+</style>
+<script id="tasky-v10513-meeting-audio-hotfix-js">
+window.TASKY_BUILD='V105.1.3';console.info('Tasky build',window.TASKY_BUILD);
+
+const meetingV10513AudioEls=new Map();
+let meetingV10513AudioBlocked=false;
+
+function meet10513L(ar,en){return lang==='ar'?ar:en}
+
+function meetingV10513UnlockButton(){
+  let b=document.getElementById('meet10513AudioUnlock');
+  if(!b){
+    b=document.createElement('button');
+    b.id='meet10513AudioUnlock';
+    b.type='button';
+    b.innerHTML=`🔊 <span>${meet10513L('اضغط لتشغيل صوت الاجتماع','Tap to enable meeting audio')}</span>`;
+    b.onclick=meetingV10513UnlockAudio;
+    document.body.appendChild(b);
+  }
+  b.classList.toggle('show',meetingV10513AudioBlocked&&!!meetingRoomV101);
+  return b;
+}
+async function meetingV10513TryPlay(el){
+  if(!el)return true;
+  el.autoplay=true;el.muted=false;el.volume=1;
+  el.setAttribute('playsinline','');
+  try{
+    await el.play();
+    return true;
+  }catch(e){
+    if(e?.name==='NotAllowedError'||e?.name==='AbortError'){
+      meetingV10513AudioBlocked=true;
+      meetingV10513UnlockButton();
+    }
+    return false;
+  }
+}
+function meetingV10513AudioEl(peerId){
+  const key=String(peerId);
+  let el=meetingV10513AudioEls.get(key);
+  if(el&&document.body.contains(el))return el;
+  el=document.createElement('audio');
+  el.id='meet10513Audio_'+key.replace(/[^a-zA-Z0-9_-]/g,'_');
+  el.className='meet10513-audio-sink';
+  el.autoplay=true;el.playsInline=true;el.muted=false;el.volume=1;
+  document.body.appendChild(el);
+  meetingV10513AudioEls.set(key,el);
+  return el;
+}
+function meetingV10513SyncPeerAudio(peerId,stream){
+  if(!stream)return;
+  const tracks=stream.getAudioTracks?.().filter(t=>t.readyState==='live')||[];
+  const el=meetingV10513AudioEl(peerId);
+  if(!tracks.length){
+    if(el.srcObject)el.srcObject=null;
+    return;
+  }
+  const current=el.srcObject;
+  const currentIds=current?.getAudioTracks?.().map(t=>t.id).join(',')||'';
+  const nextIds=tracks.map(t=>t.id).join(',');
+  if(currentIds!==nextIds)el.srcObject=new MediaStream(tracks);
+  meetingV10513TryPlay(el);
+}
+function meetingV10513SyncAllAudio(){
+  if(!meetingRoomV101)return;
+  for(const [peerId,stream] of meetingRemoteStreamsV101.entries()){
+    meetingV10513SyncPeerAudio(peerId,stream);
+  }
+  for(const [peerId,el] of [...meetingV10513AudioEls.entries()]){
+    if(!meetingRemoteStreamsV101.has(peerId)){
+      try{el.pause();el.srcObject=null;el.remove()}catch(_){}
+      meetingV10513AudioEls.delete(peerId);
+    }
+  }
+}
+async function meetingV10513UnlockAudio(){
+  meetingV10513AudioBlocked=false;
+  /* Resume any AudioContext used by active-speaker detection as well. */
+  try{
+    if(meetingV1042AudioCtx?.state==='suspended')await meetingV1042AudioCtx.resume();
+  }catch(_){}
+  let ok=true;
+  for(const el of meetingV10513AudioEls.values()){
+    const played=await meetingV10513TryPlay(el);
+    ok=ok&&played;
+  }
+  meetingV10513AudioBlocked=!ok;
+  meetingV10513UnlockButton();
+  if(ok)taskyToast(meet10513L('تم تشغيل صوت الاجتماع','Meeting audio enabled'),{tone:'success'});
+}
+
+/* Safari/iOS may reject audible autoplay even though the user clicked Join earlier
+   because media setup completes asynchronously. Any user gesture in the room retries audio. */
+document.addEventListener('pointerdown',()=>{
+  if(meetingRoomV101&&meetingV10513AudioBlocked)meetingV10513UnlockAudio();
+},{passive:true});
+
+/* P2P: create a dedicated audio sink immediately when an audio track arrives.
+   This avoids depending on the participant's <video> element for sound. */
+const meetingEnsurePeerBaseV10513=meetingEnsurePeerV101;
+meetingEnsurePeerV101=function(remotePeerId){
+  const pc=meetingEnsurePeerBaseV10513(remotePeerId);
+  if(!pc.__taskyV10513Audio){
+    pc.__taskyV10513Audio=true;
+    const oldTrack=pc.ontrack;
+    pc.ontrack=e=>{
+      oldTrack?.(e);
+      setTimeout(()=>{
+        const s=meetingRemoteStreamsV101.get(remotePeerId);
+        if(s)meetingV10513SyncPeerAudio(remotePeerId,s);
+      },0);
+    };
+  }
+  return pc;
+};
+
+/* SFU: LiveKit remote audio track is explicitly attached to a dedicated audio sink.
+   LiveKit's track.attach() is preferred when available; MediaStream fallback remains. */
+function meetingV10513AttachLiveKitAudio(track,participant){
+  if(!track||track.kind!=='audio')return;
+  const id=participant?.identity||track.sid||crypto.randomUUID?.()||String(Date.now());
+  const el=meetingV10513AudioEl(id);
+  try{
+    if(typeof track.attach==='function'){
+      track.attach(el);
+    }else if(track.mediaStreamTrack){
+      el.srcObject=new MediaStream([track.mediaStreamTrack]);
+    }
+  }catch(e){
+    if(track.mediaStreamTrack)el.srcObject=new MediaStream([track.mediaStreamTrack]);
+  }
+  meetingV10513TryPlay(el);
+}
+function meetingV10513DetachLiveKitAudio(track,participant){
+  const id=participant?.identity;
+  if(!id)return;
+  const el=meetingV10513AudioEls.get(String(id));
+  if(!el)return;
+  try{track?.detach?.(el)}catch(_){}
+  try{el.pause();el.srcObject=null;el.remove()}catch(_){}
+  meetingV10513AudioEls.delete(String(id));
+}
+
+/* Patch SFU listeners after the room exists without changing transport selection. */
+const meetingV105ConnectSfuBaseV10513=meetingV105ConnectSfu;
+meetingV105ConnectSfu=async function(){
+  await meetingV105ConnectSfuBaseV10513();
+  const room=meetingV105SfuRoom,LK=window.LivekitClient;
+  if(!room||room.__taskyV10513Audio)return;
+  room.__taskyV10513Audio=true;
+
+  /* Attach tracks that were already subscribed during connect. */
+  for(const p of room.remoteParticipants?.values?.()||[]){
+    for(const pub of p.trackPublications?.values?.()||[]){
+      const t=pub.track;
+      if(t?.kind==='audio')meetingV10513AttachLiveKitAudio(t,p);
+    }
+  }
+
+  room.on(LK.RoomEvent.TrackSubscribed,(track,pub,participant)=>{
+    if(track?.kind==='audio'||pub?.source===LK.Track.Source.Microphone){
+      meetingV10513AttachLiveKitAudio(track,participant);
+    }
+  });
+  room.on(LK.RoomEvent.TrackUnsubscribed,(track,pub,participant)=>{
+    if(track?.kind==='audio'||pub?.source===LK.Track.Source.Microphone){
+      meetingV10513DetachLiveKitAudio(track,participant);
+    }
+  });
+};
+
+/* Re-rendering the meeting room must never drop remote sound. */
+const meetingRenderRoomBaseV10513=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  meetingRenderRoomBaseV10513();
+  if(meetingRoomV101){
+    meetingV10513SyncAllAudio();
+    meetingV10513UnlockButton();
+  }
+};
+
+/* Keep host mute privacy semantics while ensuring local audio track really is enabled/disabled. */
+const toggleMeetingMicBaseV10513=toggleMeetingMicV101;
+toggleMeetingMicV101=async function(){
+  await toggleMeetingMicBaseV10513();
+  const tracks=meetingLocalStreamV101?.getAudioTracks?.()||[];
+  tracks.forEach(t=>{t.enabled=!!meetingLocalStateV101.mic});
+};
+
+/* Audio diagnostics: make the existing Connection panel reveal actual local/remote tracks. */
+const meetingV105DiagnosticsBaseV10513=meetingV105Diagnostics;
+meetingV105Diagnostics=function(){
+  meetingV105DiagnosticsBaseV10513();
+  const body=document.getElementById('addModalBody');
+  if(!body)return;
+  const local=meetingLocalStreamV101?.getAudioTracks?.()||[];
+  const remote=[...meetingRemoteStreamsV101.values()].flatMap(s=>s.getAudioTracks?.()||[]).filter(t=>t.readyState==='live');
+  const block=document.createElement('div');
+  block.className='meet105-diag';
+  block.innerHTML=`<div><span>${meet10513L('مايك محلي','Local mic')}</span><b>${local.length?`${local.filter(t=>t.enabled).length}/${local.length} ${meet10513L('مفعّل','enabled')}`:meet10513L('لا يوجد','None')}</b></div>
+    <div><span>${meet10513L('مسارات صوت واردة','Remote audio tracks')}</span><b>${remote.length}</b></div>
+    <div><span>${meet10513L('تشغيل الصوت','Audio playback')}</span><b>${meetingV10513AudioBlocked?meet10513L('يحتاج نقرة','Tap required'):meet10513L('مفعّل','Enabled')}</b></div>
+    <div><span>${meet10513L('مخارج الصوت','Audio sinks')}</span><b>${meetingV10513AudioEls.size}</b></div>`;
+  body.appendChild(block);
+};
+
+/* Cleanup. */
+const leaveMeetingRoomBaseV10513=leaveMeetingRoomV101;
+leaveMeetingRoomV101=async function(opts={}){
+  for(const el of meetingV10513AudioEls.values()){
+    try{el.pause();el.srcObject=null;el.remove()}catch(_){}
+  }
+  meetingV10513AudioEls.clear();
+  meetingV10513AudioBlocked=false;
+  document.getElementById('meet10513AudioUnlock')?.classList.remove('show');
+  return leaveMeetingRoomBaseV10513(opts);
+};
+</script>
+
 </body>
 </html>
