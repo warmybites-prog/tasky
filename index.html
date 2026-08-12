@@ -11727,5 +11727,107 @@ meetingsTemplateV101=function(){
 };
 </script>
 
+
+<style id="tasky-v1041-meeting-ux-hotfix-css">
+.meet1041-wait-inline{margin:14px 0 0;border:1px solid #cfe2db;background:#edf6f2;border-radius:16px;padding:16px;text-align:center;color:#153c33}
+.meet1041-wait-inline h3{margin:0 0 6px;font-size:16px}.meet1041-wait-inline p{margin:0;color:#587169;font-size:10px;line-height:1.7}
+.meet1041-wait-inline .spinner{width:28px;height:28px;border:3px solid #d9e5e0;border-top-color:#0b4d40;border-radius:50%;margin:12px auto;animation:spin .9s linear infinite}
+</style>
+<script id="tasky-v1041-meeting-ux-hotfix-js">
+window.TASKY_BUILD='V104.1';console.info('Tasky build',window.TASKY_BUILD);
+
+/* Preserve chat drafts while the 2.5s poll updates the drawer. */
+const meetingV103RenderDrawerBaseV1041=meetingV103RenderDrawer;
+meetingV103RenderDrawer=function(){
+  const input=document.getElementById('meet103ChatInput');
+  const draft=input?.value??'';
+  const hadFocus=document.activeElement===input;
+  const start=input?.selectionStart??draft.length;
+  const end=input?.selectionEnd??draft.length;
+  meetingV103RenderDrawerBaseV1041();
+  if(meetingV103DrawerTab==='chat'){
+    const next=document.getElementById('meet103ChatInput');
+    if(next){
+      next.value=draft;
+      if(hadFocus){
+        next.focus({preventScroll:true});
+        try{next.setSelectionRange(Math.min(start,draft.length),Math.min(end,draft.length))}catch(_){}
+      }
+    }
+  }
+};
+
+/* Build a proper external invitation from the actual V102 guest_token payload. */
+function meetingV1041InviteText(m,url,isGuest){
+  const title=m?.title||meet103L('اجتماع تاسكي','Tasky Meeting');
+  const organizer=m?.created_by?meetingMemberNameV101(m.created_by):'';
+  const desc=(m?.description||'').trim();
+  return [
+    meet103L('📅 دعوة اجتماع عبر تاسكي','📅 Tasky meeting invitation'),
+    '',
+    `📌 ${meet103L('الاجتماع','Meeting')}: ${title}`,
+    m?.scheduled_at?`🗓 ${meet103L('الموعد','When')}: ${meetingDateV101(m.scheduled_at)}`:'',
+    m?.duration_minutes?`⏱ ${meet103L('المدة','Duration')}: ${Number(m.duration_minutes)} ${meet103L('دقيقة','min')}`:'',
+    organizer?`👤 ${meet103L('المنظّم','Organizer')}: ${organizer}`:'',
+    desc?`📝 ${meet103L('التفاصيل','Details')}: ${desc}`:'',
+    '',
+    `🔗 ${isGuest?meet103L('الدخول كضيف بدون حساب','Join as a guest — no account required'):meet103L('رابط الدخول','Join link')}:`,
+    url,
+    '',
+    `🔑 ${meet103L('رمز الاجتماع','Meeting code')}: ${m?.room_code||''}`,
+    isGuest?meet103L('ℹ️ لا تحتاج إلى إنشاء حساب تاسكي. سيطلب منك المنظم الدخول من غرفة الانتظار إذا كانت مفعّلة.','ℹ️ No Tasky account is required. If the waiting room is enabled, the organizer will admit you.'): ''
+  ].filter(Boolean).join('\n');
+}
+async function meetingShareInviteV103(roomCode){
+  try{
+    const m=meetingsV101.find(x=>x.room_code===roomCode)||meetingRoomV101;
+    let url=meetingLinkV101(roomCode),isGuest=false;
+    if(m?.allow_guests&&m?.can_manage){
+      const r=await sb.rpc('tasky_meeting_guest_link_v102',{p_meeting_id:m.id});
+      if(!r.error&&r.data?.guest_token){
+        url=meetingGuestLinkUrlV102(r.data.room_code||roomCode,r.data.guest_token);
+        isGuest=true;
+      }
+    }
+    const text=meetingV1041InviteText(m||{room_code:roomCode},url,isGuest);
+    /* Do not pass a separate URL to iOS Web Share; WhatsApp may otherwise discard the message body. */
+    if(navigator.share) await navigator.share({title:m?.title||'Tasky Meeting',text});
+    else{
+      await navigator.clipboard.writeText(text);
+      taskyToast(meet103L('تم نسخ دعوة الاجتماع بالتفاصيل','Detailed meeting invitation copied'),{tone:'success'});
+    }
+  }catch(e){
+    if(e?.name!=='AbortError')taskyToast(meet103L('تعذّر مشاركة الدعوة','Could not share invitation'),{tone:'error'});
+  }
+}
+
+/* Show waiting state inside the guest page as well as the full-screen waiting room. */
+const meetingV103ShowGuestWaitingBaseV1041=meetingV103ShowGuestWaiting;
+meetingV103ShowGuestWaiting=function(){
+  meetingV103ShowGuestWaitingBaseV1041();
+  const screen=document.getElementById('taskyMeetingGuestV102')||document.getElementById('meet102GuestScreen')||document.querySelector('.meet102-public-card');
+  const form=document.getElementById('meet102GuestName')?.closest('form');
+  if(form){
+    form.querySelectorAll('input,button').forEach(el=>el.disabled=true);
+    let box=document.getElementById('meet1041GuestWaitInline');
+    if(!box){
+      box=document.createElement('div');
+      box.id='meet1041GuestWaitInline';
+      box.className='meet1041-wait-inline';
+      form.appendChild(box);
+    }
+    box.innerHTML=`<h3>⏳ ${meet103L('أنت الآن في غرفة الانتظار','You are now in the waiting room')}</h3><div class="spinner"></div><p>${meet103L('تم إرسال طلبك إلى منظم الاجتماع. لا تغلق هذه الصفحة؛ ستدخل تلقائيًا فور الموافقة.','Your request was sent to the organizer. Keep this page open; you will enter automatically when admitted.')}</p>`;
+    try{box.scrollIntoView({behavior:'smooth',block:'center'})}catch(_){}
+  }
+}
+const meetingV103CancelGuestWaitBaseV1041=meetingV103CancelGuestWait;
+meetingV103CancelGuestWait=function(){
+  meetingV103CancelGuestWaitBaseV1041();
+  const form=document.getElementById('meet102GuestName')?.closest('form');
+  form?.querySelectorAll('input,button').forEach(el=>el.disabled=false);
+  document.getElementById('meet1041GuestWaitInline')?.remove();
+}
+</script>
+
 </body>
 </html>
