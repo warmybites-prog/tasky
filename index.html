@@ -15834,5 +15834,132 @@ brain106Open=async function(meetingId){
 setTimeout(()=>{try{tasky1062EnhanceProjectNav()}catch(_){};try{tasky1062EnsureBrainstormToolbar()}catch(_){}},250);
 </script>
 
+
+<style id="tasky-v10621-design-consistency-css">
+/* ============================================================
+   V106.2.1 — Restore Tasky visual language
+   No emoji icons in product actions. Use existing neutral buttons/icons.
+   ============================================================ */
+.tasky1062-project-menu-actions .close-project,
+.tasky1062-project-menu-actions .delete-project{
+  background:var(--card)!important;
+  color:var(--ink)!important;
+  border:1px solid var(--border)!important;
+}
+.tasky1062-project-menu-actions .delete-project{
+  color:var(--danger)!important;
+}
+.tasky1062-project-menu-actions button,
+.tasky1062-project-menu-sheet>.chip-btn{
+  min-height:42px!important;
+  border-radius:10px!important;
+  font-size:10px!important;
+  font-weight:800!important;
+}
+.tasky1062-brain-btn{
+  background:var(--card)!important;
+  color:var(--ink)!important;
+  border-color:var(--border)!important;
+  font-weight:800!important;
+}
+#brain106ToolbarBtn{
+  background:transparent!important;
+  border-color:rgba(255,255,255,.14)!important;
+}
+.brain106-head-actions button,
+.brain106-compose button{
+  border-radius:9px!important;
+  font-weight:800!important;
+}
+.meet10512-actions .minutes,
+.meet10512-actions .permissions{
+  background:var(--card)!important;
+  color:var(--ink)!important;
+  border-color:var(--border)!important;
+}
+</style>
+
+<script id="tasky-v10621-design-consistency-js">
+window.TASKY_BUILD='V106.2.1';console.info('Tasky build',window.TASKY_BUILD);
+
+function tasky10621L(ar,en){return lang==='ar'?ar:en}
+
+function tasky10621ProjectMenuButton(label,action,extra=''){
+  return `<button class="chip-btn ${extra}" onclick="${action}">${escapeHtml(label)}</button>`;
+}
+
+/* Rebuild project management sheet without emoji/decorative icons. */
+tasky1062OpenProjectMenu=function(projectId){
+  const p=projects.find(x=>x.id===projectId);if(!p)return;
+  const canManage=canManageProjectClient(projectId);
+  if(!canManage)return taskyToast(tasky10621L('لا تملك صلاحية إدارة هذا المشروع','You do not have permission to manage this project'),{tone:'warning'});
+
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${tasky10621L('إدارة المشروع','Project management')}</h3><div class="subtle">${tasky10621L('أغلق المشروع لإزالته من القائمة مع الاحتفاظ بالتاريخ، أو احذفه نهائيًا إذا كان فارغًا ولا توجد سجلات مرتبطة.','Close the project to remove it from the active list while preserving history, or permanently delete it only if it is empty and has no linked records.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="tasky1062-project-menu-sheet">
+    <div class="tasky1062-project-summary"><b>${escapeHtml(p.name)}</b><span>${escapeHtml(p.description||tasky10621L('بدون وصف','No description'))}</span></div>
+    <div class="tasky1062-project-menu-actions">
+      ${tasky10621ProjectMenuButton(tasky10621L('إغلاق المشروع','Close project'),`tasky106CloseProject('${p.id}')`,'close-project')}
+      ${currentUserRole==='admin'?tasky10621ProjectMenuButton(tasky10621L('حذف نهائي','Delete permanently'),`tasky106DeleteProject('${p.id}')`,'delete-project'):''}
+    </div>
+    ${tasky10621ProjectMenuButton(tasky10621L('صلاحيات المشروع','Project permissions'),`closeAddModal();openProjectAccessModal('${p.id}')`)}
+  </div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+};
+
+/* Meeting card brainstorm button: text only, same chip language as the rest of Tasky. */
+const meetingCardBaseV10621=meetingCardV101;
+meetingCardV101=function(m,past=false){
+  let h=meetingCardBaseV10621(m,past);
+
+  h=h.replace(
+    /<button class="chip-btn tasky1062-brain-btn" onclick="brain106Open\('([^']+)'\)">[\s\S]*?<\/button>/,
+    `<button class="chip-btn tasky1062-brain-btn" onclick="brain106Open('$1')">${tasky10621L('غرفة العصف الذهني','Brainstorm room')}</button>`
+  );
+
+  h=h.replace(/📝\s*/g,'').replace(/🔐\s*/g,'').replace(/✉️\s*/g,'').replace(/🔗\s*/g,'').replace(/↗\s*/g,'').replace(/✎\s*/g,'');
+  return h;
+};
+
+/* Live meeting toolbar: keep wording, remove emoji glyph. */
+function tasky10621NormalizeMeetingToolbar(){
+  const brain=document.getElementById('brain106ToolbarBtn');
+  if(brain)brain.innerHTML=`<span>${tasky10621L('عصف ذهني','Brainstorm')}</span>`;
+
+  const tools=document.getElementById('meet103Tools');
+  if(!tools)return;
+  tools.querySelectorAll('button').forEach(btn=>{
+    if(btn.id==='brain106ToolbarBtn')return;
+    const span=btn.querySelector('span');
+    if(!span)return;
+    for(const n of [...btn.childNodes]){
+      if(n.nodeType===Node.TEXT_NODE && /[\p{Extended_Pictographic}]/u.test(n.textContent||'')){
+        n.textContent='';
+      }
+    }
+  });
+}
+
+const meetingRenderRoomBaseV10621=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  const r=meetingRenderRoomBaseV10621();
+  if(meetingRoomV101)requestAnimationFrame(tasky10621NormalizeMeetingToolbar);
+  return r;
+};
+
+/* Brainstorm heading/actions without emoji. */
+const brain106RenderBaseV10621=brain106Render;
+brain106Render=function(){
+  brain106RenderBaseV10621();
+  const el=document.getElementById('taskyV106Brainstorm');
+  if(!el)return;
+  const h=el.querySelector('.brain106-head h2');
+  if(h)h.textContent=h.textContent.replace(/^[\s\p{Extended_Pictographic}]+/u,'');
+};
+
+setTimeout(()=>{
+  try{tasky10621NormalizeMeetingToolbar()}catch(_){}
+},200);
+</script>
+
 </body>
 </html>
