@@ -21883,7 +21883,7 @@ setActiveNav=function(id,...args){
 
 
 <script id="tasky-v1632-connect-money-hotfix-js">
-window.TASKY_BUILD='V164.1';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V165';console.info('Tasky build',window.TASKY_BUILD);
 
 /* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
 function com162Money(v){
@@ -21896,6 +21896,333 @@ function com162Money(v){
 /* Keep the older formatter and the V162 formatter aligned. */
 if(typeof com161Money==='function'){
   com162Money=function(v){ return com161Money(v); };
+}
+</script>
+
+
+<style id="tasky-v165-entitlements-css">
+/* ============================================================
+   V165 — Subscription / Package / Add-on entitlement layer
+   ============================================================ */
+.ent165-lock{
+  margin-inline-start:auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:18px;
+  height:18px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  font-size:10px;
+  color:var(--muted);
+}
+.ent165-addon{
+  margin-inline-start:auto;
+  display:inline-flex;
+  align-items:center;
+  border:1px solid #d8dfdc;
+  background:var(--paper);
+  color:var(--muted);
+  border-radius:999px;
+  padding:2px 6px;
+  font-size:7px;
+  font-weight:800;
+}
+.ent165-dialog-copy{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+}
+.ent165-dialog-copy p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.7;
+}
+.ent165-dialog-meta{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.ent165-dialog-meta span{
+  border:1px solid var(--border);
+  background:var(--paper);
+  border-radius:999px;
+  padding:4px 7px;
+  font-size:8px;
+  color:var(--muted);
+}
+</style>
+
+<script id="tasky-v165-entitlements-js">
+window.TASKY_BUILD='V165';console.info('Tasky build',window.TASKY_BUILD);
+
+/* ============================================================
+   Module catalog
+   Keep module identity separate from how it is sold.
+   "essential" modules remain available so customers can manage
+   account/billing/support even when a subscription is restricted.
+   ============================================================ */
+const TASKY_MODULE_CATALOG_V165 = {
+  home:{ar:'الرئيسية',en:'Home',essential:true},
+  tasks:{ar:'المهام والمشاريع',en:'Tasks & Projects'},
+  crm:{ar:'CRM',en:'CRM'},
+  hr:{ar:'الموارد البشرية',en:'HR'},
+  analytics:{ar:'التحليلات',en:'Analytics'},
+  integrations:{ar:'التكاملات',en:'Integrations'},
+  content:{ar:'المحتوى',en:'Content'},
+  campaigns:{ar:'الحملات',en:'Campaigns'},
+  requests:{ar:'الطلبات',en:'Requests'},
+  media:{ar:'الوسائط',en:'Media'},
+  inventory:{ar:'المخزون',en:'Inventory'},
+  events:{ar:'الفعاليات',en:'Events'},
+  budgets:{ar:'الميزانيات',en:'Budgets'},
+  vendors:{ar:'الموردون والمشتريات',en:'Vendors & Procurement'},
+  comms:{ar:'المراسلات',en:'Comms'},
+  assets:{ar:'الأصول',en:'Assets'},
+  surveys:{ar:'الاستبيانات',en:'Surveys'},
+  reports:{ar:'التقارير',en:'Reports'},
+  meetings:{ar:'الاجتماعات',en:'Meetings'},
+  bookings:{ar:'الحجوزات',en:'Bookings'},
+  experience:{ar:'تجربة الموظف',en:'Employee Experience'},
+  connect:{ar:'التواصل',en:'Connect'},
+  support:{ar:'الدعم',en:'Support',essential:true},
+  settings:{ar:'الإعدادات',en:'Settings',essential:true},
+  team:{ar:'الفريق',en:'Team'},
+  billing:{ar:'الفوترة',en:'Billing',essential:true}
+};
+
+/* Soft dependencies do not disable the source module.
+   They only disable the integrated action that requires the target module. */
+const TASKY_SOFT_LINKS_V165 = {
+  hr:{experience:['insurance_health','employee_benefits'],requests:['hr_requests'],assets:['employee_assets']},
+  experience:{hr:['employee_profile','onboarding'],connect:['social_meals'],bookings:['scheduled_benefits']},
+  connect:{experience:['wallet','meal_payments'],meetings:['meeting_chat'],tasks:['share_task_project'],requests:['share_request']},
+  requests:{assets:['asset_requests'],inventory:['parts'],vendors:['procurement'],tasks:['task_project_conversion'],bookings:['onsite_visit'],surveys:['csat'],crm:['external_customer']},
+  bookings:{crm:['customer'],requests:['service_followup'],assets:['bookable_assets']},
+  meetings:{tasks:['actions'],connect:['conversation'],surveys:['rating']},
+  events:{budgets:['event_budget'],vendors:['event_vendor'],tasks:['event_tasks']},
+  vendors:{inventory:['received_items'],budgets:['budget_control'],requests:['purchase_request']},
+  inventory:{assets:['asset_creation'],vendors:['replenishment'],requests:['parts_request']},
+  crm:{requests:['support_request'],bookings:['appointment'],campaigns:['campaign_targeting']},
+  campaigns:{content:['content'],crm:['audience'],analytics:['performance']},
+  surveys:{requests:['service_feedback'],hr:['employee_survey'],analytics:['survey_analytics']},
+  analytics:{reports:['export']}
+};
+
+let taskyEntitlementsV165=null;
+let taskyEntitlementsLoadingV165=false;
+let taskyEntitlementsErrorV165='';
+let taskyEntitlementsFetchedWorkspaceV165=null;
+
+/* Remove unconditional availability from newly-added business modules.
+   Platform essentials remain always available. */
+for(const item of NAV_ITEMS){
+  if(['bookings','experience','connect'].includes(item.id)) delete item.always;
+}
+
+function taskyModuleLabelV165(moduleId){
+  const m=TASKY_MODULE_CATALOG_V165[moduleId]||{};
+  return lang==='ar'?(m.ar||moduleId):(m.en||m.ar||moduleId);
+}
+function taskyEntitlementRecordV165(moduleId){
+  return taskyEntitlementsV165?.modules?.[moduleId]||null;
+}
+function taskyEntitlementsEnforcedV165(){
+  return !!taskyEntitlementsV165?.enforce;
+}
+function taskyModuleAvailableV165(moduleId){
+  const cat=TASKY_MODULE_CATALOG_V165[moduleId];
+  if(cat?.essential)return true;
+
+  const rec=taskyEntitlementRecordV165(moduleId);
+  if(taskyEntitlementsEnforcedV165() && rec) return !!rec.enabled;
+
+  /* When V165 has not been explicitly enforced yet, preserve the legacy
+     commercial/runtime behavior so this migration does not unexpectedly
+     remove access from existing workspaces. */
+  const runtimeState=platformModuleState?.(moduleId);
+  if(runtimeState) return !!runtimeState.enabled;
+  const p=PLANS[currentPlan];
+  return !!p && (p.modules==='all'||p.modules?.includes(moduleId));
+}
+function taskyModuleSourceV165(moduleId){
+  const r=taskyEntitlementRecordV165(moduleId);
+  return r?.source||'legacy_plan';
+}
+function taskyModuleAddonV165(moduleId){
+  return taskyEntitlementRecordV165(moduleId)?.source==='addon';
+}
+function taskyCapabilityAvailableV165(sourceModule,targetModule){
+  if(!taskyModuleAvailableV165(sourceModule))return false;
+  return taskyModuleAvailableV165(targetModule);
+}
+function taskyOpenModuleLockedV165(moduleId,context=''){
+  const rec=taskyEntitlementRecordV165(moduleId);
+  const title=lang==='ar'?'هذه الوحدة غير متاحة في الباقة الحالية':'This module is not available in the current package';
+  const moduleName=taskyModuleLabelV165(moduleId);
+  const source=rec?.source||'package';
+  const packageName=taskyEntitlementsV165?.package_name?.[lang]||taskyEntitlementsV165?.package_code||currentPlan||'—';
+  const msg=lang==='ar'
+    ?`${moduleName} غير مفعلة لمساحة العمل الحالية. يمكن أن تكون ضمن باقة أخرى أو إضافة Add-on مستقلة.`
+    :`${moduleName} is not enabled for this workspace. It can be included in another package or enabled as an Add-on.`;
+  showTaskyDialog({
+    title,
+    message:`${msg}${context?`\n${context}`:''}`,
+    tone:'warning',
+    actions:[
+      {label:lang==='ar'?'عرض الباقات والإضافات':'View plans & add-ons',primary:true,onClick:()=>setActiveNav('billing')},
+      {label:lang==='ar'?'إغلاق':'Close'}
+    ]
+  });
+}
+function taskyOpenModuleV165(moduleId,context=''){
+  if(taskyModuleAvailableV165(moduleId)) return setActiveNav(moduleId);
+  taskyOpenModuleLockedV165(moduleId,context);
+  return false;
+}
+function taskyRequireIntegrationV165(sourceModule,targetModule,action){
+  if(!taskyModuleAvailableV165(sourceModule)){
+    taskyOpenModuleLockedV165(sourceModule);
+    return false;
+  }
+  if(!taskyModuleAvailableV165(targetModule)){
+    const context=lang==='ar'
+      ?`هذه العملية تحتاج أيضًا إلى تفعيل قسم ${taskyModuleLabelV165(targetModule)}.`
+      :`This action also requires the ${taskyModuleLabelV165(targetModule)} module.`;
+    taskyOpenModuleLockedV165(targetModule,context);
+    return false;
+  }
+  return true;
+}
+
+async function taskyFetchEntitlementsV165({render=true}={}){
+  if(!currentWorkspaceId)return null;
+  if(taskyEntitlementsLoadingV165)return taskyEntitlementsV165;
+  taskyEntitlementsLoadingV165=true;
+  taskyEntitlementsErrorV165='';
+  try{
+    const {data,error}=await sb.rpc('tasky_entitlements_runtime_v165',{
+      p_workspace_id:currentWorkspaceId,
+      p_legacy_plan:currentPlan||'free'
+    });
+    if(error)throw error;
+    taskyEntitlementsV165=data||null;
+    taskyEntitlementsFetchedWorkspaceV165=currentWorkspaceId;
+    if(render){
+      renderNav();
+      if(activeNav && !taskyModuleAvailableV165(activeNav)){
+        activeNav='home';
+        renderModule();
+      }
+    }
+    return taskyEntitlementsV165;
+  }catch(e){
+    console.warn('V165 entitlement runtime unavailable; using legacy plan/runtime',e);
+    taskyEntitlementsErrorV165=e?.message||String(e);
+    return null;
+  }finally{
+    taskyEntitlementsLoadingV165=false;
+  }
+}
+
+/* Entitlements become the single gate used by old code too. */
+planAllows=function(planId,moduleId){
+  return taskyModuleAvailableV165(moduleId);
+};
+
+/* Block direct/deep navigation to disabled modules.
+   This protects cross-module buttons even when the source module did not
+   explicitly know about packages/add-ons. */
+const setActiveNavBaseV165=setActiveNav;
+setActiveNav=function(id,...args){
+  if(TASKY_MODULE_CATALOG_V165[id] && !taskyModuleAvailableV165(id)){
+    taskyOpenModuleLockedV165(id);
+    return false;
+  }
+  return setActiveNavBaseV165(id,...args);
+};
+
+/* Entitlement-aware navigation rendering.
+   It preserves the existing project block and platform-module disable state. */
+renderNav=function(){
+  const nav=document.getElementById('mainNav');
+  let lastGroup=null;
+  const visibleItems=NAV_ITEMS.filter(item=>(!item.adminOnly||currentUserRole==='admin'));
+
+  const projectColors=['var(--blue)','var(--teal)','var(--green)','var(--blue-deep)','var(--violet)','var(--amber)'];
+  const projectRows=projects.map((p,i)=>`
+    <a class="project-item ${activeProjectId===p.id?'active':''}" onclick="setActiveProject('${p.id}')">
+      <span class="dot" style="background:${projectColors[i%projectColors.length]}"></span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</span>
+    </a>`).join('');
+  const addProjectLabel=lang==='ar'?'مشروع جديد':'New project';
+  const noProjectsLabel=lang==='ar'?'لا توجد مشاريع بعد':'No projects yet';
+  const projectsBlock=`<div class="projects-inline-wrap"><div class="projects-inline-head"><span>${t('projectsLabel')}</span><button type="button" class="projects-inline-plus" onclick="openProjectModal()" title="${addProjectLabel}"><svg><use href="#i-plus"/></svg></button></div><div class="projects-list projects-inline-list">${projectRows||`<div class="projects-empty">${noProjectsLabel}</div>`}<a class="project-item create-project-item" onclick="openProjectModal()"><svg style="width:15px;height:15px;flex:none"><use href="#i-plus"/></svg>${addProjectLabel}</a></div></div>`;
+
+  nav.innerHTML=visibleItems.map(item=>{
+    let groupHeader='';
+    if(item.group&&item.group!==lastGroup)groupHeader=`<div class="nav-group-label">${t(item.group)}</div>`;
+    lastGroup=item.group||lastGroup;
+
+    const essential=!!TASKY_MODULE_CATALOG_V165[item.id]?.essential;
+    const runtimeState=platformModuleState?.(item.id);
+    const runtimeRestricted=!!runtimeState && !runtimeState.enabled;
+    const entitlementLocked=!essential&&!taskyModuleAvailableV165(item.id);
+    const locked=runtimeRestricted||entitlementLocked;
+    const action=runtimeRestricted?`openPlatformModuleUnavailable('${item.id}')`
+      :entitlementLocked?`taskyOpenModuleLockedV165('${item.id}')`
+      :`setActiveNav('${item.id}')`;
+
+    const addon=taskyModuleAddonV165(item.id);
+    const lockUi=locked?`<span class="ent165-lock">×</span>`:(addon?`<span class="ent165-addon">ADD-ON</span>`:(item.dot?`<span class="dot" style="background:${item.dot}"></span>`:''));
+
+    const navItem=`${groupHeader}<a class="nav-item ${activeNav===item.id?'active':''} ${locked?'locked':''}" onclick="${action}"><svg><use href="#${item.icon}"/></svg>${t(item.key)}${lockUi}</a>`;
+    return item.id==='tasks'?navItem+projectsBlock:navItem;
+  }).join('');
+};
+
+/* Harden specific cross-module actions that previously assumed the destination
+   was always available. */
+if(typeof hr163ProfileBody==='function'){
+  const hr163ProfileBodyBaseV165=hr163ProfileBody;
+  hr163ProfileBody=function(e,d){
+    if(hr163ProfileTab==='insurance' && !taskyModuleAvailableV165('experience')){
+      return `<div class="hr72-alert">${lang==='ar'?'بيانات التأمين والصحة مرتبطة بإضافة تجربة الموظف، وهي غير مفعلة في الباقة الحالية.':'Insurance & Health is provided through the Employee Experience add-on, which is not enabled in the current package.'}</div><button class="chip-btn" style="margin-top:8px" onclick="taskyOpenModuleLockedV165('experience')">${lang==='ar'?'عرض خيار التفعيل':'View enable option'}</button>`;
+    }
+    return hr163ProfileBodyBaseV165(e,d);
+  };
+}
+
+/* Connect meal wallet is a soft dependency on Employee Experience.
+   Chat still works when Experience is disabled. */
+const com161ContributeBaseV165=typeof com161Contribute==='function'?com161Contribute:null;
+if(com161ContributeBaseV165){
+  com161Contribute=function(mealId){
+    if(!taskyRequireIntegrationV165('connect','experience','meal_wallet'))return;
+    return com161ContributeBaseV165(mealId);
+  };
+}
+const com161PayMealBaseV165=typeof com161PayMeal==='function'?com161PayMeal:null;
+if(com161PayMealBaseV165){
+  com161PayMeal=async function(mealId){
+    if(!taskyRequireIntegrationV165('connect','experience','meal_wallet'))return;
+    return com161PayMealBaseV165(mealId);
+  };
+}
+
+/* Requests can stay enabled by itself. Any links to other modules route safely
+   because setActiveNav is now entitlement-aware. */
+
+/* Fetch entitlement state whenever a workspace becomes usable.
+   Existing commercial runtime remains the fallback until V165 is configured. */
+setTimeout(()=>taskyFetchEntitlementsV165({render:true}),250);
+const refreshPlatformRuntimeLiveBaseV165=typeof refreshPlatformRuntimeLive==='function'?refreshPlatformRuntimeLive:null;
+if(refreshPlatformRuntimeLiveBaseV165){
+  refreshPlatformRuntimeLive=async function(...args){
+    const r=await refreshPlatformRuntimeLiveBaseV165(...args);
+    await taskyFetchEntitlementsV165({render:true});
+    return r;
+  };
 }
 </script>
 
