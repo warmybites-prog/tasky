@@ -19953,5 +19953,226 @@ async function req150PublicLookupDo(){
 }
 </script>
 
+
+<style id="tasky-v160-experience-css">
+/* ============================================================
+   V160 — Employee Experience / Benefits / Wallet / Marketplace
+   ============================================================ */
+.exp160{display:flex;flex-direction:column;gap:14px}
+.exp160-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;border:1px solid var(--border);background:var(--card);border-radius:15px;padding:16px}
+.exp160-head h2{margin:0 0 4px;font-size:19px}.exp160-head p{margin:0;color:var(--muted);font-size:9px;line-height:1.6;max-width:760px}
+.exp160-actions{display:flex;gap:7px;flex-wrap:wrap}
+.exp160-btn{min-height:38px;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:7px 11px;font:800 9px Inter,'IBM Plex Sans Arabic';cursor:pointer}
+.exp160-btn.primary{background:var(--green);border-color:var(--green);color:#fff}.exp160-btn.danger{color:var(--danger)}
+.exp160-tabs{display:flex;gap:5px;overflow-x:auto;padding:4px;border:1px solid var(--border);background:var(--card);border-radius:12px;scrollbar-width:none}
+.exp160-tabs::-webkit-scrollbar{display:none}.exp160-tab{min-height:35px;border:0;background:transparent;color:var(--muted);border-radius:8px;padding:6px 10px;font-size:8.3px;font-weight:800;white-space:nowrap}.exp160-tab.active{background:var(--green-tint);color:var(--green)}
+.exp160-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.exp160-stat,.exp160-panel{border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px}
+.exp160-stat span{display:block;color:var(--muted);font-size:8px;margin-bottom:5px}.exp160-stat b{font-size:20px}.exp160-stat small{display:block;color:var(--muted);font-size:7.2px;margin-top:5px}
+.exp160-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}.exp160-panel-head h3{margin:0;font-size:13px}.exp160-panel-head p{margin:2px 0 0;color:var(--muted);font-size:8px}
+.exp160-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:9px}
+.exp160-card{border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:11px}
+.exp160-card h4{margin:0 0 4px;font-size:11px}.exp160-card p{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+.exp160-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}.exp160-meta div{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:7px}.exp160-meta span{display:block;color:var(--muted);font-size:6.7px;margin-bottom:2px}.exp160-meta b{font-size:8px}
+.exp160-card-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.exp160-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.exp160-field.full{grid-column:1/-1}.exp160-field label{display:block;color:var(--muted);font-size:8px;margin-bottom:4px}.exp160-field input,.exp160-field select,.exp160-field textarea{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:9px;font:inherit;font-size:9.5px}.exp160-field textarea{min-height:90px;resize:vertical}
+.exp160-wallet{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #cfe0d7;background:var(--green-tint);border-radius:13px;padding:14px}.exp160-wallet b{font-size:22px}.exp160-wallet small{display:block;color:var(--muted);font-size:7.5px}
+.exp160-leader{display:flex;align-items:center;gap:8px;padding:8px;border-bottom:1px solid var(--border)}.exp160-leader:last-child{border-bottom:0}.exp160-rank{width:26px;height:26px;border:1px solid var(--border);border-radius:8px;display:grid;place-items:center;font-size:8px;font-weight:900}.exp160-leader-main{flex:1}.exp160-leader-main b{font-size:8.5px;display:block}.exp160-leader-main small{font-size:7px;color:var(--muted)}
+.exp160-badge{display:inline-flex;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:3px 7px;font-size:7px;color:var(--muted)}
+.exp160-product-img{height:110px;border:1px solid var(--border);border-radius:9px;background:var(--card);display:grid;place-items:center;color:var(--muted);font-size:8px;margin-bottom:8px}
+.exp160-empty{border:1px dashed var(--border);background:var(--paper);border-radius:11px;padding:22px;text-align:center;color:var(--muted);font-size:9px;line-height:1.6}
+.exp160-table-wrap{overflow:auto}.exp160-table{width:100%;min-width:800px;border-collapse:collapse;font-size:8.3px}.exp160-table th,.exp160-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:start}.exp160-table th{background:var(--paper);color:var(--muted);font-weight:800}
+@media(max-width:900px){.exp160-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:700px){.exp160-head{flex-direction:column;padding:13px}.exp160-actions{width:100%}.exp160-actions .exp160-btn{flex:1}.exp160-grid{grid-template-columns:1fr 1fr}.exp160-form{grid-template-columns:1fr}.exp160-field.full{grid-column:auto}}
+</style>
+
+<script id="tasky-v160-experience-js">
+window.TASKY_BUILD='V160';console.info('Tasky build',window.TASKY_BUILD);
+
+/* New main section: Employee Experience */
+STR.ar.nav_experience='تجربة الموظف';
+STR.en.nav_experience='Employee Experience';
+if(!NAV_ITEMS.some(x=>x.id==='experience')){
+  const idx=NAV_ITEMS.findIndex(x=>x.id==='hr');
+  NAV_ITEMS.splice(idx>=0?idx+1:NAV_ITEMS.length,0,{id:'experience',key:'nav_experience',icon:'i-star',group:'grp_people',always:true});
+}
+
+let exp160Tab='overview',exp160State=null,exp160Loading=false,exp160Error='',exp160Realtime=null;
+
+const exp160Tabs=[
+ ['overview','نظرة عامة','Overview'],
+ ['wallet','المحفظة والمصروفات','Wallet & Spend'],
+ ['meals','الغداء والقهوة','Meals & Coffee'],
+ ['benefits','الكوبونات والخصومات','Coupons & Discounts'],
+ ['tickets','التذاكر','Tickets'],
+ ['marketplace','المنتجات والخدمات','Marketplace'],
+ ['challenges','التحديات والمبادرات','Challenges'],
+ ['ideas','الاقتراحات والأفكار','Ideas & Suggestions'],
+ ['cards','بطاقات الموظف','Employee Cards'],
+ ['onboarding','التهيئة والانضمام','Onboarding']
+];
+function exp160L(ar,en){return lang==='ar'?ar:en}
+function exp160Rows(k){return Array.isArray(exp160State?.[k])?exp160State[k]:[]}
+function exp160Money(v){return `${Number(v||0).toLocaleString(lang==='ar'?'ar-SA':'en-US',{maximumFractionDigits:2})} ${exp160L('ر.س','SAR')}`}
+function exp160SetTab(id){exp160Tab=id;if(activeNav==='experience')renderModule()}
+async function exp160Fetch(){
+  if(!currentWorkspaceId)return;exp160Loading=true;exp160Error='';if(activeNav==='experience')renderModule();
+  const {data,error}=await sb.rpc('tasky_experience_state_v160',{p_workspace_id:currentWorkspaceId});
+  exp160Loading=false;if(error){exp160Error=error.message||String(error);exp160State=null}else exp160State=data||{};
+  if(activeNav==='experience')renderModule();
+}
+function exp160InitRealtime(){
+  if(exp160Realtime){try{sb.removeChannel(exp160Realtime)}catch(_){}}
+  if(!currentWorkspaceId)return;
+  exp160Realtime=sb.channel(`tasky-exp-v160-${currentWorkspaceId}`);
+  ['tasky_exp_wallet_transactions_v160','tasky_exp_meal_invites_v160','tasky_exp_coupon_claims_v160','tasky_exp_challenge_entries_v160','tasky_exp_ideas_v160']
+   .forEach(table=>exp160Realtime.on('postgres_changes',{event:'*',schema:'public',table,filter:`workspace_id=eq.${currentWorkspaceId}`},()=>setTimeout(exp160Fetch,120)));
+  exp160Realtime.subscribe();
+}
+const renderModuleBaseV160=renderModule;
+renderModule=function(){
+  if(activeNav==='experience'){document.getElementById('moduleArea').innerHTML=exp160Template();return}
+  return renderModuleBaseV160();
+};
+const setActiveNavBaseV160=setActiveNav;
+setActiveNav=function(id,...args){
+  const r=setActiveNavBaseV160(id,...args);
+  if(id==='experience'){if(!exp160State&&!exp160Loading)exp160Fetch();if(!exp160Realtime)exp160InitRealtime()}
+  return r;
+};
+
+function exp160Template(){
+ if(exp160Loading&&!exp160State)return `<div class="exp160-empty">${exp160L('جارٍ تحميل تجربة الموظف…','Loading Employee Experience…')}</div>`;
+ if(exp160Error)return `<div class="exp160-empty">${escapeHtml(exp160Error)}<br><button class="exp160-btn" onclick="exp160Fetch()">${exp160L('إعادة المحاولة','Retry')}</button></div>`;
+ return `<div class="exp160">
+   <div class="exp160-head"><div><h2>${exp160L('تجربة الموظف','Employee Experience')}</h2><p>${exp160L('المزايا والمحفظة والضيافة والتذاكر والخصومات والتحديات والأفكار والبطاقات والتهيئة في مساحة واحدة.','Benefits, wallet, hospitality, tickets, discounts, challenges, ideas, employee cards and onboarding in one place.')}</p></div><div class="exp160-actions"><button class="exp160-btn" onclick="exp160OpenLunchInvite()">${exp160L('دعوة غداء/قهوة','Meal / coffee invite')}</button><button class="exp160-btn primary" onclick="exp160SetTab('marketplace')">${exp160L('استعراض المزايا','Browse benefits')}</button></div></div>
+   <div class="exp160-tabs">${exp160Tabs.map(t=>`<button class="exp160-tab ${exp160Tab===t[0]?'active':''}" onclick="exp160SetTab('${t[0]}')">${exp160L(t[1],t[2])}</button>`).join('')}</div>
+   ${exp160TabTemplate()}
+ </div>`;
+}
+function exp160TabTemplate(){
+ if(exp160Tab==='overview')return exp160Overview();
+ if(exp160Tab==='wallet')return exp160Wallet();
+ if(exp160Tab==='meals')return exp160Meals();
+ if(exp160Tab==='benefits')return exp160Benefits();
+ if(exp160Tab==='tickets')return exp160Tickets();
+ if(exp160Tab==='marketplace')return exp160Marketplace();
+ if(exp160Tab==='challenges')return exp160Challenges();
+ if(exp160Tab==='ideas')return exp160Ideas();
+ if(exp160Tab==='cards')return exp160Cards();
+ return exp160Onboarding();
+}
+function exp160Overview(){
+ const m=exp160State?.metrics||{},leader=exp160Rows('leaderboard').slice(0,5);
+ return `<div class="exp160-grid">
+  <div class="exp160-stat"><span>${exp160L('رصيد محفظتي','My wallet')}</span><b>${exp160Money(m.my_wallet||0)}</b><small>${exp160L('مصروفات ومزايا الشركة','Company-funded spend and benefits')}</small></div>
+  <div class="exp160-stat"><span>${exp160L('خصومات متاحة','Available discounts')}</span><b>${Number(m.active_offers||0)}</b><small>${exp160L('من مقدمي الخدمات','From providers')}</small></div>
+  <div class="exp160-stat"><span>${exp160L('تحديات نشطة','Active challenges')}</span><b>${Number(m.active_challenges||0)}</b><small>${exp160L('مبادرات صحة وتفاعل','Health and engagement initiatives')}</small></div>
+  <div class="exp160-stat"><span>${exp160L('أفكار هذا الشهر','Ideas this month')}</span><b>${Number(m.month_ideas||0)}</b><small>${exp160L('اقتراحات الموظفين','Employee suggestions')}</small></div>
+  <div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('أحدث المزايا','Latest benefits')}</h3></div></div><div class="exp160-cards">${exp160Rows('offers').slice(0,4).map(exp160OfferCard).join('')||`<div class="exp160-empty">${exp160L('لا توجد عروض بعد.','No offers yet.')}</div>`}</div></div>
+  <div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('لوحة المتصدرين','Leaderboard')}</h3></div></div>${leader.length?leader.map((x,i)=>`<div class="exp160-leader"><span class="exp160-rank">${i+1}</span><div class="exp160-leader-main"><b>${escapeHtml(x.employee_name||'')}</b><small>${escapeHtml(x.challenge_name||'')}</small></div><strong>${Number(x.score||0).toLocaleString()}</strong></div>`).join(''):`<div class="exp160-empty">${exp160L('لا توجد نتائج بعد.','No results yet.')}</div>`}</div>
+ </div>`;
+}
+function exp160Wallet(){
+ const w=exp160State?.wallet||{},tx=exp160Rows('wallet_transactions');
+ return `<div class="exp160-grid">
+  <div class="exp160-wallet" style="grid-column:1/-1"><div><small>${exp160L('الرصيد المتاح','Available balance')}</small><b>${exp160Money(w.balance||0)}</b></div><div class="exp160-actions"><button class="exp160-btn" onclick="exp160OpenLunchPot()">${exp160L('قطة غداء','Lunch pot')}</button><button class="exp160-btn primary" onclick="exp160OpenWalletGrant()">${exp160L('إضافة رصيد للموظفين','Fund employees')}</button></div></div>
+  <div class="exp160-panel" style="grid-column:1/-1"><div class="exp160-panel-head"><div><h3>${exp160L('الحركات','Transactions')}</h3><p>${exp160L('دفتر حسابات داخلي للمزايا والمصروفات والبيتي كاش. التنفيذ المالي الحقيقي يتطلب مزود دفع مربوط.','Internal ledger for benefits, spend and petty cash. Real payment settlement requires a connected payment provider.')}</p></div></div>${tx.length?`<div class="exp160-table-wrap"><table class="exp160-table"><thead><tr><th>${exp160L('النوع','Type')}</th><th>${exp160L('الوصف','Description')}</th><th>${exp160L('المبلغ','Amount')}</th><th>${exp160L('التاريخ','Date')}</th></tr></thead><tbody>${tx.map(x=>`<tr><td>${escapeHtml(x.tx_type||'')}</td><td>${escapeHtml(x.description||'')}</td><td>${exp160Money(x.amount)}</td><td>${escapeHtml(new Date(x.created_at).toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</td></tr>`).join('')}</tbody></table></div>`:`<div class="exp160-empty">${exp160L('لا توجد حركات بعد.','No transactions yet.')}</div>`}</div>
+ </div>`;
+}
+function exp160Meals(){
+ const rows=exp160Rows('meal_invites');
+ return `<div class="exp160-panel"><div class="exp160-panel-head"><div><h3>${exp160L('الغداء والقهوة والفطور','Meals, coffee & breakfast')}</h3><p>${exp160L('دعوات ممولة، قطة مشتركة، وربط اختياري مع تطبيقات المطاعم ومقدمي الطعام.','Funded invites, shared lunch pots, and optional restaurant/provider integrations.')}</p></div><button class="exp160-btn primary" onclick="exp160OpenLunchInvite()">${exp160L('دعوة جديدة','New invite')}</button></div>${rows.length?`<div class="exp160-cards">${rows.map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.title)}</h4><p>${escapeHtml(x.meal_type)} · ${exp160Money(x.amount_per_person)} ${exp160L('لكل شخص','per person')}</p><div class="exp160-meta"><div><span>${exp160L('المدعوون','Invitees')}</span><b>${Number(x.invitee_count||0)}</b></div><div><span>${exp160L('المستخدم','Redeemed')}</span><b>${Number(x.redeemed_count||0)}</b></div></div></div>`).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد دعوات بعد.','No invites yet.')}</div>`}</div>`;
+}
+function exp160Benefits(){
+ const rows=exp160Rows('offers');
+ return `<div class="exp160-panel"><div class="exp160-panel-head"><div><h3>${exp160L('الكوبونات والخصومات','Coupons & Discounts')}</h3><p>${exp160L('ربط الشركة بمقدمي الخدمات وطلب مزايا للموظفين مع خصم أو كوبون أو رصيد محفظة.','Connect the company with providers and request employee benefits as discounts, coupons or wallet credit.')}</p></div><button class="exp160-btn" onclick="exp160OpenProviderRequest()">${exp160L('طلب عرض من مزود','Request provider offer')}</button></div>${rows.length?`<div class="exp160-cards">${rows.map(exp160OfferCard).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد عروض بعد.','No offers yet.')}</div>`}</div>`;
+}
+function exp160OfferCard(x){return `<div class="exp160-card"><h4>${escapeHtml(x.title||x.product_name||'')}</h4><p>${escapeHtml(x.provider_name||'')}<br>${escapeHtml(x.description||'')}</p><div class="exp160-meta"><div><span>${exp160L('القيمة','Value')}</span><b>${x.discount_pct?`${Number(x.discount_pct)}%`:exp160Money(x.wallet_value||0)}</b></div><div><span>${exp160L('الحالة','Status')}</span><b>${escapeHtml(x.status||'active')}</b></div></div><div class="exp160-card-actions"><button class="exp160-btn" onclick="exp160ClaimOffer('${x.id}')">${exp160L('استخدام','Use')}</button></div></div>`}
+function exp160Tickets(){
+ const rows=exp160Rows('tickets_products');
+ return `<div class="exp160-panel"><div class="exp160-panel-head"><div><h3>${exp160L('شراء التذاكر','Tickets')}</h3><p>${exp160L('تذاكر فعاليات وتجارب مقدمة من مزودين. الدفع والتسليم الإلكتروني الفعلي يعتمدان على مزود التذاكر/الدفع المربوط.','Event and experience tickets from providers. Real payment and e-ticket delivery depend on the connected ticket/payment provider.')}</p></div></div>${rows.length?`<div class="exp160-cards">${rows.map(x=>`<div class="exp160-card"><div class="exp160-product-img">${exp160L('صورة المنتج','Product image')}</div><h4>${escapeHtml(x.name)}</h4><p>${escapeHtml(x.provider_name||'')} · ${exp160Money(x.price)}</p><div class="exp160-card-actions"><button class="exp160-btn primary" onclick="exp160PurchaseProduct('${x.id}')">${exp160L('شراء','Buy')}</button></div></div>`).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد تذاكر معروضة.','No tickets listed.')}</div>`}</div>`;
+}
+function exp160Marketplace(){
+ const rows=exp160Rows('products');
+ return `<div class="exp160-panel"><div class="exp160-panel-head"><div><h3>${exp160L('سوق تاسكي','Tasky Marketplace')}</h3><p>${exp160L('منتجات وخدمات مقدمي الخدمة المعروضة لعملاء تاسكي وموظفيهم.','Provider products and services offered to Tasky customers and their employees.')}</p></div></div>${rows.length?`<div class="exp160-cards">${rows.map(x=>`<div class="exp160-card"><div class="exp160-product-img">${escapeHtml(x.category||exp160L('منتج','Product'))}</div><h4>${escapeHtml(x.name)}</h4><p>${escapeHtml(x.provider_name||'')}<br>${escapeHtml(x.description||'')}</p><div class="exp160-meta"><div><span>${exp160L('السعر','Price')}</span><b>${exp160Money(x.price)}</b></div><div><span>${exp160L('الفئة','Category')}</span><b>${escapeHtml(x.category||'')}</b></div></div><div class="exp160-card-actions"><button class="exp160-btn primary" onclick="exp160PurchaseProduct('${x.id}')">${exp160L('طلب/شراء','Order / Buy')}</button></div></div>`).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد منتجات بعد.','No products yet.')}</div>`}</div>`;
+}
+function exp160Challenges(){
+ const ch=exp160Rows('challenges'),leader=exp160Rows('leaderboard');
+ return `<div class="exp160-grid"><div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('التحديات والمبادرات','Challenges & Initiatives')}</h3><p>${exp160L('مثل تحديات الخطوات والنشاط والمشاركة والمبادرات التطوعية.','Step, activity, participation and volunteering challenges.')}</p></div><button class="exp160-btn primary" onclick="exp160OpenChallenge()">${exp160L('تحدٍ جديد','New challenge')}</button></div>${ch.length?ch.map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.name)}</h4><p>${escapeHtml(x.metric)} · ${escapeHtml(x.status)}</p><div class="exp160-card-actions"><button class="exp160-btn" onclick="exp160JoinChallenge('${x.id}')">${exp160L('انضمام','Join')}</button></div></div>`).join(''):`<div class="exp160-empty">${exp160L('لا توجد تحديات.','No challenges.')}</div>`}</div><div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>Leaderboard</h3></div></div>${leader.length?leader.map((x,i)=>`<div class="exp160-leader"><span class="exp160-rank">${i+1}</span><div class="exp160-leader-main"><b>${escapeHtml(x.employee_name||'')}</b><small>${escapeHtml(x.challenge_name||'')}</small></div><strong>${Number(x.score||0).toLocaleString()}</strong></div>`).join(''):`<div class="exp160-empty">${exp160L('لا توجد نتائج.','No results.')}</div>`}</div></div>`;
+}
+function exp160Ideas(){
+ const rows=exp160Rows('ideas');
+ return `<div class="exp160-panel"><div class="exp160-panel-head"><div><h3>${exp160L('الاقتراحات والأفكار الإبداعية','Suggestions & Creative Ideas')}</h3><p>${exp160L('قناة مستقلة عن Brainstorm لاستقبال اقتراحات الموظفين وتحويل المعتمد منها إلى مهمة أو مشروع.','A channel separate from Brainstorm for employee suggestions that can be converted into work.')}</p></div><button class="exp160-btn primary" onclick="exp160OpenIdea()">${exp160L('اقتراح جديد','New suggestion')}</button></div>${rows.length?`<div class="exp160-cards">${rows.map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.title)}</h4><p>${escapeHtml(x.description||'')}</p><div class="exp160-meta"><div><span>${exp160L('الأصوات','Votes')}</span><b>${Number(x.vote_count||0)}</b></div><div><span>${exp160L('الحالة','Status')}</span><b>${escapeHtml(x.status)}</b></div></div><div class="exp160-card-actions"><button class="exp160-btn" onclick="exp160VoteIdea('${x.id}')">${exp160L('تصويت','Vote')}</button></div></div>`).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد اقتراحات بعد.','No suggestions yet.')}</div>`}</div>`;
+}
+function exp160Cards(){
+ const c=exp160State?.employee_cards||{};
+ return `<div class="exp160-grid"><div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('بطاقة الموظف','Employee Card')}</h3><p>${exp160L('صورة، رقم موظف، مسمى، جهة اتصال وQR/VCard لبطاقة العمل.','Photo, employee number, title, contact details and QR/VCard business card.')}</p></div></div><div class="exp160-card"><h4>${escapeHtml(c.employee_name||'')}</h4><p>${escapeHtml(c.job_title||'')}<br>${escapeHtml(c.work_email||'')}</p><div class="exp160-card-actions"><button class="exp160-btn" onclick="exp160DownloadVCard()">${exp160L('بطاقة اتصال','Business contact card')}</button></div></div></div>
+ <div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('الصحة والتأمين','Health & Insurance')}</h3><p>${exp160L('بطاقة صحية للعامل وتغطية التأمين ضمن بيانات HR.','Worker health card and insurance coverage surfaced from HR data.')}</p></div></div><div class="exp160-card"><h4>${exp160L('التأمين','Insurance')}</h4><p>${escapeHtml(c.insurance_provider||exp160L('غير مسجل','Not recorded'))}<br>${escapeHtml(c.insurance_class||'')}</p><div class="exp160-meta"><div><span>${exp160L('نسبة التغطية','Coverage')}</span><b>${c.coverage_pct!=null?Number(c.coverage_pct)+'%':'—'}</b></div><div><span>${exp160L('البطاقة الصحية','Health card')}</span><b>${c.health_card_no?exp160L('مسجلة','Recorded'):exp160L('غير مسجلة','Not recorded')}</b></div></div></div></div>
+ <div class="exp160-panel" style="grid-column:1/-1"><div class="exp160-panel-head"><div><h3>${exp160L('أجهزة البصمة والحضور','Biometric attendance devices')}</h3><p>${exp160L('سجل أجهزة وربط Connector-ready لاستيراد الحضور من أجهزة البصمة دون وضع مفاتيح الأجهزة في الواجهة.','Device registry and connector-ready attendance import without exposing device credentials in the frontend.')}</p></div><button class="exp160-btn" onclick="exp160OpenBiometric()">${exp160L('إضافة جهاز','Add device')}</button></div>${exp160Rows('biometric_devices').length?`<div class="exp160-cards">${exp160Rows('biometric_devices').map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.name)}</h4><p>${escapeHtml(x.vendor||'')} · ${escapeHtml(x.location_label||'')}</p><span class="exp160-badge">${escapeHtml(x.status||'configured')}</span></div>`).join('')}</div>`:`<div class="exp160-empty">${exp160L('لا توجد أجهزة مرتبطة.','No devices configured.')}</div>`}</div>
+ </div>`;
+}
+function exp160Onboarding(){
+ const rows=exp160Rows('onboarding_templates'),newhires=exp160Rows('new_hires');
+ return `<div class="exp160-grid"><div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('تهيئة حسب المسمى الوظيفي','Role-based onboarding')}</h3><p>${exp160L('Checklist مختلفة حسب المسمى/القسم مع مهام وصول وأصول وصلاحيات.','Different onboarding checklist by title/department with access, asset and permission tasks.')}</p></div><button class="exp160-btn" onclick="exp160OpenOnboardingTemplate()">${exp160L('قالب جديد','New template')}</button></div>${rows.length?rows.map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.name)}</h4><p>${escapeHtml(x.job_title_pattern||'')}</p></div>`).join(''):`<div class="exp160-empty">${exp160L('لا توجد قوالب بعد.','No templates yet.')}</div>`}</div>
+ <div class="exp160-panel" style="grid-column:span 2"><div class="exp160-panel-head"><div><h3>${exp160L('المنضمون حديثًا','New Joiners')}</h3><p>${exp160L('إشعار الموظفين بانضمام موظف جديد مع صورة وبطاقة تعريف اختيارية.','Notify employees of new joiners with optional photo and profile card.')}</p></div></div>${newhires.length?newhires.map(x=>`<div class="exp160-card"><h4>${escapeHtml(x.employee_name)}</h4><p>${escapeHtml(x.job_title||'')} · ${escapeHtml(x.department_name||'')}</p></div>`).join(''):`<div class="exp160-empty">${exp160L('لا يوجد منضمون حديثًا.','No recent joiners.')}</div>`}</div></div>`;
+}
+
+/* Dialog helpers and operations */
+function exp160Modal(title,body){document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${escapeHtml(title)}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div>${body}`;document.getElementById('addModalOverlay').classList.remove('hidden')}
+function exp160OpenLunchInvite(){exp160Modal(exp160L('دعوة غداء / قهوة','Meal / coffee invite'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('العنوان','Title')}</label><input id="exp160MealTitle"></div><div class="exp160-field"><label>${exp160L('النوع','Type')}</label><select id="exp160MealType"><option value="lunch">${exp160L('غداء','Lunch')}</option><option value="coffee">${exp160L('قهوة','Coffee')}</option><option value="breakfast">${exp160L('فطور','Breakfast')}</option></select></div><div class="exp160-field"><label>${exp160L('عدد الأشخاص','People')}</label><input type="number" min="1" id="exp160MealCount" value="5"></div><div class="exp160-field"><label>${exp160L('المبلغ للشخص','Amount per person')}</label><input type="number" min="0" step="0.01" id="exp160MealAmt" value="50"></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveMealInvite()">${exp160L('إنشاء الدعوة','Create invite')}</button></div></div>`)}
+async function exp160SaveMealInvite(){const {error}=await sb.rpc('tasky_experience_meal_invite_create_v160',{p_workspace_id:currentWorkspaceId,p_title:document.getElementById('exp160MealTitle').value.trim(),p_meal_type:document.getElementById('exp160MealType').value,p_people_count:Number(document.getElementById('exp160MealCount').value||1),p_amount_per_person:Number(document.getElementById('exp160MealAmt').value||0)});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+function exp160OpenLunchPot(){exp160Modal(exp160L('قطة غداء','Lunch pot'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('العنوان','Title')}</label><input id="exp160PotTitle"></div><div class="exp160-field"><label>${exp160L('مساهمتي','My contribution')}</label><input type="number" id="exp160PotAmt" value="25"></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveLunchPot()">${exp160L('إنشاء','Create')}</button></div></div>`)}
+async function exp160SaveLunchPot(){const {error}=await sb.rpc('tasky_experience_lunch_pot_create_v160',{p_workspace_id:currentWorkspaceId,p_title:document.getElementById('exp160PotTitle').value.trim(),p_contribution:Number(document.getElementById('exp160PotAmt').value||0)});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+function exp160OpenWalletGrant(){exp160Modal(exp160L('إضافة رصيد للموظفين','Fund employee wallets'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('عدد الموظفين','Employee count')}</label><input type="number" id="exp160GrantCount" value="1"></div><div class="exp160-field"><label>${exp160L('المبلغ لكل موظف','Amount per employee')}</label><input type="number" id="exp160GrantAmt" value="100"></div><div class="exp160-field full"><label>${exp160L('الوصف','Description')}</label><input id="exp160GrantDesc"></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveWalletGrant()">${exp160L('إضافة الرصيد','Fund')}</button></div></div>`)}
+async function exp160SaveWalletGrant(){const {error}=await sb.rpc('tasky_experience_wallet_grant_v160',{p_workspace_id:currentWorkspaceId,p_people_count:Number(document.getElementById('exp160GrantCount').value||1),p_amount:Number(document.getElementById('exp160GrantAmt').value||0),p_description:document.getElementById('exp160GrantDesc').value.trim()||null});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+function exp160OpenProviderRequest(){exp160Modal(exp160L('طلب عرض من مقدم خدمة','Request provider offer'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('الفئة','Category')}</label><input id="exp160ProviderCat"></div><div class="exp160-field"><label>${exp160L('عدد الموظفين','Employees')}</label><input type="number" id="exp160ProviderCount" value="50"></div><div class="exp160-field full"><label>${exp160L('المطلوب','Request')}</label><textarea id="exp160ProviderText"></textarea></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveProviderRequest()">${exp160L('إرسال الطلب','Send request')}</button></div></div>`)}
+async function exp160SaveProviderRequest(){const {error}=await sb.rpc('tasky_experience_provider_request_v160',{p_workspace_id:currentWorkspaceId,p_category:document.getElementById('exp160ProviderCat').value.trim(),p_employee_count:Number(document.getElementById('exp160ProviderCount').value||1),p_request_text:document.getElementById('exp160ProviderText').value.trim()});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+async function exp160ClaimOffer(id){const {error}=await sb.rpc('tasky_experience_offer_claim_v160',{p_offer_id:id});if(error)return taskyToast(error.message,{tone:'warning'});await exp160Fetch()}
+async function exp160PurchaseProduct(id){const {data,error}=await sb.rpc('tasky_experience_purchase_intent_v160',{p_product_id:id});if(error)return taskyToast(error.message,{tone:'warning'});showTaskyDialog({title:exp160L('تم إنشاء طلب الشراء','Purchase intent created'),message:data?.provider_required?exp160L('المنتج يحتاج ربط مزود الدفع/التذاكر لإتمام العملية فعليًا.','This product requires the payment/ticket provider to complete the transaction.'):exp160L('تم خصم المبلغ من المحفظة الداخلية.','Amount deducted from internal wallet.'),tone:'success'})}
+function exp160OpenChallenge(){exp160Modal(exp160L('تحدٍ جديد','New challenge'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('الاسم','Name')}</label><input id="exp160ChName"></div><div class="exp160-field"><label>${exp160L('المقياس','Metric')}</label><select id="exp160ChMetric"><option value="steps">${exp160L('خطوات','Steps')}</option><option value="activity">${exp160L('نشاط','Activity')}</option><option value="participation">${exp160L('مشاركة','Participation')}</option><option value="custom">${exp160L('مخصص','Custom')}</option></select></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveChallenge()">${exp160L('إنشاء','Create')}</button></div></div>`)}
+async function exp160SaveChallenge(){const {error}=await sb.rpc('tasky_experience_challenge_create_v160',{p_workspace_id:currentWorkspaceId,p_name:document.getElementById('exp160ChName').value.trim(),p_metric:document.getElementById('exp160ChMetric').value});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+async function exp160JoinChallenge(id){const {error}=await sb.rpc('tasky_experience_challenge_join_v160',{p_challenge_id:id});if(error)return taskyToast(error.message,{tone:'warning'});await exp160Fetch()}
+function exp160OpenIdea(){exp160Modal(exp160L('اقتراح جديد','New suggestion'),`<div class="exp160-form"><div class="exp160-field full"><label>${exp160L('العنوان','Title')}</label><input id="exp160IdeaTitle"></div><div class="exp160-field full"><label>${exp160L('الوصف','Description')}</label><textarea id="exp160IdeaDesc"></textarea></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveIdea()">${exp160L('إرسال','Submit')}</button></div></div>`)}
+async function exp160SaveIdea(){const {error}=await sb.rpc('tasky_experience_idea_create_v160',{p_workspace_id:currentWorkspaceId,p_title:document.getElementById('exp160IdeaTitle').value.trim(),p_description:document.getElementById('exp160IdeaDesc').value.trim()});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+async function exp160VoteIdea(id){const {error}=await sb.rpc('tasky_experience_idea_vote_v160',{p_idea_id:id});if(error)return taskyToast(error.message,{tone:'warning'});await exp160Fetch()}
+function exp160OpenBiometric(){exp160Modal(exp160L('إضافة جهاز بصمة','Add biometric device'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('الاسم','Name')}</label><input id="exp160BioName"></div><div class="exp160-field"><label>${exp160L('المصنّع','Vendor')}</label><input id="exp160BioVendor"></div><div class="exp160-field"><label>${exp160L('الموقع','Location')}</label><input id="exp160BioLoc"></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveBiometric()">${exp160L('حفظ','Save')}</button></div></div>`)}
+async function exp160SaveBiometric(){const {error}=await sb.rpc('tasky_experience_biometric_add_v160',{p_workspace_id:currentWorkspaceId,p_name:document.getElementById('exp160BioName').value.trim(),p_vendor:document.getElementById('exp160BioVendor').value.trim()||null,p_location_label:document.getElementById('exp160BioLoc').value.trim()||null});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+function exp160OpenOnboardingTemplate(){exp160Modal(exp160L('قالب تهيئة','Onboarding template'),`<div class="exp160-form"><div class="exp160-field"><label>${exp160L('الاسم','Name')}</label><input id="exp160OnName"></div><div class="exp160-field"><label>${exp160L('المسمى الوظيفي','Job title pattern')}</label><input id="exp160OnJob"></div><div class="exp160-field full"><label>${exp160L('قائمة التهيئة JSON','Checklist JSON')}</label><textarea id="exp160OnList">[]</textarea></div><div class="exp160-field full"><button class="exp160-btn primary" onclick="exp160SaveOnboardingTemplate()">${exp160L('حفظ','Save')}</button></div></div>`)}
+async function exp160SaveOnboardingTemplate(){let items=[];try{items=JSON.parse(document.getElementById('exp160OnList').value)}catch(_){return taskyToast(exp160L('JSON غير صالح','Invalid JSON'),{tone:'warning'})}const {error}=await sb.rpc('tasky_experience_onboarding_template_v160',{p_workspace_id:currentWorkspaceId,p_name:document.getElementById('exp160OnName').value.trim(),p_job_title_pattern:document.getElementById('exp160OnJob').value.trim()||null,p_checklist:items});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await exp160Fetch()}
+function exp160DownloadVCard(){const c=exp160State?.employee_cards||{};const v=`BEGIN:VCARD\nVERSION:3.0\nFN:${c.employee_name||''}\nTITLE:${c.job_title||''}\nEMAIL:${c.work_email||''}\nTEL:${c.work_phone||''}\nEND:VCARD`;const b=new Blob([v],{type:'text/vcard'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='tasky-contact.vcf';a.click();setTimeout(()=>URL.revokeObjectURL(a.href),500)}
+
+/* HR enhancement card injected into HR without redesigning HR. */
+const hrTemplateBaseV160=typeof hrTemplate==='function'?hrTemplate:null;
+if(hrTemplateBaseV160){
+  hrTemplate=function(...args){
+    const base=hrTemplateBaseV160(...args);
+    const extra=`<div class="hr-v160-exp-card" style="margin:10px 0;border:1px solid var(--border);background:var(--card);border-radius:12px;padding:11px;display:flex;justify-content:space-between;gap:10px;align-items:center"><div><b>${exp160L('بطاقات الموظف والصحة والتأمين','Employee Cards, Health & Insurance')}</b><div class="subtle">${exp160L('البطاقة الصحية، تغطية التأمين، بطاقة الموظف وبطاقة الاتصال من تجربة الموظف.','Health card, insurance coverage, employee card and business contact card are managed in Employee Experience.')}</div></div><button class="exp160-btn" onclick="setActiveNav('experience');exp160SetTab('cards')">${exp160L('فتح','Open')}</button></div>`;
+    return extra+base;
+  };
+}
+
+/* Requests: attachments on ticket and replies */
+const req150OpenRequestBaseV160=req150OpenRequest;
+req150OpenRequest=function(id=''){
+  req150OpenRequestBaseV160(id);
+  if(!id)return;
+  const body=document.getElementById('addModalBody');if(!body)return;
+  const slot=document.createElement('div');slot.className='req150-field full';slot.innerHTML=`<label>${exp160L('المرفقات','Attachments')}</label><input type="file" id="req160Attachment" multiple><div style="margin-top:6px"><button class="req150-btn" onclick="req160UploadAttachments('${id}')">${exp160L('رفع المرفقات','Upload attachments')}</button></div>`;
+  const form=body.querySelector('.req150-form');form?.appendChild(slot);
+}
+async function req160UploadAttachments(requestId){
+  const files=[...(document.getElementById('req160Attachment')?.files||[])];if(!files.length)return;
+  for(const file of files.slice(0,8)){
+    if(file.size>25*1024*1024){taskyToast(exp160L('ملف أكبر من 25MB','File exceeds 25MB'),{tone:'warning'});continue}
+    const safe=file.name.replace(/[^\w.\-]+/g,'_'),path=`${currentWorkspaceId}/${requestId}/${crypto.randomUUID()}-${safe}`;
+    const {error:up}=await sb.storage.from('tasky-request-assets').upload(path,file,{contentType:file.type||'application/octet-stream'});if(up){taskyToast(up.message,{tone:'warning'});continue}
+    const {error}=await sb.rpc('tasky_request_attachment_register_v160',{p_request_id:requestId,p_storage_path:path,p_file_name:file.name,p_mime_type:file.type||null,p_size_bytes:file.size,p_visibility:'public'});
+    if(error)taskyToast(error.message,{tone:'warning'});
+  }
+  taskyToast(exp160L('تم رفع المرفقات','Attachments uploaded'),{tone:'success'});await req150Fetch();req150OpenRequest(requestId);
+}
+</script>
+
 </body>
 </html>
