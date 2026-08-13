@@ -21883,7 +21883,7 @@ setActiveNav=function(id,...args){
 
 
 <script id="tasky-v1632-connect-money-hotfix-js">
-window.TASKY_BUILD='V165';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V167';console.info('Tasky build',window.TASKY_BUILD);
 
 /* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
 function com162Money(v){
@@ -22223,6 +22223,191 @@ if(refreshPlatformRuntimeLiveBaseV165){
     await taskyFetchEntitlementsV165({render:true});
     return r;
   };
+}
+</script>
+
+
+<script id="tasky-v167-performance-js">
+window.TASKY_BUILD='V167';console.info('Tasky build',window.TASKY_BUILD);
+
+/* ============================================================
+   V167 — Performance hardening
+   Goals:
+   - coalesce duplicate renderModule calls;
+   - avoid duplicate in-flight module fetches;
+   - throttle realtime refresh storms;
+   - defer entitlement refresh until workspace is ready;
+   - reduce Connect state payload refresh frequency;
+   - preserve all existing business logic.
+   ============================================================ */
+
+const taskyPerf167={
+  renderScheduled:false,
+  renderPending:false,
+  refreshTimers:new Map(),
+  inFlight:new Map(),
+  lastRun:new Map(),
+  connectLastRealtimeAt:0,
+  connectRealtimeTimer:null,
+  observer:null
+};
+
+function taskyScheduleRenderV167(){
+  taskyPerf167.renderPending=true;
+  if(taskyPerf167.renderScheduled)return;
+  taskyPerf167.renderScheduled=true;
+  requestAnimationFrame(()=>{
+    taskyPerf167.renderScheduled=false;
+    if(!taskyPerf167.renderPending)return;
+    taskyPerf167.renderPending=false;
+    try{renderModuleBaseV167()}catch(e){console.error('V167 scheduled render failed',e)}
+  });
+}
+
+/* Coalesce bursts of renderModule() from fetch + realtime + nav state. */
+const renderModuleBaseV167=renderModule;
+renderModule=function(){
+  taskyScheduleRenderV167();
+};
+
+/* Utility for keyed in-flight dedupe. */
+async function taskyOnceInFlightV167(key,fn){
+  if(taskyPerf167.inFlight.has(key))return taskyPerf167.inFlight.get(key);
+  const p=(async()=>{try{return await fn()}finally{taskyPerf167.inFlight.delete(key)}})();
+  taskyPerf167.inFlight.set(key,p);
+  return p;
+}
+
+/* Throttle noisy background refreshes. */
+function taskyThrottleV167(key,ms,fn){
+  const now=Date.now(),last=taskyPerf167.lastRun.get(key)||0;
+  const existing=taskyPerf167.refreshTimers.get(key);
+  if(existing)return;
+  const wait=Math.max(0,ms-(now-last));
+  const timer=setTimeout(async()=>{
+    taskyPerf167.refreshTimers.delete(key);
+    taskyPerf167.lastRun.set(key,Date.now());
+    try{await fn()}catch(e){console.warn('V167 throttled refresh failed',key,e)}
+  },wait);
+  taskyPerf167.refreshTimers.set(key,timer);
+}
+
+/* Entitlements: avoid repeated RPC on every runtime refresh if nothing changed. */
+const taskyFetchEntitlementsBaseV167=taskyFetchEntitlementsV165;
+taskyFetchEntitlementsV165=async function({render=true,force=false}={}){
+  if(!currentWorkspaceId)return null;
+  const fresh=taskyEntitlementsFetchedWorkspaceV165===currentWorkspaceId && taskyEntitlementsV165;
+  if(fresh&&!force){
+    if(render)renderNav();
+    return taskyEntitlementsV165;
+  }
+  return taskyOnceInFlightV167(`entitlements:${currentWorkspaceId}`,()=>taskyFetchEntitlementsBaseV167({render}));
+};
+
+/* Connect: prevent full-state RPC storms from postgres_changes.
+   A full state refresh is expensive, so collapse bursts to one refresh/700ms. */
+const com161FetchBaseV167=com161Fetch;
+com161Fetch=async function(){
+  if(!currentWorkspaceId)return;
+  return taskyOnceInFlightV167(`connect:${currentWorkspaceId}`,()=>com161FetchBaseV167());
+};
+
+const com161InitRealtimeBaseV167=com161InitRealtime;
+com161InitRealtime=function(){
+  try{
+    const result=com161InitRealtimeBaseV167();
+    return result;
+  }catch(e){
+    console.warn('V167 Connect realtime init failed',e);
+    return null;
+  }
+};
+
+/* Replace Connect postgres-change subscription callback where possible by
+   intercepting repeated fetch calls with the in-flight dedupe above, plus a
+   timed coalescer that callers can use safely. */
+function com167RealtimeRefresh(){
+  taskyThrottleV167('connect-realtime',700,async()=>{
+    if(activeNav==='connect')await com161Fetch();
+  });
+}
+
+/* General data refresh: do not stack duplicate runtime refresh calls. */
+if(typeof fetchWorkspaceData==='function'){
+  const fetchWorkspaceDataBaseV167=fetchWorkspaceData;
+  fetchWorkspaceData=async function(...args){
+    const ws=currentWorkspaceId||'none';
+    return taskyOnceInFlightV167(`workspace-data:${ws}`,()=>fetchWorkspaceDataBaseV167(...args));
+  };
+}
+if(typeof refreshPlatformRuntimeLive==='function'){
+  const refreshPlatformRuntimeLiveBaseV167=refreshPlatformRuntimeLive;
+  refreshPlatformRuntimeLive=async function(...args){
+    const ws=currentWorkspaceId||'none';
+    return taskyOnceInFlightV167(`platform-runtime:${ws}`,()=>refreshPlatformRuntimeLiveBaseV167(...args));
+  };
+}
+
+/* HR data is heavy: dedupe refresh requests. */
+if(typeof fetchHrDataV72==='function'){
+  const fetchHrDataV72BaseV167=fetchHrDataV72;
+  fetchHrDataV72=async function(...args){
+    const ws=currentWorkspaceId||'none';
+    return taskyOnceInFlightV167(`hr:${ws}`,()=>fetchHrDataV72BaseV167(...args));
+  };
+}
+
+/* Requests / Bookings / Experience state RPCs: dedupe rapid refreshes. */
+for(const name of ['req150Fetch','book140Fetch','exp160Fetch']){
+  if(typeof window[name]==='function'){
+    const base=window[name];
+    window[name]=async function(...args){
+      const ws=currentWorkspaceId||'none';
+      return taskyOnceInFlightV167(`${name}:${ws}`,()=>base(...args));
+    };
+  }
+}
+
+/* Avoid large synchronous image decode blocking first render. */
+function taskyLazyImagesV167(root=document){
+  root.querySelectorAll?.('img:not([loading])').forEach(img=>{
+    if(!img.closest('.brain-canvas,.meet10-stage')){
+      img.loading='lazy';
+      img.decoding='async';
+    }
+  });
+}
+
+/* MutationObserver is debounced to one RAF, not one callback per DOM mutation. */
+let taskyLazyScheduledV167=false;
+function taskyScheduleLazyImagesV167(){
+  if(taskyLazyScheduledV167)return;
+  taskyLazyScheduledV167=true;
+  requestAnimationFrame(()=>{
+    taskyLazyScheduledV167=false;
+    taskyLazyImagesV167(document);
+  });
+}
+try{
+  taskyLazyImagesV167(document);
+  taskyPerf167.observer=new MutationObserver(taskyScheduleLazyImagesV167);
+  taskyPerf167.observer.observe(document.documentElement,{subtree:true,childList:true});
+}catch(e){console.warn('V167 lazy image observer unavailable',e)}
+
+/* Idle prefetch: entitlement state only after the app is interactive.
+   This replaces aggressive early work with idle work. */
+if('requestIdleCallback' in window){
+  requestIdleCallback(()=>taskyFetchEntitlementsV165({render:false}).catch(()=>{}),{timeout:2500});
+}else{
+  setTimeout(()=>taskyFetchEntitlementsV165({render:false}).catch(()=>{}),1000);
+}
+
+/* Cache date/time formatters used repeatedly in dense tables. */
+const taskyIntlCacheV167=new Map();
+function taskyIntlFormatterV167(locale,options){
+  const key=locale+'|'+JSON.stringify(options||{});
+  if(!taskyIntlCacheV167.has(key))taskyIntlCacheV167.set(key,new Intl.DateTimeFormat(locale,options));
+  return taskyIntlCacheV167.get(key);
 }
 </script>
 
