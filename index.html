@@ -13096,7 +13096,163 @@ renderPublicMeetingGuestPortalV102=function(){
 renderPublicMeetingGuestExitV1044=function(message,meetingId){const p=meetingGuestPublicV102;if(!p)return;meet102GuestFrameV102(`<div class="meet102-guest-card meet102-exit"><div class="meet102-exit-check">✓</div><h1>${escapeHtml(message||meet102L('تمت مغادرة الاجتماع','You left the meeting'))}</h1><p>${meet1047L('قيّم الجودة التقنية للصوت والفيديو والاتصال.','Rate technical quality: audio, video, and connection.')}</p>${meetingId?meetingV1047RatingWidget(meetingId,0,true):''}<button class="chip-btn" style="margin-top:12px" onclick="showPublicMeetingGuestPortalV102('${escapeHtml(p.roomCode)}','${escapeHtml(p.guestToken)}')">${meet102L('العودة إلى صفحة الاجتماع','Back to meeting page')}</button></div>`)};
 async function meetingV1046PrintReport(meetingId){
   try{const {m,d}=await meetingV1046GetExportData(meetingId),attendees=(d.attendee_names||[]).join('، '),dur=meetingV1047DurationInfo(m);
-    const report=`<!doctype html><html lang="${lang}" dir="${lang==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(m.title||'Meeting minutes')}</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;line-height:1.8;color:#17211f}h1{color:#0b4d40}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:20px 0}.meta div{border:1px solid #ddd;border-radius:10px;padding:10px}.label{color:#697772;font-size:12px}.minutes{white-space:pre-wrap;border-top:2px solid #0b4d40;padding-top:18px;margin-top:20px}</style></head><body><h1>${meet1047L('محضر اجتماع','Meeting Minutes')}: ${escapeHtml(m.title||'')}</h1><div class="meta"><div><span class="label">${meet1047L('الموعد','When')}</span><br><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div><div><span class="label">${escapeHtml(dur.title)}</span><br><b>${escapeHtml(dur.label)}</b></div><div><span class="label">${meet1047L('المنظّم','Organizer')}</span><br><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div><div><span class="label">${meet1047L('الحضور','Attendees')}</span><br><b>${escapeHtml(attendees||'—')}</b></div></div><div class="minutes"><h2>${meet1047L('المحضر','Minutes')}</h2>${escapeHtml(d.content||'').replace(/\n/g,'<br>')}</div></body></html>`;
+    const report=`<!doctype html><html lang="${lang}" dir="${lang==='ar'?'rtl':'ltr'}"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${escapeHtml(m.title||'Meeting minutes')}</title><style>body{font-family:Arial,sans-serif;max-width:900px;margin:40px auto;padding:0 24px;line-height:1.8;color:#17211f}h1{color:#0b4d40}.meta{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin:20px 0}.meta div{border:1px solid #ddd;border-radius:10px;padding:10px}.label{color:#697772;font-size:12px}.minutes{white-space:pre-wrap;border-top:2px solid #0b4d40;padding-top:18px;margin-top:20px}</style>
+<style id="tasky-v1633-connect-theme-harmony">
+/* V163.3 — Connect typography + theme harmonization */
+.com161-shell{
+  gap:22px !important;
+  min-height:72vh !important;
+}
+.com161-panel{
+  border-radius:26px !important;
+  box-shadow:0 14px 32px rgba(16,24,40,.06) !important;
+  border:1px solid var(--line) !important;
+}
+.com161-panel,
+.com161-panel *{
+  font-family:"IBM Plex Sans Arabic",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif !important;
+}
+.com161-header{
+  padding:22px 24px !important;
+  background:#fff !important;
+}
+.com161-card,
+.com161-sidebar{
+  padding:18px !important;
+}
+.com161-title{
+  font-size:20px !important;
+  line-height:1.45 !important;
+  font-weight:900 !important;
+}
+.com161-section-title{
+  font-size:30px !important;
+  line-height:1.3 !important;
+  font-weight:900 !important;
+}
+.com161-sub,
+.com161-item-meta,
+.com161-meal-meta,
+.com161-empty,
+.com161-hint{
+  font-size:14px !important;
+  line-height:1.75 !important;
+  color:var(--muted) !important;
+}
+.com161-item{
+  padding:16px !important;
+  border-radius:18px !important;
+}
+.com161-item-title{
+  font-size:17px !important;
+  line-height:1.45 !important;
+  font-weight:800 !important;
+}
+.com161-pill,
+.com161-tab{
+  font-size:14px !important;
+  padding:10px 14px !important;
+}
+.com161-search,
+.com161-composer textarea{
+  font-size:15px !important;
+}
+.com161-composer{
+  padding:16px 18px !important;
+}
+.com161-composer textarea{
+  min-height:58px !important;
+  border-radius:16px !important;
+}
+.com161-body{
+  grid-template-columns:minmax(0,1.4fr) 340px !important;
+  min-height:62vh !important;
+}
+.com161-meal-box{
+  background:#f8fbf8 !important;
+}
+.com161-meal-head{
+  margin-bottom:18px !important;
+}
+.com161-meal-list,
+.com161-meal-polls{
+  gap:12px !important;
+}
+.com161-meal-item{
+  padding:16px !important;
+  border-radius:20px !important;
+}
+.com161-poll-grid{
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr)) !important;
+}
+.com161-chat-actions,
+.com161-poll-actions,
+.com161-toolbar{
+  gap:10px !important;
+}
+.com161-panel .btn,
+.com161-panel .btn-light,
+.com161-panel .btn-ghost,
+.com161-panel .icon-btn{
+  min-height:44px !important;
+}
+.com161-panel .btn,
+.com161-panel .btn-light,
+.com161-panel .btn-ghost{
+  border-radius:14px !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+}
+.com161-panel .icon-btn{
+  width:44px !important;
+  height:44px !important;
+  border-radius:14px !important;
+}
+.com161-panel .stat-card,
+.com161-panel .mini-stat,
+.com161-panel .soft-card{
+  border-radius:18px !important;
+}
+.com161-panel .kpi-value,
+.com161-panel .amount{
+  font-size:24px !important;
+  font-weight:900 !important;
+}
+.com161-panel .muted,
+.com161-panel .tiny{
+  font-size:13px !important;
+  color:var(--muted) !important;
+}
+@media (max-width:1100px){
+  .com161-body{
+    grid-template-columns:1fr !important;
+  }
+}
+@media (max-width:720px){
+  .com161-header{
+    padding:18px !important;
+  }
+  .com161-card,
+  .com161-sidebar{
+    padding:16px !important;
+  }
+  .com161-section-title{
+    font-size:24px !important;
+  }
+  .com161-item-title{
+    font-size:16px !important;
+  }
+  .com161-pill,
+  .com161-tab,
+  .com161-panel .btn,
+  .com161-panel .btn-light,
+  .com161-panel .btn-ghost{
+    font-size:13px !important;
+  }
+}
+</style>
+
+</head><body><h1>${meet1047L('محضر اجتماع','Meeting Minutes')}: ${escapeHtml(m.title||'')}</h1><div class="meta"><div><span class="label">${meet1047L('الموعد','When')}</span><br><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div><div><span class="label">${escapeHtml(dur.title)}</span><br><b>${escapeHtml(dur.label)}</b></div><div><span class="label">${meet1047L('المنظّم','Organizer')}</span><br><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div><div><span class="label">${meet1047L('الحضور','Attendees')}</span><br><b>${escapeHtml(attendees||'—')}</b></div></div><div class="minutes"><h2>${meet1047L('المحضر','Minutes')}</h2>${escapeHtml(d.content||'').replace(/\n/g,'<br>')}</div></body></html>`;
     const blob=new Blob([report],{type:'text/html;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Tasky-Meeting-Minutes-${String(m.title||meetingId).replace(/[^\p{L}\p{N}\-_]+/gu,'-').slice(0,70)}.html`;document.body.appendChild(a);a.click();const u=a.href;a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200);taskyToast(meet1047L('تم تنزيل تقرير المحضر','Minutes report downloaded'),{tone:'success'});
   }catch(e){showTaskyDialog({title:meet1047L('تعذّر إنشاء التقرير','Could not create report'),message:e.message,tone:'error'})}
 }
@@ -21114,7 +21270,7 @@ setActiveNav=function(id,...args){
 
 
 <script id="tasky-v1632-connect-money-hotfix-js">
-window.TASKY_BUILD='V163.2';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V163.3';console.info('Tasky build',window.TASKY_BUILD);
 
 /* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
 function com162Money(v){
