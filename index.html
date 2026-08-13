@@ -21112,5 +21112,23 @@ setActiveNav=function(id,...args){
 };
 </script>
 
+
+<script id="tasky-v1632-connect-money-hotfix-js">
+window.TASKY_BUILD='V163.2';console.info('Tasky build',window.TASKY_BUILD);
+
+/* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
+function com162Money(v){
+  return `${Number(v||0).toLocaleString(
+    lang==='ar'?'ar-SA':'en-US',
+    {maximumFractionDigits:2}
+  )} ${com162L('ر.س','SAR')}`;
+}
+
+/* Keep the older formatter and the V162 formatter aligned. */
+if(typeof com161Money==='function'){
+  com162Money=function(v){ return com161Money(v); };
+}
+</script>
+
 </body>
 </html>
