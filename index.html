@@ -20372,5 +20372,366 @@ async function com161PayMeal(mealId){
 }
 </script>
 
+
+<style id="tasky-v162-connect-ux-css">
+/* ============================================================
+   V162 — Tasky Connect UX Power Pack
+   Chat-first layout + rich messaging + meal workflow.
+   ============================================================ */
+.com162-shell{display:grid;grid-template-columns:250px minmax(0,1fr);gap:9px;min-height:650px}
+.com162-room-search{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:8px 9px;font-size:8px;margin-bottom:8px}
+.com162-drawer{
+  position:fixed;top:0;inset-inline-end:0;width:min(390px,92vw);height:100dvh;z-index:42000;
+  background:var(--card);border-inline-start:1px solid var(--border);box-shadow:0 0 34px rgba(0,0,0,.12);
+  transform:translateX(105%);transition:transform .18s ease;overflow:auto;padding:14px
+}
+[dir="rtl"] .com162-drawer{transform:translateX(-105%)}
+.com162-drawer.show{transform:translateX(0)}
+.com162-drawer-backdrop{position:fixed;inset:0;z-index:41990;background:rgba(18,27,23,.18);display:none}
+.com162-drawer-backdrop.show{display:block}
+.com162-search-panel{position:absolute;top:62px;inset-inline:12px;z-index:20;border:1px solid var(--border);background:var(--card);border-radius:10px;padding:8px;box-shadow:0 10px 25px rgba(0,0,0,.08);display:none}
+.com162-search-panel.show{display:block}
+.com162-search-panel input{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:8px;padding:8px;font-size:8px}
+.com162-msg-row{display:flex;align-items:flex-end;gap:7px;max-width:84%;align-self:flex-start}
+.com162-msg-row.mine{align-self:flex-end;flex-direction:row-reverse}
+.com162-avatar{width:30px;height:30px;border:1px solid var(--border);border-radius:50%;background:var(--paper);display:grid;place-items:center;font-weight:900;font-size:8px;flex:none}
+.com162-bubble{border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:8px 9px;min-width:100px}
+.com162-msg-row.mine .com162-bubble{background:var(--green-tint);border-color:#cfe0d7}
+.com162-bubble .who{font-size:7.3px;font-weight:850;margin-bottom:3px}.com162-bubble .body{font-size:9px;line-height:1.5;white-space:pre-wrap;word-break:break-word}
+.com162-bubble .time{font-size:6.5px;color:var(--muted);margin-top:4px;display:flex;justify-content:space-between;gap:8px}
+.com162-reply-preview{border-inline-start:3px solid var(--green);background:var(--card);border-radius:7px;padding:5px 7px;margin-bottom:5px;font-size:7px;color:var(--muted)}
+.com162-reactions{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}.com162-react{border:1px solid var(--border);background:var(--card);border-radius:999px;padding:2px 5px;font-size:7px;cursor:pointer}
+.com162-msg-actions{display:flex;gap:4px;margin-top:5px;opacity:.72}.com162-msg-actions button{border:0;background:transparent;color:var(--muted);font-size:7px;cursor:pointer;padding:2px 3px}
+.com162-system{align-self:center;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:5px 8px;font-size:7px;color:var(--muted)}
+.com162-system.meal{background:var(--green-tint);border-color:#cfe0d7;color:var(--green)}
+.com162-typing{height:18px;padding:0 12px;color:var(--muted);font-size:7px}
+.com162-compose-wrap{border-top:1px solid var(--border);padding:8px;background:var(--card)}
+.com162-compose-tools{display:flex;gap:5px;align-items:center;margin-bottom:6px}
+.com162-compose-tools button{min-height:30px}
+.com162-compose-main{display:flex;gap:6px}.com162-compose-main textarea{flex:1;min-height:44px;max-height:120px;resize:vertical;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:9px}
+.com162-quote{display:none;border:1px solid var(--border);background:var(--paper);border-radius:8px;padding:6px 8px;margin-bottom:6px;font-size:7px;color:var(--muted)}.com162-quote.show{display:flex;justify-content:space-between;gap:8px}
+.com162-attach-list{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px}.com162-attach-pill{border:1px solid var(--border);background:var(--paper);border-radius:8px;padding:5px 7px;font-size:7px}
+.com162-menu{display:none;gap:5px;flex-wrap:wrap;margin-bottom:6px}.com162-menu.show{display:flex}
+.com162-pin{border:1px solid #d8dfdc;background:#f8faf9;border-radius:8px;padding:6px 7px;font-size:7px;margin-bottom:5px;cursor:pointer}
+.com162-meal-summary{border:1px solid #cfe0d7;background:var(--green-tint);border-radius:11px;padding:9px;margin:8px 12px 0}.com162-meal-summary-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.com162-meal-summary h4{margin:0 0 3px;font-size:9px}.com162-meal-summary p{margin:0;font-size:7px;color:var(--muted)}
+.com162-steps{display:flex;gap:4px;overflow:auto;margin-top:7px}.com162-step{border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:4px 7px;font-size:6.6px;white-space:nowrap}.com162-step.active{background:var(--green);border-color:var(--green);color:#fff}
+.com162-meal-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:8px}.com162-meal-box{border:1px solid var(--border);background:var(--card);border-radius:9px;padding:7px}.com162-meal-box span{display:block;font-size:6.6px;color:var(--muted)}.com162-meal-box b{font-size:8.5px}
+.com162-item-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:6px;align-items:center;border-bottom:1px solid var(--border);padding:7px 0}.com162-item-row:last-child{border-bottom:0}.com162-item-row b{font-size:8px}.com162-item-row small{display:block;font-size:6.7px;color:var(--muted)}
+.com162-pay-row{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:6px;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}.com162-pay-row:last-child{border-bottom:0}.com162-pay-row b{font-size:8px}.com162-pay-row small{display:block;font-size:6.6px;color:var(--muted)}
+.com162-online{width:7px;height:7px;border-radius:50%;background:var(--green);display:inline-block;margin-inline-start:4px}
+.com162-unread{min-width:18px;height:18px;border-radius:999px;background:var(--green);color:#fff;display:grid;place-items:center;font-size:6.5px;font-weight:900;padding:0 5px}
+.com162-fav{font-size:8px;color:var(--green)}
+@media(max-width:900px){.com162-shell{grid-template-columns:220px minmax(0,1fr)}}
+@media(max-width:700px){
+  .com162-shell{grid-template-columns:1fr}.com161-side{max-height:220px}.com161-main{min-height:560px}
+  .com162-msg-row{max-width:93%}.com162-meal-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<script id="tasky-v162-connect-ux-js">
+window.TASKY_BUILD='V162';console.info('Tasky build',window.TASKY_BUILD);
+
+let com162Drawer=false,com162Search='',com162RoomSearch='',com162ReplyTo=null,com162Files=[],com162Menu=false;
+let com162TypingUsers=new Map(),com162TypingTimer=null,com162Broadcast=null,com162Recorder=null,com162RecordedChunks=[];
+
+function com162L(ar,en){return lang==='ar'?ar:en}
+function com162Esc(s){return escapeHtml(String(s??''))}
+function com162Initial(name){return (String(name||'?').trim().charAt(0)||'?').toUpperCase()}
+function com162RoomName(r){
+  if(r?.room_type==='general')return com162L('عام','General');
+  return r?.name||'';
+}
+function com162GroupRooms(){
+  const q=String(com162RoomSearch||'').toLowerCase();
+  return com161Rows('rooms').filter(r=>!q||[com162RoomName(r),r.last_message,r.description].some(x=>String(x||'').toLowerCase().includes(q)));
+}
+function com162ToggleDrawer(v=!com162Drawer){com162Drawer=v;document.getElementById('com162Drawer')?.classList.toggle('show',v);document.getElementById('com162Backdrop')?.classList.toggle('show',v)}
+function com162ToggleMenu(){com162Menu=!com162Menu;document.getElementById('com162Menu')?.classList.toggle('show',com162Menu)}
+function com162SetRoomSearch(v){com162RoomSearch=v;renderModule()}
+function com162ToggleChatSearch(){
+  const p=document.getElementById('com162SearchPanel');p?.classList.toggle('show');
+  if(p?.classList.contains('show'))setTimeout(()=>document.getElementById('com162SearchInput')?.focus(),20);
+}
+function com162SearchMessages(v){com162Search=v;const room=com161Room();if(room)document.getElementById('com162SearchResults').innerHTML=com162SearchResults(room)}
+function com162SearchResults(room){
+  const q=String(com162Search||'').trim().toLowerCase();
+  if(!q)return `<div class="com161-empty">${com162L('اكتب كلمة للبحث.','Type to search.')}</div>`;
+  const rows=com161Rows('messages').filter(m=>m.room_id===room.id&&String(m.body||'').toLowerCase().includes(q)).slice(-40);
+  return rows.length?rows.map(m=>`<div class="com162-pin" onclick="com162JumpMessage('${m.id}')"><b>${com162Esc(m.sender_name)}</b><br>${com162Esc(m.body)}</div>`).join(''):`<div class="com161-empty">${com162L('لا توجد نتائج.','No results.')}</div>`;
+}
+function com162JumpMessage(id){
+  document.getElementById('com162SearchPanel')?.classList.remove('show');
+  const el=document.querySelector(`[data-msg-id="${id}"]`);if(el){el.scrollIntoView({behavior:'smooth',block:'center'});el.style.outline='2px solid var(--green)';setTimeout(()=>el.style.outline='',1200)}
+}
+function com162Reply(id){
+  const m=com161Rows('messages').find(x=>x.id===id);if(!m)return;
+  com162ReplyTo=m;const q=document.getElementById('com162Quote');if(q){q.classList.add('show');q.innerHTML=`<span>${com162L('رد على','Reply to')} ${com162Esc(m.sender_name)}: ${com162Esc((m.body||'').slice(0,90))}</span><button class="com161-btn" onclick="com162CancelReply()">×</button>`}
+  document.getElementById('com161Composer')?.focus();
+}
+function com162CancelReply(){com162ReplyTo=null;document.getElementById('com162Quote')?.classList.remove('show')}
+function com162Mention(){
+  const room=com161Room(),members=com161Rows('members').filter(m=>m.room_id===room?.id&&m.user_id!==currentUserId);
+  com161Modal(com162L('إشارة إلى زميل','Mention colleague'),`<div class="com161-form"><div class="com161-field full"><select id="com162MentionUser" size="8">${members.map(m=>`<option value="${m.user_id}" data-name="${com162Esc(m.member_name)}">${com162Esc(m.member_name)}</option>`).join('')}</select></div><div class="com161-field full"><button class="com161-btn primary" onclick="com162InsertMention()">${com162L('إضافة الإشارة','Insert mention')}</button></div></div>`);
+}
+function com162InsertMention(){
+  const sel=document.getElementById('com162MentionUser'),opt=sel?.selectedOptions?.[0];if(!opt)return;
+  const input=document.getElementById('com161Composer');if(input){input.value+=`${input.value?' ':''}@${opt.dataset.name} `;input.dataset.mentionIds=[...(input.dataset.mentionIds||'').split(',').filter(Boolean),opt.value].join(',')}
+  closeAddModal();input?.focus();
+}
+async function com162React(messageId,reaction){
+  const {error}=await sb.rpc('tasky_connect_reaction_toggle_v162',{p_message_id:messageId,p_reaction:reaction});
+  if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();
+}
+async function com162Pin(messageId){
+  const {error}=await sb.rpc('tasky_connect_pin_toggle_v162',{p_message_id:messageId});
+  if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();
+}
+async function com162RoomPref(kind){
+  const room=com161Room();if(!room)return;
+  const {error}=await sb.rpc('tasky_connect_room_pref_v162',{p_room_id:room.id,p_pref:kind});
+  if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();
+}
+async function com162SyncTeams(){
+  const {data,error}=await sb.rpc('tasky_connect_sync_request_teams_v162',{p_workspace_id:currentWorkspaceId});
+  if(error)return taskyToast(error.message,{tone:'warning'});taskyToast(`${com162L('تمت مزامنة الفرق','Teams synced')}: ${Number(data?.created||0)}`,{tone:'success'});await com161Fetch();
+}
+
+/* Attachments + paste screenshot */
+function com162PickFiles(accept='*/*'){const i=document.createElement('input');i.type='file';i.multiple=true;i.accept=accept;i.onchange=()=>{com162Files.push(...[...i.files].slice(0,8));com162RenderPendingFiles()};i.click()}
+function com162RenderPendingFiles(){const h=document.getElementById('com162AttachList');if(!h)return;h.innerHTML=com162Files.map((f,i)=>`<span class="com162-attach-pill">${com162Esc(f.name)} <button onclick="com162Files.splice(${i},1);com162RenderPendingFiles()">×</button></span>`).join('')}
+async function com162UploadFiles(roomId){
+  const out=[];
+  for(const file of com162Files.slice(0,8)){
+    if(file.size>25*1024*1024){taskyToast(com162L('الحد 25MB للملف','25MB file limit'),{tone:'warning'});continue}
+    const safe=file.name.replace(/[^\w.\-]+/g,'_'),path=`${currentWorkspaceId}/${roomId}/${crypto.randomUUID()}-${safe}`;
+    const {error}=await sb.storage.from('tasky-connect-assets').upload(path,file,{contentType:file.type||'application/octet-stream'});if(error){taskyToast(error.message,{tone:'warning'});continue}
+    out.push({storage_path:path,file_name:file.name,mime_type:file.type||null,size_bytes:file.size});
+  }
+  return out;
+}
+async function com162StartVoice(){
+  if(com162Recorder&&com162Recorder.state==='recording'){com162Recorder.stop();return}
+  if(!navigator.mediaDevices?.getUserMedia)return taskyToast(com162L('التسجيل الصوتي غير مدعوم هنا','Voice recording is not supported here'),{tone:'warning'});
+  try{
+    const stream=await navigator.mediaDevices.getUserMedia({audio:true});com162RecordedChunks=[];
+    com162Recorder=new MediaRecorder(stream);
+    com162Recorder.ondataavailable=e=>{if(e.data.size)com162RecordedChunks.push(e.data)};
+    com162Recorder.onstop=()=>{const blob=new Blob(com162RecordedChunks,{type:com162Recorder.mimeType||'audio/webm'});com162Files.push(new File([blob],`voice-${Date.now()}.webm`,{type:blob.type}));stream.getTracks().forEach(t=>t.stop());com162RenderPendingFiles();taskyToast(com162L('تم إرفاق التسجيل الصوتي','Voice note attached'),{tone:'success'})};
+    com162Recorder.start();taskyToast(com162L('جاري التسجيل… اضغط الميكروفون للإيقاف','Recording… tap mic again to stop'),{tone:'success'});
+  }catch(e){taskyToast(e.message||String(e),{tone:'warning'})}
+}
+document.addEventListener('paste',e=>{
+  if(activeNav!=='connect'||!document.getElementById('com161Composer')?.matches(':focus'))return;
+  const files=[...(e.clipboardData?.files||[])].filter(f=>f.type.startsWith('image/'));
+  if(files.length){com162Files.push(...files);com162RenderPendingFiles()}
+});
+
+/* Typing broadcast */
+function com162InitBroadcast(){
+  if(com162Broadcast){try{sb.removeChannel(com162Broadcast)}catch(_){}}
+  if(!currentWorkspaceId)return;
+  com162Broadcast=sb.channel(`tasky-connect-presence-v162-${currentWorkspaceId}`,{config:{broadcast:{self:false}}});
+  com162Broadcast.on('broadcast',{event:'typing'},({payload})=>{
+    if(!payload||payload.user_id===currentUserId)return;
+    if(payload.room_id!==com161RoomId)return;
+    if(payload.typing)com162TypingUsers.set(payload.user_id,{name:payload.name,until:Date.now()+3500});else com162TypingUsers.delete(payload.user_id);
+    com162RenderTyping();
+  });
+  com162Broadcast.subscribe();
+}
+function com162Typing(){
+  const room=com161Room();if(!room||!com162Broadcast)return;
+  clearTimeout(com162TypingTimer);
+  com162Broadcast.send({type:'broadcast',event:'typing',payload:{room_id:room.id,user_id:currentUserId,name:com161Rows('members').find(m=>m.room_id===room.id&&m.user_id===currentUserId)?.member_name||'',typing:true}});
+  com162TypingTimer=setTimeout(()=>com162Broadcast?.send({type:'broadcast',event:'typing',payload:{room_id:room.id,user_id:currentUserId,typing:false}}),1800);
+}
+function com162RenderTyping(){
+  const now=Date.now();for(const [k,v] of com162TypingUsers){if(v.until<now)com162TypingUsers.delete(k)}
+  const h=document.getElementById('com162Typing');if(h)h.textContent=[...com162TypingUsers.values()].map(x=>x.name).filter(Boolean).join('، ')+(com162TypingUsers.size?` ${com162L('يكتب الآن…','is typing…')}`:'');
+}
+
+/* Better room list */
+com161RoomsTemplate=function(){
+  const rooms=com162GroupRooms();
+  const groups=[['general',com162L('عام','General')],['team',com162L('الفرق','Teams')],['private',com162L('مجموعاتي','My groups')],['meal',com162L('الغداء والقهوة','Meals')]];
+  return `<input class="com162-room-search" value="${com162Esc(com162RoomSearch)}" oninput="com162SetRoomSearch(this.value)" placeholder="${com162L('بحث في المحادثات','Search conversations')}">`
+    +groups.map(g=>{
+      const rr=rooms.filter(r=>r.room_type===g[0]);
+      if(!rr.length)return'';
+      return `<div style="margin-bottom:9px"><div style="padding:4px 7px;color:var(--muted);font-size:7px;font-weight:800">${g[1]}</div>${rr.map(r=>`<button class="com161-room ${com161RoomId===r.id?'active':''}" onclick="com161SelectRoom('${r.id}')"><span class="com161-room-dot"></span><span class="com161-room-main"><b>${r.favorite?'<span class="com162-fav">★</span> ':''}${com162Esc(com162RoomName(r))}</b><small>${com162Esc(r.last_message||r.description||(r.room_type==='general'?com162L('جميع موظفي الشركة','All company employees'):''))}</small></span>${Number(r.unread_count||0)>0?`<span class="com162-unread">${Number(r.unread_count)}</span>`:''}</button>`).join('')}</div>`;
+    }).join('');
+};
+
+/* Main two-column chat-first shell */
+com161Template=function(){
+  if(com161Loading&&!com161State)return `<div class="com161-empty">${com162L('جارٍ تحميل المحادثات…','Loading conversations…')}</div>`;
+  if(com161Error)return `<div class="com161-empty">${com162Esc(com161Error)}<br><button class="com161-btn" onclick="com161Fetch()">${com162L('إعادة المحاولة','Retry')}</button></div>`;
+  const room=com161Room();
+  return `<div class="com161">
+    <div class="com161-head"><div><h2>${com162L('التواصل','Connect')}</h2><p>${com162L('محادثات الشركة والفرق والمجموعات والغداء — بتجربة محادثة أولًا.','Company, team, group and meal conversations — chat first.')}</p></div><div class="com161-actions"><button class="com161-btn" onclick="com162SyncTeams()">${com162L('مزامنة الفرق','Sync teams')}</button><button class="com161-btn" onclick="com161CreateRoom('private')">${com162L('محادثة جديدة','New conversation')}</button><button class="com161-btn primary" onclick="com161CreateMealRoom()">${com162L('محادثة غداء','Meal conversation')}</button></div></div>
+    <div class="com162-shell">
+      <aside class="com161-side"><div class="com161-side-head"><b>${com162L('المحادثات','Conversations')}</b><button class="com161-btn" onclick="com161CreateRoom('private')">+</button></div>${com161RoomsTemplate()}</aside>
+      <section class="com161-main" style="position:relative">${room?com161ChatTemplate(room):`<div class="com161-empty">${com162L('اختر محادثة.','Choose a conversation.')}</div>`}</section>
+    </div>
+    <div id="com162Backdrop" class="com162-drawer-backdrop ${com162Drawer?'show':''}" onclick="com162ToggleDrawer(false)"></div>
+    <aside id="com162Drawer" class="com162-drawer ${com162Drawer?'show':''}">${room?com161InfoTemplate(room):''}</aside>
+  </div>`;
+};
+
+/* Rich message renderer */
+function com162MessageTemplate(m){
+  if(m.message_type==='system'){
+    const meal=/meal|Contribution|payment/i.test(m.body||'')||['meal_item','payment'].includes(m.message_type);
+    const text=m.system_text_ar&&lang==='ar'?m.system_text_ar:m.system_text_en&&lang==='en'?m.system_text_en:m.body;
+    return `<div class="com162-system ${meal?'meal':''}" data-msg-id="${m.id}">${com162Esc(text)}</div>`;
+  }
+  if(m.message_type==='meal_item'){
+    const p=m.payload||{};
+    return `<div class="com162-system meal" data-msg-id="${m.id}">${com162Esc(m.sender_name)} ${com162L('أضاف','added')}: <b>${com162Esc(p.name||'')}</b> · ${com161Money?com161Money(p.price):com162Esc(p.price)}</div>`;
+  }
+  const reply=m.reply_body?`<div class="com162-reply-preview"><b>${com162Esc(m.reply_sender_name||'')}</b><br>${com162Esc((m.reply_body||'').slice(0,130))}</div>`:'';
+  const reacts=Array.isArray(m.reactions)?m.reactions:[];
+  const atts=Array.isArray(m.attachments)?m.attachments:[];
+  return `<div class="com162-msg-row ${m.sender_user_id===currentUserId?'mine':''}" data-msg-id="${m.id}">
+    <span class="com162-avatar">${com162Esc(com162Initial(m.sender_name))}</span>
+    <div class="com162-bubble">${m.show_sender!==false?`<div class="who">${com162Esc(m.sender_name)}</div>`:''}${reply}<div class="body">${com162Esc(m.body||'')}</div>
+      ${atts.length?`<div class="com162-attach-list" style="margin-top:6px">${atts.map(a=>`<button class="com162-attach-pill" onclick="com162OpenAttachment('${a.id}')">${a.mime_type?.startsWith('audio/')?'◉ ':''}${com162Esc(a.file_name)}</button>`).join('')}</div>`:''}
+      <div class="com162-reactions">${reacts.map(r=>`<button class="com162-react" onclick="com162React('${m.id}','${com162Esc(r.reaction)}')">${com162Esc(r.reaction)} ${Number(r.count||0)}</button>`).join('')}</div>
+      <div class="com162-msg-actions"><button onclick="com162Reply('${m.id}')">${com162L('رد','Reply')}</button><button onclick="com162React('${m.id}','👍')">👍</button><button onclick="com162React('${m.id}','✓')">✓</button><button onclick="com162Pin('${m.id}')">${com162L('تثبيت','Pin')}</button></div>
+      <div class="time"><span>${com162Esc(com161Date(m.created_at))}</span><span>${m.sender_user_id===currentUserId&&Number(m.read_count||0)>0?`${com162L('قرأها','Read by')} ${Number(m.read_count)}`:''}</span></div>
+    </div>
+  </div>`;
+}
+async function com162OpenAttachment(id){
+  const {data,error}=await sb.rpc('tasky_connect_attachment_signed_url_v162',{p_attachment_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  if(data?.url)window.open(data.url,'_blank','noopener');
+}
+
+com161ChatTemplate=function(room){
+  const msgs=com161Rows('messages').filter(m=>m.room_id===room.id);
+  const meal=com161Rows('meal_sessions').find(x=>x.room_id===room.id);
+  const pins=com161Rows('pins').filter(x=>x.room_id===room.id).slice(0,3);
+  return `<div class="com161-chat-head"><div><h3>${com162Esc(com162RoomName(room))}${room.room_type==='general'?` <span class="com162-online"></span>`:''}</h3><p>${com162Esc(room.description||(room.room_type==='general'?com162L('جميع موظفي الشركة','All company employees'):''))} · ${Number(room.member_count||0)} ${com162L('أعضاء','members')}</p></div><div class="com161-actions">${room.room_type==='meal'?`<button class="com161-btn" onclick="com161OpenMealItem('${room.id}')">${com162L('إضافة صنف','Add item')}</button>`:''}<button class="com161-btn" onclick="com162ToggleChatSearch()">${com162L('بحث','Search')}</button><button class="com161-btn" onclick="com162ToggleDrawer(true)">${com162L('التفاصيل','Details')}</button></div></div>
+    <div id="com162SearchPanel" class="com162-search-panel"><input id="com162SearchInput" oninput="com162SearchMessages(this.value)" placeholder="${com162L('بحث داخل المحادثة','Search this conversation')}"><div id="com162SearchResults">${com162SearchResults(room)}</div></div>
+    ${pins.length?`<div style="padding:7px 12px 0">${pins.map(p=>`<div class="com162-pin" onclick="com162JumpMessage('${p.message_id}')">${com162L('مثبت','Pinned')}: ${com162Esc((p.body||'').slice(0,90))}</div>`).join('')}</div>`:''}
+    ${meal?com162MealSummary(meal):''}
+    <div class="com161-messages" id="com161Messages">${msgs.length?msgs.map(com162MessageTemplate).join(''):`<div class="com161-empty">${com162L('ابدأ المحادثة.','Start the conversation.')}</div>`}</div>
+    <div id="com162Typing" class="com162-typing"></div>
+    <div class="com162-compose-wrap">
+      <div id="com162Quote" class="com162-quote"></div>
+      <div id="com162AttachList" class="com162-attach-list"></div>
+      <div id="com162Menu" class="com162-menu ${com162Menu?'show':''}">
+        <button class="com161-btn" onclick="com162PickFiles('*/*')">${com162L('ملف','File')}</button>
+        <button class="com161-btn" onclick="com162PickFiles('image/*')">${com162L('صورة','Image')}</button>
+        <button class="com161-btn" onclick="com162Mention()">@</button>
+        <button class="com161-btn" onclick="com162StartVoice()">${com162L('رسالة صوتية','Voice')}</button>
+        <button class="com161-btn" onclick="com162CreatePoll()">${com162L('استطلاع','Poll')}</button>
+        <button class="com161-btn" onclick="com162ShareReference()">${com162L('مشاركة مرجع','Share ref')}</button>
+      </div>
+      <div class="com162-compose-tools"><button class="com161-btn" onclick="com162ToggleMenu()">+</button><span style="font-size:7px;color:var(--muted)">${com162L('يمكن لصق صورة مباشرة هنا','Paste screenshots directly')}</span></div>
+      <div class="com162-compose-main"><textarea id="com161Composer" oninput="com162Typing()" placeholder="${com162L('اكتب رسالة…','Write a message…')}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();com161Send()}"></textarea><button class="com161-btn primary" onclick="com161Send()">${com162L('إرسال','Send')}</button></div>
+    </div>`;
+};
+
+/* Meal card inside chat */
+function com162MealSummary(meal){
+  const items=com161Rows('meal_items').filter(x=>x.meal_session_id===meal.id);
+  const participants=com161Rows('meal_participants').filter(x=>x.meal_session_id===meal.id);
+  const contributions=com161Rows('meal_contributions').filter(x=>x.meal_session_id===meal.id);
+  const paid=contributions.reduce((s,x)=>s+Number(x.amount||0),0);
+  const target=Number(meal.grand_total||meal.target_amount||0),pct=target?Math.min(100,paid/target*100):0;
+  const stages=[['planning',com162L('اقتراح','Suggest')],['voting',com162L('تصويت','Vote')],['locked',com162L('اعتماد','Lock')],['collecting',com162L('القطة','Collect')],['ordered',com162L('الطلب','Order')],['delivered',com162L('التوصيل','Delivered')]];
+  return `<div class="com162-meal-summary"><div class="com162-meal-summary-top"><div><h4>${com162Esc(meal.title)}</h4><p>${com162Esc(meal.restaurant_label||com162L('لم يتم تحديد المطعم','Restaurant not selected'))} · ${meal.deadline_at?`${com162L('إغلاق','Deadline')}: ${new Date(meal.deadline_at).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'})}`:''}</p></div><button class="com161-btn" onclick="com162ToggleDrawer(true)">${com162L('فتح الخطة','Open plan')}</button></div>
+    <div class="com162-steps">${stages.map(s=>`<span class="com162-step ${meal.stage===s[0]?'active':''}">${s[1]}</span>`).join('')}</div>
+    <div class="com162-meal-grid"><div class="com162-meal-box"><span>${com162L('الإجمالي','Total')}</span><b>${com162Money(target)}</b></div><div class="com162-meal-box"><span>${com162L('تم جمع','Collected')}</span><b>${com162Money(paid)}</b></div><div class="com162-meal-box"><span>${com162L('المشاركون','Participants')}</span><b>${participants.length||Number(meal.member_count||0)}</b></div><div class="com162-meal-box"><span>${com162L('طريقة التقسيم','Split')}</span><b>${com162Esc(meal.split_mode||'equal')}</b></div></div>
+    <div class="com161-progress"><i style="width:${pct}%"></i></div>
+  </div>`;
+}
+
+/* Drawer now contains details instead of permanent third column */
+com161InfoTemplate=function(room){
+  const members=com161Rows('members').filter(m=>m.room_id===room.id),meal=com161Rows('meal_sessions').find(x=>x.room_id===room.id);
+  const pins=com161Rows('pins').filter(x=>x.room_id===room.id);
+  return `<div class="com161-side-head"><b>${com162L('تفاصيل المحادثة','Conversation details')}</b><button class="com161-btn" onclick="com162ToggleDrawer(false)">×</button></div>
+    <div class="com161-card-actions" style="margin-bottom:9px"><button class="com161-btn" onclick="com162RoomPref('favorite')">${room.favorite?com162L('إزالة من المفضلة','Unfavorite'):com162L('مفضلة','Favorite')}</button><button class="com161-btn" onclick="com162RoomPref('mute')">${room.muted?com162L('إلغاء الكتم','Unmute'):com162L('كتم','Mute')}</button><button class="com161-btn" onclick="com161OpenMembers('${room.id}')">${com162L('إضافة زملاء','Add people')}</button></div>
+    ${meal?com162MealDrawer(meal):''}
+    ${pins.length?`<h3>${com162L('الرسائل المثبتة','Pinned messages')}</h3>${pins.map(p=>`<div class="com162-pin" onclick="com162JumpMessage('${p.message_id}');com162ToggleDrawer(false)">${com162Esc(p.body||'')}</div>`).join('')}`:''}
+    <h3 style="margin-top:12px">${com162L('الأعضاء','Members')}</h3><div class="com161-members">${members.map(m=>`<div class="com161-member"><span class="com162-avatar">${com162Esc(com162Initial(m.member_name))}</span><div><b>${com162Esc(m.member_name||'')}</b><small>${com162Esc(m.role||'member')}</small></div></div>`).join('')}</div>`;
+}
+function com162MealDrawer(meal){
+  const items=com161Rows('meal_items').filter(x=>x.meal_session_id===meal.id),participants=com161Rows('meal_participants').filter(x=>x.meal_session_id===meal.id);
+  return `<div class="com161-meal"><h4>${com162Esc(meal.title)}</h4><p>${com162L('Workflow كامل للغداء والقهوة داخل المحادثة.','Complete meal workflow inside the chat.')}</p>
+    <div class="com162-meal-grid"><div class="com162-meal-box"><span>${com162L('المطعم','Restaurant')}</span><b>${com162Esc(meal.restaurant_label||'—')}</b></div><div class="com162-meal-box"><span>${com162L('رسوم التوصيل','Delivery')}</span><b>${com162Money(meal.delivery_fee)}</b></div><div class="com162-meal-box"><span>${com162L('الضريبة','Tax')}</span><b>${com162Money(meal.tax_amount)}</b></div><div class="com162-meal-box"><span>${com162L('الإجمالي','Grand total')}</span><b>${com162Money(meal.grand_total||meal.target_amount)}</b></div></div>
+    <div class="com161-card-actions" style="margin-top:8px"><button class="com161-btn" onclick="com162MealSettings('${meal.id}')">${com162L('إعدادات الخطة','Plan settings')}</button><button class="com161-btn" onclick="com161OpenMealItem('${meal.room_id}')">${com162L('إضافة صنف','Add item')}</button><button class="com161-btn" onclick="com162AdvanceMeal('${meal.id}')">${com162L('المرحلة التالية','Next stage')}</button></div>
+    <h3 style="margin-top:10px">${com162L('الأصناف','Items')}</h3><div>${items.map(i=>`<div class="com162-item-row"><div><b>${com162Esc(i.name)}</b><small>${com162Esc(i.note||'')} · ${Number(i.vote_count||0)} ${com162L('أصوات','votes')}</small></div><strong>${com162Money(i.price)}</strong><button class="com161-btn" onclick="com162TogglePersonalItem('${i.id}')">${i.selected_by_me?com162L('مختار','Selected'):com162L('أنا أطلبه','I want this')}</button></div>`).join('')||`<div class="com161-empty">${com162L('لا توجد أصناف بعد.','No items yet.')}</div>`}</div>
+    <h3 style="margin-top:10px">${com162L('الدفع','Payments')}</h3><div>${participants.map(p=>`<div class="com162-pay-row"><div><b>${com162Esc(p.member_name||'')}</b><small>${com162L('عليه','Due')}: ${com162Money(p.share_due)} · ${com162L('دفع','Paid')}: ${com162Money(p.contributed)}</small></div><span class="com161-chip">${com162Esc(p.payment_status||'pending')}</span></div>`).join('')||`<div class="com161-empty">${com162L('يتم حساب الحصص عند اعتماد الطلب.','Shares are calculated after locking the order.')}</div>`}</div>
+    <div class="com161-card-actions" style="margin-top:9px"><button class="com161-btn" onclick="com161Contribute('${meal.id}')">${com162L('المساهمة','Contribute')}</button><button class="com161-btn" onclick="com162RemindUnpaid('${meal.id}')">${com162L('تذكير غير الدافعين','Remind unpaid')}</button><button class="com161-btn primary" onclick="com161PayMeal('${meal.id}')">${com162L('تنفيذ الدفع','Pay')}</button></div>
+  </div>`;
+}
+function com162MealSettings(mealId){
+  const m=com161Rows('meal_sessions').find(x=>x.id===mealId)||{};
+  com161Modal(com162L('إعدادات خطة الغداء','Meal plan settings'),`<div class="com161-form">
+    <div class="com161-field"><label>${com162L('المطعم','Restaurant')}</label><input id="com162Restaurant" value="${com162Esc(m.restaurant_label||'')}"></div>
+    <div class="com161-field"><label>${com162L('المسؤول','Responsible person')}</label><select id="com162Resp"><option value="">—</option>${com161Rows('members').filter(x=>x.room_id===m.room_id).map(x=>`<option value="${x.user_id}" ${m.responsible_user_id===x.user_id?'selected':''}>${com162Esc(x.member_name)}</option>`).join('')}</select></div>
+    <div class="com161-field"><label>${com162L('طريقة التقسيم','Split mode')}</label><select id="com162Split"><option value="equal" ${m.split_mode==='equal'?'selected':''}>${com162L('بالتساوي','Equal')}</option><option value="personal" ${m.split_mode==='personal'?'selected':''}>${com162L('كل شخص يدفع طلبه','Personal items')}</option><option value="manager" ${m.split_mode==='manager'?'selected':''}>${com162L('المدير يتحمل كامل المبلغ','Manager pays all')}</option><option value="subsidy" ${m.split_mode==='subsidy'?'selected':''}>${com162L('دعم لكل شخص والباقي عليه','Per-person subsidy')}</option></select></div>
+    <div class="com161-field"><label>${com162L('دعم المدير لكل شخص','Subsidy per person')}</label><input type="number" id="com162Subsidy" value="${Number(m.subsidy_per_person||0)}"></div>
+    <div class="com161-field"><label>${com162L('رسوم التوصيل','Delivery fee')}</label><input type="number" id="com162Delivery" value="${Number(m.delivery_fee||0)}"></div>
+    <div class="com161-field"><label>${com162L('الضريبة','Tax')}</label><input type="number" id="com162Tax" value="${Number(m.tax_amount||0)}"></div>
+    <div class="com161-field"><label>${com162L('الحد الأدنى للطلب','Minimum order')}</label><input type="number" id="com162Minimum" value="${Number(m.minimum_order||0)}"></div>
+    <div class="com161-field"><label>${com162L('موعد إغلاق القطة','Collection deadline')}</label><input type="datetime-local" id="com162Deadline"></div>
+    <div class="com161-field full"><button class="com161-btn primary" onclick="com162SaveMealSettings('${mealId}')">${com162L('حفظ','Save')}</button></div>
+  </div>`);
+}
+async function com162SaveMealSettings(mealId){
+  const deadline=document.getElementById('com162Deadline').value;
+  const {error}=await sb.rpc('tasky_connect_meal_settings_v162',{p_meal_session_id:mealId,p_restaurant_label:document.getElementById('com162Restaurant').value.trim()||null,p_responsible_user_id:document.getElementById('com162Resp').value||null,p_split_mode:document.getElementById('com162Split').value,p_subsidy_per_person:Number(document.getElementById('com162Subsidy').value||0),p_delivery_fee:Number(document.getElementById('com162Delivery').value||0),p_tax_amount:Number(document.getElementById('com162Tax').value||0),p_minimum_order:Number(document.getElementById('com162Minimum').value||0),p_deadline_at:deadline?new Date(deadline).toISOString():null});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();com162ToggleDrawer(true);
+}
+async function com162AdvanceMeal(id){const {error}=await sb.rpc('tasky_connect_meal_advance_v162',{p_meal_session_id:id});if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();com162ToggleDrawer(true)}
+async function com162TogglePersonalItem(itemId){const {error}=await sb.rpc('tasky_connect_meal_personal_item_toggle_v162',{p_item_id:itemId});if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();com162ToggleDrawer(true)}
+async function com162RemindUnpaid(mealId){const {data,error}=await sb.rpc('tasky_connect_meal_remind_unpaid_v162',{p_meal_session_id:mealId});if(error)return taskyToast(error.message,{tone:'warning'});taskyToast(`${com162L('تم إرسال التذكير','Reminder sent')}: ${Number(data?.count||0)}`,{tone:'success'});await com161Fetch()}
+
+/* Send upgraded messages with reply, mentions and attachments */
+com161Send=async function(){
+  const input=document.getElementById('com161Composer'),body=input?.value.trim()||'';if(!com161RoomId||(!body&&!com162Files.length))return;
+  const mentionIds=(input?.dataset?.mentionIds||'').split(',').filter(Boolean);
+  const attachments=await com162UploadFiles(com161RoomId);
+  input.value='';if(input)input.dataset.mentionIds='';
+  const {error}=await sb.rpc('tasky_connect_message_send_v162',{p_room_id:com161RoomId,p_body:body,p_reply_to_id:com162ReplyTo?.id||null,p_mention_user_ids:mentionIds,p_attachments:attachments,p_message_type:attachments.length&&!body?'attachment':'text',p_payload:{}});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  com162Files=[];com162ReplyTo=null;await com161Fetch();com161ScrollBottom();
+};
+function com162CreatePoll(){
+  com161Modal(com162L('استطلاع سريع','Quick poll'),`<div class="com161-form"><div class="com161-field full"><label>${com162L('السؤال','Question')}</label><input id="com162PollQ"></div><div class="com161-field full"><label>${com162L('الخيارات، كل خيار بسطر','Options, one per line')}</label><textarea id="com162PollOpts"></textarea></div><div class="com161-field full"><button class="com161-btn primary" onclick="com162SendPoll()">${com162L('إرسال','Send')}</button></div></div>`);
+}
+async function com162SendPoll(){
+  const opts=document.getElementById('com162PollOpts').value.split('\n').map(x=>x.trim()).filter(Boolean).slice(0,10);if(opts.length<2)return;
+  const {error}=await sb.rpc('tasky_connect_poll_create_v162',{p_room_id:com161RoomId,p_question:document.getElementById('com162PollQ').value.trim(),p_options:opts});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();
+}
+function com162ShareReference(){
+  com161Modal(com162L('مشاركة مرجع من تاسكي','Share Tasky reference'),`<div class="com161-form"><div class="com161-field"><label>${com162L('النوع','Type')}</label><select id="com162RefType"><option value="task">Task</option><option value="project">Project</option><option value="request">Request</option><option value="meeting">Meeting</option><option value="asset">Asset</option></select></div><div class="com161-field"><label>${com162L('المرجع','Reference')}</label><input id="com162RefValue"></div><div class="com161-field full"><label>${com162L('عنوان مختصر','Label')}</label><input id="com162RefLabel"></div><div class="com161-field full"><button class="com161-btn primary" onclick="com162SendReference()">${com162L('مشاركة','Share')}</button></div></div>`);
+}
+async function com162SendReference(){
+  const p={type:document.getElementById('com162RefType').value,ref:document.getElementById('com162RefValue').value.trim(),label:document.getElementById('com162RefLabel').value.trim()};
+  const {error}=await sb.rpc('tasky_connect_message_send_v162',{p_room_id:com161RoomId,p_body:p.label||p.ref,p_reply_to_id:null,p_mention_user_ids:[],p_attachments:[],p_message_type:'reference',p_payload:p});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();
+}
+
+/* Enrich initial connect setup */
+const com161FetchBaseV162=com161Fetch;
+com161Fetch=async function(){
+  await com161FetchBaseV162();
+  if(activeNav==='connect'&&!com162Broadcast)com162InitBroadcast();
+};
+const setActiveNavBaseV162=setActiveNav;
+setActiveNav=function(id,...args){
+  const r=setActiveNavBaseV162(id,...args);
+  if(id==='connect'&&!com162Broadcast)setTimeout(com162InitBroadcast,0);
+  return r;
+};
+</script>
+
 </body>
 </html>
