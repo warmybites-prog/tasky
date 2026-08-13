@@ -18856,5 +18856,311 @@ const brain108CloseCanvasBaseV130=brain108CloseCanvas;
 brain108CloseCanvas=function(){brain130Images=[];brain130Timeline=[];document.getElementById('brain130Present')?.classList.remove('show');return brain108CloseCanvasBaseV130()};
 </script>
 
+
+<style id="tasky-v1301-brainstorm-ui-fix-css">
+/* ============================================================
+   V130.1 — Brainstorm UI cleanup
+   Fix overlapping panels and make open controls dismissible
+   by tapping/clicking anywhere outside.
+   ============================================================ */
+
+/* Keep one clear floating surface at a time. */
+#brain130Layers,
+#brain130Breakouts,
+#brain130Matrix,
+#brain130Timeline,
+#brain120Templates,
+#brain120Tools,
+#brain120InsightsPanel,
+#brain112Actions,
+#brain109ShapeMenu,
+#brain109LineMenu{
+  z-index:52000!important;
+}
+
+/* Activity / layers / breakouts should never appear as giant blocking cards. */
+.brain130-side-panel,
+.brain130-layer-panel,
+.brain120-panel,
+.brain112-actions-panel{
+  width:min(390px,calc(100vw - 90px))!important;
+  max-height:min(62dvh,560px)!important;
+  overflow:auto!important;
+  border-radius:12px!important;
+  padding:10px!important;
+}
+
+/* The screenshot showed the activity panel much too wide/tall. */
+#brain130Timeline{
+  inset-inline-end:12px!important;
+  inset-inline-start:auto!important;
+  top:58px!important;
+  width:min(360px,calc(100vw - 90px))!important;
+}
+#brain130Timeline h3{
+  margin:0 0 8px!important;
+  font-size:12px!important;
+}
+
+/* Keep the controls above the canvas but below modal/editor surfaces. */
+#brain120Hud{z-index:80!important}
+#brain130Toolbar{z-index:79!important}
+#brain130Stagebar{z-index:78!important}
+#brain130Progress{z-index:77!important}
+.brain120-minimap{z-index:70!important}
+
+/* Cleaner stage controls on desktop: do not cover the working area excessively. */
+#brain130Toolbar{
+  max-width:calc(100% - 110px)!important;
+  row-gap:5px!important;
+}
+#brain130Stagebar{
+  max-width:min(720px,calc(100% - 160px))!important;
+}
+
+/* Panels now look like control sheets, not page content. */
+.brain130-side-panel > h3,
+.brain130-layer-panel > h3,
+.brain120-panel > h3{
+  font-size:12px!important;
+  margin:0 0 7px!important;
+}
+.brain130-timeline-item{
+  padding-bottom:8px!important;
+  margin-bottom:2px!important;
+}
+
+/* Global transparent dismissal layer. It sits above canvas chrome,
+   but below the actual open panel. */
+#brain1301DismissLayer{
+  position:fixed;
+  inset:0;
+  z-index:51990;
+  display:none;
+  background:transparent;
+}
+#brain1301DismissLayer.show{display:block}
+
+/* Top bar must stay usable. */
+#brain107CanvasShell .brain107-top{
+  position:relative;
+  z-index:53000!important;
+}
+
+/* Do not let hidden panels capture clicks. */
+.brain130-side-panel:not(.show),
+.brain130-layer-panel:not(.show),
+.brain120-panel:not(.show),
+.brain112-actions-panel:not(.show),
+.brain109-shape-menu:not(.show),
+.brain109-line-menu:not(.show){
+  pointer-events:none!important;
+}
+
+/* Mobile: use a bottom-sheet style panel instead of overlaying most of canvas. */
+@media(max-width:700px){
+  .brain130-side-panel,
+  .brain130-layer-panel,
+  .brain120-panel,
+  .brain112-actions-panel{
+    position:absolute!important;
+    top:auto!important;
+    bottom:8px!important;
+    inset-inline:8px!important;
+    width:auto!important;
+    max-height:min(52dvh,420px)!important;
+    border-radius:14px!important;
+  }
+  #brain130Timeline{
+    top:auto!important;
+    bottom:8px!important;
+    inset-inline:8px!important;
+    width:auto!important;
+  }
+  #brain130Toolbar{
+    max-width:calc(100% - 60px)!important;
+  }
+  #brain130Stagebar{
+    max-width:calc(100% - 76px)!important;
+  }
+}
+</style>
+
+<script id="tasky-v1301-brainstorm-ui-fix-js">
+window.TASKY_BUILD='V130.1';console.info('Tasky build',window.TASKY_BUILD);
+
+const brain1301ClosableSelectors=[
+  '.brain130-side-panel.show',
+  '.brain130-layer-panel.show',
+  '.brain120-panel.show',
+  '.brain112-actions-panel.show',
+  '.brain109-shape-menu.show',
+  '.brain109-line-menu.show'
+];
+
+function brain1301EnsureDismissLayer(){
+  let layer=document.getElementById('brain1301DismissLayer');
+  if(!layer){
+    layer=document.createElement('div');
+    layer.id='brain1301DismissLayer';
+    document.body.appendChild(layer);
+    layer.addEventListener('pointerdown',e=>{
+      e.preventDefault();
+      e.stopPropagation();
+      brain1301CloseTransientUi();
+    });
+  }
+  return layer;
+}
+
+function brain1301AnyTransientOpen(){
+  return brain1301ClosableSelectors.some(sel=>document.querySelector(sel));
+}
+
+function brain1301SyncDismissLayer(){
+  const layer=brain1301EnsureDismissLayer();
+  layer.classList.toggle('show',brain1301AnyTransientOpen());
+}
+
+function brain1301CloseTransientUi(except=null){
+  for(const sel of brain1301ClosableSelectors){
+    document.querySelectorAll(sel).forEach(el=>{
+      if(el!==except)el.classList.remove('show');
+    });
+  }
+  brain1301SyncDismissLayer();
+}
+
+/* One-panel-at-a-time wrappers */
+const brain130PanelBaseV1301=brain130Panel;
+brain130Panel=function(id){
+  const target=document.getElementById(id);
+  const willOpen=target&&!target.classList.contains('show');
+  brain1301CloseTransientUi(target);
+  if(target)target.classList.toggle('show',willOpen);
+  brain1301SyncDismissLayer();
+};
+
+const brain120PanelBaseV1301=brain120Panel;
+brain120Panel=function(id){
+  const target=document.getElementById(id);
+  const willOpen=target&&!target.classList.contains('show');
+  brain1301CloseTransientUi(target);
+  if(target)target.classList.toggle('show',willOpen);
+  brain1301SyncDismissLayer();
+};
+
+const brain112TogglePanelBaseV1301=brain112TogglePanel;
+brain112TogglePanel=function(){
+  const target=document.getElementById('brain112Actions');
+  const willOpen=target&&!target.classList.contains('show');
+  brain1301CloseTransientUi(target);
+  if(target)target.classList.toggle('show',willOpen);
+  brain1301SyncDismissLayer();
+};
+
+const brain109ToggleShapeMenuBaseV1301=brain109ToggleShapeMenu;
+brain109ToggleShapeMenu=function(){
+  const target=document.getElementById('brain109ShapeMenu');
+  const willOpen=target&&!target.classList.contains('show');
+  brain1301CloseTransientUi(target);
+  if(target)target.classList.toggle('show',willOpen);
+  brain1301SyncDismissLayer();
+};
+
+const brain109ToggleLineMenuBaseV1301=brain109ToggleLineMenu;
+brain109ToggleLineMenu=function(){
+  const target=document.getElementById('brain109LineMenu');
+  const willOpen=target&&!target.classList.contains('show');
+  brain1301CloseTransientUi(target);
+  if(target)target.classList.toggle('show',willOpen);
+  brain1301SyncDismissLayer();
+};
+
+/* Functions that directly .show a panel now respect the same behavior. */
+const brain130OpenBreakoutsBaseV1301=brain130OpenBreakouts;
+brain130OpenBreakouts=async function(){
+  brain1301CloseTransientUi(document.getElementById('brain130Breakouts'));
+  await brain130OpenBreakoutsBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+const brain130DecisionMatrixBaseV1301=brain130DecisionMatrix;
+brain130DecisionMatrix=async function(){
+  brain1301CloseTransientUi(document.getElementById('brain130Matrix'));
+  await brain130DecisionMatrixBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+const brain130OpenLayersBaseV1301=brain130OpenLayers;
+brain130OpenLayers=function(){
+  const target=document.getElementById('brain130Layers');
+  brain1301CloseTransientUi(target);
+  brain130OpenLayersBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+const brain130OpenTimelineBaseV1301=brain130OpenTimeline;
+brain130OpenTimeline=async function(){
+  brain1301CloseTransientUi(document.getElementById('brain130Timeline'));
+  await brain130OpenTimelineBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+const brain120InsightsBaseV1301=brain120Insights;
+brain120Insights=function(){
+  brain1301CloseTransientUi(document.getElementById('brain120InsightsPanel'));
+  brain120InsightsBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+const brain130ClusterBaseV1301=brain130Cluster;
+brain130Cluster=async function(){
+  brain1301CloseTransientUi(document.getElementById('brain120InsightsPanel'));
+  await brain130ClusterBaseV1301();
+  brain1301SyncDismissLayer();
+};
+
+/* Clicking directly in the canvas should always dismiss transient menus/panels.
+   This matches the requested behavior: press a button, then tap anywhere else
+   to cancel/close it. */
+document.addEventListener('pointerdown',e=>{
+  if(!window.brain108RoomId)return;
+  const insidePanel=e.target.closest?.(
+    '.brain130-side-panel,.brain130-layer-panel,.brain120-panel,.brain112-actions-panel,.brain109-shape-menu,.brain109-line-menu'
+  );
+  const trigger=e.target.closest?.(
+    '#brain130Toolbar button,#brain120Hud button,#brain112ActionsBtn,.brain107-tool,#brain130Stagebar button'
+  );
+  if(!insidePanel&&!trigger&&brain1301AnyTransientOpen()){
+    brain1301CloseTransientUi();
+  }
+},true);
+
+/* Escape closes any transient UI before changing canvas tool state. */
+window.addEventListener('keydown',e=>{
+  if(e.key==='Escape'&&brain1301AnyTransientOpen()){
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    brain1301CloseTransientUi();
+  }
+},true);
+
+/* Keep the layer in sync after room renders/open/close. */
+const brain108RenderCanvasShellBaseV1301=brain108RenderCanvasShell;
+brain108RenderCanvasShell=function(room){
+  brain108RenderCanvasShellBaseV1301(room);
+  brain1301EnsureDismissLayer();
+  brain1301SyncDismissLayer();
+};
+
+const brain108CloseCanvasBaseV1301=brain108CloseCanvas;
+brain108CloseCanvas=function(){
+  brain1301CloseTransientUi();
+  document.getElementById('brain1301DismissLayer')?.classList.remove('show');
+  return brain108CloseCanvasBaseV1301();
+};
+</script>
+
 </body>
 </html>
