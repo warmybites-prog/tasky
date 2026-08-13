@@ -17385,5 +17385,200 @@ function brain110BindKeys(){if(brain110KeysBound)return;brain110KeysBound=true;w
 const brain108OpenRoomBaseV110=brain108OpenRoom;brain108OpenRoom=async function(roomId){await brain108OpenRoomBaseV110(roomId);if(!window.brain108RoomId)return;clearInterval(brain107Timer);brain107Timer=setInterval(()=>brain109FetchCanvas(),15000);clearInterval(brain107PresenceTimer);brain107PresenceTimer=setInterval(()=>brain108PresencePing(),10000);await brain110Connect(roomId)};
 const brain108CloseCanvasBaseV110=brain108CloseCanvas;brain108CloseCanvas=function(){brain110Disconnect();brain110CloseEdit();return brain108CloseCanvasBaseV110()};
 </script>
+
+<style id="tasky-v111-brainstorm-history-css">
+/* ============================================================
+   V111 — Brainstorm history, lock and recovery
+   ============================================================ */
+.brain111-history{
+  display:flex;flex-direction:column;gap:9px;margin-top:10px
+}
+.brain111-snapshot{
+  border:1px solid var(--border);background:var(--paper);
+  border-radius:11px;padding:10px;display:flex;align-items:center;
+  justify-content:space-between;gap:10px
+}
+.brain111-snapshot b{display:block;font-size:10px;margin-bottom:2px}
+.brain111-snapshot small{display:block;color:var(--muted);font-size:8px;line-height:1.5}
+.brain111-snapshot-actions{display:flex;gap:5px;flex-wrap:wrap;justify-content:flex-end}
+.brain111-snapshot-actions button{min-height:34px}
+.brain111-lock-note{
+  position:absolute;z-index:11;top:10px;left:50%;transform:translateX(-50%);
+  padding:6px 10px;border:1px solid #d9cda9;background:#fff9ea;color:#705d27;
+  border-radius:999px;font-size:8px;white-space:nowrap
+}
+.brain111-toolbar-btn.locked{
+  border-color:#8e7436!important;color:#ead9a5!important;background:#322d20!important
+}
+.brain111-version-meta{
+  border:1px solid var(--border);background:var(--card);border-radius:11px;
+  padding:9px 10px;font-size:8.5px;color:var(--muted);line-height:1.65
+}
+@media(max-width:700px){
+  .brain111-snapshot{align-items:flex-start;flex-direction:column}
+  .brain111-snapshot-actions{width:100%}
+  .brain111-snapshot-actions button{flex:1}
+}
+</style>
+
+<script id="tasky-v111-brainstorm-history-js">
+window.TASKY_BUILD='V111';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain111AutoTimer=null;
+let brain111LastAutoAt=0;
+
+function brain111L(ar,en){return lang==='ar'?ar:en}
+function brain111CanManage(){
+  return !!window.brain108RoomMeta?.can_manage;
+}
+function brain111Locked(){
+  return !!window.brain108RoomMeta?.edit_locked;
+}
+function brain111CanEdit(){
+  return window.brain108RoomMeta?.status==='active'
+    && !!window.brain108RoomMeta?.can_edit
+    && !brain111Locked();
+}
+
+/* V111 is the final edit authority for standalone rooms. */
+brain109Editable=brain111CanEdit;
+brain108Editable=brain111CanEdit;
+
+async function brain111CreateSnapshot(kind='manual'){
+  if(!window.brain108RoomId||!brain111CanManage())return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_snapshot_create_v111',{
+    p_room_id:window.brain108RoomId,p_kind:kind
+  });
+  if(error){
+    if(kind==='manual')showTaskyDialog({title:brain111L('تعذّر حفظ نسخة','Could not save version'),message:error.message,tone:'error'});
+    else console.warn('V111 auto snapshot',error);
+    return;
+  }
+  if(kind==='manual'){
+    taskyToast(data?.created===false?brain111L('لا توجد تغييرات جديدة لحفظها','No new changes to save'):brain111L('تم حفظ نسخة من اللوحة','Board version saved'),{tone:'success'});
+  }
+}
+async function brain111ToggleLock(){
+  if(!window.brain108RoomId||!brain111CanManage())return;
+  const target=!brain111Locked();
+  const {error}=await sb.rpc('tasky_brainstorm_room_set_lock_v111',{
+    p_room_id:window.brain108RoomId,p_locked:target
+  });
+  if(error)return showTaskyDialog({title:brain111L('تعذّر تحديث القفل','Could not update board lock'),message:error.message,tone:'error'});
+  await brain109FetchCanvas();
+  brain108RenderCanvasShell(window.brain108RoomMeta||{});
+  brain110Connect(window.brain108RoomId);
+  taskyToast(target?brain111L('تم قفل التعديل','Editing locked'):brain111L('تم فتح التعديل','Editing unlocked'),{tone:'success'});
+}
+async function brain111OpenHistory(){
+  if(!window.brain108RoomId)return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_snapshot_list_v111',{p_room_id:window.brain108RoomId});
+  if(error)return showTaskyDialog({title:brain111L('تعذّر تحميل السجل','Could not load version history'),message:error.message,tone:'error'});
+  const rows=Array.isArray(data)?data:[];
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain111L('سجل نسخ اللوحة','Board version history')}</h3><div class="subtle">${brain111L('يمكن لمدير الغرفة حفظ نسخة واستعادة حالة سابقة. الاستعادة لا تحذف النسخة الحالية؛ يحفظ تاسكي نسخة أمان قبل الاستعادة.','Room managers can save and restore earlier board states. Restore does not discard the current state; Tasky saves a safety version first.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="brain111-version-meta">${brain111L('النسخ تشمل البطاقات، مواضعها، الرسم، الأشكال، الخطوط والأسهم. مؤشرات الحضور لا تدخل في النسخ.','Versions include cards, positions, drawings, shapes, lines and arrows. Live presence is not versioned.')}</div>
+  ${brain111CanManage()?`<div style="margin-top:9px"><button class="primary-btn" onclick="brain111SaveAndReloadHistory()">${brain111L('حفظ نسخة الآن','Save version now')}</button></div>`:''}
+  <div class="brain111-history">${rows.length?rows.map(s=>`<div class="brain111-snapshot"><div><b>${escapeHtml(s.label||brain111L('نسخة محفوظة','Saved version'))}</b><small>${escapeHtml(new Date(s.created_at).toLocaleString(lang==='ar'?'ar-SA':'en-US'))} · ${escapeHtml(s.created_by_name||'')}</small></div><div class="brain111-snapshot-actions">${brain111CanManage()?`<button class="chip-btn" onclick="brain111Restore('${s.id}')">${brain111L('استعادة','Restore')}</button>`:''}</div></div>`).join(''):`<div class="meet101-empty">${brain111L('لا توجد نسخ محفوظة حتى الآن.','No saved versions yet.')}</div>`}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain111SaveAndReloadHistory(){
+  await brain111CreateSnapshot('manual');
+  await brain111OpenHistory();
+}
+async function brain111Restore(snapshotId){
+  if(!brain111CanManage())return;
+  const ok=await taskyConfirm(
+    brain111L('استعادة هذه النسخة؟ سيحفظ تاسكي نسخة أمان من الحالة الحالية أولًا.','Restore this version? Tasky will save a safety copy of the current state first.'),
+    {title:brain111L('استعادة نسخة','Restore version'),confirmText:brain111L('استعادة','Restore')}
+  );
+  if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_snapshot_restore_v111',{
+    p_room_id:window.brain108RoomId,p_snapshot_id:snapshotId
+  });
+  if(error)return showTaskyDialog({title:brain111L('تعذّرت الاستعادة','Could not restore version'),message:error.message,tone:'error'});
+  closeAddModal();
+  await brain109FetchCanvas();
+  brain107Fit();
+  taskyToast(brain111L('تمت استعادة النسخة','Version restored'),{tone:'success'});
+}
+async function brain111DuplicateRoom(){
+  if(!window.brain108RoomId||!brain111CanManage())return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_room_duplicate_v111',{p_room_id:window.brain108RoomId});
+  if(error)return showTaskyDialog({title:brain111L('تعذّر تكرار الغرفة','Could not duplicate room'),message:error.message,tone:'error'});
+  taskyToast(brain111L('تم إنشاء نسخة مستقلة من الغرفة','A duplicate room was created'),{tone:'success'});
+  if(data?.id){
+    brain108CloseCanvas();
+    await brain108FetchRooms();
+    if(activeNav==='meetings'&&meetingsSectionV10622==='brainstorm')renderModule();
+    setTimeout(()=>brain108OpenRoom(data.id),80);
+  }
+}
+
+/* Toolbar injection after V109 shell render. */
+const brain108RenderCanvasShellBaseV111=brain108RenderCanvasShell;
+brain108RenderCanvasShell=function(room){
+  brain108RenderCanvasShellBaseV111(room);
+
+  const actions=document.querySelector('#brain107CanvasShell .brain107-top-actions');
+  if(actions){
+    const closeBtn=actions.lastElementChild;
+    if(!document.getElementById('brain111HistoryBtn')){
+      const h=document.createElement('button');
+      h.id='brain111HistoryBtn';h.type='button';h.textContent=brain111L('السجل','History');
+      h.onclick=brain111OpenHistory;
+      actions.insertBefore(h,closeBtn);
+    }
+    if(brain111CanManage()&&!document.getElementById('brain111LockBtn')){
+      const l=document.createElement('button');
+      l.id='brain111LockBtn';l.type='button';l.className='brain111-toolbar-btn'+(brain111Locked()?' locked':'');
+      l.textContent=brain111Locked()?brain111L('فتح التعديل','Unlock'):brain111L('قفل التعديل','Lock');
+      l.onclick=brain111ToggleLock;
+      actions.insertBefore(l,closeBtn);
+    }
+    if(brain111CanManage()&&!document.getElementById('brain111DuplicateBtn')){
+      const d=document.createElement('button');
+      d.id='brain111DuplicateBtn';d.type='button';d.textContent=brain111L('تكرار','Duplicate');
+      d.onclick=brain111DuplicateRoom;
+      actions.insertBefore(d,closeBtn);
+    }
+  }
+
+  if(brain111Locked()){
+    const wrap=document.getElementById('brain107StageWrap');
+    if(wrap&&!document.getElementById('brain111LockNote')){
+      const n=document.createElement('div');
+      n.id='brain111LockNote';n.className='brain111-lock-note';
+      n.textContent=brain111L('التعديل مقفل مؤقتًا بواسطة مدير الغرفة','Editing is temporarily locked by the room manager');
+      wrap.appendChild(n);
+    }
+  }
+};
+
+/* Auto-version only when the manager is actively inside an editable room.
+   Server-side fingerprinting prevents duplicate snapshots with no changes. */
+function brain111StartAuto(){
+  clearInterval(brain111AutoTimer);
+  brain111AutoTimer=setInterval(()=>{
+    if(window.brain108RoomId&&brain111CanManage()&&brain111CanEdit()){
+      brain111CreateSnapshot('auto');
+    }
+  },10*60*1000);
+}
+brain111StartAuto();
+
+const brain108OpenRoomBaseV111=brain108OpenRoom;
+brain108OpenRoom=async function(roomId){
+  await brain108OpenRoomBaseV111(roomId);
+  if(window.brain108RoomId&&brain111CanManage()){
+    setTimeout(()=>brain111CreateSnapshot('auto'),1200);
+  }
+};
+
+const brain108CloseCanvasBaseV111=brain108CloseCanvas;
+brain108CloseCanvas=function(){
+  return brain108CloseCanvasBaseV111();
+};
+</script>
+
 </body>
 </html>
