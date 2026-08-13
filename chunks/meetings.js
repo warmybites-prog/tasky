@@ -1,4 +1,4 @@
-/* Tasky V168 lazy chunk: meetings */
+/* Tasky V168.1 lazy chunk: meetings */
 
 /* --- source script: taskyV101MeetingsScript --- */
 
@@ -4580,17 +4580,16 @@ if(setActiveNavBaseV10622){
 window.TASKY_BUILD='V107.1';console.info('Tasky build',window.TASKY_BUILD);
 
 
-/* Brainstorm remains a second-level lazy chunk. */
-if(typeof setMeetingsSectionV10622==='function' && !window.__taskyBrainstormSectionLazyV168){
-  window.__taskyBrainstormSectionLazyV168=true;
-  const _setMeetingsSectionBeforeBrainV168=setMeetingsSectionV10622;
-  const _brainLazyWrapperV168=async function(section){
-    if(section==='brainstorm' && typeof taskyLazyLoadChunkV168==='function' && !taskyLazyChunkLoadedV168('brainstorm')){
-      await taskyLazyLoadChunkV168('brainstorm');
+if(typeof setMeetingsSectionV10622==='function' && !window.__taskyBrainstormLazyV1681){
+  window.__taskyBrainstormLazyV1681=true;
+  const _base=setMeetingsSectionV10622;
+  const _wrapper=async function(section){
+    if(section==='brainstorm' && typeof taskyLazyLoadChunkV1681==='function' && !taskyLazyChunkLoadedV1681('brainstorm')){
+      await taskyLazyLoadChunkV1681('brainstorm');
       const latest=window.setMeetingsSectionV10622;
-      if(latest && latest!==_brainLazyWrapperV168)return latest(section);
+      if(latest && latest!==_wrapper)return latest(section);
     }
-    return _setMeetingsSectionBeforeBrainV168(section);
+    return _base(section);
   };
-  window.setMeetingsSectionV10622=_brainLazyWrapperV168;
+  window.setMeetingsSectionV10622=_wrapper;
 }
