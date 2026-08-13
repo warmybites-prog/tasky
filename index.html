@@ -3788,7 +3788,7 @@ function syncNewTaskButtons(){
 }
 
 /* ================= STATE ================= */
-let activeNav = "tasks";
+let activeNav = "home";
 let activeView = "board";
 let currentPlan = "free";
 let currentUserRole = null; // authoritative value loaded only from workspace_members
@@ -13422,7 +13422,7 @@ setActiveNav=function(id,...args){
 
 
 <script id="tasky-v1632-connect-money-hotfix-js">
-window.TASKY_BUILD='V168.1';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V168.2';console.info('Tasky build',window.TASKY_BUILD);
 
 /* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
 function com162Money(v){
@@ -14011,6 +14011,119 @@ setActiveNav=async function(id,...args){
   }catch(_){}
 })();
 if(typeof renderNav==='function')renderNav();
+</script>
+
+
+<style id="tasky-v1682-mobile-navigation-css">
+/* ============================================================
+   V168.2 — Mobile drawer correction
+   Keep fixed header/footer areas and scroll navigation only.
+   ============================================================ */
+@media(max-width:820px){
+  .sidebar{
+    height:100dvh !important;
+    max-height:100dvh !important;
+    overflow:hidden !important;
+    display:flex !important;
+    flex-direction:column !important;
+  }
+  .sidebar-brand-row,
+  .workspace,
+  .new-task-btn,
+  .search-mini,
+  .sidebar-bottom{
+    flex:0 0 auto !important;
+  }
+  .main-nav{
+    flex:1 1 auto !important;
+    min-height:0 !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+    overscroll-behavior:contain !important;
+    -webkit-overflow-scrolling:touch !important;
+    padding-bottom:12px !important;
+    scrollbar-width:thin;
+  }
+  .sidebar-bottom{
+    margin-top:0 !important;
+    position:relative !important;
+    z-index:2 !important;
+    background:#12291A !important;
+    padding-bottom:max(4px,env(safe-area-inset-bottom)) !important;
+  }
+  .main-nav .nav-item{
+    flex-shrink:0 !important;
+  }
+  body.mobile-sidebar-open .sidebar-backdrop{
+    touch-action:none;
+  }
+}
+</style>
+
+<script id="tasky-v1682-mobile-navigation-js">
+window.TASKY_BUILD='V168.2';console.info('Tasky build',window.TASKY_BUILD);
+
+/* Default application entry is always Home.
+   Navigation state is intentionally not restored from a previous section. */
+activeNav='home';
+
+function taskyCloseDrawerAfterNavV1682(){
+  if(window.matchMedia?.('(max-width: 820px)').matches){
+    try{closeMobileSidebar()}catch(_){
+      document.body.classList.remove('mobile-sidebar-open');
+    }
+  }
+}
+
+/* Final navigation wrapper: on phones/tablets, selecting a section must reveal
+   the page immediately instead of leaving the drawer covering the content. */
+const setActiveNavBeforeMobileFixV1682=setActiveNav;
+setActiveNav=async function(id,...args){
+  const result=await setActiveNavBeforeMobileFixV1682(id,...args);
+  taskyCloseDrawerAfterNavV1682();
+  return result;
+};
+
+const setActiveProjectBeforeMobileFixV1682=setActiveProject;
+setActiveProject=function(id,...args){
+  const result=setActiveProjectBeforeMobileFixV1682(id,...args);
+  taskyCloseDrawerAfterNavV1682();
+  return result;
+};
+
+/* Reset an accidentally-open mobile drawer when moving to desktop/landscape. */
+function taskyNormalizeSidebarV1682(){
+  if(!window.matchMedia?.('(max-width: 820px)').matches){
+    document.body.classList.remove('mobile-sidebar-open');
+  }
+}
+window.addEventListener('resize',taskyNormalizeSidebarV1682,{passive:true});
+window.addEventListener('orientationchange',()=>setTimeout(taskyNormalizeSidebarV1682,80),{passive:true});
+
+/* Ensure Home is visibly rendered after bootstrap completes. */
+function taskyOpenDefaultHomeV1682(){
+  if(!document.getElementById('taskArea'))return;
+  activeNav='home';
+  try{
+    renderNav();
+    renderAll();
+    const taskArea=document.getElementById('taskArea');
+    const moduleArea=document.getElementById('moduleArea');
+    const tasksOnly=document.getElementById('tasksOnly');
+    taskArea?.classList.remove('hidden');
+    moduleArea?.classList.add('hidden');
+    tasksOnly?.classList.add('hidden');
+    const crumb=document.getElementById('breadcrumbLabel');
+    if(crumb)crumb.textContent=t('nav_home');
+  }catch(e){
+    console.warn('V168.2 default Home render deferred',e);
+  }
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',()=>setTimeout(taskyOpenDefaultHomeV1682,0),{once:true});
+}else{
+  setTimeout(taskyOpenDefaultHomeV1682,0);
+}
 </script>
 
 </body>
