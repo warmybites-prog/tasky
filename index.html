@@ -20733,5 +20733,235 @@ setActiveNav=function(id,...args){
 };
 </script>
 
+
+<style id="tasky-v163-hr-ux-css">
+/* ============================================================
+   V163 — HR UX Restructure
+   Six top-level areas, sub-navigation, action-first dashboard,
+   employee profile workspace and mobile simplification.
+   ============================================================ */
+.hr163-topnav{display:flex;gap:6px;overflow-x:auto;padding:4px;border:1px solid var(--border);background:var(--card);border-radius:12px;margin-top:10px;scrollbar-width:none}
+.hr163-topnav::-webkit-scrollbar{display:none}
+.hr163-topbtn{min-height:38px;border:0;background:transparent;color:var(--muted);border-radius:8px;padding:7px 11px;font-size:8.5px;font-weight:850;white-space:nowrap}
+.hr163-topbtn.active{background:var(--green-tint);color:var(--green)}
+.hr163-subnav{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 12px}
+.hr163-subbtn{min-height:32px;border:1px solid var(--border);background:var(--paper);color:var(--muted);border-radius:8px;padding:6px 9px;font-size:7.7px;font-weight:800}
+.hr163-subbtn.active{border-color:#bdd4c9;background:var(--green-tint);color:var(--green)}
+.hr163-searchrow{display:flex;gap:7px;align-items:center;flex-wrap:wrap;margin-bottom:10px}
+.hr163-global-search{min-width:260px;flex:1;min-height:38px;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:8px 10px;font-size:8.5px}
+.hr163-quick{display:flex;gap:6px;flex-wrap:wrap}
+.hr163-action-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px}
+.hr163-action{border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:10px;text-align:start;cursor:pointer}
+.hr163-action b{display:block;font-size:9px;margin-bottom:3px}.hr163-action small{display:block;color:var(--muted);font-size:7px;line-height:1.4}
+.hr163-alert-list{display:flex;flex-direction:column;gap:6px}
+.hr163-alert{display:grid;grid-template-columns:10px minmax(0,1fr) auto;gap:8px;align-items:center;border:1px solid var(--border);background:var(--paper);border-radius:10px;padding:8px}
+.hr163-alert-dot{width:8px;height:8px;border-radius:50%;background:var(--green)}
+.hr163-alert.warn .hr163-alert-dot{background:#b28a2e}.hr163-alert.bad .hr163-alert-dot{background:var(--danger)}
+.hr163-alert b{display:block;font-size:8px}.hr163-alert small{display:block;font-size:6.8px;color:var(--muted)}
+.hr163-profile{display:grid;grid-template-columns:190px minmax(0,1fr);gap:10px}
+.hr163-profile-side,.hr163-profile-main{border:1px solid var(--border);background:var(--card);border-radius:12px;padding:10px}
+.hr163-profile-card{text-align:center;padding:8px 6px 12px;border-bottom:1px solid var(--border);margin-bottom:8px}
+.hr163-profile-avatar{width:68px;height:68px;border-radius:50%;border:1px solid var(--border);background:var(--paper);display:grid;place-items:center;margin:0 auto 7px;font-size:18px;font-weight:900;overflow:hidden}
+.hr163-profile-avatar img{width:100%;height:100%;object-fit:cover}
+.hr163-profile-card h3{margin:0;font-size:12px}.hr163-profile-card p{margin:3px 0 0;color:var(--muted);font-size:7.5px}
+.hr163-profile-nav{display:flex;flex-direction:column;gap:3px}.hr163-profile-nav button{border:0;background:transparent;color:var(--muted);text-align:start;border-radius:7px;padding:7px 8px;font-size:7.8px;font-weight:800}.hr163-profile-nav button.active{background:var(--green-tint);color:var(--green)}
+.hr163-data-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}.hr163-data{border:1px solid var(--border);background:var(--paper);border-radius:9px;padding:8px}.hr163-data span{display:block;font-size:6.7px;color:var(--muted);margin-bottom:2px}.hr163-data b{font-size:8.2px}
+.hr163-progress{height:6px;background:var(--border);border-radius:999px;overflow:hidden}.hr163-progress i{display:block;height:100%;background:var(--green)}
+.hr163-saved{display:flex;gap:5px;flex-wrap:wrap}.hr163-saved button{border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:4px 7px;font-size:6.8px}
+.hr163-mobile-actions{display:none}
+@media(max-width:850px){
+  .hr163-action-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .hr163-profile{grid-template-columns:1fr}.hr163-profile-nav{flex-direction:row;overflow:auto}.hr163-profile-nav button{white-space:nowrap}
+  .hr163-data-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:700px){
+  .hr163-topnav .hr163-topbtn:nth-child(n+4){display:none}
+  .hr163-mobile-actions{display:block}
+  .hr163-global-search{min-width:0;width:100%}
+  .hr163-action-grid{grid-template-columns:1fr 1fr}
+}
+</style>
+
+<script id="tasky-v163-hr-ux-js">
+window.TASKY_BUILD='V163';console.info('Tasky build',window.TASKY_BUILD);
+
+let hr163Area='home',hr163ProfileTab='summary',hr163EmployeeId=null,hr163GlobalSearch='';
+let hr163DeptFilter='',hr163StatusFilter='',hr163SavedView='';
+
+const HR163_AREAS=[
+ ['home','الرئيسية','Home',['dashboard']],
+ ['people','الموظفون','People',['employees','org','documents','assets']],
+ ['time','الوقت والإجازات','Time & Leave',['attendance','leaves','calendar80']],
+ ['lifecycle','دورة حياة الموظف','Lifecycle',['onboarding','offboarding','changes','recruitment','selfservice82']],
+ ['performance','الأداء والمزايا','Performance & Benefits',['performance','training','compensation','benefits83','expenses84','surveys','cases']],
+ ['reports','التقارير','Reports',['analytics','workforce','automation79','permissions','launch85']]
+];
+
+function hr163L(ar,en){return lang==='ar'?ar:en}
+function hr163AreaForTab(id){return HR163_AREAS.find(a=>a[3].includes(id))?.[0]||'home'}
+function hr163AreaDef(id=hr163Area){return HR163_AREAS.find(a=>a[0]===id)||HR163_AREAS[0]}
+function hr163SetArea(id){
+  hr163Area=id;
+  const def=hr163AreaDef(id),next=def[3].find(x=>HR_TABS_V72.some(t=>t[0]===x)&&hrTabVisible72(x));
+  if(next){hrActiveTabV72=next}
+  if(activeNav==='hr')renderModule();
+}
+function hr163SetUnderlying(tab){
+  if(!hrTabVisible72(tab))return;
+  hrActiveTabV72=tab;hr163Area=hr163AreaForTab(tab);
+  if(activeNav==='hr')renderModule();
+  if(tab==='analytics')setTimeout(()=>fetchHrAnalyticsV81?.(),0);
+  if(tab==='workforce')setTimeout(()=>fetchHrWorkforceV81?.(),0);
+}
+function hr163TopNav(){
+  return `<div class="hr163-topnav">${HR163_AREAS.map(a=>`<button class="hr163-topbtn ${hr163Area===a[0]?'active':''}" onclick="hr163SetArea('${a[0]}')">${hr163L(a[1],a[2])}</button>`).join('')}<button class="hr163-topbtn hr163-mobile-actions" onclick="hr163MoreMenu()">${hr163L('المزيد','More')}</button></div>`;
+}
+function hr163SubNav(){
+  const def=hr163AreaDef(),tabs=def[3].map(id=>HR_TABS_V72.find(t=>t[0]===id)).filter(Boolean).filter(t=>hrTabVisible72(t[0]));
+  if(def[0]==='home')return '';
+  return `<div class="hr163-subnav">${tabs.map(t=>`<button class="hr163-subbtn ${hrActiveTabV72===t[0]?'active':''}" onclick="hr163SetUnderlying('${t[0]}')">${hr163L(t[1],t[2])}</button>`).join('')}</div>`;
+}
+function hr163MoreMenu(){
+  const options=HR163_AREAS.slice(3).map(a=>`<button class="chip-btn" style="width:100%;justify-content:flex-start" onclick="closeAddModal();hr163SetArea('${a[0]}')">${hr163L(a[1],a[2])}</button>`).join('');
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><h3>${hr163L('أقسام HR','HR areas')}</h3><button class="modal-close" onclick="closeAddModal()">×</button></div><div style="display:grid;gap:7px">${options}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+
+/* Replace 20-tab header with six areas + global search + quick actions. */
+hrHeaderV72=function(){
+  return `<div class="hr72-head"><div><h2>${hrL72('الموارد البشرية','Human Resources')}</h2><p>${hrL72('واجهة أبسط مبنية على الأشخاص والوقت ودورة الحياة والأداء والتقارير.','A simpler workspace organized around people, time, lifecycle, performance and reporting.')}</p></div><div class="hr72-actions">${hrCanManage72()?`<button class="primary-btn" onclick="hrOpenFormV72('employee')">${hrL72('موظف جديد','New employee')}</button>`:''}<button class="chip-btn" onclick="fetchHrDataV72(true)">${hrL72('تحديث','Refresh')}</button></div></div>
+    ${hr163TopNav()}
+    ${hr163SubNav()}
+    <div class="hr163-searchrow"><input class="hr163-global-search" value="${escapeHtml(hr163GlobalSearch)}" oninput="hr163GlobalSearch=this.value" onkeydown="if(event.key==='Enter')hr163RunGlobalSearch()" placeholder="${hr163L('بحث الموظفين والعمليات: اسم، رقم وظيفي، بريد، وثيقة، طلب…','Search people and HR operations: name, employee no., email, document, request…')}"><div class="hr163-quick"><button class="chip-btn" onclick="hr163RunGlobalSearch()">${hr163L('بحث','Search')}</button><button class="chip-btn" onclick="hr163QuickMenu()">${hr163L('إجراء سريع','Quick action')}</button></div></div>`;
+};
+
+function hr163QuickMenu(){
+  const actions=[
+    ['employee','موظف جديد','New employee'],['leave','طلب إجازة','Leave request'],['attendance','تسجيل حضور/غياب','Attendance'],['request','طلب HR','HR request'],['document','إضافة مستند','Add document'],['onboarding','بدء Onboarding','Start onboarding']
+  ];
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><h3>${hr163L('إجراء سريع','Quick action')}</h3><button class="modal-close" onclick="closeAddModal()">×</button></div><div class="hr163-action-grid">${actions.map(a=>`<button class="hr163-action" onclick="closeAddModal();hrOpenFormV72('${a[0]}')"><b>${hr163L(a[1],a[2])}</b></button>`).join('')}</div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+function hr163RunGlobalSearch(){
+  const q=String(hr163GlobalSearch||'').trim().toLowerCase();
+  if(!q){hr163SetArea('people');return}
+  const emp=hrV72.employees.find(e=>[e.full_name_ar,e.full_name_en,e.employee_no,e.email,e.phone].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(emp){hr163OpenEmployee(emp.id);return}
+  const doc=hrV72.documents.find(d=>[d.title,d.document_number,d.document_type].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(doc){hr163SetUnderlying('documents');return}
+  const req=hrV72.requests.find(r=>[r.title,r.request_type,r.details].some(v=>String(v||'').toLowerCase().includes(q)));
+  if(req){hr163SetUnderlying('requests');return}
+  hrSearchV72=hr163GlobalSearch;hr163SetUnderlying('employees');
+}
+
+/* Action-first HR home */
+function hr163Home(){
+  const active=hrV72.employees.filter(e=>e.status!=='terminated');
+  const pendingLeaves=hrV72.leaveRequests.filter(x=>x.status==='pending');
+  const openReq=hrV72.requests.filter(x=>['open','in_progress','pending'].includes(x.status));
+  const today=new Date(),soon=new Date(Date.now()+60*86400000);
+  const expDocs=hrV72.documents.filter(d=>d.expires_at&&new Date(d.expires_at)>=today&&new Date(d.expires_at)<=soon);
+  const onboarding=hrV72.lifecycleCases.filter(x=>x.case_type==='onboarding'&&x.status!=='completed');
+  const late=hrV72.attendance.filter(a=>a.attendance_date===new Date().toISOString().slice(0,10)&&['late','absent'].includes(a.status));
+  const alerts=[
+    ...pendingLeaves.slice(0,3).map(x=>({tone:'warn',title:hr163L('طلب إجازة ينتظر الموافقة','Leave request awaiting approval'),sub:hrName72(hrEmp72(x.employee_id)),go:"leaves"})),
+    ...expDocs.slice(0,3).map(x=>({tone:'bad',title:hr163L('وثيقة تنتهي قريبًا','Document expiring soon'),sub:`${hrName72(hrEmp72(x.employee_id))} · ${hrDate72(x.expires_at)}`,go:"documents"})),
+    ...onboarding.slice(0,2).map(x=>({tone:'',title:hr163L('Onboarding قيد التنفيذ','Onboarding in progress'),sub:hrName72(hrEmp72(x.employee_id)),go:"onboarding"})),
+    ...late.slice(0,2).map(x=>({tone:'warn',title:hr163L('حضور يحتاج مراجعة','Attendance needs review'),sub:hrName72(hrEmp72(x.employee_id)),go:"attendance"}))
+  ];
+  return `<div class="hr72-kpis"><div class="hr72-kpi"><span>${hr163L('الموظفون','Employees')}</span><b>${active.length}</b><small>${hrV72.departments.length} ${hr163L('قسم','departments')}</small></div><div class="hr72-kpi"><span>${hr163L('بانتظار الإجراء','Needs action')}</span><b>${pendingLeaves.length+openReq.length}</b><small>${hr163L('إجازات وطلبات','Leave + requests')}</small></div><div class="hr72-kpi"><span>${hr163L('تنتهي قريبًا','Expiring soon')}</span><b>${expDocs.length}</b><small>${hr163L('وثائق خلال 60 يوم','Documents within 60 days')}</small></div><div class="hr72-kpi"><span>${hr163L('Onboarding نشط','Active onboarding')}</span><b>${onboarding.length}</b><small>${hr163L('موظفون جدد','New joiners')}</small></div></div>
+  <div class="hr72-grid2">
+    <div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hr163L('ما يحتاج إجراء الآن','What needs action now')}</h3><p>${hr163L('نظهر ما يحتاج قرار أو متابعة بدل إغراق الصفحة بالمؤشرات.','Actionable items first instead of a crowded dashboard.')}</p></div></div><div class="hr163-alert-list">${alerts.length?alerts.map(a=>`<button class="hr163-alert ${a.tone}" onclick="hr163SetUnderlying('${a.go}')"><span class="hr163-alert-dot"></span><span><b>${escapeHtml(a.title)}</b><small>${escapeHtml(a.sub||'')}</small></span><span>›</span></button>`).join(''):`<div class="hr72-empty">${hr163L('لا توجد عناصر حرجة الآن.','Nothing urgent right now.')}</div>`}</div></div>
+    <div class="hr72-panel"><div class="hr72-panel-head"><div><h3>${hr163L('إجراءات سريعة','Quick actions')}</h3></div></div><div class="hr163-action-grid">${[
+      ['employee','موظف جديد','New employee','إضافة ملف موظف','Create employee record'],
+      ['leave','طلب إجازة','Leave request','تسجيل طلب سريع','Create request'],
+      ['attendance','تسجيل حضور','Attendance','حضور أو غياب','Presence / absence'],
+      ['document','إضافة عقد/مستند','Contract / document','ملف أو وثيقة','Add record'],
+      ['onboarding','بدء Onboarding','Start onboarding','تهيئة موظف جديد','New joiner flow'],
+      ['request','طلب HR','HR request','خطاب أو تعديل بيانات','Letter or data change']
+    ].map(a=>`<button class="hr163-action" onclick="hrOpenFormV72('${a[0]}')"><b>${hr163L(a[1],a[2])}</b><small>${hr163L(a[3],a[4])}</small></button>`).join('')}</div></div>
+  </div>`;
+}
+
+/* Underlying pages remain intact; top IA chooses which one is visible. */
+const hrBodyV72BaseV163=hrBodyV72;
+hrBodyV72=function(){
+  if(hr163Area==='home')return hr163Home();
+  return hrBodyV72BaseV163();
+};
+
+/* Employee directory: filters + saved views + completeness. */
+const hrEmployeesV72BaseV163=hrEmployeesV72;
+hrEmployeesV72=function(){
+  const q=hrSearchV72.trim().toLowerCase();
+  const rows=hrV72.employees.filter(e=>{
+    if(hr163DeptFilter&&String(e.department_id)!==String(hr163DeptFilter))return false;
+    if(hr163StatusFilter&&e.status!==hr163StatusFilter)return false;
+    if(hr163SavedView==='probation'&&e.status!=='probation')return false;
+    if(hr163SavedView==='missing'&&hr163Completeness(e)>=80)return false;
+    return !q||[e.full_name_ar,e.full_name_en,e.email,e.employee_no,e.phone].some(v=>String(v||'').toLowerCase().includes(q));
+  });
+  return `<div class="hr72-panel"><div class="hr72-toolbar"><div><h3 style="margin:0;font-size:14px">${hr163L('دليل الموظفين','Employee directory')}</h3><small style="color:var(--muted)">${rows.length} ${hr163L('موظف','employees')}</small></div><div style="display:flex;gap:7px;flex-wrap:wrap"><input class="hr72-search" placeholder="${hr163L('بحث…','Search…')}" value="${escapeHtml(hrSearchV72)}" oninput="hrSearchV72=this.value;renderModule()"><select onchange="hr163DeptFilter=this.value;renderModule()"><option value="">${hr163L('كل الأقسام','All departments')}</option>${hrV72.departments.map(d=>`<option value="${d.id}" ${hr163DeptFilter===d.id?'selected':''}>${escapeHtml(lang==='ar'?d.name_ar:(d.name_en||d.name_ar))}</option>`).join('')}</select><select onchange="hr163StatusFilter=this.value;renderModule()"><option value="">${hr163L('كل الحالات','All statuses')}</option>${['active','probation','leave','suspended','terminated'].map(s=>`<option value="${s}" ${hr163StatusFilter===s?'selected':''}>${s}</option>`).join('')}</select></div></div>
+    <div class="hr163-saved" style="margin-bottom:8px"><button onclick="hr163SavedView='';renderModule()">${hr163L('الكل','All')}</button><button onclick="hr163SavedView='probation';renderModule()">${hr163L('تحت التجربة','Probation')}</button><button onclick="hr163SavedView='missing';renderModule()">${hr163L('بيانات ناقصة','Incomplete data')}</button></div>
+    <div class="hr72-table-wrap"><table class="hr72-table"><thead><tr><th>${hr163L('الموظف','Employee')}</th><th>${hr163L('الإدارة','Department')}</th><th>${hr163L('المسمى','Position')}</th><th>${hr163L('الحالة','Status')}</th><th>${hr163L('اكتمال البيانات','Data completeness')}</th></tr></thead><tbody>${rows.map(e=>`<tr class="clickable" onclick="hr163OpenEmployee('${e.id}')"><td><div class="hr72-name"><div class="hr72-avatar">${e.avatar_url?`<img src="${escapeHtml(e.avatar_url)}">`:escapeHtml(hrInitial72(e))}</div><div><b>${escapeHtml(hrName72(e))}</b><small>${escapeHtml(e.employee_no||e.email||'—')}</small></div></div></td><td>${escapeHtml((()=>{const d=hrDept72(e.department_id);return d?(lang==='ar'?d.name_ar:(d.name_en||d.name_ar)):'—'})())}</td><td>${escapeHtml((()=>{const p=hrPos72(e.position_id);return p?(lang==='ar'?p.title_ar:(p.title_en||p.title_ar)):'—'})())}</td><td>${hrStatus72(e.status)}</td><td><b>${hr163Completeness(e)}%</b><div class="hr163-progress"><i style="width:${hr163Completeness(e)}%"></i></div></td></tr>`).join('')||`<tr><td colspan="5"><div class="hr72-empty">${hr163L('لا توجد نتائج.','No results.')}</div></td></tr>`}</tbody></table></div></div>`;
+};
+function hr163Completeness(e){
+  const vals=[e.full_name_ar||e.full_name_en,e.employee_no,e.email,e.phone,e.hire_date,e.department_id,e.position_id,e.manager_employee_id,e.work_location,e.employment_type];
+  return Math.round(vals.filter(Boolean).length/vals.length*100);
+}
+
+/* Unified Employee Profile instead of many scattered popups. */
+function hr163OpenEmployee(id,tab='summary'){
+  hr163EmployeeId=id;hr163ProfileTab=tab;const e=hrEmp72(id);if(!e)return;
+  const docs=hrV72.documents.filter(x=>x.employee_id===id),att=hrV72.attendance.filter(x=>x.employee_id===id),leaves=hrV72.leaveRequests.filter(x=>x.employee_id===id),assets=hrV72.assets.filter(x=>x.employee_id===id),perf=hrV72.performance.filter(x=>x.employee_id===id),reqs=hrV72.requests.filter(x=>x.employee_id===id),changes=hrV72.changes.filter(x=>x.employee_id===id),cases=hrV72.lifecycleCases.filter(x=>x.employee_id===id);
+  const tabs=[['summary','الملخص','Summary'],['job','الوظيفة','Job'],['time','الحضور','Attendance'],['leave','الإجازات','Leave'],['docs','العقود والمستندات','Documents'],['insurance','التأمين والصحة','Insurance & Health'],['assets','الأصول','Assets'],['performance','الأداء','Performance'],['requests','الطلبات','Requests'],['timeline','السجل','Timeline']];
+  const body=hr163ProfileBody(e,{docs,att,leaves,assets,perf,reqs,changes,cases});
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${hr163L('ملف الموظف','Employee Profile')}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div><div class="hr163-profile"><aside class="hr163-profile-side"><div class="hr163-profile-card"><div class="hr163-profile-avatar">${e.avatar_url?`<img src="${escapeHtml(e.avatar_url)}">`:escapeHtml(hrInitial72(e))}</div><h3>${escapeHtml(hrName72(e))}</h3><p>${escapeHtml(e.employee_no||'—')} · ${escapeHtml(e.email||'')}</p><div style="margin-top:7px">${hrStatus72(e.status)}</div></div><nav class="hr163-profile-nav">${tabs.map(t=>`<button class="${hr163ProfileTab===t[0]?'active':''}" onclick="hr163OpenEmployee('${id}','${t[0]}')">${hr163L(t[1],t[2])}</button>`).join('')}</nav></aside><main class="hr163-profile-main">${body}</main></div>`;
+  document.getElementById('addModalBody').classList.add('hr72-modal');document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+hrOpenEmployeeV72=hr163OpenEmployee;
+
+function hr163ProfileBody(e,d){
+  const dept=hrDept72(e.department_id),pos=hrPos72(e.position_id),mgr=hrEmp72(e.manager_employee_id);
+  if(hr163ProfileTab==='summary')return `<div class="hr72-panel-head"><div><h3>${hr163L('الملخص','Summary')}</h3><p>${hr163L('كل ما يحتاجه HR عن الموظف من مكان واحد.','Everything HR needs from one employee workspace.')}</p></div>${hrCanManage72()?`<button class="chip-btn" onclick="hrOpenFormV72('employee','${e.id}')">${hr163L('تعديل','Edit')}</button>`:''}</div><div class="hr163-data-grid">${[['الإدارة','Department',dept?(lang==='ar'?dept.name_ar:(dept.name_en||dept.name_ar)):'—'],['المسمى','Position',pos?(lang==='ar'?pos.title_ar:(pos.title_en||pos.title_ar)):'—'],['المدير','Manager',hrName72(mgr)],['تاريخ الانضمام','Hire date',hrDate72(e.hire_date)],['الموقع','Location',e.work_location||'—'],['اكتمال البيانات','Data completeness',hr163Completeness(e)+'%']].map(x=>`<div class="hr163-data"><span>${hr163L(x[0],x[1])}</span><b>${escapeHtml(String(x[2]))}</b></div>`).join('')}</div>`;
+  if(hr163ProfileTab==='job')return `<div class="hr163-data-grid">${[['الإدارة','Department',dept?(lang==='ar'?dept.name_ar:(dept.name_en||dept.name_ar)):'—'],['المسمى','Position',pos?(lang==='ar'?pos.title_ar:(pos.title_en||pos.title_ar)):'—'],['المدير','Manager',hrName72(mgr)],['نوع التوظيف','Employment type',e.employment_type||'—'],['الموقع','Location',e.work_location||'—'],['الحالة','Status',e.status||'—']].map(x=>`<div class="hr163-data"><span>${hr163L(x[0],x[1])}</span><b>${escapeHtml(String(x[2]))}</b></div>`).join('')}</div>`;
+  if(hr163ProfileTab==='time')return d.att.length?`<div class="hr72-steps">${d.att.slice().sort((a,b)=>String(b.attendance_date).localeCompare(String(a.attendance_date))).slice(0,30).map(x=>`<div class="hr72-step"><div><b>${hrDate72(x.attendance_date)}</b><small>${x.check_in?new Date(x.check_in).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'}):'—'} → ${x.check_out?new Date(x.check_out).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'}):'—'}</small></div>${hrStatus72(x.status)}</div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد سجلات حضور.','No attendance records.')}</div>`;
+  if(hr163ProfileTab==='leave')return d.leaves.length?`<div class="hr72-steps">${d.leaves.map(x=>`<div class="hr72-step"><div><b>${hrDate72(x.start_date)} → ${hrDate72(x.end_date)}</b><small>${Number(x.days||0)} ${hr163L('أيام','days')}</small></div>${hrStatus72(x.status)}</div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد إجازات.','No leave records.')}</div>`;
+  if(hr163ProfileTab==='docs')return d.docs.length?`<div class="hr72-steps">${d.docs.map(x=>`<div class="hr72-step"><div><b>${escapeHtml(x.title||x.document_type)}</b><small>${escapeHtml(x.document_number||'')} · ${hr163L('انتهاء','Expiry')}: ${hrDate72(x.expires_at)}</small></div></div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد مستندات.','No documents.')}</div>`;
+  if(hr163ProfileTab==='insurance')return `<div class="hr72-alert">${hr163L('بيانات التأمين والبطاقة الصحية تعرض من قسم تجربة الموظف لتجنب تكرار مصدر البيانات داخل HR.','Insurance and health-card data is surfaced from Employee Experience to avoid duplicate HR records.')}</div><button class="chip-btn" style="margin-top:8px" onclick="closeAddModal();setActiveNav('experience');exp160SetTab('cards')">${hr163L('فتح التأمين والصحة','Open Insurance & Health')}</button>`;
+  if(hr163ProfileTab==='assets')return d.assets.length?`<div class="hr72-steps">${d.assets.map(x=>`<div class="hr72-step"><div><b>${escapeHtml(x.asset_name||x.asset_type)}</b><small>${escapeHtml(x.asset_tag||x.serial_number||'')}</small></div>${hrStatus72(x.status)}</div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد أصول مسلمة.','No assigned assets.')}</div>`;
+  if(hr163ProfileTab==='performance')return d.perf.length?`<div class="hr72-steps">${d.perf.map(x=>`<div class="hr72-step"><div><b>${escapeHtml(x.cycle_label||'')}</b><small>${escapeHtml(x.summary||'')}</small></div><span class="hr72-pill">${Number(x.score||0)}/5</span></div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد تقييمات.','No reviews.')}</div>`;
+  if(hr163ProfileTab==='requests')return d.reqs.length?`<div class="hr72-steps">${d.reqs.map(x=>`<div class="hr72-step"><div><b>${escapeHtml(x.title)}</b><small>${escapeHtml(x.request_type||'')}</small></div>${hrStatus72(x.status)}</div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد طلبات.','No requests.')}</div>`;
+  const timeline=[];
+  d.changes.forEach(x=>timeline.push({d:x.effective_date,t:`${x.change_type}: ${x.from_value||'—'} → ${x.to_value||'—'}`}));
+  d.docs.forEach(x=>timeline.push({d:x.created_at,t:hr163L(`إضافة مستند: ${x.title}`,`Document added: ${x.title}`)}));
+  d.perf.forEach(x=>timeline.push({d:x.review_date||x.created_at,t:hr163L(`تقييم أداء: ${x.cycle_label||''}`,`Performance review: ${x.cycle_label||''}`)}));
+  d.cases.forEach(x=>timeline.push({d:x.created_at,t:`${x.case_type}: ${x.title||''}`}));
+  timeline.sort((a,b)=>String(b.d).localeCompare(String(a.d)));
+  return timeline.length?`<div class="hr72-timeline">${timeline.map(x=>`<div class="hr72-time-row"><div class="hr72-time-dot"></div><div class="hr72-time-copy"><b>${escapeHtml(x.t)}</b><small>${hrDate72(x.d)}</small></div></div>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد أحداث بعد.','No timeline events yet.')}</div>`;
+}
+
+/* Expiry Center shortcut from Documents page. */
+const hrDocumentsV72BaseV163=hrDocumentsV72;
+hrDocumentsV72=function(){
+  const now=new Date(),d90=new Date(Date.now()+90*86400000),exp=hrV72.documents.filter(x=>x.expires_at&&new Date(x.expires_at)>=now&&new Date(x.expires_at)<=d90).sort((a,b)=>String(a.expires_at).localeCompare(String(b.expires_at)));
+  return `<div class="hr72-panel" style="margin-bottom:10px"><div class="hr72-panel-head"><div><h3>${hr163L('مركز الانتهاء','Expiry Center')}</h3><p>${hr163L('العقود والوثائق التي تنتهي خلال 90 يوم.','Contracts and documents expiring within 90 days.')}</p></div></div>${exp.length?`<div class="hr163-alert-list">${exp.slice(0,12).map(x=>`<button class="hr163-alert ${new Date(x.expires_at)-now<30*86400000?'bad':'warn'}" onclick="hr163OpenEmployee('${x.employee_id}','docs')"><span class="hr163-alert-dot"></span><span><b>${escapeHtml(x.title||x.document_type)}</b><small>${escapeHtml(hrName72(hrEmp72(x.employee_id)))} · ${hrDate72(x.expires_at)}</small></span><span>›</span></button>`).join('')}</div>`:`<div class="hr72-empty">${hr163L('لا توجد وثائق قريبة الانتهاء.','No documents expiring soon.')}</div>`}</div>${hrDocumentsV72BaseV163()}`;
+};
+
+/* Keep area in sync when legacy HR code changes tabs. */
+const setHrTabV72BaseV163=setHrTabV72;
+setHrTabV72=function(id){
+  hr163Area=hr163AreaForTab(id);
+  return setHrTabV72BaseV163(id);
+};
+
+/* Default HR entry is the new Home. */
+const setActiveNavBaseV163=setActiveNav;
+setActiveNav=function(id,...args){
+  if(id==='hr'&&activeNav!=='hr'){hr163Area='home';hrActiveTabV72='dashboard'}
+  return setActiveNavBaseV163(id,...args);
+};
+</script>
+
 </body>
 </html>
