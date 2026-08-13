@@ -20963,5 +20963,154 @@ setActiveNav=function(id,...args){
 };
 </script>
 
+
+<style id="tasky-v1631-connect-loading-css">
+.com1631-loadcard{
+  max-width:520px;margin:48px auto;border:1px solid var(--border);background:var(--card);
+  border-radius:13px;padding:18px;text-align:center
+}
+.com1631-loadcard h3{margin:0 0 6px;font-size:13px}
+.com1631-loadcard p{margin:0 0 12px;color:var(--muted);font-size:8px;line-height:1.6}
+.com1631-load-actions{display:flex;gap:7px;justify-content:center;flex-wrap:wrap}
+</style>
+
+<script id="tasky-v1631-connect-loading-hotfix-js">
+window.TASKY_BUILD='V163.1';console.info('Tasky build',window.TASKY_BUILD);
+
+/*
+ V163.1:
+ - Never leave Connect stuck on "Loading conversations".
+ - Catch rejected Supabase/network calls.
+ - Add a bounded timeout.
+ - Keep the last successful state visible during refresh.
+ - Render actionable diagnostics instead of a blank/loading screen.
+*/
+let com1631FetchSeq=0;
+let com1631LastGoodAt=0;
+
+function com1631L(ar,en){return lang==='ar'?ar:en}
+function com1631FriendlyError(err){
+  const s=String(err?.message||err||'').trim();
+  if(!s)return com1631L('تعذر تحميل المحادثات.','Could not load conversations.');
+  if(/function .*tasky_connect_state_v161.*does not exist|could not find the function/i.test(s))
+    return com1631L('قاعدة بيانات التواصل غير محدثة. شغّل SQL الخاص بـ V162 ثم أعد المحاولة.','Connect database is not updated. Run the V162 SQL migration, then retry.');
+  if(/permission denied|access denied|not authorized|jwt/i.test(s))
+    return com1631L('تعذر الوصول إلى المحادثات بسبب الصلاحيات أو الجلسة. حدّث الصفحة ثم أعد المحاولة.','Conversation access failed because of permissions/session. Refresh and retry.');
+  if(/timeout|timed out|network|fetch|failed to fetch/i.test(s))
+    return com1631L('الاتصال بالخادم تأخر أو انقطع. أعد المحاولة.','The server connection timed out or failed. Retry.');
+  return s;
+}
+
+async function com1631RpcWithTimeout(ms=15000){
+  let timer;
+  try{
+    return await Promise.race([
+      sb.rpc('tasky_connect_state_v161',{p_workspace_id:currentWorkspaceId}),
+      new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error('CONNECT_FETCH_TIMEOUT')),ms)})
+    ]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+/* Replace both the V161 fetch and the V162 wrapper with one hardened loader. */
+com161Fetch=async function(){
+  if(!currentWorkspaceId){
+    com161Loading=false;
+    com161Error=com1631L('لم يتم تحديد مساحة العمل بعد.','Workspace is not ready yet.');
+    if(activeNav==='connect')renderModule();
+    return;
+  }
+
+  const seq=++com1631FetchSeq;
+  const hadState=!!com161State;
+  com161Error='';
+  if(!hadState)com161Loading=true;
+  if(activeNav==='connect')renderModule();
+
+  try{
+    const result=await com1631RpcWithTimeout();
+    if(seq!==com1631FetchSeq)return;
+
+    const data=result?.data,error=result?.error;
+    if(error)throw error;
+
+    com161State=data||{};
+    com1631LastGoodAt=Date.now();
+    if(!com161RoomId||!com161Rows('rooms').some(r=>r.id===com161RoomId)){
+      com161RoomId=com161Rows('rooms')[0]?.id||null;
+    }
+
+    if(activeNav==='connect'&&!com162Broadcast){
+      try{com162InitBroadcast()}catch(e){console.warn('Connect broadcast init failed',e)}
+    }
+  }catch(e){
+    if(seq!==com1631FetchSeq)return;
+    console.error('Tasky Connect fetch failed',e);
+    com161Error=com1631FriendlyError(e);
+    if(!hadState)com161State=null;
+  }finally{
+    if(seq===com1631FetchSeq){
+      com161Loading=false;
+      if(activeNav==='connect')renderModule();
+    }
+  }
+};
+
+function com1631RetryConnect(){
+  com161Error='';
+  com161Loading=false;
+  com161Fetch();
+}
+
+function com1631ConnectErrorCard(){
+  return `<div class="com1631-loadcard">
+    <h3>${com1631L('تعذر تحميل التواصل','Connect could not load')}</h3>
+    <p>${escapeHtml(com161Error||com1631L('حدث خطأ أثناء تحميل المحادثات.','An error occurred while loading conversations.'))}</p>
+    <div class="com1631-load-actions">
+      <button class="com161-btn primary" onclick="com1631RetryConnect()">${com1631L('إعادة المحاولة','Retry')}</button>
+      <button class="com161-btn" onclick="location.reload()">${com1631L('تحديث الصفحة','Reload page')}</button>
+    </div>
+  </div>`;
+}
+
+/* Harden the V162 chat-first template itself. */
+const com161TemplateBaseV1631=com161Template;
+com161Template=function(){
+  if(com161Loading&&!com161State){
+    return `<div class="com1631-loadcard"><h3>${com1631L('جارٍ تحميل المحادثات','Loading conversations')}</h3><p>${com1631L('يتم الآن مزامنة المحادثات والأعضاء والرسائل.','Syncing conversations, members and messages.')}</p></div>`;
+  }
+  if(com161Error&&!com161State)return com1631ConnectErrorCard();
+
+  try{
+    return com161TemplateBaseV1631();
+  }catch(e){
+    console.error('Tasky Connect render failed',e);
+    com161Error=com1631FriendlyError(e);
+    return com1631ConnectErrorCard();
+  }
+};
+
+/* Avoid a Realtime setup failure breaking navigation. */
+const com161InitRealtimeBaseV1631=com161InitRealtime;
+com161InitRealtime=function(){
+  try{return com161InitRealtimeBaseV1631()}
+  catch(e){console.warn('Tasky Connect realtime init failed',e);return null}
+};
+
+/* If user opens Connect before workspace/session initialization settles, retry shortly. */
+const setActiveNavBaseV1631=setActiveNav;
+setActiveNav=function(id,...args){
+  const r=setActiveNavBaseV1631(id,...args);
+  if(id==='connect'){
+    setTimeout(()=>{
+      if(activeNav!=='connect')return;
+      if(!com161State&&!com161Loading)com161Fetch();
+    },120);
+  }
+  return r;
+};
+</script>
+
 </body>
 </html>
