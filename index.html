@@ -13252,6 +13252,619 @@ async function meetingV1046PrintReport(meetingId){
 }
 </style>
 
+
+<style id="tasky-v1634-connect-theme-mobile">
+/* ============================================================
+   V163.4 — Tasky Connect exact theme alignment + mobile-first UX
+   ============================================================ */
+
+/* Core visual alignment */
+.com161,
+.com161 *{
+  font-family:"IBM Plex Sans Arabic","Tajawal",system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif !important;
+}
+.com161{
+  --c1634-surface:#ffffff;
+  --c1634-soft:#f6f8f6;
+  --c1634-soft2:#eef5ea;
+  --c1634-line:#e2e7e3;
+  --c1634-green:var(--green);
+  --c1634-ink:var(--ink);
+  --c1634-muted:var(--muted);
+  color:var(--ink);
+}
+.com161-head{
+  border:1px solid var(--border) !important;
+  background:var(--card) !important;
+  border-radius:22px !important;
+  padding:22px 24px !important;
+  box-shadow:none !important;
+  align-items:center !important;
+}
+.com161-head h2{
+  font-size:28px !important;
+  line-height:1.25 !important;
+  font-weight:900 !important;
+  letter-spacing:-.02em !important;
+}
+.com161-head p{
+  font-size:14px !important;
+  line-height:1.7 !important;
+  color:var(--muted) !important;
+  margin-top:5px !important;
+}
+.com161-actions{
+  gap:9px !important;
+}
+.com161-btn{
+  min-height:44px !important;
+  padding:10px 15px !important;
+  border-radius:13px !important;
+  border:1px solid var(--border) !important;
+  background:var(--paper) !important;
+  color:var(--ink) !important;
+  font-size:14px !important;
+  font-weight:800 !important;
+  box-shadow:none !important;
+}
+.com161-btn.primary{
+  background:var(--green) !important;
+  border-color:var(--green) !important;
+  color:#fff !important;
+}
+.com161-btn:hover{
+  filter:none !important;
+  transform:none !important;
+  background:var(--green-tint) !important;
+}
+.com161-btn.primary:hover{
+  background:var(--green) !important;
+}
+
+/* Main shell: closer to Tasky cards */
+.com162-shell{
+  grid-template-columns:320px minmax(0,1fr) !important;
+  gap:18px !important;
+  min-height:690px !important;
+}
+.com161-side,
+.com161-main{
+  border:1px solid var(--border) !important;
+  background:var(--card) !important;
+  border-radius:22px !important;
+  box-shadow:none !important;
+  overflow:hidden !important;
+}
+.com161-side{
+  padding:16px !important;
+}
+.com161-side-head{
+  margin-bottom:10px !important;
+  padding:2px 2px 6px !important;
+}
+.com161-side-head b{
+  font-size:16px !important;
+  font-weight:900 !important;
+}
+
+/* Conversation search + room list */
+.com162-room-search{
+  min-height:44px !important;
+  border-radius:12px !important;
+  padding:10px 12px !important;
+  font-size:14px !important;
+  margin-bottom:12px !important;
+  border:1px solid var(--border) !important;
+}
+.com161-room{
+  min-height:64px !important;
+  padding:10px 11px !important;
+  border-radius:14px !important;
+  gap:10px !important;
+  margin-bottom:4px !important;
+}
+.com161-room:hover{
+  background:var(--paper) !important;
+}
+.com161-room.active{
+  background:var(--green-tint) !important;
+  color:var(--green) !important;
+}
+.com161-room-dot{
+  width:9px !important;
+  height:9px !important;
+}
+.com161-room-main b{
+  font-size:15px !important;
+  font-weight:850 !important;
+  line-height:1.35 !important;
+}
+.com161-room-main small{
+  font-size:12px !important;
+  line-height:1.45 !important;
+  margin-top:3px !important;
+}
+.com162-unread{
+  min-width:22px !important;
+  height:22px !important;
+  font-size:11px !important;
+}
+.com162-fav{
+  font-size:13px !important;
+}
+
+/* Chat header */
+.com161-chat-head{
+  min-height:76px !important;
+  padding:14px 18px !important;
+  border-bottom:1px solid var(--border) !important;
+  background:var(--card) !important;
+}
+.com161-chat-head h3{
+  font-size:18px !important;
+  font-weight:900 !important;
+  line-height:1.35 !important;
+}
+.com161-chat-head p{
+  font-size:12px !important;
+  line-height:1.5 !important;
+  margin-top:4px !important;
+}
+
+/* Meal summary card - same neutral Tasky language */
+.com162-meal-summary{
+  margin:14px 16px 0 !important;
+  border:1px solid #d9e4d5 !important;
+  background:#f4f8f1 !important;
+  border-radius:18px !important;
+  padding:15px !important;
+}
+.com162-meal-summary h4{
+  font-size:16px !important;
+  font-weight:900 !important;
+}
+.com162-meal-summary p{
+  font-size:12px !important;
+  line-height:1.55 !important;
+}
+.com162-steps{
+  gap:6px !important;
+  margin-top:10px !important;
+}
+.com162-step{
+  padding:6px 9px !important;
+  font-size:11px !important;
+  border-radius:999px !important;
+}
+.com162-meal-grid{
+  gap:9px !important;
+  margin-top:11px !important;
+}
+.com162-meal-box{
+  border:1px solid var(--border) !important;
+  background:var(--card) !important;
+  border-radius:12px !important;
+  padding:10px !important;
+}
+.com162-meal-box span{
+  font-size:11px !important;
+}
+.com162-meal-box b{
+  font-size:15px !important;
+  margin-top:3px !important;
+  display:block !important;
+}
+.com161-progress{
+  height:8px !important;
+  margin-top:10px !important;
+}
+
+/* Messages */
+.com161-messages{
+  padding:18px !important;
+  gap:10px !important;
+}
+.com162-msg-row{
+  max-width:82% !important;
+  gap:9px !important;
+}
+.com162-avatar{
+  width:34px !important;
+  height:34px !important;
+  font-size:12px !important;
+  border-radius:50% !important;
+}
+.com162-bubble{
+  border-radius:16px !important;
+  padding:10px 12px !important;
+  min-width:120px !important;
+  box-shadow:none !important;
+}
+.com162-bubble .who{
+  font-size:12px !important;
+  margin-bottom:4px !important;
+}
+.com162-bubble .body{
+  font-size:14px !important;
+  line-height:1.65 !important;
+}
+.com162-bubble .time{
+  font-size:10px !important;
+  margin-top:6px !important;
+}
+.com162-reply-preview{
+  font-size:11px !important;
+  line-height:1.5 !important;
+  padding:7px 8px !important;
+  border-radius:9px !important;
+}
+.com162-msg-actions{
+  gap:8px !important;
+  margin-top:7px !important;
+}
+.com162-msg-actions button{
+  font-size:11px !important;
+}
+.com162-react{
+  font-size:11px !important;
+  padding:4px 7px !important;
+}
+.com162-system{
+  font-size:11px !important;
+  padding:7px 10px !important;
+}
+.com162-system.meal{
+  background:#f4f8f1 !important;
+  color:var(--green) !important;
+}
+
+/* Composer */
+.com162-compose-wrap{
+  padding:12px 14px !important;
+  background:var(--card) !important;
+}
+.com162-compose-tools{
+  margin-bottom:8px !important;
+}
+.com162-compose-main{
+  gap:8px !important;
+}
+.com162-compose-main textarea{
+  min-height:54px !important;
+  max-height:140px !important;
+  border-radius:14px !important;
+  padding:11px 13px !important;
+  font-size:14px !important;
+  line-height:1.55 !important;
+}
+.com162-typing{
+  font-size:11px !important;
+  height:22px !important;
+  padding-inline:16px !important;
+}
+.com162-menu{
+  gap:7px !important;
+}
+.com162-attach-pill{
+  font-size:11px !important;
+  padding:6px 8px !important;
+}
+
+/* Drawer */
+.com162-drawer{
+  width:min(420px,92vw) !important;
+  padding:18px !important;
+  background:var(--card) !important;
+}
+.com162-drawer h3{
+  font-size:15px !important;
+  margin:14px 0 8px !important;
+}
+.com161-member{
+  padding:8px !important;
+  border-radius:11px !important;
+}
+.com161-member b{
+  font-size:13px !important;
+}
+.com161-member small{
+  font-size:10px !important;
+}
+.com162-item-row{
+  padding:10px 0 !important;
+}
+.com162-item-row b{
+  font-size:13px !important;
+}
+.com162-item-row small{
+  font-size:10px !important;
+}
+.com162-pay-row{
+  padding:9px 0 !important;
+}
+.com162-pay-row b{
+  font-size:13px !important;
+}
+.com162-pay-row small{
+  font-size:10px !important;
+}
+
+/* Tablet */
+@media(max-width:1050px){
+  .com162-shell{
+    grid-template-columns:270px minmax(0,1fr) !important;
+    gap:12px !important;
+  }
+  .com161-head{
+    padding:18px 20px !important;
+  }
+  .com161-head h2{
+    font-size:25px !important;
+  }
+}
+
+/* ============================================================
+   Mobile-first Connect
+   ============================================================ */
+@media(max-width:720px){
+  .com161{
+    gap:10px !important;
+  }
+  .com161-head{
+    padding:14px !important;
+    border-radius:16px !important;
+    align-items:flex-start !important;
+  }
+  .com161-head h2{
+    font-size:22px !important;
+  }
+  .com161-head p{
+    font-size:12px !important;
+    line-height:1.55 !important;
+  }
+  .com161-actions{
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+  }
+  .com161-actions .com161-btn{
+    width:100% !important;
+    min-width:0 !important;
+    font-size:12px !important;
+    padding:9px 8px !important;
+  }
+
+  /* Mobile becomes a true conversation app:
+     rooms OR chat, not both stacked forever. */
+  .com162-shell{
+    display:block !important;
+    min-height:0 !important;
+  }
+  .com161-side,
+  .com161-main{
+    border-radius:16px !important;
+  }
+  .com161-side{
+    max-height:none !important;
+    padding:12px !important;
+  }
+  .com161-main{
+    min-height:72dvh !important;
+  }
+
+  /* When a room is selected, minimize room list to compact picker */
+  .com161:has(.com161-main .com161-chat-head) .com161-side{
+    max-height:94px !important;
+    overflow:auto !important;
+  }
+  .com161:has(.com161-main .com161-chat-head) .com161-side .com161-room:not(.active),
+  .com161:has(.com161-main .com161-chat-head) .com161-side > div:not(.com161-side-head):not(:has(.com161-room.active)){
+    display:none !important;
+  }
+  .com161:has(.com161-main .com161-chat-head) .com162-room-search{
+    display:none !important;
+  }
+  .com161-side-head{
+    margin-bottom:4px !important;
+  }
+  .com161-side-head b{
+    font-size:13px !important;
+  }
+  .com161-room{
+    min-height:54px !important;
+    padding:8px 9px !important;
+  }
+  .com161-room-main b{
+    font-size:13px !important;
+  }
+  .com161-room-main small{
+    font-size:10px !important;
+  }
+
+  .com161-chat-head{
+    min-height:68px !important;
+    padding:10px 12px !important;
+    flex-wrap:wrap !important;
+  }
+  .com161-chat-head h3{
+    font-size:16px !important;
+  }
+  .com161-chat-head p{
+    font-size:10px !important;
+  }
+  .com161-chat-head .com161-actions{
+    display:flex !important;
+    width:auto !important;
+    margin-inline-start:auto !important;
+  }
+  .com161-chat-head .com161-actions .com161-btn{
+    width:auto !important;
+    min-height:36px !important;
+    padding:7px 9px !important;
+    font-size:11px !important;
+  }
+
+  .com162-meal-summary{
+    margin:10px 10px 0 !important;
+    padding:11px !important;
+    border-radius:14px !important;
+  }
+  .com162-meal-summary h4{
+    font-size:14px !important;
+  }
+  .com162-meal-summary p{
+    font-size:10px !important;
+  }
+  .com162-steps{
+    padding-bottom:2px !important;
+  }
+  .com162-step{
+    font-size:9px !important;
+    padding:5px 7px !important;
+  }
+  .com162-meal-grid{
+    grid-template-columns:1fr 1fr !important;
+    gap:6px !important;
+  }
+  .com162-meal-box{
+    padding:8px !important;
+  }
+  .com162-meal-box span{
+    font-size:9px !important;
+  }
+  .com162-meal-box b{
+    font-size:12px !important;
+  }
+
+  .com161-messages{
+    padding:12px 10px !important;
+    gap:8px !important;
+  }
+  .com162-msg-row{
+    max-width:92% !important;
+    gap:6px !important;
+  }
+  .com162-avatar{
+    width:28px !important;
+    height:28px !important;
+    font-size:10px !important;
+  }
+  .com162-bubble{
+    padding:8px 10px !important;
+    min-width:90px !important;
+    border-radius:14px !important;
+  }
+  .com162-bubble .who{
+    font-size:10px !important;
+  }
+  .com162-bubble .body{
+    font-size:13px !important;
+  }
+  .com162-bubble .time{
+    font-size:9px !important;
+  }
+  .com162-msg-actions button{
+    font-size:10px !important;
+  }
+  .com162-react{
+    font-size:10px !important;
+  }
+  .com162-system{
+    max-width:88% !important;
+    font-size:10px !important;
+    text-align:center !important;
+  }
+
+  /* Sticky composer on phones */
+  .com162-compose-wrap{
+    position:sticky !important;
+    bottom:0 !important;
+    z-index:12 !important;
+    padding:9px 10px calc(9px + env(safe-area-inset-bottom)) !important;
+    border-top:1px solid var(--border) !important;
+  }
+  .com162-compose-main textarea{
+    min-height:46px !important;
+    font-size:13px !important;
+    padding:9px 10px !important;
+  }
+  .com162-compose-main .com161-btn.primary{
+    min-width:62px !important;
+    padding-inline:10px !important;
+  }
+  .com162-compose-tools{
+    margin-bottom:5px !important;
+  }
+  .com162-compose-tools span{
+    display:none !important;
+  }
+  .com162-menu{
+    overflow-x:auto !important;
+    flex-wrap:nowrap !important;
+    padding-bottom:3px !important;
+  }
+  .com162-menu .com161-btn{
+    flex:none !important;
+    white-space:nowrap !important;
+  }
+
+  /* Full-height bottom-sheet feel for details drawer */
+  .com162-drawer{
+    top:auto !important;
+    bottom:0 !important;
+    inset-inline:0 !important;
+    width:100% !important;
+    height:min(78dvh,760px) !important;
+    border-inline-start:0 !important;
+    border-top:1px solid var(--border) !important;
+    border-radius:22px 22px 0 0 !important;
+    transform:translateY(105%) !important;
+    padding:14px !important;
+  }
+  [dir="rtl"] .com162-drawer{
+    transform:translateY(105%) !important;
+  }
+  .com162-drawer.show{
+    transform:translateY(0) !important;
+  }
+
+  .com162-item-row{
+    grid-template-columns:minmax(0,1fr) auto !important;
+    gap:5px !important;
+  }
+  .com162-item-row .com161-btn{
+    grid-column:1/-1 !important;
+    width:100% !important;
+    min-height:36px !important;
+  }
+
+  .com162-pay-row{
+    grid-template-columns:1fr !important;
+  }
+}
+
+/* Very small phones */
+@media(max-width:390px){
+  .com161-head h2{
+    font-size:20px !important;
+  }
+  .com161-actions{
+    grid-template-columns:1fr !important;
+  }
+  .com162-meal-grid{
+    grid-template-columns:1fr !important;
+  }
+  .com161-chat-head .com161-actions{
+    width:100% !important;
+    display:grid !important;
+    grid-template-columns:repeat(3,1fr) !important;
+  }
+  .com161-chat-head .com161-actions .com161-btn{
+    width:100% !important;
+  }
+}
+</style>
+
 </head><body><h1>${meet1047L('محضر اجتماع','Meeting Minutes')}: ${escapeHtml(m.title||'')}</h1><div class="meta"><div><span class="label">${meet1047L('الموعد','When')}</span><br><b>${escapeHtml(meetingDateV101(m.scheduled_at))}</b></div><div><span class="label">${escapeHtml(dur.title)}</span><br><b>${escapeHtml(dur.label)}</b></div><div><span class="label">${meet1047L('المنظّم','Organizer')}</span><br><b>${escapeHtml(meetingMemberNameV101(m.created_by))}</b></div><div><span class="label">${meet1047L('الحضور','Attendees')}</span><br><b>${escapeHtml(attendees||'—')}</b></div></div><div class="minutes"><h2>${meet1047L('المحضر','Minutes')}</h2>${escapeHtml(d.content||'').replace(/\n/g,'<br>')}</div></body></html>`;
     const blob=new Blob([report],{type:'text/html;charset=utf-8'}),a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=`Tasky-Meeting-Minutes-${String(m.title||meetingId).replace(/[^\p{L}\p{N}\-_]+/gu,'-').slice(0,70)}.html`;document.body.appendChild(a);a.click();const u=a.href;a.remove();setTimeout(()=>URL.revokeObjectURL(u),1200);taskyToast(meet1047L('تم تنزيل تقرير المحضر','Minutes report downloaded'),{tone:'success'});
   }catch(e){showTaskyDialog({title:meet1047L('تعذّر إنشاء التقرير','Could not create report'),message:e.message,tone:'error'})}
@@ -21270,7 +21883,7 @@ setActiveNav=function(id,...args){
 
 
 <script id="tasky-v1632-connect-money-hotfix-js">
-window.TASKY_BUILD='V163.3';console.info('Tasky build',window.TASKY_BUILD);
+window.TASKY_BUILD='V163.4';console.info('Tasky build',window.TASKY_BUILD);
 
 /* V163.2 — fix missing money formatter used by V162 Connect meal UI. */
 function com162Money(v){
