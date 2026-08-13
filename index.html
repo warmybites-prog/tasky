@@ -19505,5 +19505,453 @@ book140InitRealtime=function(){
 };
 </script>
 
+
+<style id="tasky-v150-requests-css">
+/* ============================================================
+   V150 — Tasky Requests / Service Desk
+   Internal + external request/ticket platform.
+   ============================================================ */
+.req150{display:flex;flex-direction:column;gap:14px}
+.req150-head{
+  display:flex;justify-content:space-between;align-items:flex-start;gap:12px;
+  padding:16px;border:1px solid var(--border);background:var(--card);border-radius:15px
+}
+.req150-head h2{margin:0 0 4px;font-size:19px}
+.req150-head p{margin:0;color:var(--muted);font-size:9px;line-height:1.65;max-width:780px}
+.req150-actions{display:flex;gap:7px;flex-wrap:wrap}
+.req150-btn{
+  min-height:38px;border:1px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:9px;padding:7px 11px;font:800 9px Inter,'IBM Plex Sans Arabic';cursor:pointer
+}
+.req150-btn.primary{background:var(--green);border-color:var(--green);color:#fff}
+.req150-btn.danger{color:var(--danger)}
+.req150-tabs{
+  display:flex;gap:5px;overflow-x:auto;padding:4px;border:1px solid var(--border);
+  background:var(--card);border-radius:12px;scrollbar-width:none
+}
+.req150-tabs::-webkit-scrollbar{display:none}
+.req150-tab{
+  min-height:35px;border:0;background:transparent;color:var(--muted);
+  border-radius:8px;padding:6px 10px;font-size:8.3px;font-weight:800;white-space:nowrap
+}
+.req150-tab.active{background:var(--green-tint);color:var(--green)}
+.req150-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.req150-stat,.req150-panel{
+  border:1px solid var(--border);background:var(--card);border-radius:13px;padding:12px
+}
+.req150-stat span{display:block;color:var(--muted);font-size:8px;margin-bottom:5px}
+.req150-stat b{font-size:20px;line-height:1}
+.req150-stat small{display:block;margin-top:6px;color:var(--muted);font-size:7.3px}
+.req150-panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px}
+.req150-panel-head h3{margin:0;font-size:13px}.req150-panel-head p{margin:2px 0 0;color:var(--muted);font-size:8px}
+.req150-toolbar{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.req150-toolbar input,.req150-toolbar select{
+  min-height:36px;border:1px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:9px;padding:7px 9px;font-size:8.5px
+}
+.req150-toolbar input{min-width:210px;flex:1}
+.req150-table-wrap{overflow:auto}
+.req150-table{width:100%;min-width:900px;border-collapse:collapse;font-size:8.3px}
+.req150-table th,.req150-table td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:start;vertical-align:middle}
+.req150-table th{position:sticky;top:0;background:var(--paper);color:var(--muted);font-weight:800}
+.req150-badge{
+  display:inline-flex;align-items:center;border:1px solid var(--border);background:var(--paper);
+  color:var(--muted);border-radius:999px;padding:3px 7px;font-size:7px
+}
+.req150-badge.open,.req150-badge.in_progress,.req150-badge.resolved{background:var(--green-tint);color:var(--green);border-color:#cfe0d7}
+.req150-badge.pending_requester,.req150-badge.pending_third_party,.req150-badge.pending_approval{background:#fff8e8;color:#7f6521;border-color:#eadcaf}
+.req150-badge.closed,.req150-badge.cancelled{background:#f3f4f3;color:#707c77}
+.req150-badge.critical,.req150-badge.breached{background:var(--danger-tint);color:var(--danger);border-color:#e2c8c5}
+.req150-badge.at_risk{background:#fff5e5;color:#8a681d;border-color:#e7d8ab}
+.req150-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:9px}
+.req150-card{border:1px solid var(--border);background:var(--paper);border-radius:12px;padding:11px}
+.req150-card h4{margin:0 0 4px;font-size:11px}.req150-card p{margin:0;color:var(--muted);font-size:8px;line-height:1.5}
+.req150-card-actions{display:flex;gap:5px;flex-wrap:wrap;margin-top:9px}
+.req150-meta{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:9px}
+.req150-meta div{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:7px}
+.req150-meta span{display:block;color:var(--muted);font-size:6.8px;margin-bottom:2px}.req150-meta b{font-size:8px}
+.req150-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.req150-field.full{grid-column:1/-1}
+.req150-field label{display:block;color:var(--muted);font-size:8px;margin-bottom:4px}
+.req150-field input,.req150-field select,.req150-field textarea{
+  width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:9px;padding:9px;font:inherit;font-size:9.5px
+}
+.req150-field textarea{min-height:95px;resize:vertical}
+.req150-thread{display:flex;flex-direction:column;gap:7px}
+.req150-message{border:1px solid var(--border);background:var(--paper);border-radius:10px;padding:9px}
+.req150-message.internal{background:#fff9e9;border-color:#eadcaf}
+.req150-message b{display:block;font-size:8.5px;margin-bottom:3px}.req150-message p{margin:0;font-size:9px;white-space:pre-wrap;line-height:1.55}
+.req150-message small{display:block;color:var(--muted);font-size:7px;margin-top:5px}
+.req150-sla{
+  border:1px solid var(--border);background:var(--paper);border-radius:10px;padding:9px;display:flex;justify-content:space-between;gap:10px
+}
+.req150-sla i{display:block;height:5px;background:var(--green);border-radius:999px;margin-top:5px}
+.req150-kanban{display:grid;grid-template-columns:repeat(4,minmax(230px,1fr));gap:8px;overflow:auto}
+.req150-col{border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:8px;min-height:260px}
+.req150-col h4{margin:0 0 7px;font-size:9px}
+.req150-kcard{border:1px solid var(--border);background:var(--card);border-radius:9px;padding:8px;margin-bottom:6px;cursor:pointer}
+.req150-kcard b{display:block;font-size:8.5px}.req150-kcard small{font-size:7px;color:var(--muted)}
+.req150-public{
+  position:fixed;inset:0;z-index:59000;background:#f5f7f5;color:#18231f;display:none;overflow:auto
+}
+.req150-public.show{display:block}
+.req150-public-shell{width:min(760px,calc(100% - 28px));margin:22px auto;background:#fff;border:1px solid #dce2df;border-radius:16px;padding:18px}
+.req150-empty{border:1px dashed var(--border);background:var(--paper);border-radius:11px;padding:22px;text-align:center;color:var(--muted);font-size:9px;line-height:1.6}
+.req150-feature-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:7px}
+.req150-feature{border:1px solid var(--border);background:var(--paper);border-radius:9px;padding:8px;font-size:8px;line-height:1.5}
+.req150-feature b{display:block;margin-bottom:2px}
+@media(max-width:900px){.req150-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.req150-kanban{grid-template-columns:repeat(2,minmax(230px,1fr))}}
+@media(max-width:700px){
+  .req150-head{flex-direction:column;padding:13px}.req150-actions{width:100%}.req150-actions .req150-btn{flex:1}
+  .req150-grid{grid-template-columns:1fr 1fr}.req150-form{grid-template-columns:1fr}.req150-field.full{grid-column:auto}
+  .req150-toolbar>*{width:100%}.req150-toolbar input{min-width:0}.req150-kanban{grid-template-columns:1fr}
+}
+</style>
+
+<script id="tasky-v150-requests-js">
+window.TASKY_BUILD='V150';console.info('Tasky build',window.TASKY_BUILD);
+
+/* Navigation */
+STR.ar.nav_requests='الطلبات';
+STR.en.nav_requests='Requests';
+if(!NAV_ITEMS.some(x=>x.id==='requests')){
+  const idx=NAV_ITEMS.findIndex(x=>x.id==='bookings');
+  NAV_ITEMS.splice(idx>=0?idx+1:NAV_ITEMS.length,0,{id:'requests',key:'nav_requests',icon:'i-inbox',group:'grp_ops',always:true});
+}
+
+let req150Tab='overview',req150State=null,req150Loading=false,req150Error='',req150Realtime=null;
+let req150Search='',req150Status='',req150Priority='',req150Team='',req150View='table';
+let req150PublicCatalog=null,req150PublicDraft={};
+
+const req150Tabs=[
+ ['overview','نظرة عامة','Overview'],
+ ['requests','الطلبات','Requests'],
+ ['inbox','صندوق الفريق','Team Inbox'],
+ ['catalog','كتالوج الخدمات','Service Catalog'],
+ ['approvals','الموافقات','Approvals'],
+ ['assets','الأصول المرتبطة','Linked Assets'],
+ ['knowledge','قاعدة المعرفة','Knowledge Base'],
+ ['problems','المشاكل والتغييرات','Problems & Changes'],
+ ['customers','العملاء الخارجيون','External Customers'],
+ ['sla','SLA','SLA'],
+ ['automation','الأتمتة','Automation'],
+ ['reports','التقارير','Reports'],
+ ['settings','الإعدادات','Settings']
+];
+
+function req150L(ar,en){return lang==='ar'?ar:en}
+function req150Rows(k){return Array.isArray(req150State?.[k])?req150State[k]:[]}
+function req150StatusLabel(s){
+ const m={new:['جديد','New'],open:['مفتوح','Open'],in_progress:['قيد المعالجة','In progress'],pending_requester:['بانتظار مقدم الطلب','Waiting requester'],pending_third_party:['بانتظار طرف ثالث','Waiting third party'],pending_approval:['بانتظار موافقة','Waiting approval'],resolved:['محلول','Resolved'],closed:['مغلق','Closed'],cancelled:['ملغي','Cancelled']};
+ return m[s]?req150L(...m[s]):s;
+}
+function req150PriorityLabel(s){const m={low:['منخفضة','Low'],medium:['متوسطة','Medium'],high:['عالية','High'],critical:['حرجة','Critical']};return m[s]?req150L(...m[s]):s}
+function req150Date(v){if(!v)return'—';try{return new Date(v).toLocaleString(lang==='ar'?'ar-SA':'en-US',{dateStyle:'medium',timeStyle:'short'})}catch(_){return v}}
+function req150SetTab(id){req150Tab=id;if(activeNav==='requests')renderModule()}
+async function req150Fetch(){
+ if(!currentWorkspaceId)return;req150Loading=true;req150Error='';if(activeNav==='requests')renderModule();
+ const {data,error}=await sb.rpc('tasky_request_state_v150',{p_workspace_id:currentWorkspaceId});
+ req150Loading=false;if(error){req150Error=error.message||String(error);req150State=null}else req150State=data||{};
+ if(activeNav==='requests')renderModule();
+}
+function req150InitRealtime(){
+ if(req150Realtime){try{sb.removeChannel(req150Realtime)}catch(_){}}
+ if(!currentWorkspaceId)return;
+ req150Realtime=sb.channel(`tasky-requests-v150-${currentWorkspaceId}`);
+ ['tasky_requests_v150','tasky_request_comments_v150','tasky_request_approvals_v150','tasky_request_worklogs_v150','tasky_request_activity_v150']
+ .forEach(table=>req150Realtime.on('postgres_changes',{event:'*',schema:'public',table,filter:`workspace_id=eq.${currentWorkspaceId}`},()=>setTimeout(req150Fetch,120)));
+ req150Realtime.subscribe();
+}
+
+const renderModuleBaseV150=renderModule;
+renderModule=function(){
+ if(activeNav==='requests'){document.getElementById('moduleArea').innerHTML=req150Template();return}
+ return renderModuleBaseV150();
+};
+const setActiveNavBaseV150=setActiveNav;
+setActiveNav=function(id,...args){
+ const r=setActiveNavBaseV150(id,...args);
+ if(id==='requests'){
+   if(!req150State&&!req150Loading)req150Fetch();
+   if(!req150Realtime)req150InitRealtime();
+ }
+ return r;
+};
+
+function req150Template(){
+ if(req150Loading&&!req150State)return `<div class="req150-empty">${req150L('جارٍ تحميل الطلبات…','Loading requests…')}</div>`;
+ if(req150Error)return `<div class="req150-empty">${escapeHtml(req150Error)}<br><button class="req150-btn" onclick="req150Fetch()">${req150L('إعادة المحاولة','Retry')}</button></div>`;
+ return `<div class="req150">
+  <div class="req150-head"><div><h2>${req150L('الطلبات','Requests')}</h2><p>${req150L('Service Desk عام للطلبات الداخلية والخارجية: تقنية المعلومات، الأصول، المرافق، الموارد البشرية، المشتريات، الشكاوى والخدمات المخصصة.','A universal Service Desk for internal and external requests: IT, assets, facilities, HR, procurement, complaints and custom services.')}</p></div>
+    <div class="req150-actions"><button class="req150-btn" onclick="req150OpenPublic()">${req150L('البوابة الخارجية','External portal')}</button><button class="req150-btn primary" onclick="req150OpenRequest()">${req150L('طلب جديد','New request')}</button></div></div>
+  <div class="req150-tabs">${req150Tabs.map(t=>`<button class="req150-tab ${req150Tab===t[0]?'active':''}" onclick="req150SetTab('${t[0]}')">${req150L(t[1],t[2])}</button>`).join('')}</div>
+  ${req150TabTemplate()}
+ </div>`;
+}
+function req150TabTemplate(){
+ if(req150Tab==='overview')return req150Overview();
+ if(req150Tab==='requests')return req150Requests();
+ if(req150Tab==='inbox')return req150Inbox();
+ if(req150Tab==='catalog')return req150Catalog();
+ if(req150Tab==='approvals')return req150Approvals();
+ if(req150Tab==='assets')return req150Assets();
+ if(req150Tab==='knowledge')return req150Knowledge();
+ if(req150Tab==='problems')return req150Problems();
+ if(req150Tab==='customers')return req150Customers();
+ if(req150Tab==='sla')return req150Sla();
+ if(req150Tab==='automation')return req150Automation();
+ if(req150Tab==='reports')return req150Reports();
+ return req150Settings();
+}
+function req150Overview(){
+ const m=req150State?.metrics||{},risk=req150Rows('requests').filter(x=>x.sla_state==='at_risk'||x.sla_state==='breached').slice(0,8);
+ return `<div class="req150-grid">
+  <div class="req150-stat"><span>${req150L('مفتوحة','Open')}</span><b>${Number(m.open||0)}</b><small>${req150L('كل الفرق','Across teams')}</small></div>
+  <div class="req150-stat"><span>${req150L('غير معيّنة','Unassigned')}</span><b>${Number(m.unassigned||0)}</b><small>${req150L('تحتاج استلام','Need ownership')}</small></div>
+  <div class="req150-stat"><span>${req150L('SLA معرض للخطر','SLA at risk')}</span><b>${Number(m.at_risk||0)}</b><small>${Number(m.breached||0)} ${req150L('متجاوزة','breached')}</small></div>
+  <div class="req150-stat"><span>${req150L('رضا الخدمة','CSAT')}</span><b>${Number(m.csat||0).toFixed(1)}</b><small>/ 5</small></div>
+  <div class="req150-panel" style="grid-column:1/-1"><div class="req150-panel-head"><div><h3>${req150L('طلبات تحتاج انتباه','Requests needing attention')}</h3><p>${req150L('الأقرب لخرق SLA أو المتجاوزة.','Closest to SLA breach or already breached.')}</p></div></div>${risk.length?req150Table(risk):`<div class="req150-empty">${req150L('لا توجد طلبات معرضة للخطر الآن.','No at-risk requests right now.')}</div>`}</div>
+ </div>`;
+}
+function req150Filtered(){
+ const q=String(req150Search||'').toLowerCase();
+ return req150Rows('requests').filter(r=>{
+   if(req150Status&&r.status!==req150Status)return false;
+   if(req150Priority&&r.priority!==req150Priority)return false;
+   if(req150Team&&r.team_id!==req150Team)return false;
+   if(!q)return true;
+   return [r.reference_no,r.title,r.requester_name,r.service_name,r.team_name,r.assignee_name].some(x=>String(x||'').toLowerCase().includes(q));
+ });
+}
+function req150Filters(){
+ return `<div class="req150-toolbar">
+  <input value="${escapeHtml(req150Search)}" oninput="req150Search=this.value;renderModule()" placeholder="${req150L('بحث بالمرجع أو العنوان أو مقدم الطلب','Search ref, title or requester')}">
+  <select onchange="req150Status=this.value;renderModule()"><option value="">${req150L('كل الحالات','All statuses')}</option>${['new','open','in_progress','pending_requester','pending_third_party','pending_approval','resolved','closed','cancelled'].map(s=>`<option value="${s}" ${req150Status===s?'selected':''}>${escapeHtml(req150StatusLabel(s))}</option>`).join('')}</select>
+  <select onchange="req150Priority=this.value;renderModule()"><option value="">${req150L('كل الأولويات','All priorities')}</option>${['low','medium','high','critical'].map(s=>`<option value="${s}" ${req150Priority===s?'selected':''}>${escapeHtml(req150PriorityLabel(s))}</option>`).join('')}</select>
+  <select onchange="req150Team=this.value;renderModule()"><option value="">${req150L('كل الفرق','All teams')}</option>${req150Rows('teams').map(t=>`<option value="${t.id}" ${req150Team===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select>
+  <button class="req150-btn" onclick="req150Search='';req150Status='';req150Priority='';req150Team='';renderModule()">${req150L('مسح','Clear')}</button>
+ </div>`;
+}
+function req150Table(rows){
+ return `<div class="req150-table-wrap"><table class="req150-table"><thead><tr><th>${req150L('المرجع','Ref')}</th><th>${req150L('الطلب','Request')}</th><th>${req150L('مقدم الطلب','Requester')}</th><th>${req150L('الفريق / المسؤول','Team / Assignee')}</th><th>${req150L('الأولوية','Priority')}</th><th>${req150L('الحالة','Status')}</th><th>SLA</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr>
+ <td><b>${escapeHtml(r.reference_no||'')}</b><br><small>${escapeHtml(r.request_type||'')}</small></td>
+ <td><b>${escapeHtml(r.title||'')}</b><br><small>${escapeHtml(r.service_name||'')}</small></td>
+ <td>${escapeHtml(r.requester_name||'')}<br><small>${escapeHtml(r.requester_department||'')}</small></td>
+ <td>${escapeHtml(r.team_name||'—')}<br><small>${escapeHtml(r.assignee_name||req150L('غير معيّن','Unassigned'))}</small></td>
+ <td><span class="req150-badge ${r.priority}">${escapeHtml(req150PriorityLabel(r.priority))}</span></td>
+ <td><span class="req150-badge ${r.status}">${escapeHtml(req150StatusLabel(r.status))}</span></td>
+ <td><span class="req150-badge ${r.sla_state||''}">${escapeHtml(r.sla_state||'—')}</span><br><small>${r.resolution_due_at?escapeHtml(req150Date(r.resolution_due_at)):''}</small></td>
+ <td><button class="req150-btn" onclick="req150OpenRequest('${r.id}')">${req150L('فتح','Open')}</button></td>
+ </tr>`).join('')}</tbody></table></div>`;
+}
+function req150Requests(){
+ const rows=req150Filtered();
+ if(req150View==='kanban')return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('الطلبات','Requests')}</h3></div><div class="req150-toolbar"><button class="req150-btn" onclick="req150View='table';renderModule()">${req150L('جدول','Table')}</button><button class="req150-btn primary" onclick="req150OpenRequest()">${req150L('طلب جديد','New')}</button></div></div>${req150Filters()}${req150Kanban(rows)}</div>`;
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('كل الطلبات','All requests')}</h3><p>${req150L('عرض تشغيلي موحد للطلبات الداخلية والخارجية.','Unified operational view for internal and external requests.')}</p></div><div class="req150-toolbar"><button class="req150-btn" onclick="req150View='kanban';renderModule()">Kanban</button><button class="req150-btn primary" onclick="req150OpenRequest()">${req150L('طلب جديد','New request')}</button></div></div>${req150Filters()}${rows.length?req150Table(rows):`<div class="req150-empty">${req150L('لا توجد نتائج.','No results.')}</div>`}</div>`;
+}
+function req150Kanban(rows){
+ const cols=[['new','جديد','New'],['in_progress','قيد المعالجة','In progress'],['pending_requester','بانتظار','Waiting'],['resolved','محلول','Resolved']];
+ return `<div class="req150-kanban">${cols.map(c=>`<div class="req150-col"><h4>${req150L(c[1],c[2])}</h4>${rows.filter(r=>r.status===c[0]||(c[0]==='pending_requester'&&['pending_requester','pending_third_party','pending_approval'].includes(r.status))).map(r=>`<div class="req150-kcard" onclick="req150OpenRequest('${r.id}')"><b>${escapeHtml(r.reference_no)} · ${escapeHtml(r.title)}</b><small>${escapeHtml(r.team_name||'')} · ${escapeHtml(req150PriorityLabel(r.priority))}</small></div>`).join('')}</div>`).join('')}</div>`;
+}
+function req150Inbox(){
+ const me=req150Rows('requests').filter(r=>r.assignee_user_id===currentUserId||(!r.assignee_user_id&&r.team_id));
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('صندوق الفريق','Team Inbox')}</h3><p>${req150L('طلباتك والطلبات غير المعيّنة للفرق التي تعمل معها.','Your requests and unassigned team work.')}</p></div></div>${me.length?req150Table(me):`<div class="req150-empty">${req150L('الصندوق فارغ.','Inbox is clear.')}</div>`}</div>`;
+}
+function req150Catalog(){
+ const rows=req150Rows('services');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('كتالوج الخدمات','Service Catalog')}</h3><p>${req150L('أنواع طلبات مرنة، نماذج مخصصة، Workflow، SLA وفريق افتراضي.','Flexible request types, forms, workflow, SLA and default team.')}</p></div><button class="req150-btn primary" onclick="req150OpenService()">${req150L('خدمة جديدة','New service')}</button></div>${rows.length?`<div class="req150-cards">${rows.map(s=>`<div class="req150-card"><h4>${escapeHtml(s.name)}</h4><p>${escapeHtml(s.description||'')}</p><div class="req150-meta"><div><span>${req150L('النوع','Type')}</span><b>${escapeHtml(s.request_type)}</b></div><div><span>${req150L('الفريق','Team')}</span><b>${escapeHtml(s.team_name||'—')}</b></div><div><span>SLA</span><b>${escapeHtml(s.sla_name||'—')}</b></div><div><span>${req150L('خارجي','External')}</span><b>${s.public_enabled?req150L('مسموح','Allowed'):req150L('داخلي','Internal')}</b></div></div><div class="req150-card-actions"><button class="req150-btn" onclick="req150OpenService('${s.id}')">${req150L('تعديل','Edit')}</button></div></div>`).join('')}</div>`:`<div class="req150-empty">${req150L('لا توجد خدمات بعد.','No services yet.')}</div>`}</div>`;
+}
+function req150Approvals(){
+ const rows=req150Rows('approvals');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('الموافقات','Approvals')}</h3><p>${req150L('متسلسلة أو متوازية مع سجل واضح.','Sequential or parallel approvals with clear history.')}</p></div></div>${rows.length?`<div class="req150-table-wrap"><table class="req150-table"><thead><tr><th>${req150L('الطلب','Request')}</th><th>${req150L('المرحلة','Stage')}</th><th>${req150L('المعتمد','Approver')}</th><th>${req150L('الحالة','Status')}</th><th></th></tr></thead><tbody>${rows.map(a=>`<tr><td>${escapeHtml(a.reference_no)} · ${escapeHtml(a.title)}</td><td>${escapeHtml(a.stage_name||'')}</td><td>${escapeHtml(a.approver_name||'')}</td><td>${escapeHtml(a.status)}</td><td>${a.status==='pending'&&a.approver_user_id===currentUserId?`<button class="req150-btn" onclick="req150Approval('${a.id}','approved')">${req150L('موافقة','Approve')}</button> <button class="req150-btn danger" onclick="req150Approval('${a.id}','rejected')">${req150L('رفض','Reject')}</button>`:''}</td></tr>`).join('')}</tbody></table></div>`:`<div class="req150-empty">${req150L('لا توجد موافقات معلقة.','No pending approvals.')}</div>`}</div>`;
+}
+function req150Assets(){
+ const rows=req150Rows('asset_links');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('الأصول المرتبطة','Linked Assets')}</h3><p>${req150L('ربط الطلب بجهاز أو مركبة أو موقع أو أي أصل من تاسكي مع سجل الأعطال.','Link requests to devices, vehicles, locations or any Tasky asset with request history.')}</p></div></div>${rows.length?req150Table(req150Rows('requests').filter(r=>rows.some(a=>a.request_id===r.id))):`<div class="req150-empty">${req150L('لا توجد روابط أصول حتى الآن.','No asset-linked requests yet.')}</div>`}</div>`;
+}
+function req150Knowledge(){
+ const rows=req150Rows('knowledge');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('قاعدة المعرفة','Knowledge Base')}</h3><p>${req150L('مقالات حلول وتعليمات يمكن اقتراحها قبل إنشاء الطلب.','Solution articles that can be suggested before a request is created.')}</p></div><button class="req150-btn primary" onclick="req150OpenKnowledge()">${req150L('مقال جديد','New article')}</button></div>${rows.length?`<div class="req150-cards">${rows.map(k=>`<div class="req150-card"><h4>${escapeHtml(k.title)}</h4><p>${escapeHtml(k.summary||'')}</p><div class="req150-card-actions"><button class="req150-btn" onclick="req150OpenKnowledge('${k.id}')">${req150L('فتح','Open')}</button></div></div>`).join('')}</div>`:`<div class="req150-empty">${req150L('لا توجد مقالات بعد.','No articles yet.')}</div>`}</div>`;
+}
+function req150Problems(){
+ const probs=req150Rows('problems'),changes=req150Rows('changes');
+ return `<div class="req150-grid"><div class="req150-panel" style="grid-column:span 2"><div class="req150-panel-head"><div><h3>${req150L('المشاكل','Problems')}</h3><p>${req150L('Root Cause وKnown Errors للمشاكل المتكررة.','Root cause and known errors for recurring incidents.')}</p></div><button class="req150-btn" onclick="req150OpenProblem('problem')">${req150L('مشكلة جديدة','New problem')}</button></div>${probs.length?probs.map(x=>`<div class="req150-card"><h4>${escapeHtml(x.reference_no)} · ${escapeHtml(x.title)}</h4><p>${escapeHtml(x.root_cause||x.description||'')}</p></div>`).join(''):`<div class="req150-empty">${req150L('لا توجد مشاكل.','No problems.')}</div>`}</div>
+ <div class="req150-panel" style="grid-column:span 2"><div class="req150-panel-head"><div><h3>${req150L('طلبات التغيير','Changes')}</h3><p>${req150L('تقييم مخاطر وموافقات وتخطيط تنفيذ.','Risk assessment, approvals and implementation planning.')}</p></div><button class="req150-btn" onclick="req150OpenProblem('change')">${req150L('تغيير جديد','New change')}</button></div>${changes.length?changes.map(x=>`<div class="req150-card"><h4>${escapeHtml(x.reference_no)} · ${escapeHtml(x.title)}</h4><p>${escapeHtml(x.risk_summary||x.description||'')}</p></div>`).join(''):`<div class="req150-empty">${req150L('لا توجد تغييرات.','No changes.')}</div>`}</div></div>`;
+}
+function req150Customers(){
+ const rows=req150Rows('external_orgs');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('العملاء والمنظمات الخارجية','External Customers & Organizations')}</h3><p>${req150L('Contacts، عقود دعم، Entitlements وSLA حسب الخطة.','Contacts, support contracts, entitlements and plan-specific SLA.')}</p></div><button class="req150-btn" onclick="req150OpenOrg()">${req150L('منظمة جديدة','New organization')}</button></div>${rows.length?`<div class="req150-cards">${rows.map(o=>`<div class="req150-card"><h4>${escapeHtml(o.name)}</h4><p>${escapeHtml(o.support_plan||'Standard')}</p><div class="req150-meta"><div><span>${req150L('جهات الاتصال','Contacts')}</span><b>${Number(o.contact_count||0)}</b></div><div><span>${req150L('الطلبات المفتوحة','Open requests')}</span><b>${Number(o.open_count||0)}</b></div></div></div>`).join('')}</div>`:`<div class="req150-empty">${req150L('لا توجد منظمات خارجية.','No external organizations.')}</div>`}</div>`;
+}
+function req150Sla(){
+ const rows=req150Rows('sla_policies');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>SLA</h3><p>${req150L('وقت الاستجابة والحل، ساعات العمل، الإيقاف والتصعيد.','Response/resolution targets, business hours, pause and escalation.')}</p></div><button class="req150-btn primary" onclick="req150OpenSla()">${req150L('سياسة جديدة','New policy')}</button></div>${rows.length?`<div class="req150-cards">${rows.map(s=>`<div class="req150-card"><h4>${escapeHtml(s.name)}</h4><p>${req150L('استجابة','Response')}: ${Number(s.response_minutes)} ${req150L('د','min')} · ${req150L('حل','Resolution')}: ${Number(s.resolution_minutes)} ${req150L('د','min')}</p></div>`).join('')}</div>`:`<div class="req150-empty">${req150L('لا توجد سياسات SLA.','No SLA policies.')}</div>`}</div>`;
+}
+function req150Automation(){
+ const rows=req150Rows('automations');
+ return `<div class="req150-panel"><div class="req150-panel-head"><div><h3>${req150L('الأتمتة','Automation')}</h3><p>${req150L('Triggers وشروط وإجراءات للتوجيه والتصعيد والإشعارات.','Triggers, conditions and actions for routing, escalation and notifications.')}</p></div><button class="req150-btn primary" onclick="req150OpenAutomation()">${req150L('قاعدة جديدة','New rule')}</button></div>${rows.length?`<div class="req150-cards">${rows.map(a=>`<div class="req150-card"><h4>${escapeHtml(a.name)}</h4><p>${escapeHtml(a.trigger_type)} · ${a.active?req150L('نشطة','Active'):req150L('متوقفة','Inactive')}</p></div>`).join('')}</div>`:`<div class="req150-empty">${req150L('لا توجد قواعد أتمتة.','No automation rules.')}</div>`}</div>`;
+}
+function req150Reports(){
+ const a=req150State?.analytics||{};
+ return `<div class="req150-grid">
+  <div class="req150-stat"><span>${req150L('First Response','First Response')}</span><b>${Number(a.avg_first_response_minutes||0).toFixed(0)}</b><small>${req150L('دقيقة','minutes')}</small></div>
+  <div class="req150-stat"><span>${req150L('Resolution Time','Resolution Time')}</span><b>${Number(a.avg_resolution_minutes||0).toFixed(0)}</b><small>${req150L('دقيقة','minutes')}</small></div>
+  <div class="req150-stat"><span>${req150L('SLA Compliance','SLA Compliance')}</span><b>${Number(a.sla_compliance||0).toFixed(0)}%</b></div>
+  <div class="req150-stat"><span>${req150L('Reopen Rate','Reopen Rate')}</span><b>${Number(a.reopen_rate||0).toFixed(0)}%</b></div>
+  <div class="req150-panel" style="grid-column:1/-1"><div class="req150-feature-grid">
+    <div class="req150-feature"><b>${req150L('أكثر خدمة طلبًا','Top service')}</b>${escapeHtml(a.top_service||'—')}</div>
+    <div class="req150-feature"><b>${req150L('أكثر فئة تكرارًا','Top recurring issue')}</b>${escapeHtml(a.top_category||'—')}</div>
+    <div class="req150-feature"><b>${req150L('أعلى فريق حملًا','Highest workload')}</b>${escapeHtml(a.top_team||'—')}</div>
+    <div class="req150-feature"><b>${req150L('متوسط CSAT','Average CSAT')}</b>${Number(a.avg_csat||0).toFixed(1)}</div>
+  </div></div></div>`;
+}
+function req150Settings(){
+ const s=req150State?.settings||{};
+ return `<div class="req150-grid">
+  <div class="req150-panel" style="grid-column:span 2"><div class="req150-panel-head"><div><h3>${req150L('إعدادات البوابة','Portal settings')}</h3></div></div><div class="req150-form">
+    <div class="req150-field"><label>${req150L('الرابط العام','Public slug')}</label><input id="req150Slug" value="${escapeHtml(s.public_slug||'')}"></div>
+    <div class="req150-field"><label>${req150L('اسم البوابة','Portal name')}</label><input id="req150PortalName" value="${escapeHtml(s.portal_name||'')}"></div>
+    <div class="req150-field full"><label>${req150L('رسالة المقدمة','Intro')}</label><textarea id="req150PortalIntro">${escapeHtml(s.portal_intro||'')}</textarea></div>
+    <div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveSettings()">${req150L('حفظ','Save')}</button></div>
+  </div></div>
+  <div class="req150-panel" style="grid-column:span 2"><div class="req150-panel-head"><div><h3>${req150L('تكاملات','Integrations')}</h3><p>${req150L('Email-to-Ticket وWhatsApp/SMS وAPI/Webhooks جاهزة للربط بمزودات خارجية.','Email-to-ticket, WhatsApp/SMS and API/Webhooks are connector-ready.')}</p></div></div><div class="req150-feature-grid"><div class="req150-feature"><b>Email</b>${req150L('Connector-ready','Connector-ready')}</div><div class="req150-feature"><b>WhatsApp / SMS</b>${req150L('Connector-ready','Connector-ready')}</div><div class="req150-feature"><b>API / Webhooks</b>${req150L('Data model ready','Data model ready')}</div><div class="req150-feature"><b>${req150L('المرفقات','Attachments')}</b>${req150L('Private storage ready','Private storage ready')}</div></div></div>
+ </div>`;
+}
+
+/* ---------- Dialogs ---------- */
+function req150Modal(title,body){
+ document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${escapeHtml(title)}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div>${body}`;
+ document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+function req150OpenRequest(id=''){
+ const r=req150Rows('requests').find(x=>x.id===id)||{},services=req150Rows('services'),teams=req150Rows('teams'),comments=req150Rows('comments').filter(c=>c.request_id===id);
+ req150Modal(id?`${escapeHtml(r.reference_no)} · ${escapeHtml(r.title)}`:req150L('طلب جديد','New request'),`<div class="req150-form">
+  <div class="req150-field"><label>${req150L('العنوان','Title')}</label><input id="req150Title" value="${escapeHtml(r.title||'')}"></div>
+  <div class="req150-field"><label>${req150L('الخدمة','Service')}</label><select id="req150Service">${services.map(s=>`<option value="${s.id}" ${r.service_id===s.id?'selected':''}>${escapeHtml(s.name)}</option>`).join('')}</select></div>
+  <div class="req150-field"><label>${req150L('الأولوية','Priority')}</label><select id="req150Priority">${['low','medium','high','critical'].map(x=>`<option value="${x}" ${r.priority===x?'selected':''}>${escapeHtml(req150PriorityLabel(x))}</option>`).join('')}</select></div>
+  <div class="req150-field"><label>${req150L('Impact','Impact')}</label><select id="req150Impact">${['low','medium','high'].map(x=>`<option value="${x}" ${r.impact===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="req150-field"><label>${req150L('Urgency','Urgency')}</label><select id="req150Urgency">${['low','medium','high'].map(x=>`<option value="${x}" ${r.urgency===x?'selected':''}>${x}</option>`).join('')}</select></div>
+  <div class="req150-field"><label>${req150L('الفريق','Team')}</label><select id="req150Team"><option value="">—</option>${teams.map(t=>`<option value="${t.id}" ${r.team_id===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select></div>
+  <div class="req150-field full"><label>${req150L('الوصف','Description')}</label><textarea id="req150Description">${escapeHtml(r.description||'')}</textarea></div>
+  ${id?`<div class="req150-field full"><div class="req150-sla"><div><b>SLA</b><small>${escapeHtml(r.sla_state||'—')}</small><i style="width:${Math.max(4,Math.min(100,Number(r.sla_progress||0)))}%"></i></div><div><small>${req150L('الاستجابة','Response')}: ${escapeHtml(req150Date(r.response_due_at))}<br>${req150L('الحل','Resolution')}: ${escapeHtml(req150Date(r.resolution_due_at))}</small></div></div></div>`:''}
+  <div class="req150-field full"><div class="req150-toolbar"><button class="req150-btn primary" onclick="req150SaveRequest('${id}')">${req150L('حفظ','Save')}</button>${id?`<button class="req150-btn" onclick="req150StatusChange('${id}','in_progress')">${req150L('بدء المعالجة','Start')}</button><button class="req150-btn" onclick="req150StatusChange('${id}','pending_requester')">${req150L('بانتظار مقدم الطلب','Wait requester')}</button><button class="req150-btn" onclick="req150StatusChange('${id}','resolved')">${req150L('حل','Resolve')}</button><button class="req150-btn" onclick="req150StatusChange('${id}','closed')">${req150L('إغلاق','Close')}</button>`:''}</div></div>
+  ${id?`<div class="req150-field full"><h4 style="margin:5px 0">${req150L('المحادثة','Conversation')}</h4><div class="req150-thread">${comments.length?comments.map(c=>`<div class="req150-message ${c.visibility==='internal'?'internal':''}"><b>${escapeHtml(c.author_name||'')}</b><p>${escapeHtml(c.body)}</p><small>${c.visibility==='internal'?req150L('ملاحظة داخلية','Internal note')+' · ':''}${escapeHtml(req150Date(c.created_at))}</small></div>`).join(''):`<div class="req150-empty">${req150L('لا توجد رسائل بعد.','No messages yet.')}</div>`}</div></div>
+  <div class="req150-field full"><label>${req150L('رد / ملاحظة','Reply / note')}</label><textarea id="req150Comment"></textarea><div class="req150-toolbar" style="margin-top:6px"><button class="req150-btn" onclick="req150AddComment('${id}','public')">${req150L('رد عام','Public reply')}</button><button class="req150-btn" onclick="req150AddComment('${id}','internal')">${req150L('ملاحظة داخلية','Internal note')}</button></div></div>`:''}
+ </div>`);
+}
+async function req150SaveRequest(id){
+ const p={request_id:id||null,title:document.getElementById('req150Title').value.trim(),service_id:document.getElementById('req150Service').value,priority:document.getElementById('req150Priority').value,impact:document.getElementById('req150Impact').value,urgency:document.getElementById('req150Urgency').value,team_id:document.getElementById('req150Team').value||null,description:document.getElementById('req150Description').value.trim()};
+ const {data,error}=await sb.rpc('tasky_request_save_v150',{p_workspace_id:currentWorkspaceId,p_payload:p});
+ if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();taskyToast(`${req150L('تم الحفظ','Saved')} ${data?.reference_no||''}`,{tone:'success'});
+}
+async function req150StatusChange(id,status){
+ const {error}=await sb.rpc('tasky_request_status_v150',{p_request_id:id,p_status:status,p_note:null});
+ if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+async function req150AddComment(id,visibility){
+ const body=document.getElementById('req150Comment').value.trim();if(!body)return;
+ const {error}=await sb.rpc('tasky_request_comment_add_v150',{p_request_id:id,p_visibility:visibility,p_body:body});
+ if(error)return taskyToast(error.message,{tone:'warning'});await req150Fetch();req150OpenRequest(id);
+}
+function req150OpenService(id=''){
+ const s=req150Rows('services').find(x=>x.id===id)||{},teams=req150Rows('teams'),slas=req150Rows('sla_policies');
+ req150Modal(id?req150L('تعديل الخدمة','Edit service'):req150L('خدمة جديدة','New service'),`<div class="req150-form">
+ <div class="req150-field"><label>${req150L('الاسم','Name')}</label><input id="req150SvcName" value="${escapeHtml(s.name||'')}"></div>
+ <div class="req150-field"><label>${req150L('النوع','Request type')}</label><select id="req150SvcType">${['incident','service_request','access_request','asset_request','maintenance','question','complaint','change_request','problem','custom'].map(x=>`<option value="${x}" ${s.request_type===x?'selected':''}>${x}</option>`).join('')}</select></div>
+ <div class="req150-field"><label>${req150L('الفريق الافتراضي','Default team')}</label><select id="req150SvcTeam"><option value="">—</option>${teams.map(t=>`<option value="${t.id}" ${s.default_team_id===t.id?'selected':''}>${escapeHtml(t.name)}</option>`).join('')}</select></div>
+ <div class="req150-field"><label>SLA</label><select id="req150SvcSla"><option value="">—</option>${slas.map(x=>`<option value="${x.id}" ${s.sla_policy_id===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select></div>
+ <div class="req150-field full"><label>${req150L('الوصف','Description')}</label><textarea id="req150SvcDesc">${escapeHtml(s.description||'')}</textarea></div>
+ <div class="req150-field"><label>${req150L('خارجي','External')}</label><select id="req150SvcPublic"><option value="false">${req150L('داخلي فقط','Internal only')}</option><option value="true" ${s.public_enabled?'selected':''}>${req150L('متاح خارجيًا','Public')}</option></select></div>
+ <div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveService('${id}')">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveService(id){
+ const p={id:id||null,name:document.getElementById('req150SvcName').value.trim(),request_type:document.getElementById('req150SvcType').value,default_team_id:document.getElementById('req150SvcTeam').value||null,sla_policy_id:document.getElementById('req150SvcSla').value||null,description:document.getElementById('req150SvcDesc').value.trim()||null,public_enabled:document.getElementById('req150SvcPublic').value==='true'};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:'service',p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+function req150OpenKnowledge(id=''){
+ const k=req150Rows('knowledge').find(x=>x.id===id)||{};
+ req150Modal(req150L('مقال معرفة','Knowledge article'),`<div class="req150-form"><div class="req150-field full"><label>${req150L('العنوان','Title')}</label><input id="req150KbTitle" value="${escapeHtml(k.title||'')}"></div><div class="req150-field full"><label>${req150L('ملخص','Summary')}</label><input id="req150KbSummary" value="${escapeHtml(k.summary||'')}"></div><div class="req150-field full"><label>${req150L('المحتوى','Content')}</label><textarea id="req150KbBody" style="min-height:180px">${escapeHtml(k.body||'')}</textarea></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveKnowledge('${id}')">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveKnowledge(id){
+ const p={id:id||null,title:document.getElementById('req150KbTitle').value.trim(),summary:document.getElementById('req150KbSummary').value.trim()||null,body:document.getElementById('req150KbBody').value.trim()};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:'knowledge',p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+function req150OpenSla(){
+ req150Modal('SLA',`<div class="req150-form"><div class="req150-field"><label>${req150L('الاسم','Name')}</label><input id="req150SlaName"></div><div class="req150-field"><label>${req150L('الاستجابة بالدقائق','Response minutes')}</label><input type="number" id="req150SlaResp" value="60"></div><div class="req150-field"><label>${req150L('الحل بالدقائق','Resolution minutes')}</label><input type="number" id="req150SlaRes" value="480"></div><div class="req150-field"><label>${req150L('تحذير قبل الخرق %','At-risk threshold %')}</label><input type="number" id="req150SlaRisk" value="80"></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveSla()">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveSla(){
+ const p={name:document.getElementById('req150SlaName').value.trim(),response_minutes:Number(document.getElementById('req150SlaResp').value||60),resolution_minutes:Number(document.getElementById('req150SlaRes').value||480),risk_pct:Number(document.getElementById('req150SlaRisk').value||80)};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:'sla',p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+function req150OpenAutomation(){
+ req150Modal(req150L('قاعدة أتمتة','Automation rule'),`<div class="req150-form"><div class="req150-field"><label>${req150L('الاسم','Name')}</label><input id="req150AutoName"></div><div class="req150-field"><label>${req150L('Trigger','Trigger')}</label><select id="req150AutoTrigger"><option>created</option><option>status_changed</option><option>sla_at_risk</option><option>comment_added</option><option>approval_changed</option><option>scheduled</option></select></div><div class="req150-field full"><label>${req150L('الشروط JSON','Conditions JSON')}</label><textarea id="req150AutoCond">{}</textarea></div><div class="req150-field full"><label>${req150L('الإجراءات JSON','Actions JSON')}</label><textarea id="req150AutoAct">[]</textarea></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveAutomation()">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveAutomation(){
+ let conditions={},actions=[];try{conditions=JSON.parse(document.getElementById('req150AutoCond').value);actions=JSON.parse(document.getElementById('req150AutoAct').value)}catch(_){return taskyToast(req150L('JSON غير صالح','Invalid JSON'),{tone:'warning'})}
+ const p={name:document.getElementById('req150AutoName').value.trim(),trigger_type:document.getElementById('req150AutoTrigger').value,conditions,actions};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:'automation',p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+function req150OpenProblem(kind){
+ req150Modal(kind==='problem'?req150L('مشكلة جديدة','New problem'):req150L('تغيير جديد','New change'),`<div class="req150-form"><div class="req150-field full"><label>${req150L('العنوان','Title')}</label><input id="req150PcTitle"></div><div class="req150-field full"><label>${req150L('الوصف','Description')}</label><textarea id="req150PcDesc"></textarea></div><div class="req150-field full"><label>${kind==='problem'?req150L('السبب الجذري','Root cause'):req150L('ملخص المخاطر','Risk summary')}</label><textarea id="req150PcExtra"></textarea></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveProblem('${kind}')">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveProblem(kind){
+ const p={title:document.getElementById('req150PcTitle').value.trim(),description:document.getElementById('req150PcDesc').value.trim(),extra:document.getElementById('req150PcExtra').value.trim()};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:kind,p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+function req150OpenOrg(){
+ req150Modal(req150L('منظمة خارجية','External organization'),`<div class="req150-form"><div class="req150-field"><label>${req150L('الاسم','Name')}</label><input id="req150OrgName"></div><div class="req150-field"><label>${req150L('خطة الدعم','Support plan')}</label><select id="req150OrgPlan"><option>Standard</option><option>Premium</option><option>24x7</option></select></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150SaveOrg()">${req150L('حفظ','Save')}</button></div></div>`);
+}
+async function req150SaveOrg(){
+ const p={name:document.getElementById('req150OrgName').value.trim(),support_plan:document.getElementById('req150OrgPlan').value};
+ const {error}=await sb.rpc('tasky_request_entity_upsert_v150',{p_workspace_id:currentWorkspaceId,p_entity:'organization',p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await req150Fetch();
+}
+async function req150Approval(id,status){
+ const {error}=await sb.rpc('tasky_request_approval_action_v150',{p_approval_id:id,p_status:status,p_note:null});if(error)return taskyToast(error.message,{tone:'warning'});await req150Fetch();
+}
+async function req150SaveSettings(){
+ const p={public_slug:document.getElementById('req150Slug').value.trim(),portal_name:document.getElementById('req150PortalName').value.trim(),portal_intro:document.getElementById('req150PortalIntro').value.trim()};
+ const {error}=await sb.rpc('tasky_request_settings_save_v150',{p_workspace_id:currentWorkspaceId,p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});await req150Fetch();
+}
+
+/* ---------- Public portal ---------- */
+async function req150OpenPublic(){
+ const slug=req150State?.settings?.public_slug;if(!slug)return showTaskyDialog({title:req150L('البوابة العامة غير مفعلة','Public portal not configured'),message:req150L('حدد Public slug من الإعدادات.','Set a public slug in Settings.'),tone:'warning'});
+ const {data,error}=await sb.rpc('tasky_public_request_catalog_v150',{p_public_slug:slug});if(error)return taskyToast(error.message,{tone:'warning'});
+ req150PublicCatalog=data||{};req150PublicDraft={};req150RenderPublic();
+}
+function req150RenderPublic(){
+ let el=document.getElementById('req150Public');if(!el){el=document.createElement('div');el.id='req150Public';el.className='req150-public';document.body.appendChild(el)}
+ const c=req150PublicCatalog||{};
+ el.innerHTML=`<div class="req150-public-shell"><div class="req150-panel-head"><div><h2>${escapeHtml(c.portal_name||req150L('بوابة الطلبات','Requests Portal'))}</h2><p>${escapeHtml(c.portal_intro||'')}</p></div><button class="req150-btn" onclick="document.getElementById('req150Public').classList.remove('show')">×</button></div>
+ <div class="req150-cards">${(c.services||[]).map(s=>`<button class="req150-card" style="text-align:start" onclick="req150PublicForm('${s.id}')"><h4>${escapeHtml(s.name)}</h4><p>${escapeHtml(s.description||'')}</p></button>`).join('')}</div>
+ <div style="margin-top:14px"><button class="req150-btn" onclick="req150PublicLookup()">${req150L('متابعة طلب سابق','Track existing request')}</button></div></div>`;
+ el.classList.add('show');
+}
+function req150PublicForm(serviceId){
+ const el=document.getElementById('req150Public');
+ el.innerHTML=`<div class="req150-public-shell"><div class="req150-panel-head"><h2>${req150L('إرسال طلب','Submit request')}</h2><button class="req150-btn" onclick="req150RenderPublic()">‹</button></div><div class="req150-form">
+ <div class="req150-field"><label>${req150L('الاسم','Name')}</label><input id="req150PubName"></div>
+ <div class="req150-field"><label>${req150L('الجوال','Phone')}</label><input id="req150PubPhone" inputmode="tel"></div>
+ <div class="req150-field"><label>${req150L('البريد','Email')}</label><input id="req150PubEmail"></div>
+ <div class="req150-field full"><label>${req150L('العنوان','Title')}</label><input id="req150PubTitle"></div>
+ <div class="req150-field full"><label>${req150L('التفاصيل','Details')}</label><textarea id="req150PubDesc"></textarea></div>
+ <div class="req150-field full"><button class="req150-btn primary" onclick="req150PublicSubmit('${serviceId}')">${req150L('إرسال','Submit')}</button></div></div></div>`;
+}
+async function req150PublicSubmit(serviceId){
+ const p={service_id:serviceId,requester_name:document.getElementById('req150PubName').value.trim(),requester_phone:document.getElementById('req150PubPhone').value.trim(),requester_email:document.getElementById('req150PubEmail').value.trim(),title:document.getElementById('req150PubTitle').value.trim(),description:document.getElementById('req150PubDesc').value.trim()};
+ const {data,error}=await sb.rpc('tasky_public_request_create_v150',{p_public_slug:req150State.settings.public_slug,p_payload:p});if(error)return taskyToast(error.message,{tone:'warning'});
+ document.getElementById('req150Public').innerHTML=`<div class="req150-public-shell"><div class="req150-empty"><b style="display:block;font-size:14px">${req150L('تم إرسال الطلب','Request submitted')}</b><br>${req150L('المرجع','Reference')}: ${escapeHtml(data.reference_no||'')}<br>${req150L('رمز المتابعة','Tracking code')}: ${escapeHtml(data.tracking_code||'')}</div></div>`;req150Fetch();
+}
+function req150PublicLookup(){
+ const el=document.getElementById('req150Public');
+ el.innerHTML=`<div class="req150-public-shell"><div class="req150-panel-head"><h2>${req150L('متابعة طلب','Track request')}</h2><button class="req150-btn" onclick="req150RenderPublic()">‹</button></div><div class="req150-form"><div class="req150-field"><label>${req150L('المرجع','Reference')}</label><input id="req150LookupRef"></div><div class="req150-field"><label>${req150L('رمز المتابعة','Tracking code')}</label><input id="req150LookupCode"></div><div class="req150-field full"><button class="req150-btn primary" onclick="req150PublicLookupDo()">${req150L('عرض الحالة','View status')}</button></div><div id="req150LookupResult" class="req150-field full"></div></div></div>`;
+}
+async function req150PublicLookupDo(){
+ const {data,error}=await sb.rpc('tasky_public_request_lookup_v150',{p_public_slug:req150State.settings.public_slug,p_reference_no:document.getElementById('req150LookupRef').value.trim(),p_tracking_code:document.getElementById('req150LookupCode').value.trim()});
+ const host=document.getElementById('req150LookupResult');if(error){host.innerHTML=`<div class="req150-empty">${escapeHtml(error.message)}</div>`;return}
+ host.innerHTML=`<div class="req150-card"><h4>${escapeHtml(data.reference_no)} · ${escapeHtml(data.title)}</h4><p>${escapeHtml(req150StatusLabel(data.status))}<br>${escapeHtml(data.last_public_reply||'')}</p></div>`;
+}
+</script>
+
 </body>
 </html>
