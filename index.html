@@ -19203,5 +19203,307 @@ function book140PublicForm(serviceId){const el=document.getElementById('book140P
 async function book140PublicSubmit(serviceId){const {data,error}=await sb.rpc('tasky_public_booking_create_v140',{p_public_slug:book140State.settings.public_slug,p_payload:{service_id:serviceId,customer_name:document.getElementById('book140PubName').value.trim(),customer_phone:document.getElementById('book140PubPhone').value.trim(),start_at:new Date(document.getElementById('book140PubStart').value).toISOString(),party_size:Number(document.getElementById('book140PubParty').value||1)}});if(error)return taskyToast(error.message,{tone:'warning'});document.getElementById('book140Public').innerHTML=`<div class="book140-public-shell"><div class="book140-empty"><b>${book140L('تم استلام الحجز','Booking received')}</b><br>${escapeHtml(data?.reference_no||'')}</div></div>`;book140Fetch()}
 </script>
 
+
+<style id="tasky-v1401-bookings-hardening-css">
+/* ============================================================
+   V140.1 — Bookings launch hardening + calendar + slot picker
+   ============================================================ */
+.book1401-filterbar{
+  display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-bottom:10px
+}
+.book1401-filterbar input,.book1401-filterbar select{
+  min-height:36px;border:1px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:9px;padding:7px 9px;font-size:8.5px
+}
+.book1401-search{min-width:210px;flex:1}
+.book1401-calendar{
+  display:grid;grid-template-columns:72px repeat(7,minmax(115px,1fr));min-width:900px;
+  border:1px solid var(--border);border-radius:11px;overflow:hidden
+}
+.book1401-calhead,.book1401-hour,.book1401-cell{
+  border-inline-end:1px solid var(--border);border-bottom:1px solid var(--border)
+}
+.book1401-calhead{padding:7px;background:var(--paper);text-align:center;font-size:8px;font-weight:850}
+.book1401-hour{padding:8px 6px;background:var(--paper);color:var(--muted);font-size:7.5px}
+.book1401-cell{padding:5px;min-height:62px;background:var(--card)}
+.book1401-event{
+  border-inline-start:3px solid var(--green);background:var(--green-tint);border-radius:7px;
+  padding:5px 6px;margin-bottom:4px;font-size:7.3px;line-height:1.35;cursor:pointer
+}
+.book1401-event.requested{border-inline-start-color:#b28a2e;background:#fff8e8}
+.book1401-event.cancelled,.book1401-event.no_show{border-inline-start-color:var(--danger);background:var(--danger-tint)}
+.book1401-slots{display:grid;grid-template-columns:repeat(auto-fit,minmax(105px,1fr));gap:6px;margin-top:7px}
+.book1401-slot{
+  min-height:36px;border:1px solid var(--border);background:var(--paper);color:var(--ink);
+  border-radius:8px;font-size:8px;font-weight:800
+}
+.book1401-slot.selected{background:var(--green);border-color:var(--green);color:#fff}
+.book1401-slot[disabled]{opacity:.45;cursor:not-allowed}
+.book1401-inline-note{
+  border:1px solid #d7e3dd;background:#f4faf7;color:#3d6253;border-radius:9px;
+  padding:7px 8px;font-size:7.8px;line-height:1.5
+}
+.book1401-warn{
+  border:1px solid #eadcaf;background:#fff9e9;color:#765f25;border-radius:9px;
+  padding:7px 8px;font-size:7.8px;line-height:1.5
+}
+.book1401-entity-meta{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;margin-top:8px
+}
+.book1401-entity-meta div{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:6px}
+.book1401-entity-meta span{display:block;color:var(--muted);font-size:6.8px;margin-bottom:2px}
+.book1401-entity-meta b{font-size:8px}
+.book1401-reservation-meta{display:flex;gap:5px;flex-wrap:wrap;margin-top:3px}
+.book1401-chip{border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:2px 6px;font-size:6.8px;color:var(--muted)}
+.book1401-public-locations{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:7px}
+.book1401-public-option{
+  border:1px solid #dce2df;background:#fff;border-radius:10px;padding:10px;text-align:start;color:#263a32
+}
+.book1401-public-option.selected{border-color:#77a18f;background:#eef6f2}
+@media(max-width:700px){
+  .book1401-filterbar{align-items:stretch}.book1401-filterbar>*{width:100%}
+  .book1401-search{min-width:0}
+}
+</style>
+
+<script id="tasky-v1401-bookings-hardening-js">
+window.TASKY_BUILD='V140.1';console.info('Tasky build',window.TASKY_BUILD);
+
+let book1401Search='';
+let book1401Status='';
+let book1401Location='';
+let book1401SelectedSlot='';
+let book1401SlotCache=[];
+let book1401SlotLoading=false;
+let book1401PublicLocation='';
+
+function book1401Norm(s){return String(s||'').trim().toLowerCase()}
+function book1401FilterReservations(rows){
+  const q=book1401Norm(book1401Search);
+  return rows.filter(r=>{
+    if(book1401Status&&r.status!==book1401Status)return false;
+    if(book1401Location&&r.location_id!==book1401Location)return false;
+    if(!q)return true;
+    return [r.reference_no,r.customer_name,r.customer_phone,r.service_name,r.location_name,r.resource_name,r.staff_name]
+      .some(x=>book1401Norm(x).includes(q));
+  });
+}
+function book1401SetFilter(kind,v){
+  if(kind==='search')book1401Search=v;
+  if(kind==='status')book1401Status=v;
+  if(kind==='location')book1401Location=v;
+  if(activeNav==='bookings')renderModule();
+}
+function book1401Filterbar(){
+  return `<div class="book1401-filterbar">
+    <input class="book1401-search" value="${escapeHtml(book1401Search)}" oninput="book1401SetFilter('search',this.value)" placeholder="${book140L('بحث بالمرجع أو العميل أو الخدمة','Search ref, customer or service')}">
+    <select onchange="book1401SetFilter('status',this.value)">
+      <option value="">${book140L('كل الحالات','All statuses')}</option>
+      ${['requested','confirmed','checked_in','in_progress','completed','cancelled','no_show'].map(s=>`<option value="${s}" ${book1401Status===s?'selected':''}>${escapeHtml(book140Status(s))}</option>`).join('')}
+    </select>
+    <select onchange="book1401SetFilter('location',this.value)">
+      <option value="">${book140L('كل الفروع','All locations')}</option>
+      ${book140Rows('locations').map(x=>`<option value="${x.id}" ${book1401Location===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}
+    </select>
+    <button class="book140-btn" onclick="book1401Search='';book1401Status='';book1401Location='';renderModule()">${book140L('مسح','Clear')}</button>
+  </div>`;
+}
+
+/* Richer reservation table with operational context. */
+book140ReservationTable=function(rows){
+  return `<div class="book140-table-wrap"><table class="book140-table"><thead><tr>
+    <th>${book140L('المرجع','Ref')}</th><th>${book140L('العميل','Customer')}</th><th>${book140L('الخدمة','Service')}</th>
+    <th>${book140L('الوقت','Time')}</th><th>${book140L('التخصيص','Assignment')}</th><th>${book140L('الحالة','Status')}</th>
+    <th>${book140L('القيمة','Value')}</th><th></th></tr></thead><tbody>${rows.map(r=>`<tr>
+      <td><b>${escapeHtml(r.reference_no||'')}</b><div class="book1401-reservation-meta">${r.source?`<span class="book1401-chip">${escapeHtml(r.source)}</span>`:''}${Number(r.party_size||1)>1?`<span class="book1401-chip">${Number(r.party_size)} ${book140L('أشخاص','guests')}</span>`:''}</div></td>
+      <td><b>${escapeHtml(r.customer_name||'')}</b><br><small>${escapeHtml(r.customer_phone||'')}</small></td>
+      <td>${escapeHtml(r.service_name||'')}</td>
+      <td>${escapeHtml(book140Date(r.start_at))}<br><small>${r.end_at?escapeHtml(book140Date(r.end_at)):''}</small></td>
+      <td>${escapeHtml(r.location_name||'—')}<br><small>${escapeHtml([r.resource_name,r.staff_name].filter(Boolean).join(' · ')||'')}</small></td>
+      <td><span class="book140-badge ${r.status}">${escapeHtml(book140Status(r.status))}</span></td>
+      <td>${book140Money(r.total_amount)}</td>
+      <td><button class="book140-btn" onclick="book140OpenReservation('${r.id}')">${book140L('فتح','Open')}</button></td>
+    </tr>`).join('')}</tbody></table></div>`;
+};
+
+book140Reservations=function(){
+  const rows=book1401FilterReservations(book140Rows('reservations'));
+  return `<div class="book140-panel"><div class="book140-panel-head"><div><h3>${book140L('كل الحجوزات','All reservations')}</h3><p>${book140L('بحث، فلترة، إعادة جدولة، وصول، إكمال، إلغاء وعدم حضور.','Search, filter, reschedule, check-in, complete, cancel and no-show.')}</p></div><button class="book140-btn primary" onclick="book140OpenReservation()">${book140L('حجز جديد','New booking')}</button></div>${book1401Filterbar()}${rows.length?book140ReservationTable(rows):`<div class="book140-empty">${book140L('لا توجد حجوزات مطابقة.','No matching reservations.')}</div>`}</div>`;
+};
+
+/* Real weekly calendar instead of a chronological table. */
+book140Calendar=function(){
+  const rows=book1401FilterReservations(book140Rows('reservations'));
+  const days=[0,1,2,3,4,5,6].map(i=>{const d=new Date();d.setHours(0,0,0,0);d.setDate(d.getDate()+i);return d});
+  const hours=Array.from({length:15},(_,i)=>7+i);
+  const ev=(d,h)=>rows.filter(r=>{const x=new Date(r.start_at);return x.toDateString()===d.toDateString()&&x.getHours()===h})
+    .map(r=>`<div class="book1401-event ${r.status}" onclick="book140OpenReservation('${r.id}')"><b>${escapeHtml(r.service_name||'')}</b><br>${escapeHtml(r.customer_name||'')}<br><small>${escapeHtml(r.location_name||r.resource_name||'')}</small></div>`).join('');
+  return `<div class="book140-panel"><div class="book140-panel-head"><div><h3>${book140L('التقويم التشغيلي','Operational calendar')}</h3><p>${book140L('أسبوع حي مع فلترة حسب الفرع والحالة والبحث.','Live weekly view with location, status and search filters.')}</p></div></div>${book1401Filterbar()}<div class="book140-table-wrap"><div class="book1401-calendar"><div class="book1401-calhead"></div>${days.map(d=>`<div class="book1401-calhead">${d.toLocaleDateString(lang==='ar'?'ar-SA':'en-US',{weekday:'short',day:'numeric',month:'short'})}</div>`).join('')}${hours.map(h=>`<div class="book1401-hour">${String(h).padStart(2,'0')}:00</div>${days.map(d=>`<div class="book1401-cell">${ev(d,h)}</div>`).join('')}`).join('')}</div></div></div>`;
+};
+
+/* Richer entity cards + maintenance block. */
+book140Entities=function(kind){
+  const labels={services:['الخدمات','Services'],resources:['الموارد','Resources'],staff:['الموظفون','Staff'],locations:['الفروع','Locations']},rows=book140Rows(kind),n=labels[kind];
+  const card=x=>{
+    let meta=[];
+    if(kind==='services')meta=[[book140L('النوع','Type'),x.booking_type],[book140L('المدة','Duration'),`${Number(x.duration_minutes||0)} ${book140L('د','min')}`],[book140L('السعة','Capacity'),Number(x.capacity||1)],[book140L('السعر','Price'),book140Money(x.base_price)]];
+    if(kind==='resources')meta=[[book140L('النوع','Type'),x.resource_type],[book140L('السعة','Capacity'),Number(x.capacity||1)],[book140L('الفرع','Location'),x.location_name||'—']];
+    if(kind==='staff')meta=[[book140L('المسمى','Role'),x.role_label||'—'],[book140L('الفرع','Location'),x.location_name||'—'],[book140L('الحالة','Status'),x.active?book140L('نشط','Active'):book140L('غير نشط','Inactive')]];
+    if(kind==='locations')meta=[[book140L('المدينة','City'),x.city||'—'],[book140L('المنطقة الزمنية','Timezone'),x.timezone||'Asia/Riyadh']];
+    return `<div class="book140-card"><h4>${escapeHtml(x.name||x.display_name||'')}</h4><p>${escapeHtml(x.description||x.email||x.address||'')}</p><div class="book1401-entity-meta">${meta.map(m=>`<div><span>${escapeHtml(String(m[0]))}</span><b>${escapeHtml(String(m[1]??'—'))}</b></div>`).join('')}</div><div class="book140-card-actions"><button class="book140-btn" onclick="book140OpenEntity('${kind}','${x.id}')">${book140L('تعديل','Edit')}</button>${kind==='resources'?`<button class="book140-btn" onclick="book1401OpenBlock('${x.id}')">${book140L('صيانة / حظر وقت','Maintenance / block')}</button>`:''}</div></div>`;
+  };
+  return `<div class="book140-panel"><div class="book140-panel-head"><div><h3>${book140L(n[0],n[1])}</h3><p>${book140L('السعة والتوفر والسياسات والتسعير والربط ضمن محرك واحد.','Capacity, availability, policies, pricing and assignment in one engine.')}</p></div><button class="book140-btn primary" onclick="book140OpenEntity('${kind}')">${book140L('إضافة','Add')}</button></div>${rows.length?`<div class="book140-cards">${rows.map(card).join('')}</div>`:`<div class="book140-empty">${book140L('لا توجد بيانات بعد.','No data yet.')}</div>`}</div>`;
+};
+
+/* Add location selection and availability slot picker to booking form. */
+book140OpenReservation=function(id=''){
+  const r=book140Rows('reservations').find(x=>x.id===id)||{};
+  book1401SelectedSlot=r.start_at||'';
+  book1401SlotCache=[];
+  const services=book140Rows('services'),locations=book140Rows('locations'),resources=book140Rows('resources'),staff=book140Rows('staff');
+  book140Modal(id?book140L('تفاصيل الحجز','Booking details'):book140L('حجز جديد','New booking'),`<div class="book140-form">
+    <div class="book140-field"><label>${book140L('اسم العميل','Customer')}</label><input id="book140CustName" value="${escapeHtml(r.customer_name||'')}"></div>
+    <div class="book140-field"><label>${book140L('الجوال','Phone')}</label><input id="book140CustPhone" inputmode="tel" value="${escapeHtml(r.customer_phone||'')}" placeholder="+9665XXXXXXXX"></div>
+    <div class="book140-field"><label>${book140L('الخدمة','Service')}</label><select id="book140Service" onchange="book1401LoadSlots()">${services.map(x=>`<option value="${x.id}" ${r.service_id===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select></div>
+    <div class="book140-field"><label>${book140L('الفرع','Location')}</label><select id="book140Location" onchange="book1401LoadSlots()"><option value="">${book140L('أي فرع','Any location')}</option>${locations.map(x=>`<option value="${x.id}" ${r.location_id===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select></div>
+    <div class="book140-field"><label>${book140L('المورد','Resource')}</label><select id="book140Resource" onchange="book1401LoadSlots()"><option value="">${book140L('اختيار تلقائي','Auto')}</option>${resources.map(x=>`<option value="${x.id}" ${r.resource_id===x.id?'selected':''}>${escapeHtml(x.name)}</option>`).join('')}</select></div>
+    <div class="book140-field"><label>${book140L('الموظف','Staff')}</label><select id="book140Staff" onchange="book1401LoadSlots()"><option value="">${book140L('أي موظف متاح','Any')}</option>${staff.map(x=>`<option value="${x.id}" ${r.staff_id===x.id?'selected':''}>${escapeHtml(x.display_name)}</option>`).join('')}</select></div>
+    <div class="book140-field"><label>${book140L('التاريخ','Date')}</label><input type="date" id="book140DateOnly" onchange="book1401LoadSlots()" value="${r.start_at?new Date(r.start_at).toISOString().slice(0,10):new Date().toISOString().slice(0,10)}"></div>
+    <div class="book140-field"><label>${book140L('عدد الأشخاص','Party size')}</label><input type="number" min="1" id="book140Party" value="${Number(r.party_size||1)}" onchange="book1401LoadSlots()"></div>
+    <div class="book140-field full"><label>${book140L('الأوقات المتاحة','Available times')}</label><div id="book1401Slots" class="book1401-slots">${r.start_at?`<button type="button" class="book1401-slot selected">${new Date(r.start_at).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'})}</button>`:`<div class="book1401-inline-note">${book140L('اختر الخدمة والتاريخ ليعرض تاسكي الأوقات المتاحة الفعلية.','Choose service and date to load actual available times.')}</div>`}</div></div>
+    <div class="book140-field full"><label>${book140L('ملاحظات العميل','Customer notes')}</label><textarea id="book140Notes">${escapeHtml(r.customer_notes||'')}</textarea></div>
+    <div class="book140-field full"><label>${book140L('ملاحظات داخلية','Internal notes')}</label><textarea id="book140InternalNotes">${escapeHtml(r.internal_notes||'')}</textarea></div>
+    <div class="book140-field full"><div class="book140-toolbar"><button class="book140-btn primary" onclick="book140SaveReservation('${id}')">${book140L('حفظ','Save')}</button>${id?`<button class="book140-btn" onclick="book140StatusChange('${id}','checked_in')">${book140L('وصول','Check in')}</button><button class="book140-btn" onclick="book140StatusChange('${id}','completed')">${book140L('إكمال','Complete')}</button><button class="book140-btn" onclick="book140StatusChange('${id}','no_show')">${book140L('عدم حضور','No-show')}</button><button class="book140-btn danger" onclick="book140StatusChange('${id}','cancelled')">${book140L('إلغاء','Cancel')}</button>`:''}</div></div>
+  </div>`);
+  if(!id)setTimeout(book1401LoadSlots,60);
+};
+
+async function book1401LoadSlots(){
+  const host=document.getElementById('book1401Slots');if(!host)return;
+  const serviceId=document.getElementById('book140Service')?.value,date=document.getElementById('book140DateOnly')?.value;
+  if(!serviceId||!date)return;
+  host.innerHTML=`<div class="book1401-inline-note">${book140L('جارٍ حساب التوفر…','Checking availability…')}</div>`;
+  book1401SlotLoading=true;
+  const {data,error}=await sb.rpc('tasky_booking_available_slots_v1401',{
+    p_workspace_id:currentWorkspaceId,
+    p_service_id:serviceId,
+    p_date:date,
+    p_location_id:document.getElementById('book140Location')?.value||null,
+    p_resource_id:document.getElementById('book140Resource')?.value||null,
+    p_staff_id:document.getElementById('book140Staff')?.value||null,
+    p_party_size:Number(document.getElementById('book140Party')?.value||1)
+  });
+  book1401SlotLoading=false;
+  if(error){host.innerHTML=`<div class="book1401-warn">${escapeHtml(error.message)}</div>`;return}
+  book1401SlotCache=Array.isArray(data)?data:[];
+  host.innerHTML=book1401SlotCache.length?book1401SlotCache.map(x=>`<button type="button" class="book1401-slot ${book1401SelectedSlot===x.start_at?'selected':''}" onclick="book1401ChooseSlot('${x.start_at}')">${new Date(x.start_at).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'})}</button>`).join(''):`<div class="book1401-warn">${book140L('لا توجد أوقات متاحة بهذا الاختيار.','No available times for this selection.')}</div>`;
+}
+function book1401ChooseSlot(v){book1401SelectedSlot=v;document.querySelectorAll('#book1401Slots .book1401-slot').forEach(b=>b.classList.remove('selected'));event?.currentTarget?.classList.add('selected')}
+
+book140SaveReservation=async function(id){
+  if(!book1401SelectedSlot)return taskyToast(book140L('اختر وقتًا متاحًا','Choose an available time'),{tone:'warning'});
+  const name=document.getElementById('book140CustName')?.value.trim()||'';
+  if(!name)return taskyToast(book140L('أدخل اسم العميل','Enter customer name'),{tone:'warning'});
+  const p={
+    reservation_id:id||null,customer_name:name,
+    customer_phone:document.getElementById('book140CustPhone')?.value.trim()||null,
+    service_id:document.getElementById('book140Service')?.value,
+    location_id:document.getElementById('book140Location')?.value||null,
+    resource_id:document.getElementById('book140Resource')?.value||null,
+    staff_id:document.getElementById('book140Staff')?.value||null,
+    start_at:book1401SelectedSlot,
+    party_size:Number(document.getElementById('book140Party')?.value||1),
+    customer_notes:document.getElementById('book140Notes')?.value.trim()||null,
+    internal_notes:document.getElementById('book140InternalNotes')?.value.trim()||null
+  };
+  const {data,error}=await sb.rpc('tasky_booking_reservation_save_v140',{p_workspace_id:currentWorkspaceId,p_payload:p});
+  if(error)return showTaskyDialog({title:book140L('تعذّر حفظ الحجز','Could not save booking'),message:error.message,tone:'error'});
+  closeAddModal();await book140Fetch();taskyToast(`${book140L('تم الحفظ','Saved')} ${data?.reference_no||''}`,{tone:'success'});
+};
+
+/* Resource maintenance/block flow was missing in the V140 UI. */
+function book1401OpenBlock(resourceId){
+  book140Modal(book140L('صيانة / حظر مورد','Maintenance / resource block'),`<div class="book140-form">
+    <div class="book140-field"><label>${book140L('من','From')}</label><input type="datetime-local" id="book1401BlockStart"></div>
+    <div class="book140-field"><label>${book140L('إلى','To')}</label><input type="datetime-local" id="book1401BlockEnd"></div>
+    <div class="book140-field full"><label>${book140L('السبب','Reason')}</label><input id="book1401BlockReason"></div>
+    <div class="book140-field full"><button class="book140-btn primary" onclick="book1401SaveBlock('${resourceId}')">${book140L('حفظ الحظر','Save block')}</button></div>
+  </div>`);
+}
+async function book1401SaveBlock(resourceId){
+  const a=document.getElementById('book1401BlockStart').value,b=document.getElementById('book1401BlockEnd').value;
+  if(!a||!b)return;
+  const {error}=await sb.rpc('tasky_booking_block_v1401',{p_workspace_id:currentWorkspaceId,p_resource_id:resourceId,p_start_at:new Date(a).toISOString(),p_end_at:new Date(b).toISOString(),p_reason:document.getElementById('book1401BlockReason').value.trim()||null});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await book140Fetch();
+}
+
+/* Public booking now uses location + server-calculated availability slots. */
+book140OpenPublicPreview=async function(){
+  const slug=book140State?.settings?.public_slug;
+  if(!slug)return showTaskyDialog({title:book140L('الرابط العام غير مفعّل','Public link is not configured'),message:book140L('حدد Public slug من الإعدادات أولًا.','Set a public slug in Settings first.'),tone:'warning'});
+  const {data,error}=await sb.rpc('tasky_public_booking_catalog_v1401',{p_public_slug:slug});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  book140PublicCatalog=data||{};book140PublicDraft={};book1401PublicLocation='';book140RenderPublic();
+};
+book140RenderPublic=function(){
+  let el=document.getElementById('book140Public');if(!el){el=document.createElement('div');el.id='book140Public';el.className='book140-public';document.body.appendChild(el)}
+  const c=book140PublicCatalog||{};
+  el.innerHTML=`<div class="book140-public-shell"><div class="book140-public-head"><div><h2>${escapeHtml(c.display_name||book140L('الحجز','Booking'))}</h2><p>${escapeHtml(c.public_intro||book140L('اختر الخدمة والموعد المناسب','Choose a service and suitable time'))}</p></div><button class="book140-btn" onclick="document.getElementById('book140Public').classList.remove('show')">×</button></div>
+  ${(c.locations||[]).length?`<h3 style="font-size:11px">${book140L('اختر الفرع','Choose location')}</h3><div class="book1401-public-locations"><button class="book1401-public-option ${!book1401PublicLocation?'selected':''}" onclick="book1401PublicLocation='';book140RenderPublic()">${book140L('أي فرع','Any location')}</button>${c.locations.map(l=>`<button class="book1401-public-option ${book1401PublicLocation===l.id?'selected':''}" onclick="book1401PublicLocation='${l.id}';book140RenderPublic()"><b>${escapeHtml(l.name)}</b><br><small>${escapeHtml([l.city,l.address].filter(Boolean).join(' · '))}</small></button>`).join('')}</div>`:''}
+  <h3 style="font-size:11px;margin-top:14px">${book140L('اختر الخدمة','Choose service')}</h3><div class="book140-cards">${(c.services||[]).map(s=>`<button class="book140-card" style="text-align:start" onclick="book140PublicForm('${s.id}')"><h4>${escapeHtml(s.name)}</h4><p>${escapeHtml(s.description||'')}<br>${Number(s.duration_minutes||0)} ${book140L('دقيقة','min')} · ${book140Money(s.base_price)}</p></button>`).join('')}</div></div>`;
+  el.classList.add('show');
+};
+book140PublicForm=function(serviceId){
+  const el=document.getElementById('book140Public');
+  el.innerHTML=`<div class="book140-public-shell"><div class="book140-public-head"><h2>${book140L('اختر الموعد','Choose time')}</h2><button class="book140-btn" onclick="book140RenderPublic()">‹</button></div><div class="book140-form">
+    <div class="book140-field"><label>${book140L('التاريخ','Date')}</label><input type="date" id="book140PubDate" value="${new Date().toISOString().slice(0,10)}" onchange="book1401LoadPublicSlots('${serviceId}')"></div>
+    <div class="book140-field"><label>${book140L('عدد الأشخاص','Party size')}</label><input type="number" min="1" value="1" id="book140PubParty" onchange="book1401LoadPublicSlots('${serviceId}')"></div>
+    <div class="book140-field full"><label>${book140L('الأوقات المتاحة','Available times')}</label><div id="book140PubSlots" class="book1401-slots"></div></div>
+    <div class="book140-field"><label>${book140L('الاسم','Name')}</label><input id="book140PubName"></div>
+    <div class="book140-field"><label>${book140L('الجوال','Phone')}</label><input id="book140PubPhone" inputmode="tel" placeholder="+9665XXXXXXXX"></div>
+    <div class="book140-field full"><label>${book140L('ملاحظات — اختياري','Notes — optional')}</label><textarea id="book140PubNotes"></textarea></div>
+    <div class="book140-field full"><button class="book140-btn primary" onclick="book140PublicSubmit('${serviceId}')">${book140L('تأكيد الحجز','Confirm booking')}</button></div>
+  </div></div>`;
+  book1401SelectedSlot='';setTimeout(()=>book1401LoadPublicSlots(serviceId),40);
+};
+async function book1401LoadPublicSlots(serviceId){
+  const host=document.getElementById('book140PubSlots');if(!host)return;
+  host.innerHTML=`<div class="book1401-inline-note">${book140L('جارٍ حساب التوفر…','Checking availability…')}</div>`;
+  const {data,error}=await sb.rpc('tasky_public_booking_slots_v1401',{
+    p_public_slug:book140State.settings.public_slug,p_service_id:serviceId,
+    p_date:document.getElementById('book140PubDate').value,
+    p_location_id:book1401PublicLocation||null,
+    p_party_size:Number(document.getElementById('book140PubParty').value||1)
+  });
+  if(error){host.innerHTML=`<div class="book1401-warn">${escapeHtml(error.message)}</div>`;return}
+  const rows=Array.isArray(data)?data:[];
+  host.innerHTML=rows.length?rows.map(x=>`<button type="button" class="book1401-slot" onclick="book1401ChoosePublicSlot('${x.start_at}',this)">${new Date(x.start_at).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'})}</button>`).join(''):`<div class="book1401-warn">${book140L('لا توجد أوقات متاحة في هذا اليوم.','No available times on this date.')}</div>`;
+}
+function book1401ChoosePublicSlot(v,btn){book1401SelectedSlot=v;document.querySelectorAll('#book140PubSlots .book1401-slot').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected')}
+book140PublicSubmit=async function(serviceId){
+  if(!book1401SelectedSlot)return taskyToast(book140L('اختر وقتًا متاحًا','Choose an available time'),{tone:'warning'});
+  const name=document.getElementById('book140PubName').value.trim(),phone=document.getElementById('book140PubPhone').value.trim();
+  if(!name||!phone)return taskyToast(book140L('أدخل الاسم والجوال','Enter name and phone'),{tone:'warning'});
+  const {data,error}=await sb.rpc('tasky_public_booking_create_v1401',{p_public_slug:book140State.settings.public_slug,p_payload:{
+    service_id:serviceId,location_id:book1401PublicLocation||null,customer_name:name,customer_phone:phone,
+    start_at:book1401SelectedSlot,party_size:Number(document.getElementById('book140PubParty').value||1),
+    customer_notes:document.getElementById('book140PubNotes').value.trim()||null
+  }});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  document.getElementById('book140Public').innerHTML=`<div class="book140-public-shell"><div class="book140-empty"><b style="display:block;font-size:14px;margin-bottom:5px">${book140L('تم استلام الحجز','Booking received')}</b>${book140L('رقم الحجز','Reference')}: ${escapeHtml(data?.reference_no||'')}<br><small>${escapeHtml(book140Status(data?.status||'confirmed'))}</small></div></div>`;
+  book140Fetch();
+};
+
+/* Realtime now refreshes catalog/config changes too. */
+book140InitRealtime=function(){
+  if(book140Realtime){try{sb.removeChannel(book140Realtime)}catch(_){}}
+  if(!currentWorkspaceId)return;
+  book140Realtime=sb.channel(`tasky-bookings-v1401-${currentWorkspaceId}`);
+  ['tasky_booking_reservations_v140','tasky_booking_waitlist_v140','tasky_booking_queue_v140','tasky_booking_services_v140','tasky_booking_resources_v140','tasky_booking_staff_v140','tasky_booking_locations_v140','tasky_booking_blocks_v140']
+    .forEach(table=>book140Realtime.on('postgres_changes',{event:'*',schema:'public',table,filter:`workspace_id=eq.${currentWorkspaceId}`},()=>setTimeout(book140Fetch,120)));
+  book140Realtime.subscribe();
+};
+</script>
+
 </body>
 </html>
