@@ -17580,5 +17580,282 @@ brain108CloseCanvas=function(){
 };
 </script>
 
+
+<style id="tasky-v112-brainstorm-actions-css">
+/* ============================================================
+   V112 — Brainstorm export + action conversion
+   ============================================================ */
+.brain112-actions-panel{
+  position:absolute;z-index:42;top:62px;inset-inline-end:12px;
+  width:min(410px,calc(100vw - 75px));display:none;
+  border:1px solid #d8e0dc;background:#fff;color:#18251f;
+  border-radius:14px;padding:11px;box-shadow:0 14px 38px rgba(0,0,0,.18)
+}
+.brain112-actions-panel.show{display:block}
+.brain112-actions-panel h3{margin:0 0 4px;font-size:12px}
+.brain112-actions-panel p{margin:0 0 10px;color:#6c7b75;font-size:8.5px;line-height:1.6}
+.brain112-export-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.brain112-export-grid button{
+  min-height:39px;border:1px solid #dce3df;background:#fafbfa;color:#2e423a;
+  border-radius:9px;font-size:9px;font-weight:800
+}
+.brain112-divider{height:1px;background:#e7ebe9;margin:11px 0}
+.brain112-selection-bar{
+  position:absolute;z-index:18;bottom:55px;left:50%;transform:translateX(-50%);
+  display:none;align-items:center;gap:7px;
+  border:1px solid #d8e0dc;background:rgba(255,255,255,.96);color:#263b33;
+  border-radius:11px;padding:6px 8px;box-shadow:0 5px 16px rgba(0,0,0,.10)
+}
+.brain112-selection-bar.show{display:flex}
+.brain112-selection-bar span{font-size:8.5px;font-weight:800;white-space:nowrap}
+.brain112-selection-bar button{
+  min-height:32px;border:1px solid #dce3df;background:#fff;color:#31453d;
+  border-radius:8px;padding:5px 8px;font-size:8px;font-weight:800
+}
+.brain107-card.brain112-selected{
+  outline:3px solid rgba(29,98,75,.34)!important;
+  outline-offset:3px!important
+}
+.brain112-task-form{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.brain112-task-form .full{grid-column:1/-1}
+.brain112-task-form label{display:block;font-size:8px;color:var(--muted);margin-bottom:4px}
+.brain112-task-form select,.brain112-task-form input{
+  width:100%;border:1px solid var(--border);background:var(--paper);
+  border-radius:9px;padding:9px;font:inherit;font-size:10px
+}
+.brain112-conversion-note{
+  margin-top:9px;border:1px solid #d8e4de;background:#f5faf7;color:#3d6253;
+  border-radius:10px;padding:8px 9px;font-size:8px;line-height:1.6
+}
+.brain112-report{
+  position:fixed;left:-100000px;top:0;width:1000px;background:#fff;color:#17231f;
+  padding:35px;font-family:Arial,'IBM Plex Sans Arabic',sans-serif
+}
+.brain112-report h1{font-size:25px;margin:0 0 6px}
+.brain112-report .meta{font-size:12px;color:#65756f;margin-bottom:18px}
+.brain112-report .summary{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:18px}
+.brain112-report .summary div{border:1px solid #dfe5e2;border-radius:9px;padding:9px}
+.brain112-report .summary span{display:block;font-size:9px;color:#718079;margin-bottom:3px}
+.brain112-report .summary b{font-size:13px}
+.brain112-report .cards{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.brain112-report .card{border:1px solid #dfe5e2;border-radius:9px;padding:10px;break-inside:avoid}
+.brain112-report .card small{display:block;color:#72807b;font-size:9px;margin-bottom:5px}
+.brain112-report .card p{font-size:11px;line-height:1.6;white-space:pre-wrap;margin:0}
+@media(max-width:700px){
+  .brain112-actions-panel{inset-inline:55px 8px;width:auto;top:58px}
+  .brain112-task-form{grid-template-columns:1fr}
+  .brain112-task-form .full{grid-column:auto}
+  .brain112-selection-bar{bottom:54px;width:calc(100% - 70px);justify-content:center;flex-wrap:wrap}
+}
+</style>
+
+<script id="tasky-v112-brainstorm-actions-js">
+window.TASKY_BUILD='V112';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain112Selected=new Set();
+let brain112Busy=false;
+
+function brain112L(ar,en){return lang==='ar'?ar:en}
+function brain112Room(){return window.brain108RoomMeta||{}}
+function brain112ClosePanel(){document.getElementById('brain112Actions')?.classList.remove('show')}
+function brain112TogglePanel(){document.getElementById('brain112Actions')?.classList.toggle('show')}
+function brain112SelectableCards(){return brain107Objects.filter(o=>['idea','update','question','decision'].includes(o.kind))}
+function brain112ToggleSelect(id){
+  if(brain112Selected.has(id))brain112Selected.delete(id);else brain112Selected.add(id);
+  brain109RenderCards();
+  brain112RenderSelectionBar();
+}
+function brain112ClearSelection(){brain112Selected.clear();brain109RenderCards();brain112RenderSelectionBar()}
+function brain112RenderSelectionBar(){
+  const el=document.getElementById('brain112Selection');if(!el)return;
+  const n=brain112Selected.size;
+  el.classList.toggle('show',n>0);
+  el.innerHTML=n?`<span>${n} ${brain112L('بطاقة محددة','selected')}</span><button type="button" onclick="brain112OpenTaskConversion()">${brain112L('تحويل إلى مهام','Convert to tasks')}</button><button type="button" onclick="brain112ClearSelection()">${brain112L('إلغاء التحديد','Clear')}</button>`:'';
+}
+
+/* Enhance card footer without changing the V111 permission model. */
+const brain109RenderCardsBaseV112=brain109RenderCards;
+brain109RenderCards=function(){
+  brain109RenderCardsBaseV112();
+  const editable=brain109Editable();
+  for(const card of document.querySelectorAll('#brain107Cards .brain107-card')){
+    const id=card.dataset.id;
+    card.classList.toggle('brain112-selected',brain112Selected.has(id));
+    const foot=card.querySelector('.brain107-card-foot .actions');
+    if(foot&&!foot.querySelector('[data-brain112-select]')){
+      const b=document.createElement('button');
+      b.type='button';b.dataset.brain112Select='1';
+      b.textContent=brain112Selected.has(id)?brain112L('إلغاء التحديد','Unselect'):brain112L('تحديد','Select');
+      b.onclick=e=>{e.stopPropagation();brain112ToggleSelect(id)};
+      foot.insertBefore(b,foot.firstChild);
+    }
+  }
+  brain112RenderSelectionBar();
+};
+
+function brain112BuildReport(){
+  const room=brain112Room();
+  const rows=brain112SelectableCards();
+  const counts={idea:0,update:0,question:0,decision:0};
+  rows.forEach(r=>{counts[r.kind]=(counts[r.kind]||0)+1});
+  const report=document.createElement('div');
+  report.className='brain112-report';report.id='brain112Report';
+  report.dir=lang==='ar'?'rtl':'ltr';
+  report.innerHTML=`<h1>${escapeHtml(room.title||brain112L('غرفة العصف الذهني','Brainstorm Room'))}</h1>
+  <div class="meta">${escapeHtml(room.meeting_title||brain112L('غرفة مستقلة','Independent room'))} · ${escapeHtml(new Date().toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</div>
+  <div class="summary">
+    <div><span>${brain112L('أفكار','Ideas')}</span><b>${counts.idea}</b></div>
+    <div><span>${brain112L('تحديثات','Updates')}</span><b>${counts.update}</b></div>
+    <div><span>${brain112L('أسئلة','Questions')}</span><b>${counts.question}</b></div>
+    <div><span>${brain112L('قرارات','Decisions')}</span><b>${counts.decision}</b></div>
+  </div>
+  <div class="cards">${rows.map(o=>`<div class="card"><small>${escapeHtml(brain107KindLabel(o.kind))} · ${brain112L('تصويت','Votes')}: ${Number(o.vote_count||0)} · ${escapeHtml(o.author_name||'')}</small><p>${escapeHtml(o.body)}</p></div>`).join('')}</div>`;
+  document.body.appendChild(report);return report;
+}
+function brain112DownloadText(){
+  const room=brain112Room(),rows=brain112SelectableCards();
+  const lines=[room.title||brain112L('غرفة العصف الذهني','Brainstorm Room'),''];
+  for(const kind of ['idea','update','question','decision']){
+    const group=rows.filter(x=>x.kind===kind);
+    if(!group.length)continue;
+    lines.push(`## ${brain107KindLabel(kind)}`);
+    group.sort((a,b)=>Number(b.vote_count||0)-Number(a.vote_count||0)).forEach(o=>lines.push(`- ${o.body} (${brain112L('تصويت','Votes')}: ${Number(o.vote_count||0)})`));
+    lines.push('');
+  }
+  const blob=new Blob([lines.join('\n')],{type:'text/plain;charset=utf-8'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);
+  a.download=`Tasky-Brainstorm-${String(room.title||'room').replace(/[^\p{L}\p{N}\-_]+/gu,'-').slice(0,60)}.txt`;
+  a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+async function brain112ExportPdf(btn){
+  if(brain112Busy)return;brain112Busy=true;if(btn)btn.disabled=true;
+  let report=null;
+  try{
+    if(typeof meetingV1051EnsurePdfLibs==='function')await meetingV1051EnsurePdfLibs();
+    else throw new Error(brain112L('مكتبة PDF غير متوفرة','PDF library is unavailable'));
+    report=brain112BuildReport();
+    const canvas=await html2canvas(report,{scale:1.7,backgroundColor:'#ffffff',useCORS:true,logging:false});
+    const {jsPDF}=window.jspdf;
+    const pdf=new jsPDF({orientation:'p',unit:'mm',format:'a4'});
+    const margin=10,usableW=190,pxPerMm=canvas.width/usableW,pagePx=Math.floor((297-margin*2)*pxPerMm);
+    let y=0,page=0;
+    while(y<canvas.height){
+      const h=Math.min(pagePx,canvas.height-y),slice=document.createElement('canvas');
+      slice.width=canvas.width;slice.height=h;slice.getContext('2d').drawImage(canvas,0,y,canvas.width,h,0,0,canvas.width,h);
+      if(page++)pdf.addPage();
+      pdf.addImage(slice.toDataURL('image/jpeg',.93),'JPEG',margin,margin,usableW,h/pxPerMm);
+      y+=h;
+    }
+    const room=brain112Room();
+    pdf.save(`Tasky-Brainstorm-${String(room.title||'room').replace(/[^\p{L}\p{N}\-_]+/gu,'-').slice(0,60)}.pdf`);
+  }catch(e){
+    showTaskyDialog({title:brain112L('تعذّر تصدير PDF','Could not export PDF'),message:e.message||String(e),tone:'error'});
+  }finally{
+    report?.remove();brain112Busy=false;if(btn)btn.disabled=false;
+  }
+}
+async function brain112ExportCanvasPng(btn){
+  if(brain112Busy)return;brain112Busy=true;if(btn)btn.disabled=true;
+  try{
+    if(typeof meetingV1051EnsurePdfLibs==='function')await meetingV1051EnsurePdfLibs();
+    const stage=document.getElementById('brain107Stage');if(!stage)throw new Error('Canvas not found');
+    const old=stage.style.transform;stage.style.transform='none';
+    const canvas=await html2canvas(stage,{scale:1,backgroundColor:'#f4f5f2',useCORS:true,logging:false,width:4000,height:3000});
+    stage.style.transform=old;
+    const a=document.createElement('a');a.href=canvas.toDataURL('image/png');
+    a.download=`Tasky-Brainstorm-Canvas-${String(brain112Room().title||'room').replace(/[^\p{L}\p{N}\-_]+/gu,'-').slice(0,50)}.png`;a.click();
+  }catch(e){
+    showTaskyDialog({title:brain112L('تعذّر تصدير صورة اللوحة','Could not export canvas image'),message:e.message||String(e),tone:'error'});
+  }finally{brain112Busy=false;if(btn)btn.disabled=false}
+}
+
+function brain112OpenTaskConversion(){
+  const selected=[...brain112Selected].map(id=>brain107Objects.find(o=>o.id===id)).filter(Boolean);
+  if(!selected.length)return;
+  const allowed=projects.filter(p=>canCreateTaskInProject(p.id));
+  if(!allowed.length)return showTaskyDialog({title:brain112L('لا يوجد مشروع متاح','No available project'),message:brain112L('أنشئ مشروعًا أو اطلب صلاحية إنشاء مهام في مشروع أولًا.','Create a project or request task-creation permission first.'),tone:'warning'});
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain112L('تحويل البطاقات إلى مهام','Convert cards to tasks')}</h3><div class="subtle">${brain112L('سيتم إنشاء مهمة مستقلة لكل بطاقة محددة مع حفظ رابط مرجعي للغرفة والبطاقة.','A separate task will be created for each selected card, with a reference back to the room and card.')}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <form class="brain112-task-form" onsubmit="brain112CreateTasks(event)">
+    <div class="full"><label>${brain112L('المشروع','Project')}</label><select id="brain112Project" required>${allowed.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></div>
+    <div><label>${brain112L('الأولوية','Priority')}</label><select id="brain112Priority"><option value="medium">${brain112L('متوسطة','Medium')}</option><option value="high">${brain112L('عالية','High')}</option><option value="low">${brain112L('منخفضة','Low')}</option></select></div>
+    <div><label>${brain112L('تاريخ الاستحقاق — اختياري','Due date — optional')}</label><input id="brain112Due" type="date"></div>
+    <div class="full"><label>${brain112L('البطاقات','Cards')}</label><div class="brain112-conversion-note">${selected.map(x=>escapeHtml(x.body)).join('<br>')}</div></div>
+    <div class="full" style="display:flex;gap:7px;justify-content:flex-end"><button class="chip-btn" type="button" onclick="closeAddModal()">${brain112L('إلغاء','Cancel')}</button><button class="primary-btn" type="submit">${brain112L('إنشاء المهام','Create tasks')}</button></div>
+  </form>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain112CreateTasks(e){
+  e.preventDefault();
+  if(brain112Busy)return;brain112Busy=true;
+  const btn=e.submitter;if(btn)btn.disabled=true;
+  const projectId=document.getElementById('brain112Project').value;
+  const priority=document.getElementById('brain112Priority').value;
+  const due=document.getElementById('brain112Due').value||null;
+  const selected=[...brain112Selected].map(id=>brain107Objects.find(o=>o.id===id)).filter(Boolean);
+  const created=[],failed=[];
+  for(const card of selected){
+    const title=String(card.body||'').replace(/\s+/g,' ').trim().slice(0,180);
+    const {data,error}=await sb.rpc('tasky_work_create_task_v88',{
+      p_workspace_id:currentWorkspaceId,p_project_id:projectId,p_title:title,
+      p_tag:'Brainstorm',p_priority:priority,p_cost:0,p_start_date:null,p_due_date:due,p_assignee_ids:[]
+    });
+    if(error){failed.push({card,error:error.message});continue}
+    created.push({card,taskId:data?.id});
+    if(data?.id){
+      const link=await sb.rpc('tasky_brainstorm_action_link_v112',{
+        p_room_id:window.brain108RoomId,p_object_id:card.id,p_action_type:'task',p_target_id:data.id
+      });
+      if(link.error)console.warn('V112 action link',link.error);
+    }
+  }
+  brain112Busy=false;if(btn)btn.disabled=false;
+  if(created.length){await fetchTasks();brain112ClearSelection();closeAddModal();taskyToast(brain112L(`تم إنشاء ${created.length} مهمة`,`Created ${created.length} task(s)`),{tone:'success'})}
+  if(failed.length)showTaskyDialog({title:brain112L('بعض المهام لم تُنشأ','Some tasks were not created'),message:failed.map(x=>x.error).join('\n'),tone:'warning'});
+}
+async function brain112CreateProjectFromRoom(){
+  const room=brain112Room();
+  const name=String(room.title||brain112L('مشروع من العصف الذهني','Brainstorm project')).slice(0,120);
+  const ok=await taskyConfirm(brain112L(`إنشاء مشروع جديد باسم "${name}"؟`,`Create a new project named "${name}"?`),{title:brain112L('إنشاء مشروع من الغرفة','Create project from room'),confirmText:brain112L('إنشاء','Create')});
+  if(!ok)return;
+  const pos=projects.length?Math.max(...projects.map(p=>Number(p.position)||0))+1:0;
+  const {data,error}=await sb.rpc('tasky_work_create_project_v88',{p_workspace_id:currentWorkspaceId,p_name:name,p_description:room.description||null,p_position:pos});
+  if(error)return showTaskyDialog({title:brain112L('تعذّر إنشاء المشروع','Could not create project'),message:error.message,tone:'error'});
+  if(data?.id)await sb.rpc('tasky_brainstorm_action_link_v112',{p_room_id:window.brain108RoomId,p_object_id:null,p_action_type:'project',p_target_id:data.id});
+  await Promise.all([fetchProjects(),fetchProjectMemberships()]);renderNav();
+  taskyToast(brain112L('تم إنشاء المشروع وربطه بالغرفة','Project created and linked to the room'),{tone:'success'});
+}
+
+/* Add toolbar action panel and selection layer after shell rendering. */
+const brain108RenderCanvasShellBaseV112=brain108RenderCanvasShell;
+brain108RenderCanvasShell=function(room){
+  brain108RenderCanvasShellBaseV112(room);
+  const actions=document.querySelector('#brain107CanvasShell .brain107-top-actions');
+  if(actions&&!document.getElementById('brain112ActionsBtn')){
+    const b=document.createElement('button');b.id='brain112ActionsBtn';b.type='button';
+    b.textContent=brain112L('إجراءات','Actions');b.onclick=brain112TogglePanel;
+    actions.insertBefore(b,actions.lastElementChild);
+  }
+  const shell=document.getElementById('brain107CanvasShell');
+  if(shell&&!document.getElementById('brain112Actions')){
+    const panel=document.createElement('div');panel.id='brain112Actions';panel.className='brain112-actions-panel';
+    panel.innerHTML=`<h3>${brain112L('إجراءات الغرفة','Room actions')}</h3><p>${brain112L('صدّر محتوى الغرفة أو حوّل الأفكار المختارة إلى عمل تنفيذي داخل تاسكي.','Export the room or turn selected ideas into executable work in Tasky.')}</p>
+      <div class="brain112-export-grid"><button type="button" onclick="brain112ExportPdf(this)">${brain112L('تقرير PDF','PDF report')}</button><button type="button" onclick="brain112ExportCanvasPng(this)">${brain112L('صورة اللوحة PNG','Canvas PNG')}</button><button type="button" onclick="brain112DownloadText()">${brain112L('تصدير نص','Text export')}</button><button type="button" onclick="brain112CreateProjectFromRoom()">${brain112L('إنشاء مشروع','Create project')}</button></div>
+      <div class="brain112-divider"></div><p>${brain112L('لتكوين مهام: اضغط «تحديد» على البطاقات المطلوبة ثم اختر «تحويل إلى مهام».','To create tasks: select the desired cards, then choose Convert to tasks.')}</p>`;
+    shell.appendChild(panel);
+  }
+  const wrap=document.getElementById('brain107StageWrap');
+  if(wrap&&!document.getElementById('brain112Selection')){
+    const bar=document.createElement('div');bar.id='brain112Selection';bar.className='brain112-selection-bar';wrap.appendChild(bar);
+  }
+  brain112RenderSelectionBar();
+};
+
+/* Keep selection scoped to the current room. */
+const brain108OpenRoomBaseV112=brain108OpenRoom;
+brain108OpenRoom=async function(roomId){brain112Selected.clear();return brain108OpenRoomBaseV112(roomId)};
+const brain108CloseCanvasBaseV112=brain108CloseCanvas;
+brain108CloseCanvas=function(){brain112Selected.clear();brain112ClosePanel();return brain108CloseCanvasBaseV112()};
+</script>
+
 </body>
 </html>
