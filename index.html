@@ -18356,5 +18356,505 @@ window.addEventListener('keydown',e=>{
 });
 </script>
 
+
+<style id="tasky-v130-brainstorm-advanced-css">
+/* ============================================================
+   V130 — Advanced Brainstorm Suite
+   Breakouts, anonymous/private drafts, stages, clustering,
+   scoring/matrix, dependencies, layers, locks, owners/status,
+   action plans, references, image paste, presentation, timeline,
+   performance controls.
+   ============================================================ */
+.brain130-toolbar{
+  position:absolute;z-index:24;top:51px;inset-inline-start:10px;
+  display:flex;gap:5px;flex-wrap:wrap;max-width:calc(100% - 80px)
+}
+.brain130-toolbar button,.brain130-toolbar select{
+  min-height:32px;border:1px solid #d9e0dc;background:rgba(255,255,255,.96);
+  color:#30443d;border-radius:8px;padding:5px 8px;font-size:8px;font-weight:800
+}
+.brain130-stagebar{
+  position:absolute;z-index:23;top:92px;left:50%;transform:translateX(-50%);
+  max-width:calc(100% - 130px);display:flex;gap:4px;padding:4px;
+  border:1px solid #d9e0dc;background:rgba(255,255,255,.94);border-radius:10px
+}
+.brain130-stagebar button{
+  min-height:29px;border:0;background:transparent;color:#6b7974;border-radius:7px;
+  padding:4px 7px;font-size:7.5px;font-weight:800;white-space:nowrap
+}
+.brain130-stagebar button.active{background:#eaf3ee;color:#245b47}
+.brain130-card-meta{
+  display:flex;gap:4px;flex-wrap:wrap;margin-top:6px
+}
+.brain130-badge{
+  border:1px solid #dce3df;background:#f8faf9;color:#60716a;border-radius:999px;
+  padding:3px 6px;font-size:6.8px
+}
+.brain130-badge.owner{background:#eef5f1;color:#315e4e}
+.brain130-badge.lock{background:#fff8e8;color:#776229;border-color:#eadcae}
+.brain130-badge.status-approved{background:#eef7f2;color:#2c684f}
+.brain130-badge.status-rejected{background:#fff2f0;color:#8a4a45}
+.brain130-private{
+  position:absolute;inset:0;border-radius:12px;background:repeating-linear-gradient(
+    135deg,rgba(244,247,245,.96),rgba(244,247,245,.96) 9px,rgba(238,243,240,.96) 9px,rgba(238,243,240,.96) 18px
+  );display:grid;place-items:center;color:#687770;font-size:8px;padding:12px;text-align:center
+}
+.brain130-layer-panel,.brain130-side-panel{
+  position:absolute;z-index:54;top:55px;inset-inline-end:10px;width:min(360px,calc(100vw - 75px));
+  max-height:70dvh;overflow:auto;display:none;background:#fff;color:#1b2823;border:1px solid #d8e0dc;
+  border-radius:13px;padding:10px;box-shadow:0 14px 38px rgba(0,0,0,.18)
+}
+.brain130-layer-panel.show,.brain130-side-panel.show{display:block}
+.brain130-layer-row{
+  display:flex;align-items:center;justify-content:space-between;gap:8px;padding:7px 3px;border-bottom:1px solid #edf0ee
+}
+.brain130-layer-row:last-child{border-bottom:0}
+.brain130-layer-row span{font-size:8.5px;font-weight:800}
+.brain130-layer-row button{min-height:31px}
+.brain130-score-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.brain130-score-grid label{font-size:8px;color:#67766f}
+.brain130-score-grid input,.brain130-score-grid select{
+  width:100%;margin-top:4px;border:1px solid var(--border);border-radius:8px;padding:8px;background:var(--paper)
+}
+.brain130-matrix{
+  width:100%;border-collapse:collapse;font-size:8px;margin-top:8px
+}
+.brain130-matrix th,.brain130-matrix td{border:1px solid #e0e5e2;padding:6px;text-align:start}
+.brain130-matrix th{background:#f7f9f8}
+.brain130-breakout-card{
+  border:1px solid var(--border);background:var(--paper);border-radius:10px;padding:9px;margin-top:7px
+}
+.brain130-breakout-card b{display:block;font-size:9px;margin-bottom:3px}
+.brain130-breakout-card small{font-size:7.5px;color:var(--muted)}
+.brain130-present{
+  position:fixed;inset:0;z-index:61000;background:#f4f6f4;color:#17231f;
+  display:none;flex-direction:column
+}
+.brain130-present.show{display:flex}
+.brain130-present-head{display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:#fff;border-bottom:1px solid #dce2df}
+.brain130-present-body{flex:1;min-height:0;display:grid;place-items:center;padding:20px;overflow:hidden}
+.brain130-present-frame{width:min(1100px,95vw);height:min(680px,78vh);position:relative;background:#fff;border:1px solid #dce2df;border-radius:14px;overflow:hidden}
+.brain130-present-title{font-size:18px;font-weight:900;padding:14px}
+.brain130-present-controls{display:flex;gap:6px}
+.brain130-timeline-item{
+  border-inline-start:2px solid #d9e2dd;padding:0 0 10px 10px;margin-inline-start:4px
+}
+.brain130-timeline-item b{display:block;font-size:8.5px}
+.brain130-timeline-item p{margin:2px 0;font-size:8px;color:#53655e}
+.brain130-timeline-item small{font-size:7px;color:#83908a}
+.brain130-dropzone{
+  border:1px dashed #b9c7c1;background:#f8faf9;border-radius:10px;padding:12px;text-align:center;
+  font-size:8px;color:#63736c
+}
+.brain130-image{
+  position:absolute;border:1px solid #d7dfdb;border-radius:9px;overflow:hidden;background:#fff;
+  box-shadow:0 2px 7px rgba(0,0,0,.08);touch-action:none
+}
+.brain130-image img{width:100%;height:100%;object-fit:contain;display:block}
+.brain130-progress{
+  position:absolute;z-index:25;top:127px;left:50%;transform:translateX(-50%);
+  min-width:260px;display:none;background:rgba(255,255,255,.95);border:1px solid #d9e0dc;
+  border-radius:999px;padding:5px 8px
+}
+.brain130-progress.show{display:block}
+.brain130-progress-track{height:6px;background:#edf1ef;border-radius:999px;overflow:hidden}
+.brain130-progress-track i{display:block;height:100%;background:#1d624b;width:0}
+.brain130-progress small{display:block;text-align:center;font-size:7px;color:#61716a;margin-top:3px}
+@media(max-width:700px){
+  .brain130-toolbar{top:48px;max-width:calc(100% - 55px)}
+  .brain130-stagebar{top:88px;overflow-x:auto;max-width:calc(100% - 70px)}
+  .brain130-progress{top:122px}
+  .brain130-score-grid{grid-template-columns:1fr}
+}
+</style>
+
+<script id="tasky-v130-brainstorm-advanced-js">
+window.TASKY_BUILD='V130';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain130Stage='ideas';
+let brain130Anonymous=false;
+let brain130PrivateDraft=false;
+let brain130Layers={cards:true,drawings:true,shapes:true,frames:true,connectors:true,comments:true};
+let brain130Breakouts=[];
+let brain130Assets=[];
+let brain130Timeline=[];
+let brain130Images=[];
+let brain130PresentIndex=0;
+let brain130Perf={maxRendered:220,cursorThrottle:100,strokeSample:3};
+let brain130ImageDrag=null;
+
+const brain130Stages=[
+  ['ideas','جمع الأفكار','Ideas'],
+  ['cluster','تجميع','Cluster'],
+  ['discuss','مناقشة','Discuss'],
+  ['vote','تصويت','Vote'],
+  ['decide','قرارات','Decide'],
+  ['actions','إجراءات','Actions']
+];
+
+function brain130L(ar,en){return lang==='ar'?ar:en}
+function brain130CanManage(){return !!window.brain108RoomMeta?.can_manage}
+function brain130CanEdit(){return brain111CanEdit?brain111CanEdit():brain109Editable()}
+function brain130RoomId(){return window.brain108RoomId}
+function brain130Panel(id){
+  document.querySelectorAll('.brain130-side-panel,.brain130-layer-panel').forEach(x=>{if(x.id!==id)x.classList.remove('show')});
+  document.getElementById(id)?.classList.toggle('show');
+}
+function brain130RefreshStagebar(){
+  document.querySelectorAll('#brain130Stagebar button').forEach(b=>b.classList.toggle('active',b.dataset.stage===brain130Stage));
+}
+async function brain130SetStage(stage){
+  if(!brain130CanManage())return;
+  const {error}=await sb.rpc('tasky_brainstorm_stage_set_v130',{p_room_id:brain130RoomId(),p_stage:stage});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  brain130Stage=stage;brain130RefreshStagebar();brain130UpdateProgress();
+}
+function brain130UpdateProgress(){
+  const el=document.getElementById('brain130Progress');if(!el)return;
+  const idx=Math.max(0,brain130Stages.findIndex(x=>x[0]===brain130Stage)),pct=(idx+1)/brain130Stages.length*100;
+  el.classList.add('show');
+  el.querySelector('i').style.width=pct+'%';
+  el.querySelector('small').textContent=`${idx+1}/${brain130Stages.length} · ${brain130Stages[idx]?.[lang==='ar'?1:2]||''}`;
+}
+
+/* Anonymous and private drafting */
+async function brain130ToggleAnonymous(){
+  if(!brain130CanManage())return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_anonymous_set_v130',{p_room_id:brain130RoomId(),p_enabled:!brain130Anonymous});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  brain130Anonymous=!!data?.enabled;await brain109FetchCanvas();
+}
+function brain130TogglePrivateDraft(){
+  brain130PrivateDraft=!brain130PrivateDraft;
+  taskyToast(brain130PrivateDraft?brain130L('وضع المسودة الخاصة مفعل','Private draft mode enabled'):brain130L('وضع المسودة الخاصة متوقف','Private draft mode disabled'),{tone:'success'});
+}
+async function brain130PublishPrivate(objectId){
+  const {error}=await sb.rpc('tasky_brainstorm_private_publish_v130',{p_room_id:brain130RoomId(),p_object_id:objectId});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+
+/* Breakout boards */
+async function brain130OpenBreakouts(){
+  const {data,error}=await sb.rpc('tasky_brainstorm_breakout_list_v130',{p_room_id:brain130RoomId()});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  brain130Breakouts=Array.isArray(data)?data:[];
+  const p=document.getElementById('brain130Breakouts');
+  p.innerHTML=`<h3>${brain130L('لوحات المجموعات','Breakout boards')}</h3><p>${brain130L('قسّم الجلسة إلى مجموعات مستقلة ثم ادمج النتائج في اللوحة الرئيسية.','Split the session into independent boards, then merge results into the main board.')}</p>
+  ${brain130CanManage()?`<button class="primary-btn" onclick="brain130CreateBreakout()">${brain130L('مجموعة جديدة','New breakout')}</button>`:''}
+  ${brain130Breakouts.map(b=>`<div class="brain130-breakout-card"><b>${escapeHtml(b.title)}</b><small>${Number(b.member_count||0)} ${brain130L('مشارك','members')}</small><div style="display:flex;gap:5px;margin-top:6px"><button class="chip-btn" onclick="brain130OpenBreakout('${b.id}')">${brain130L('فتح','Open')}</button>${brain130CanManage()?`<button class="chip-btn" onclick="brain130MergeBreakout('${b.id}')">${brain130L('دمج النتائج','Merge')}</button>`:''}</div></div>`).join('')}`;
+  p.classList.add('show');
+}
+async function brain130CreateBreakout(){
+  const title=await taskyPrompt(brain130L('اسم المجموعة','Breakout name'),{title:brain130L('مجموعة جديدة','New breakout')});if(!title)return;
+  const {error}=await sb.rpc('tasky_brainstorm_breakout_create_v130',{p_room_id:brain130RoomId(),p_title:title});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain130OpenBreakouts();
+}
+async function brain130OpenBreakout(id){
+  const b=brain130Breakouts.find(x=>x.id===id);if(!b?.child_room_id)return;
+  brain108CloseCanvas();setTimeout(()=>brain108OpenRoom(b.child_room_id),80);
+}
+async function brain130MergeBreakout(id){
+  const ok=await taskyConfirm(brain130L('دمج البطاقات الجديدة من هذه المجموعة في اللوحة الرئيسية؟','Merge new cards from this breakout into the main board?'),{title:brain130L('دمج النتائج','Merge results'),confirmText:brain130L('دمج','Merge')});if(!ok)return;
+  const {error}=await sb.rpc('tasky_brainstorm_breakout_merge_v130',{p_breakout_id:id});
+  if(error)return taskyToast(error.message,{tone:'warning'});taskyToast(brain130L('تم دمج النتائج','Results merged'),{tone:'success'});
+}
+
+/* Affinity clustering */
+async function brain130Cluster(){
+  if(!brain130CanEdit())return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_cluster_suggest_v130',{p_room_id:brain130RoomId()});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  const groups=Array.isArray(data)?data:[];
+  const p=document.getElementById('brain130InsightsPanel');
+  p.innerHTML=`<h3>${brain130L('اقتراح التجميع','Clustering suggestion')}</h3><p>${brain130L('اقتراح محلي مبني على الكلمات المشتركة. لا يتم نقل العناصر إلا بعد موافقتك.','Local keyword-based suggestion. Nothing moves until you approve.')}</p>${groups.map((g,i)=>`<div class="brain120-insight"><b>${brain130L('مجموعة','Group')} ${i+1}</b><p>${g.labels.map(escapeHtml).join('<br>')}</p><button class="chip-btn" onclick='brain130ApplyCluster(${JSON.stringify(g.ids)})'>${brain130L('تجميع داخل إطار','Group in frame')}</button></div>`).join('')}`;
+  p.classList.add('show');
+}
+async function brain130ApplyCluster(ids){
+  const {error}=await sb.rpc('tasky_brainstorm_cluster_apply_v130',{p_room_id:brain130RoomId(),p_object_ids:ids});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+
+/* Merge duplicate ideas */
+async function brain130MergeSelectedIdeas(){
+  const ids=[...brain120Selected].filter(id=>brain107Objects.some(o=>o.id===id));
+  if(ids.length<2)return taskyToast(brain130L('حدد فكرتين على الأقل','Select at least two ideas'),{tone:'warning'});
+  const {error}=await sb.rpc('tasky_brainstorm_ideas_merge_v130',{p_room_id:brain130RoomId(),p_object_ids:ids});
+  if(error)return taskyToast(error.message,{tone:'warning'});brain120Selected.clear();await brain109FetchCanvas();
+}
+
+/* Scorecard + matrix */
+async function brain130OpenScore(objectId){
+  const o=brain107Objects.find(x=>x.id===objectId);if(!o)return;
+  const {data}=await sb.rpc('tasky_brainstorm_score_get_v130',{p_room_id:brain130RoomId(),p_object_id:objectId});
+  const s=data||{};
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain130L('بطاقة تقييم الفكرة','Idea scorecard')}</h3><div class="subtle">${escapeHtml(o.body)}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <form class="brain130-score-grid" onsubmit="brain130SaveScore(event,'${objectId}')">
+    ${[['impact','الأثر','Impact'],['cost','التكلفة','Cost'],['ease','سهولة التنفيذ','Ease'],['risk','المخاطر','Risk'],['time','الوقت','Time'],['customer_value','قيمة العميل','Customer value']].map(x=>`<label>${brain130L(x[1],x[2])}<input type="number" min="1" max="5" id="brain130_${x[0]}" value="${Number(s[x[0]]||3)}"></label>`).join('')}
+    <div style="grid-column:1/-1;display:flex;justify-content:flex-end"><button class="primary-btn" type="submit">${brain130L('حفظ التقييم','Save score')}</button></div>
+  </form>`;document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain130SaveScore(e,id){
+  e.preventDefault();const v=n=>Number(document.getElementById('brain130_'+n).value||3);
+  const {error}=await sb.rpc('tasky_brainstorm_score_set_v130',{p_room_id:brain130RoomId(),p_object_id:id,p_impact:v('impact'),p_cost:v('cost'),p_ease:v('ease'),p_risk:v('risk'),p_time:v('time'),p_customer_value:v('customer_value')});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await brain109FetchCanvas();
+}
+async function brain130DecisionMatrix(){
+  const {data,error}=await sb.rpc('tasky_brainstorm_matrix_v130',{p_room_id:brain130RoomId()});if(error)return taskyToast(error.message,{tone:'warning'});
+  const rows=Array.isArray(data)?data:[];
+  const p=document.getElementById('brain130Matrix');
+  p.innerHTML=`<h3>${brain130L('مصفوفة القرار','Decision matrix')}</h3><table class="brain130-matrix"><thead><tr><th>${brain130L('الفكرة','Idea')}</th><th>${brain130L('النتيجة','Score')}</th><th>${brain130L('التصويت','Votes')}</th></tr></thead><tbody>${rows.map(r=>`<tr><td>${escapeHtml(r.body)}</td><td>${Number(r.score||0).toFixed(2)}</td><td>${Number(r.votes||0)}</td></tr>`).join('')}</tbody></table>`;p.classList.add('show');
+}
+
+/* Dependencies */
+async function brain130SetDependency(){
+  const ids=[...brain120Selected].filter(id=>brain107Objects.some(o=>o.id===id)||brain109Shapes.some(s=>s.id===id));
+  if(ids.length!==2)return taskyToast(brain130L('حدد عنصرين بالضبط','Select exactly two elements'),{tone:'warning'});
+  const type=await taskyPrompt(brain130L('نوع العلاقة: depends / blocks / requires / causes / related','Relationship: depends / blocks / requires / causes / related'),{title:brain130L('نوع العلاقة','Relationship type'),placeholder:'depends'});if(!type)return;
+  const {error}=await sb.rpc('tasky_brainstorm_dependency_set_v130',{p_room_id:brain130RoomId(),p_from_id:ids[0],p_to_id:ids[1],p_relation:type});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+
+/* Layers */
+function brain130ToggleLayer(k){
+  brain130Layers[k]=!brain130Layers[k];
+  const map={cards:'#brain107Cards',drawings:'#brain107Svg',shapes:'#brain109Shapes',frames:'#brain120Frames',comments:'.brain120-comment-dot'};
+  if(map[k])document.querySelectorAll(map[k]).forEach(el=>el.style.display=brain130Layers[k]?'':'none');
+}
+function brain130OpenLayers(){
+  const p=document.getElementById('brain130Layers');
+  p.innerHTML=`<h3>${brain130L('طبقات اللوحة','Canvas layers')}</h3>${Object.keys(brain130Layers).map(k=>`<div class="brain130-layer-row"><span>${escapeHtml(k)}</span><button class="chip-btn" onclick="brain130ToggleLayer('${k}');brain130OpenLayers()">${brain130Layers[k]?brain130L('إخفاء','Hide'):brain130L('إظهار','Show')}</button></div>`).join('')}`;p.classList.add('show');
+}
+
+/* Element lock, ownership, status */
+async function brain130LockSelected(){
+  const ids=[...brain120Selected];if(!ids.length)return;
+  const {error}=await sb.rpc('tasky_brainstorm_elements_lock_v130',{p_room_id:brain130RoomId(),p_element_ids:ids,p_locked:true});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+async function brain130UnlockSelected(){
+  const ids=[...brain120Selected];if(!ids.length)return;
+  const {error}=await sb.rpc('tasky_brainstorm_elements_lock_v130',{p_room_id:brain130RoomId(),p_element_ids:ids,p_locked:false});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+async function brain130AssignOwner(objectId){
+  const name=await taskyPrompt(brain130L('اسم المسؤول أو بريده','Owner name or email'),{title:brain130L('تعيين مسؤول','Assign owner')});if(!name)return;
+  const {error}=await sb.rpc('tasky_brainstorm_owner_set_v130',{p_room_id:brain130RoomId(),p_object_id:objectId,p_owner_query:name});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+async function brain130SetStatus(objectId,status){
+  const {error}=await sb.rpc('tasky_brainstorm_status_set_v130',{p_room_id:brain130RoomId(),p_object_id:objectId,p_status:status});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+
+/* Action plan */
+async function brain130ActionPlan(objectId){
+  const o=brain107Objects.find(x=>x.id===objectId);if(!o)return;
+  const allowed=projects.filter(p=>canCreateTaskInProject(p.id));
+  if(!allowed.length)return taskyToast(brain130L('لا يوجد مشروع متاح','No available project'),{tone:'warning'});
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain130L('خطة إجراءات من القرار','Action plan from decision')}</h3><div class="subtle">${escapeHtml(o.body)}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <label class="field">${brain130L('المشروع','Project')}<select id="brain130PlanProject">${allowed.map(p=>`<option value="${p.id}">${escapeHtml(p.name)}</option>`).join('')}</select></label>
+  <label class="field">${brain130L('الإجراءات — كل سطر مهمة','Actions — one task per line')}<textarea id="brain130PlanLines" style="width:100%;min-height:120px" placeholder="${brain130L('الإجراء الأول\nالإجراء الثاني','First action\nSecond action')}"></textarea></label>
+  <div style="display:flex;justify-content:flex-end;margin-top:7px"><button class="primary-btn" onclick="brain130CreateActionPlan('${objectId}')">${brain130L('إنشاء المهام','Create tasks')}</button></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain130CreateActionPlan(objectId){
+  const projectId=document.getElementById('brain130PlanProject').value,lines=(document.getElementById('brain130PlanLines').value||'').split('\n').map(x=>x.trim()).filter(Boolean).slice(0,20);
+  if(!lines.length)return;
+  for(const line of lines){
+    const {data,error}=await sb.rpc('tasky_work_create_task_v88',{p_workspace_id:currentWorkspaceId,p_project_id:projectId,p_title:line.slice(0,180),p_tag:'Brainstorm Action Plan',p_priority:'medium',p_cost:0,p_start_date:null,p_due_date:null,p_assignee_ids:[]});
+    if(!error&&data?.id)await sb.rpc('tasky_brainstorm_action_link_v112',{p_room_id:brain130RoomId(),p_object_id:objectId,p_action_type:'task',p_target_id:data.id});
+  }
+  closeAddModal();await fetchTasks();taskyToast(brain130L('تم إنشاء خطة الإجراءات','Action plan created'),{tone:'success'});
+}
+
+/* References / attachments */
+async function brain130OpenReferences(objectId){
+  const {data}=await sb.rpc('tasky_brainstorm_reference_list_v130',{p_room_id:brain130RoomId(),p_object_id:objectId});
+  const refs=Array.isArray(data)?data:[];
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain130L('المراجع والمرفقات','References & attachments')}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  ${refs.map(r=>`<div class="brain120-comment"><b>${escapeHtml(r.label||r.url)}</b><p>${escapeHtml(r.url)}</p></div>`).join('')}
+  <label class="field">${brain130L('الرابط','URL')}<input id="brain130RefUrl" placeholder="https://"></label><label class="field">${brain130L('اسم المرجع','Label')}<input id="brain130RefLabel"></label>
+  <div style="display:flex;justify-content:flex-end"><button class="primary-btn" onclick="brain130AddReference('${objectId}')">${brain130L('إضافة','Add')}</button></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain130AddReference(objectId){
+  const url=document.getElementById('brain130RefUrl').value.trim(),label=document.getElementById('brain130RefLabel').value.trim();if(!url)return;
+  const {error}=await sb.rpc('tasky_brainstorm_reference_add_v130',{p_room_id:brain130RoomId(),p_object_id:objectId,p_url:url,p_label:label||null});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain130OpenReferences(objectId);
+}
+
+/* Image paste/upload to private Supabase Storage */
+async function brain130HandlePaste(e){
+  if(!brain130CanEdit())return;
+  const item=[...(e.clipboardData?.items||[])].find(i=>i.type.startsWith('image/'));if(!item)return;
+  e.preventDefault();const file=item.getAsFile();if(!file)return;
+  if(file.size>8*1024*1024)return taskyToast(brain130L('الصورة أكبر من 8MB','Image exceeds 8MB'),{tone:'warning'});
+  const ext=(file.type.split('/')[1]||'png').replace('jpeg','jpg'),path=`${currentWorkspaceId}/${brain130RoomId()}/${crypto.randomUUID()}.${ext}`;
+  const {error:upErr}=await sb.storage.from('tasky-brainstorm-assets').upload(path,file,{contentType:file.type,upsert:false});
+  if(upErr)return taskyToast(upErr.message,{tone:'warning'});
+  const {data:signed,error:sErr}=await sb.storage.from('tasky-brainstorm-assets').createSignedUrl(path,60*60);
+  if(sErr)return taskyToast(sErr.message,{tone:'warning'});
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect(),c=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const {error}=await sb.rpc('tasky_brainstorm_image_add_v130',{p_room_id:brain130RoomId(),p_storage_path:path,p_x:Math.round(c.x-160),p_y:Math.round(c.y-100),p_w:320,p_h:200});
+  if(error)return taskyToast(error.message,{tone:'warning'});await brain109FetchCanvas();
+}
+window.addEventListener('paste',brain130HandlePaste);
+
+async function brain130ResolveImages(){
+  const out=[];
+  for(const im of brain130Images){
+    const {data}=await sb.storage.from('tasky-brainstorm-assets').createSignedUrl(im.storage_path,3600);
+    out.push({...im,url:data?.signedUrl||''});
+  }
+  brain130Images=out;brain130RenderImages();
+}
+function brain130RenderImages(){
+  const host=document.getElementById('brain130Images');if(!host)return;
+  host.innerHTML=brain130Images.map(im=>`<div class="brain130-image ${brain120Selected.has(im.id)?'brain120-selected':''}" data-image-id="${im.id}" style="left:${im.x}px;top:${im.y}px;width:${im.w}px;height:${im.h}px">${im.url?`<img src="${escapeHtml(im.url)}" alt="">`:`<div class="brain130-private">${brain130L('جارٍ تحميل الصورة','Loading image')}</div>`}</div>`).join('');
+}
+
+/* Presentation from Frames */
+function brain130Presentation(){
+  if(!brain120Frames.length)return taskyToast(brain130L('أضف Frames أولًا','Add Frames first'),{tone:'warning'});
+  brain130PresentIndex=0;brain130RenderPresentation();document.getElementById('brain130Present').classList.add('show');
+}
+function brain130RenderPresentation(){
+  const f=brain120Frames[brain130PresentIndex];if(!f)return;
+  const body=document.getElementById('brain130PresentFrame');
+  const cards=brain107Objects.filter(o=>o.x>=f.x&&o.y>=f.y&&o.x<=f.x+f.w&&o.y<=f.y+f.h);
+  body.innerHTML=`<div class="brain130-present-title">${escapeHtml(f.title)}</div><div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:10px;padding:14px">${cards.map(o=>`<div class="brain107-card" style="position:relative;left:auto;top:auto;width:auto"><div class="brain107-card-kind">${escapeHtml(brain107KindLabel(o.kind))}</div><div class="brain107-card-body">${escapeHtml(o.body)}</div></div>`).join('')}</div>`;
+  document.getElementById('brain130PresentCount').textContent=`${brain130PresentIndex+1}/${brain120Frames.length}`;
+}
+function brain130PresentMove(d){brain130PresentIndex=Math.max(0,Math.min(brain120Frames.length-1,brain130PresentIndex+d));brain130RenderPresentation()}
+function brain130PresentClose(){document.getElementById('brain130Present').classList.remove('show')}
+
+/* Timeline */
+async function brain130OpenTimeline(){
+  const {data,error}=await sb.rpc('tasky_brainstorm_timeline_v130',{p_room_id:brain130RoomId()});if(error)return taskyToast(error.message,{tone:'warning'});
+  brain130Timeline=Array.isArray(data)?data:[];
+  const p=document.getElementById('brain130Timeline');
+  p.innerHTML=`<h3>${brain130L('سجل النشاط','Activity timeline')}</h3>${brain130Timeline.map(x=>`<div class="brain130-timeline-item"><b>${escapeHtml(x.actor_name||'')}</b><p>${escapeHtml(x.event_label||x.event_type)}</p><small>${escapeHtml(new Date(x.created_at).toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</small></div>`).join('')}`;p.classList.add('show');
+}
+
+/* Card enrichment */
+const brain109RenderCardsBaseV130=brain109RenderCards;
+brain109RenderCards=function(){
+  brain109RenderCardsBaseV130();
+  for(const el of document.querySelectorAll('#brain107Cards .brain107-card')){
+    const o=brain107Objects.find(x=>x.id===el.dataset.id);if(!o)continue;
+    const head=el.querySelector('.brain107-card-head');
+    if(head&&!el.querySelector('.brain130-card-meta')){
+      const meta=document.createElement('div');meta.className='brain130-card-meta';
+      if(o.owner_name)meta.innerHTML+=`<span class="brain130-badge owner">${escapeHtml(o.owner_name)}</span>`;
+      if(o.workflow_status&&o.workflow_status!=='new')meta.innerHTML+=`<span class="brain130-badge status-${escapeHtml(o.workflow_status)}">${escapeHtml(o.workflow_status)}</span>`;
+      if(o.element_locked)meta.innerHTML+=`<span class="brain130-badge lock">${brain130L('مقفل','Locked')}</span>`;
+      if(Number(o.score||0)>0)meta.innerHTML+=`<span class="brain130-badge">${brain130L('تقييم','Score')}: ${Number(o.score).toFixed(1)}</span>`;
+      head.insertAdjacentElement('afterend',meta);
+    }
+    const actions=el.querySelector('.brain107-card-foot .actions');
+    if(actions&&!actions.querySelector('[data-v130]')){
+      const menu=document.createElement('button');menu.type='button';menu.dataset.v130='1';menu.textContent=brain130L('المزيد','More');
+      menu.onclick=e=>{e.stopPropagation();brain130CardMenu(o.id)};actions.appendChild(menu);
+    }
+    if(o.private_draft&&!o.is_mine){
+      const mask=document.createElement('div');mask.className='brain130-private';mask.textContent=brain130L('مسودة خاصة — غير منشورة','Private draft — not published');el.appendChild(mask);
+    }
+  }
+}
+function brain130CardMenu(id){
+  const o=brain107Objects.find(x=>x.id===id);if(!o)return;
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain130L('إجراءات الفكرة','Idea actions')}</h3><div class="subtle">${escapeHtml(o.body)}</div></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="brain120-grid">
+    <button onclick="closeAddModal();brain130OpenScore('${id}')">${brain130L('بطاقة تقييم','Scorecard')}</button>
+    <button onclick="closeAddModal();brain130AssignOwner('${id}')">${brain130L('تعيين مسؤول','Assign owner')}</button>
+    <button onclick="brain130SetStatus('${id}','approved');closeAddModal()">${brain130L('اعتماد','Approve')}</button>
+    <button onclick="brain130SetStatus('${id}','rejected');closeAddModal()">${brain130L('رفض','Reject')}</button>
+    <button onclick="closeAddModal();brain130OpenReferences('${id}')">${brain130L('مراجع','References')}</button>
+    <button onclick="closeAddModal();brain130ActionPlan('${id}')">${brain130L('خطة إجراءات','Action plan')}</button>
+    ${o.private_draft&&o.is_mine?`<button onclick="brain130PublishPrivate('${id}');closeAddModal()">${brain130L('نشر للجميع','Publish')}</button>`:''}
+  </div>`;document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+
+/* State */
+brain109FetchCanvas=async function(){
+  if(!window.brain108RoomId)return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_canvas_state_v130',{p_room_id:window.brain108RoomId});
+  if(error){console.warn('V130 canvas state',error);return}
+  brain107Objects=Array.isArray(data?.objects)?data.objects:[];
+  brain107Strokes=Array.isArray(data?.strokes)?data.strokes:[];
+  brain107Presence=Array.isArray(data?.presence)?data.presence:[];
+  brain109Shapes=Array.isArray(data?.shapes)?data.shapes:[];
+  brain109Connectors=Array.isArray(data?.connectors)?data.connectors:[];
+  brain120Frames=Array.isArray(data?.frames)?data.frames:[];
+  brain130Images=Array.isArray(data?.images)?data.images:[];
+  window.brain108RoomMeta=data?.room||window.brain108RoomMeta||{};
+  brain130Stage=data?.session_stage||'ideas';
+  brain130Anonymous=!!data?.anonymous_mode;
+  window.brain120VoteSession=data?.vote_session||null;
+  brain109RenderData();brain130RenderImages();brain130RefreshStagebar();brain130UpdateProgress();
+  if(brain130Images.some(x=>!x.url))brain130ResolveImages();
+};
+
+/* Full shell enhancements */
+const brain108RenderCanvasShellBaseV130=brain108RenderCanvasShell;
+brain108RenderCanvasShell=function(room){
+  brain108RenderCanvasShellBaseV130(room);
+  const wrap=document.getElementById('brain107StageWrap'),stage=document.getElementById('brain107Stage'),shell=document.getElementById('brain107CanvasShell');
+  if(stage&&!document.getElementById('brain130Images')){
+    const h=document.createElement('div');h.id='brain130Images';h.style.cssText='position:absolute;inset:0;pointer-events:none';stage.insertBefore(h,document.getElementById('brain107Cards'));
+  }
+  if(wrap&&!document.getElementById('brain130Toolbar')){
+    const t=document.createElement('div');t.id='brain130Toolbar';t.className='brain130-toolbar';
+    t.innerHTML=`<button onclick="brain130OpenBreakouts()">${brain130L('مجموعات','Breakouts')}</button><button onclick="brain130Cluster()">${brain130L('تجميع ذكي','Cluster')}</button><button onclick="brain130MergeSelectedIdeas()">${brain130L('دمج أفكار','Merge ideas')}</button><button onclick="brain130DecisionMatrix()">${brain130L('مصفوفة قرار','Matrix')}</button><button onclick="brain130SetDependency()">${brain130L('علاقة','Dependency')}</button><button onclick="brain130OpenLayers()">${brain130L('طبقات','Layers')}</button><button onclick="brain130LockSelected()">${brain130L('قفل عنصر','Lock')}</button><button onclick="brain130UnlockSelected()">${brain130L('فتح عنصر','Unlock')}</button><button onclick="brain130Presentation()">${brain130L('عرض','Present')}</button><button onclick="brain130OpenTimeline()">${brain130L('النشاط','Activity')}</button>${brain130CanManage()?`<button onclick="brain130ToggleAnonymous()">${brain130L('مجهول','Anonymous')}</button>`:''}<button onclick="brain130TogglePrivateDraft()">${brain130L('مسودة خاصة','Private draft')}</button>`;
+    wrap.appendChild(t);
+    const sb=document.createElement('div');sb.id='brain130Stagebar';sb.className='brain130-stagebar';sb.innerHTML=brain130Stages.map(s=>`<button data-stage="${s[0]}" onclick="brain130SetStage('${s[0]}')">${brain130L(s[1],s[2])}</button>`).join('');wrap.appendChild(sb);
+    const pr=document.createElement('div');pr.id='brain130Progress';pr.className='brain130-progress';pr.innerHTML='<div class="brain130-progress-track"><i></i></div><small></small>';wrap.appendChild(pr);
+  }
+  if(shell&&!document.getElementById('brain130Layers')){
+    for(const id of ['brain130Layers','brain130Breakouts','brain130Matrix','brain130Timeline']){
+      const p=document.createElement('div');p.id=id;p.className=id==='brain130Layers'?'brain130-layer-panel':'brain130-side-panel';shell.appendChild(p);
+    }
+    const present=document.createElement('div');present.id='brain130Present';present.className='brain130-present';present.innerHTML=`<div class="brain130-present-head"><b>${brain130L('عرض غرفة العصف الذهني','Brainstorm presentation')}</b><div class="brain130-present-controls"><button onclick="brain130PresentMove(-1)">‹</button><span id="brain130PresentCount"></span><button onclick="brain130PresentMove(1)">›</button><button onclick="brain130PresentClose()">×</button></div></div><div class="brain130-present-body"><div class="brain130-present-frame" id="brain130PresentFrame"></div></div>`;document.body.appendChild(present);
+  }
+  brain130RenderImages();brain130RefreshStagebar();brain130UpdateProgress();
+};
+
+/* Private draft is enforced at create time. */
+const brain108CreateCardBaseV130=brain108CreateCard;
+brain108CreateCard=async function(){
+  if(!brain130PrivateDraft)return brain108CreateCardBaseV130();
+  const body=document.getElementById('brain107Body')?.value.trim()||'',kind=document.getElementById('brain107Kind')?.value||'idea';if(!body)return;
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect(),c=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const {error}=await sb.rpc('tasky_brainstorm_private_add_v130',{p_room_id:brain130RoomId(),p_kind:kind,p_body:body,p_x:Math.round(c.x-115),p_y:Math.round(c.y-60)});
+  if(error)return taskyToast(error.message,{tone:'warning'});brain107ToggleCompose(false);await brain109FetchCanvas();
+};
+
+/* Realtime new tables */
+const brain110ConnectBaseV130=brain110Connect;
+brain110Connect=async function(roomId){
+  await brain110ConnectBaseV130(roomId);
+  if(!brain110Channel)return;
+  ['tasky_brainstorm_breakouts_v130','tasky_brainstorm_scores_v130','tasky_brainstorm_references_v130','tasky_brainstorm_images_v130','tasky_brainstorm_activity_v130'].forEach(table=>{
+    brain110Channel.on('postgres_changes',{event:'*',schema:'public',table,filter:`room_id=eq.${roomId}`},()=>brain110ScheduleRefresh(120));
+  });
+};
+
+/* Performance tuning: adaptive culling and stroke sampling hint */
+brain120ViewportVisible=function(x,y,w=230,h=140){
+  if((brain107Objects.length+brain109Shapes.length+brain130Images.length)<brain130Perf.maxRendered)return true;
+  const wrap=document.getElementById('brain107StageWrap');if(!wrap)return true;
+  const r=wrap.getBoundingClientRect(),vx=-brain107Tx/brain107Scale-350,vy=-brain107Ty/brain107Scale-350;
+  const vw=r.width/brain107Scale+700,vh=r.height/brain107Scale+700;
+  return x+w>=vx&&x<=vx+vw&&y+h>=vy&&y<=vy+vh;
+};
+
+/* Open/close */
+const brain108OpenRoomBaseV130=brain108OpenRoom;
+brain108OpenRoom=async function(roomId){brain130Images=[];brain130Timeline=[];await brain108OpenRoomBaseV130(roomId)};
+const brain108CloseCanvasBaseV130=brain108CloseCanvas;
+brain108CloseCanvas=function(){brain130Images=[];brain130Timeline=[];document.getElementById('brain130Present')?.classList.remove('show');return brain108CloseCanvasBaseV130()};
+</script>
+
 </body>
 </html>
