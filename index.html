@@ -17857,5 +17857,504 @@ const brain108CloseCanvasBaseV112=brain108CloseCanvas;
 brain108CloseCanvas=function(){brain112Selected.clear();brain112ClosePanel();return brain108CloseCanvasBaseV112()};
 </script>
 
+
+<style id="tasky-v120-brainstorm-powerpack-css">
+/* ============================================================
+   V120 — Brainstorm Power Pack
+   Templates, Frames, Mind Map, Multi-select, Snap, Clipboard,
+   Undo/Redo, Comments, Voting sessions, Timer, Facilitator,
+   Follow-me, Mini-map, Search, Insights, perf hardening.
+   ============================================================ */
+#brain120Hud{
+  position:absolute;z-index:20;top:10px;inset-inline-start:10px;
+  display:flex;gap:6px;align-items:center;flex-wrap:wrap;max-width:75%
+}
+.brain120-hud-btn,.brain120-search{
+  min-height:34px;border:1px solid #d8dfdb;background:rgba(255,255,255,.95);
+  color:#30453d;border-radius:9px;padding:6px 9px;font-size:8.5px;font-weight:800
+}
+.brain120-search{width:185px;font-weight:500}
+.brain120-panel{
+  position:absolute;z-index:50;top:52px;inset-inline-start:10px;width:min(430px,calc(100vw - 80px));
+  max-height:min(70dvh,620px);overflow:auto;display:none;
+  border:1px solid #d8e0dc;background:#fff;color:#18251f;border-radius:14px;
+  padding:11px;box-shadow:0 14px 38px rgba(0,0,0,.18)
+}
+.brain120-panel.show{display:block}
+.brain120-panel h3{margin:0 0 4px;font-size:12px}
+.brain120-panel p{margin:0 0 9px;color:#687770;font-size:8.5px;line-height:1.6}
+.brain120-grid{display:grid;grid-template-columns:1fr 1fr;gap:7px}
+.brain120-grid button{
+  min-height:38px;border:1px solid #dce3df;background:#fafbfa;color:#31453d;
+  border-radius:9px;padding:7px 9px;font-size:8.5px;font-weight:800;text-align:start
+}
+.brain120-frame{
+  position:absolute;border:2px dashed #98a9a2;background:rgba(255,255,255,.16);
+  border-radius:14px;pointer-events:auto;touch-action:none;user-select:none;
+}
+.brain120-frame-title{
+  position:absolute;top:-25px;inset-inline-start:0;background:#fff;border:1px solid #d8dfdb;
+  border-radius:7px;padding:3px 6px;font-size:8px;font-weight:800;color:#4d6058;white-space:nowrap
+}
+.brain120-frame.dragging{opacity:.8}
+.brain120-guide{position:absolute;z-index:32;background:#1d624b;pointer-events:none;display:none}
+.brain120-guide.v{width:1px;top:0;bottom:0}
+.brain120-guide.h{height:1px;left:0;right:0}
+.brain120-minimap{
+  position:absolute;z-index:15;bottom:10px;inset-inline-start:10px;width:180px;height:125px;
+  background:rgba(255,255,255,.96);border:1px solid #d8dfdb;border-radius:10px;overflow:hidden
+}
+.brain120-minimap svg{width:100%;height:100%}
+.brain120-mini-node{fill:#71847b;opacity:.58}
+.brain120-mini-frame{fill:none;stroke:#98aaa2;stroke-width:2}
+.brain120-mini-view{fill:rgba(29,98,75,.12);stroke:#1d624b;stroke-width:2}
+.brain120-timer{
+  position:absolute;z-index:16;top:10px;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.96);border:1px solid #d8dfdb;border-radius:999px;
+  padding:6px 10px;color:#33473f;font-size:8.5px;font-weight:800;display:none
+}
+.brain120-timer.show{display:block}
+.brain120-comment-dot{
+  position:absolute;top:7px;inset-inline-end:7px;width:17px;height:17px;border-radius:999px;
+  display:grid;place-items:center;background:#eef4f1;color:#315d4d;border:1px solid #d7e2dd;font-size:7px
+}
+.brain120-comment-list{display:flex;flex-direction:column;gap:7px}
+.brain120-comment{
+  border:1px solid #e0e6e3;background:#fafbfa;border-radius:9px;padding:8px
+}
+.brain120-comment b{display:block;font-size:8.5px;margin-bottom:3px}
+.brain120-comment p{margin:0;font-size:9px;color:#3d5049;white-space:pre-wrap}
+.brain120-comment small{display:block;color:#83908b;font-size:7px;margin-top:4px}
+.brain120-vote-badge{
+  position:absolute;bottom:7px;inset-inline-end:7px;border-radius:999px;padding:3px 6px;
+  font-size:7px;background:#fff8e5;border:1px solid #eadcae;color:#785f23
+}
+.brain120-insight{
+  border:1px solid #dce4e0;background:#f8faf9;border-radius:10px;padding:9px;margin-top:7px
+}
+.brain120-insight b{display:block;font-size:9px;margin-bottom:3px}
+.brain120-insight p{margin:0;font-size:8.5px;color:#52655d;line-height:1.55}
+.brain120-selection-box{
+  position:absolute;z-index:34;border:1px solid #1d624b;background:rgba(29,98,75,.08);pointer-events:none
+}
+.brain120-selected{
+  outline:3px solid rgba(29,98,75,.28)!important;outline-offset:3px!important
+}
+.brain120-hidden{display:none!important}
+.brain120-flash{animation:brain120flash 1s ease}
+@keyframes brain120flash{0%,100%{box-shadow:none}50%{box-shadow:0 0 0 4px rgba(29,98,75,.25)}}
+@media(max-width:700px){
+  #brain120Hud{max-width:calc(100% - 65px);gap:4px}
+  .brain120-hud-btn{min-height:32px;padding:5px 7px}
+  .brain120-search{width:130px}
+  .brain120-minimap{width:125px;height:88px}
+  .brain120-panel{inset-inline-start:5px;width:calc(100vw - 58px)}
+}
+</style>
+
+<script id="tasky-v120-brainstorm-powerpack-js">
+window.TASKY_BUILD='V120';console.info('Tasky build',window.TASKY_BUILD);
+
+let brain120Frames=[];
+let brain120Selected=new Set();
+let brain120Clipboard=[];
+let brain120Undo=[];
+let brain120Redo=[];
+let brain120Snap=true;
+let brain120SelectBox=null;
+let brain120TimerState=null;
+let brain120Facilitator=false;
+let brain120Filter='';
+let brain120FilterKind='';
+let brain120LastMutation=0;
+let brain120FrameDrag=null;
+
+function brain120L(ar,en){return lang==='ar'?ar:en}
+function brain120Panel(id){
+  for(const el of document.querySelectorAll('.brain120-panel'))if(el.id!==id)el.classList.remove('show');
+  document.getElementById(id)?.classList.toggle('show');
+}
+function brain120ClosePanels(){document.querySelectorAll('.brain120-panel').forEach(x=>x.classList.remove('show'))}
+function brain120PushUndo(action){
+  brain120Undo.push(action);if(brain120Undo.length>80)brain120Undo.shift();brain120Redo=[];
+}
+function brain120CurrentRoomId(){return window.brain108RoomId}
+function brain120CanEdit(){return brain111CanEdit?brain111CanEdit():brain109Editable()}
+
+function brain120TemplatePanelHtml(){
+  const t=[
+    ['blank',brain120L('لوحة فارغة','Blank canvas')],
+    ['swot','SWOT'],
+    ['mindmap',brain120L('خريطة ذهنية','Mind map')],
+    ['retro',brain120L('مراجعة الفريق','Retrospective')],
+    ['fivewhy','5 Whys'],
+    ['impact','Impact / Effort'],
+    ['journey','Customer Journey'],
+    ['design','Design Thinking']
+  ];
+  return `<h3>${brain120L('قوالب الغرفة','Room templates')}</h3><p>${brain120L('يضيف القالب إطارات وعناوين قابلة للتعديل داخل اللوحة الحالية.','Templates add editable frames and headings to the current canvas.')}</p><div class="brain120-grid">${t.map(x=>`<button type="button" onclick="brain120ApplyTemplate('${x[0]}')">${escapeHtml(x[1])}</button>`).join('')}</div>`;
+}
+async function brain120ApplyTemplate(type){
+  if(!brain120CanEdit())return;
+  brain120ClosePanels();
+  const {error}=await sb.rpc('tasky_brainstorm_template_apply_v120',{p_room_id:brain120CurrentRoomId(),p_template:type});
+  if(error)return showTaskyDialog({title:brain120L('تعذّر تطبيق القالب','Could not apply template'),message:error.message,tone:'error'});
+  brain120PushUndo({kind:'snapshot_hint'});
+  await brain109FetchCanvas();brain107Fit();
+}
+
+function brain120RenderFrames(){
+  const host=document.getElementById('brain120Frames');if(!host)return;
+  host.innerHTML=brain120Frames.map(f=>`<div class="brain120-frame ${brain120Selected.has(f.id)?'brain120-selected':''}" data-frame-id="${f.id}" style="left:${f.x}px;top:${f.y}px;width:${f.w}px;height:${f.h}px"><span class="brain120-frame-title">${escapeHtml(f.title)}</span></div>`).join('');
+}
+function brain120RenderMiniMap(){
+  const el=document.getElementById('brain120MiniMap');if(!el)return;
+  const wrap=document.getElementById('brain107StageWrap');if(!wrap)return;
+  const r=wrap.getBoundingClientRect();
+  const viewX=Math.max(0,-brain107Tx/brain107Scale),viewY=Math.max(0,-brain107Ty/brain107Scale);
+  const viewW=r.width/brain107Scale,viewH=r.height/brain107Scale;
+  el.innerHTML=`<svg viewBox="0 0 4000 3000" preserveAspectRatio="none">
+    ${brain120Frames.map(f=>`<rect class="brain120-mini-frame" x="${f.x}" y="${f.y}" width="${f.w}" height="${f.h}"/>`).join('')}
+    ${brain107Objects.map(o=>`<rect class="brain120-mini-node" x="${o.x}" y="${o.y}" width="230" height="140" rx="12"/>`).join('')}
+    ${brain109Shapes.map(s=>`<rect class="brain120-mini-node" x="${s.x}" y="${s.y}" width="${s.w}" height="${s.h}" rx="10"/>`).join('')}
+    <rect class="brain120-mini-view" x="${viewX}" y="${viewY}" width="${viewW}" height="${viewH}"/>
+  </svg>`;
+}
+function brain120RenderSelection(){
+  document.querySelectorAll('#brain107Cards .brain107-card').forEach(el=>el.classList.toggle('brain120-selected',brain120Selected.has(el.dataset.id)));
+  document.querySelectorAll('#brain109Shapes .brain109-shape').forEach(el=>el.classList.toggle('brain120-selected',brain120Selected.has(el.dataset.shapeId)));
+  document.querySelectorAll('#brain120Frames .brain120-frame').forEach(el=>el.classList.toggle('brain120-selected',brain120Selected.has(el.dataset.frameId)));
+}
+function brain120ApplyFilter(){
+  const q=(brain120Filter||'').trim().toLowerCase();
+  document.querySelectorAll('#brain107Cards .brain107-card').forEach(el=>{
+    const o=brain107Objects.find(x=>x.id===el.dataset.id);
+    const ok=!o?true:(!q||String(o.body||'').toLowerCase().includes(q)||String(o.author_name||'').toLowerCase().includes(q))&&(!brain120FilterKind||o.kind===brain120FilterKind);
+    el.classList.toggle('brain120-hidden',!ok);
+  });
+}
+const brain109RenderDataBaseV120=brain109RenderData;
+brain109RenderData=function(){
+  brain109RenderDataBaseV120();
+  brain120RenderFrames();brain120RenderSelection();brain120RenderMiniMap();brain120ApplyFilter();
+};
+
+function brain120SnapValue(v){return brain120Snap?Math.round(v/24)*24:v}
+function brain120ToggleSnap(){brain120Snap=!brain120Snap;taskyToast(brain120Snap?brain120L('تم تفعيل المحاذاة للشبكة','Snap enabled'):brain120L('تم إيقاف المحاذاة للشبكة','Snap disabled'),{tone:'success'})}
+
+function brain120ClearSelection(){brain120Selected.clear();brain120RenderSelection()}
+function brain120ToggleSelect(id,append=false){
+  if(!append)brain120Selected.clear();
+  if(brain120Selected.has(id))brain120Selected.delete(id);else brain120Selected.add(id);
+  brain120RenderSelection();
+}
+function brain120Copy(){
+  const items=[];
+  for(const id of brain120Selected){
+    const o=brain107Objects.find(x=>x.id===id);if(o)items.push({type:'card',data:{kind:o.kind,body:o.body,x:o.x,y:o.y}});
+    const s=brain109Shapes.find(x=>x.id===id);if(s)items.push({type:'shape',data:{shape_type:s.shape_type,x:s.x,y:s.y,w:s.w,h:s.h}});
+  }
+  brain120Clipboard=items;taskyToast(brain120L(`تم نسخ ${items.length} عنصر`,`Copied ${items.length} item(s)`),{tone:'success'});
+}
+async function brain120Paste(){
+  if(!brain120CanEdit()||!brain120Clipboard.length)return;
+  const {error}=await sb.rpc('tasky_brainstorm_clipboard_paste_v120',{p_room_id:brain120CurrentRoomId(),p_items:brain120Clipboard});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+async function brain120DuplicateSelection(){brain120Copy();await brain120Paste()}
+
+async function brain120AddFrame(){
+  if(!brain120CanEdit())return;
+  const title=await taskyPrompt(brain120L('اسم الإطار','Frame title'),{title:brain120L('إطار جديد','New frame'),placeholder:brain120L('مثال: الحلول المقترحة','Example: Proposed solutions')});
+  if(!title)return;
+  const wrap=document.getElementById('brain107StageWrap'),r=wrap.getBoundingClientRect(),c=brain107ScreenToCanvas(r.left+r.width/2,r.top+r.height/2);
+  const {error}=await sb.rpc('tasky_brainstorm_frame_add_v120',{p_room_id:brain120CurrentRoomId(),p_title:title,p_x:Math.round(c.x-350),p_y:Math.round(c.y-220),p_w:700,p_h:440});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+
+async function brain120MindChild(parentId){
+  if(!brain120CanEdit())return;
+  const text=await taskyPrompt(brain120L('الفكرة الفرعية','Child idea'),{title:brain120L('فرع جديد','New branch')});if(!text)return;
+  const p=brain107Objects.find(x=>x.id===parentId);if(!p)return;
+  const {error}=await sb.rpc('tasky_brainstorm_mind_child_v120',{p_room_id:brain120CurrentRoomId(),p_parent_id:parentId,p_body:text});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+
+/* Comments */
+async function brain120OpenComments(objectId){
+  const {data,error}=await sb.rpc('tasky_brainstorm_comment_list_v120',{p_room_id:brain120CurrentRoomId(),p_object_id:objectId});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  const rows=Array.isArray(data)?data:[];
+  document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${brain120L('مناقشة الفكرة','Idea discussion')}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div>
+  <div class="brain120-comment-list">${rows.length?rows.map(c=>`<div class="brain120-comment"><b>${escapeHtml(c.author_name||'')}</b><p>${escapeHtml(c.body)}</p><small>${escapeHtml(new Date(c.created_at).toLocaleString(lang==='ar'?'ar-SA':'en-US'))}</small></div>`).join(''):`<div class="meet101-empty">${brain120L('لا توجد تعليقات بعد','No comments yet')}</div>`}</div>
+  <div style="margin-top:9px"><textarea id="brain120CommentBody" maxlength="1200" style="width:100%;min-height:85px;border:1px solid var(--border);border-radius:9px;padding:9px" placeholder="${brain120L('اكتب تعليقًا… ويمكنك استخدام @ للاسم','Write a comment… you can use @name')}"></textarea></div>
+  <div style="display:flex;justify-content:flex-end;margin-top:7px"><button class="primary-btn" onclick="brain120AddComment('${objectId}')">${brain120L('إضافة تعليق','Add comment')}</button></div>`;
+  document.getElementById('addModalOverlay').classList.remove('hidden');
+}
+async function brain120AddComment(objectId){
+  const body=document.getElementById('brain120CommentBody')?.value.trim()||'';if(!body)return;
+  const {error}=await sb.rpc('tasky_brainstorm_comment_add_v120',{p_room_id:brain120CurrentRoomId(),p_object_id:objectId,p_body:body});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain120OpenComments(objectId);
+}
+
+/* Voting session */
+async function brain120StartVote(){
+  if(!brain111CanManage())return;
+  const raw=await taskyPrompt(brain120L('عدد الأصوات لكل مشارك','Votes per participant'),{title:brain120L('بدء جولة تصويت','Start voting session'),placeholder:'5'});if(!raw)return;
+  const n=Math.max(1,Math.min(20,parseInt(raw,10)||5));
+  const {error}=await sb.rpc('tasky_brainstorm_vote_session_start_v120',{p_room_id:brain120CurrentRoomId(),p_votes_per_user:n,p_hide_results:true});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+async function brain120EndVote(){
+  if(!brain111CanManage())return;
+  const {error}=await sb.rpc('tasky_brainstorm_vote_session_end_v120',{p_room_id:brain120CurrentRoomId()});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  await brain109FetchCanvas();
+}
+
+/* Timer */
+function brain120StartTimer(minutes=5){
+  if(!brain111CanManage())return;
+  brain120TimerState={ends:Date.now()+minutes*60000,label:brain120L('جلسة عصف ذهني','Brainstorm session')};
+  brain120RenderTimer();
+  if(brain110Channel)brain110Channel.send({type:'broadcast',event:'timer',payload:brain120TimerState}).catch?.(()=>{});
+}
+function brain120RenderTimer(){
+  const el=document.getElementById('brain120Timer');if(!el)return;
+  if(!brain120TimerState){el.classList.remove('show');return}
+  const left=Math.max(0,brain120TimerState.ends-Date.now()),m=Math.floor(left/60000),s=Math.floor((left%60000)/1000);
+  el.textContent=`${brain120TimerState.label} · ${m}:${String(s).padStart(2,'0')}`;el.classList.add('show');
+  if(left<=0){brain120TimerState=null;el.textContent=brain120L('انتهى الوقت','Time is up');setTimeout(()=>el.classList.remove('show'),4000)}
+}
+setInterval(brain120RenderTimer,1000);
+
+/* Facilitator / Follow-me */
+function brain120BroadcastView(){
+  if(!brain110Channel||!brain111CanManage())return;
+  brain110Channel.send({type:'broadcast',event:'viewport',payload:{tx:brain107Tx,ty:brain107Ty,scale:brain107Scale}}).catch?.(()=>{});
+  taskyToast(brain120L('تم إرسال موضع اللوحة للجميع','Canvas view sent to everyone'),{tone:'success'});
+}
+function brain120ToggleFacilitator(){brain120Facilitator=!brain120Facilitator;taskyToast(brain120Facilitator?brain120L('وضع الميسّر مفعل','Facilitator mode enabled'):brain120L('وضع الميسّر متوقف','Facilitator mode disabled'),{tone:'success'})}
+
+/* Search / Insights */
+function brain120Search(v){brain120Filter=v;brain120ApplyFilter()}
+function brain120SetFilterKind(v){brain120FilterKind=v;brain120ApplyFilter()}
+function brain120Insights(){
+  const rows=[...brain107Objects];
+  const top=[...rows].sort((a,b)=>Number(b.vote_count||0)-Number(a.vote_count||0)).slice(0,5);
+  const words={};
+  rows.forEach(o=>String(o.body||'').toLowerCase().replace(/[^\p{L}\p{N}\s]/gu,' ').split(/\s+/).filter(w=>w.length>3).forEach(w=>words[w]=(words[w]||0)+1));
+  const common=Object.entries(words).sort((a,b)=>b[1]-a[1]).slice(0,8);
+  const decisions=rows.filter(x=>x.kind==='decision'),questions=rows.filter(x=>x.kind==='question');
+  const html=`<h3>${brain120L('ملخص وتحليلات الجلسة','Session insights')}</h3>
+    <div class="brain120-insight"><b>${brain120L('أعلى الأفكار تصويتًا','Top voted ideas')}</b><p>${top.length?top.map(x=>`${escapeHtml(x.body)} (${x.vote_count||0})`).join('<br>'):brain120L('لا يوجد تصويت بعد','No votes yet')}</p></div>
+    <div class="brain120-insight"><b>${brain120L('المواضيع المتكررة','Repeated themes')}</b><p>${common.length?common.map(x=>`${escapeHtml(x[0])} · ${x[1]}`).join(' — '):brain120L('لا توجد بيانات كافية','Not enough data')}</p></div>
+    <div class="brain120-insight"><b>${brain120L('القرارات','Decisions')}</b><p>${decisions.length?decisions.map(x=>escapeHtml(x.body)).join('<br>'):brain120L('لا توجد قرارات مسجلة','No decisions recorded')}</p></div>
+    <div class="brain120-insight"><b>${brain120L('الأسئلة المفتوحة','Open questions')}</b><p>${questions.length?questions.map(x=>escapeHtml(x.body)).join('<br>'):brain120L('لا توجد أسئلة مفتوحة','No open questions')}</p></div>`;
+  const p=document.getElementById('brain120InsightsPanel');p.innerHTML=html;p.classList.add('show');
+}
+
+/* Cross-link status from V112 */
+async function brain120FetchActionLinks(){
+  if(!brain120CurrentRoomId())return;
+  const {data}=await sb.rpc('tasky_brainstorm_action_list_v112',{p_room_id:brain120CurrentRoomId()});
+  window.brain120ActionLinks=Array.isArray(data)?data:[];
+}
+
+/* Performance: only render visible cards/shapes after threshold. */
+function brain120ViewportVisible(x,y,w=230,h=140){
+  if((brain107Objects.length+brain109Shapes.length)<180)return true;
+  const wrap=document.getElementById('brain107StageWrap');if(!wrap)return true;
+  const r=wrap.getBoundingClientRect(),vx=-brain107Tx/brain107Scale-300,vy=-brain107Ty/brain107Scale-300;
+  const vw=r.width/brain107Scale+600,vh=r.height/brain107Scale+600;
+  return x+w>=vx&&x<=vx+vw&&y+h>=vy&&y<=vy+vh;
+}
+const brain109RenderCardsBaseV120=brain109RenderCards;
+brain109RenderCards=function(){
+  brain109RenderCardsBaseV120();
+  for(const el of document.querySelectorAll('#brain107Cards .brain107-card')){
+    const o=brain107Objects.find(x=>x.id===el.dataset.id);if(!o)continue;
+    if(!brain120ViewportVisible(Number(o.x),Number(o.y),230,150))el.style.display='none';
+    if(!el.querySelector('[data-brain120-comment]')){
+      const actions=el.querySelector('.brain107-card-foot .actions');
+      if(actions){
+        const c=document.createElement('button');c.type='button';c.dataset.brain120Comment='1';c.textContent=brain120L('تعليقات','Comments');c.onclick=e=>{e.stopPropagation();brain120OpenComments(o.id)};actions.insertBefore(c,actions.firstChild);
+        if(o.kind==='idea'||o.kind==='question'){
+          const m=document.createElement('button');m.type='button';m.textContent=brain120L('فرع','Branch');m.onclick=e=>{e.stopPropagation();brain120MindChild(o.id)};actions.insertBefore(m,actions.firstChild);
+        }
+      }
+    }
+  }
+  brain120RenderSelection();brain120ApplyFilter();
+};
+const brain109RenderShapesBaseV120=brain109RenderShapes;
+brain109RenderShapes=function(){
+  brain109RenderShapesBaseV120();
+  for(const el of document.querySelectorAll('#brain109Shapes .brain109-shape')){
+    const s=brain109Shapes.find(x=>x.id===el.dataset.shapeId);if(s&&!brain120ViewportVisible(Number(s.x),Number(s.y),Number(s.w),Number(s.h)))el.style.display='none';
+  }
+  brain120RenderSelection();
+};
+
+/* State enrich */
+const brain109FetchCanvasBaseV120=brain109FetchCanvas;
+brain109FetchCanvas=async function(){
+  if(!window.brain108RoomId)return;
+  const {data,error}=await sb.rpc('tasky_brainstorm_canvas_state_v120',{p_room_id:window.brain108RoomId});
+  if(error){console.warn('V120 canvas state',error);return}
+  brain107Objects=Array.isArray(data?.objects)?data.objects:[];
+  brain107Strokes=Array.isArray(data?.strokes)?data.strokes:[];
+  brain107Presence=Array.isArray(data?.presence)?data.presence:[];
+  brain109Shapes=Array.isArray(data?.shapes)?data.shapes:[];
+  brain109Connectors=Array.isArray(data?.connectors)?data.connectors:[];
+  brain120Frames=Array.isArray(data?.frames)?data.frames:[];
+  window.brain108RoomMeta=data?.room||window.brain108RoomMeta||{};
+  window.brain120VoteSession=data?.vote_session||null;
+  brain109RenderData();
+};
+
+/* Toolbar + panels + minimap */
+const brain108RenderCanvasShellBaseV120=brain108RenderCanvasShell;
+brain108RenderCanvasShell=function(room){
+  brain108RenderCanvasShellBaseV120(room);
+  const wrap=document.getElementById('brain107StageWrap'),stage=document.getElementById('brain107Stage');
+  if(stage&&!document.getElementById('brain120Frames')){
+    const f=document.createElement('div');f.id='brain120Frames';f.style.cssText='position:absolute;inset:0;pointer-events:none';stage.insertBefore(f,document.getElementById('brain109Shapes'));
+  }
+  if(wrap&&!document.getElementById('brain120Hud')){
+    const hud=document.createElement('div');hud.id='brain120Hud';
+    hud.innerHTML=`<button class="brain120-hud-btn" onclick="brain120Panel('brain120Templates')">${brain120L('قوالب','Templates')}</button><button class="brain120-hud-btn" onclick="brain120AddFrame()">${brain120L('إطار','Frame')}</button><button class="brain120-hud-btn" onclick="brain120ToggleSnap()">${brain120L('محاذاة','Snap')}</button><button class="brain120-hud-btn" onclick="brain120Panel('brain120Tools')">${brain120L('أدوات','Tools')}</button><button class="brain120-hud-btn" onclick="brain120Insights()">${brain120L('تحليلات','Insights')}</button><input class="brain120-search" placeholder="${brain120L('بحث في اللوحة','Search canvas')}" oninput="brain120Search(this.value)">`;
+    wrap.appendChild(hud);
+    const timer=document.createElement('div');timer.id='brain120Timer';timer.className='brain120-timer';wrap.appendChild(timer);
+    const mini=document.createElement('div');mini.id='brain120MiniMap';mini.className='brain120-minimap';mini.onclick=e=>{
+      const r=mini.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*4000,y=(e.clientY-r.top)/r.height*3000,wr=wrap.getBoundingClientRect();
+      brain107Tx=wr.width/2-x*brain107Scale;brain107Ty=wr.height/2-y*brain107Scale;brain107ApplyTransform();brain120RenderMiniMap();
+    };wrap.appendChild(mini);
+  }
+  const shell=document.getElementById('brain107CanvasShell');
+  if(shell&&!document.getElementById('brain120Templates')){
+    const t=document.createElement('div');t.id='brain120Templates';t.className='brain120-panel';t.innerHTML=brain120TemplatePanelHtml();shell.appendChild(t);
+    const tools=document.createElement('div');tools.id='brain120Tools';tools.className='brain120-panel';
+    tools.innerHTML=`<h3>${brain120L('أدوات متقدمة','Advanced tools')}</h3><div class="brain120-grid">
+      <button onclick="brain120Copy()">${brain120L('نسخ المحدد','Copy selected')}</button>
+      <button onclick="brain120Paste()">${brain120L('لصق','Paste')}</button>
+      <button onclick="brain120DuplicateSelection()">${brain120L('تكرار المحدد','Duplicate selected')}</button>
+      <button onclick="brain120ClearSelection()">${brain120L('مسح التحديد','Clear selection')}</button>
+      ${brain111CanManage()?`<button onclick="brain120StartVote()">${brain120L('بدء تصويت','Start vote')}</button><button onclick="brain120EndVote()">${brain120L('إنهاء التصويت','End vote')}</button><button onclick="brain120StartTimer(5)">${brain120L('مؤقت 5 دقائق','5 min timer')}</button><button onclick="brain120StartTimer(10)">${brain120L('مؤقت 10 دقائق','10 min timer')}</button><button onclick="brain120BroadcastView()">${brain120L('اجلب الجميع هنا','Bring everyone here')}</button><button onclick="brain120ToggleFacilitator()">${brain120L('وضع الميسّر','Facilitator mode')}</button>`:''}
+      <button onclick="brain120SetFilterKind('decision')">${brain120L('عرض القرارات','Show decisions')}</button>
+      <button onclick="brain120SetFilterKind('')">${brain120L('عرض الكل','Show all')}</button>
+    </div>`;shell.appendChild(tools);
+    const ins=document.createElement('div');ins.id='brain120InsightsPanel';ins.className='brain120-panel';shell.appendChild(ins);
+  }
+  brain120RenderFrames();brain120RenderMiniMap();brain120RenderSelection();
+};
+
+/* Input improvements: multi-select and frame dragging. */
+const brain109PointerDownBaseV120=brain109PointerDown;
+brain109PointerDown=function(e){
+  const frame=e.target.closest?.('.brain120-frame');
+  if(frame&&brain107Tool==='select'&&brain120CanEdit()){
+    const f=brain120Frames.find(x=>x.id===frame.dataset.frameId);if(!f)return;
+    if(e.shiftKey||e.ctrlKey||e.metaKey){brain120ToggleSelect(f.id,true);return}
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain120FrameDrag={id:f.id,dx:p.x-f.x,dy:p.y-f.y,lastX:f.x,lastY:f.y};frame.classList.add('dragging');return;
+  }
+  const card=e.target.closest?.('.brain107-card'),shape=e.target.closest?.('.brain109-shape');
+  if(brain107Tool==='select'&&(e.shiftKey||e.ctrlKey||e.metaKey)&&(card||shape)){
+    brain120ToggleSelect(card?.dataset.id||shape?.dataset.shapeId,true);e.preventDefault();return;
+  }
+  if(brain107Tool==='select'&&!card&&!shape&&!frame&&brain120CanEdit()){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain120SelectBox={sx:p.x,sy:p.y,x:p.x,y:p.y};
+    const box=document.createElement('div');box.id='brain120SelectBox';box.className='brain120-selection-box';document.getElementById('brain107Stage').appendChild(box);return;
+  }
+  return brain109PointerDownBaseV120(e);
+}
+const brain109PointerMoveBaseV120=brain109PointerMove;
+brain109PointerMove=function(e){
+  if(brain120FrameDrag){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY),f=brain120Frames.find(x=>x.id===brain120FrameDrag.id);
+    if(f){f.x=brain120SnapValue(Math.max(0,Math.min(4000-f.w,p.x-brain120FrameDrag.dx)));f.y=brain120SnapValue(Math.max(0,Math.min(3000-f.h,p.y-brain120FrameDrag.dy)));brain120FrameDrag.lastX=f.x;brain120FrameDrag.lastY=f.y;brain120RenderFrames()}
+    return;
+  }
+  if(brain120SelectBox){
+    const p=brain107ScreenToCanvas(e.clientX,e.clientY);brain120SelectBox.x=p.x;brain120SelectBox.y=p.y;
+    const x=Math.min(brain120SelectBox.sx,p.x),y=Math.min(brain120SelectBox.sy,p.y),w=Math.abs(p.x-brain120SelectBox.sx),h=Math.abs(p.y-brain120SelectBox.sy);
+    const box=document.getElementById('brain120SelectBox');if(box)box.style.cssText=`left:${x}px;top:${y}px;width:${w}px;height:${h}px`;
+    return;
+  }
+  const r=brain109PointerMoveBaseV120(e);
+  if(brain107Drag){
+    const o=brain107Objects.find(x=>x.id===brain107Drag.id);
+    if(o){o.x=brain120SnapValue(o.x);o.y=brain120SnapValue(o.y)}
+  }
+  if(brain109ShapeDrag){
+    const s=brain109Shapes.find(x=>x.id===brain109ShapeDrag.id);
+    if(s){s.x=brain120SnapValue(s.x);s.y=brain120SnapValue(s.y)}
+  }
+  brain120RenderMiniMap();return r;
+}
+const brain109PointerUpBaseV120=brain109PointerUp;
+brain109PointerUp=async function(e){
+  if(brain120FrameDrag){
+    const d=brain120FrameDrag;brain120FrameDrag=null;document.querySelector(`.brain120-frame[data-frame-id="${CSS.escape(d.id)}"]`)?.classList.remove('dragging');
+    await sb.rpc('tasky_brainstorm_frame_move_v120',{p_room_id:brain120CurrentRoomId(),p_frame_id:d.id,p_x:Math.round(d.lastX),p_y:Math.round(d.lastY)});brain120RenderMiniMap();return;
+  }
+  if(brain120SelectBox){
+    const b=brain120SelectBox;brain120SelectBox=null;document.getElementById('brain120SelectBox')?.remove();
+    const x1=Math.min(b.sx,b.x),y1=Math.min(b.sy,b.y),x2=Math.max(b.sx,b.x),y2=Math.max(b.sy,b.y);brain120Selected.clear();
+    brain107Objects.forEach(o=>{if(o.x>=x1&&o.y>=y1&&o.x+230<=x2&&o.y+150<=y2)brain120Selected.add(o.id)});
+    brain109Shapes.forEach(s=>{if(s.x>=x1&&s.y>=y1&&s.x+s.w<=x2&&s.y+s.h<=y2)brain120Selected.add(s.id)});
+    brain120Frames.forEach(f=>{if(f.x>=x1&&f.y>=y1&&f.x+f.w<=x2&&f.y+f.h<=y2)brain120Selected.add(f.id)});
+    brain120RenderSelection();return;
+  }
+  const beforeCard=brain107Drag?{...brain107Objects.find(x=>x.id===brain107Drag.id)}:null;
+  const beforeShape=brain109ShapeDrag?{...brain109Shapes.find(x=>x.id===brain109ShapeDrag.id)}:null;
+  const r=await brain109PointerUpBaseV120(e);
+  if(beforeCard)brain120PushUndo({kind:'move_card',id:beforeCard.id,x:beforeCard.x,y:beforeCard.y});
+  if(beforeShape)brain120PushUndo({kind:'move_shape',id:beforeShape.id,x:beforeShape.x,y:beforeShape.y});
+  return r;
+}
+
+/* Realtime extra events */
+const brain110ConnectBaseV120=brain110Connect;
+brain110Connect=async function(roomId){
+  await brain110ConnectBaseV120(roomId);
+  if(!brain110Channel)return;
+  brain110Channel.on('broadcast',{event:'viewport'},payload=>{
+    if(!brain120Facilitator)return;
+    const p=payload?.payload||payload;if(!p)return;
+    brain107Tx=Number(p.tx)||0;brain107Ty=Number(p.ty)||0;brain107Scale=Number(p.scale)||1;brain107ApplyTransform();brain120RenderMiniMap();
+  });
+  brain110Channel.on('broadcast',{event:'timer'},payload=>{brain120TimerState=payload?.payload||payload;brain120RenderTimer()});
+};
+
+/* Open/close */
+const brain108OpenRoomBaseV120=brain108OpenRoom;
+brain108OpenRoom=async function(roomId){
+  brain120Selected.clear();brain120Frames=[];brain120Filter='';brain120FilterKind='';
+  await brain108OpenRoomBaseV120(roomId);
+  await brain120FetchActionLinks();
+};
+const brain108CloseCanvasBaseV120=brain108CloseCanvas;
+brain108CloseCanvas=function(){
+  brain120Selected.clear();brain120Frames=[];brain120ClosePanels();brain120TimerState=null;
+  return brain108CloseCanvasBaseV120();
+};
+
+/* keyboard */
+window.addEventListener('keydown',e=>{
+  if(!window.brain108RoomId)return;
+  const tag=e.target?.tagName?.toLowerCase();if(tag==='input'||tag==='textarea'||tag==='select')return;
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='c'){e.preventDefault();brain120Copy()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='v'){e.preventDefault();brain120Paste()}
+  if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='d'){e.preventDefault();brain120DuplicateSelection()}
+  if(e.key==='Escape'){brain120ClearSelection();brain120ClosePanels()}
+});
+</script>
+
 </body>
 </html>
