@@ -20174,5 +20174,203 @@ async function req160UploadAttachments(requestId){
 }
 </script>
 
+
+<style id="tasky-v161-comms-css">
+/* ============================================================
+   V161 — Tasky Connect
+   Company chat + team rooms + private groups + meal planning
+   ============================================================ */
+.com161{display:flex;flex-direction:column;gap:12px}
+.com161-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;border:1px solid var(--border);background:var(--card);border-radius:15px;padding:15px}
+.com161-head h2{margin:0 0 4px;font-size:19px}.com161-head p{margin:0;color:var(--muted);font-size:9px;line-height:1.6}
+.com161-actions{display:flex;gap:6px;flex-wrap:wrap}
+.com161-btn{min-height:36px;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:7px 10px;font:800 8.5px Inter,'IBM Plex Sans Arabic';cursor:pointer}
+.com161-btn.primary{background:var(--green);border-color:var(--green);color:#fff}.com161-btn.danger{color:var(--danger)}
+.com161-shell{display:grid;grid-template-columns:250px minmax(0,1fr) 280px;gap:9px;min-height:610px}
+.com161-side,.com161-main,.com161-info{border:1px solid var(--border);background:var(--card);border-radius:13px;min-width:0}
+.com161-side,.com161-info{padding:9px}
+.com161-side-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}.com161-side-head b{font-size:9px}
+.com161-room{display:flex;align-items:center;gap:8px;width:100%;border:0;background:transparent;color:var(--ink);padding:8px;border-radius:9px;text-align:start;cursor:pointer}
+.com161-room:hover{background:var(--paper)}.com161-room.active{background:var(--green-tint);color:var(--green)}
+.com161-room-dot{width:8px;height:8px;border-radius:50%;background:var(--muted);flex:none}.com161-room.active .com161-room-dot{background:var(--green)}
+.com161-room-main{min-width:0;flex:1}.com161-room-main b{display:block;font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.com161-room-main small{display:block;font-size:7px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.com161-main{display:flex;flex-direction:column;overflow:hidden}
+.com161-chat-head{padding:10px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px}.com161-chat-head h3{margin:0;font-size:11px}.com161-chat-head p{margin:2px 0 0;font-size:7.5px;color:var(--muted)}
+.com161-messages{flex:1;overflow:auto;padding:12px;display:flex;flex-direction:column;gap:7px;min-height:420px}
+.com161-msg{max-width:78%;border:1px solid var(--border);background:var(--paper);border-radius:11px;padding:8px 9px;align-self:flex-start}
+.com161-msg.mine{align-self:flex-end;background:var(--green-tint);border-color:#cfe0d7}
+.com161-msg b{display:block;font-size:7.7px;margin-bottom:3px}.com161-msg p{margin:0;font-size:9px;white-space:pre-wrap;line-height:1.5}.com161-msg small{display:block;font-size:6.7px;color:var(--muted);margin-top:4px}
+.com161-compose{padding:9px;border-top:1px solid var(--border);display:flex;gap:6px}.com161-compose textarea{flex:1;min-height:42px;max-height:110px;resize:vertical;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:8px;font:inherit;font-size:9px}
+.com161-info h3{font-size:10px;margin:2px 0 8px}.com161-info p{font-size:8px;color:var(--muted);line-height:1.5}
+.com161-members{display:flex;flex-direction:column;gap:5px}.com161-member{display:flex;align-items:center;gap:7px;padding:6px;border:1px solid var(--border);background:var(--paper);border-radius:8px}.com161-avatar{width:28px;height:28px;border:1px solid var(--border);border-radius:50%;display:grid;place-items:center;font-size:8px;font-weight:900;background:var(--card)}.com161-member b{font-size:8px;display:block}.com161-member small{font-size:6.8px;color:var(--muted)}
+.com161-meal{border:1px solid #cfe0d7;background:var(--green-tint);border-radius:10px;padding:9px;margin-bottom:8px}.com161-meal h4{margin:0 0 4px;font-size:9px}.com161-meal p{margin:0;font-size:7.5px;color:var(--muted)}
+.com161-items{display:flex;flex-direction:column;gap:5px;margin-top:7px}.com161-item{border:1px solid var(--border);background:var(--card);border-radius:8px;padding:7px}.com161-item-top{display:flex;justify-content:space-between;gap:8px}.com161-item b{font-size:8px}.com161-item small{font-size:6.8px;color:var(--muted)}
+.com161-progress{height:6px;background:var(--border);border-radius:999px;overflow:hidden;margin-top:5px}.com161-progress i{display:block;height:100%;background:var(--green)}
+.com161-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.com161-field.full{grid-column:1/-1}.com161-field label{display:block;color:var(--muted);font-size:8px;margin-bottom:4px}.com161-field input,.com161-field select,.com161-field textarea{width:100%;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:9px;padding:9px;font:inherit;font-size:9px}.com161-field textarea{min-height:85px}
+.com161-empty{padding:24px;text-align:center;color:var(--muted);font-size:9px}
+.com161-chip{display:inline-flex;border:1px solid var(--border);background:var(--paper);border-radius:999px;padding:3px 6px;font-size:6.8px;color:var(--muted)}
+@media(max-width:1000px){.com161-shell{grid-template-columns:220px minmax(0,1fr)}.com161-info{grid-column:1/-1}}
+@media(max-width:700px){.com161-head{flex-direction:column}.com161-actions{width:100%}.com161-actions .com161-btn{flex:1}.com161-shell{grid-template-columns:1fr;min-height:0}.com161-side{max-height:230px;overflow:auto}.com161-messages{min-height:390px}.com161-info{grid-column:auto}.com161-form{grid-template-columns:1fr}.com161-field.full{grid-column:auto}}
+</style>
+
+<script id="tasky-v161-comms-js">
+window.TASKY_BUILD='V161';console.info('Tasky build',window.TASKY_BUILD);
+
+STR.ar.nav_connect='التواصل';
+STR.en.nav_connect='Connect';
+if(!NAV_ITEMS.some(x=>x.id==='connect')){
+  const idx=NAV_ITEMS.findIndex(x=>x.id==='experience');
+  NAV_ITEMS.splice(idx>=0?idx+1:NAV_ITEMS.length,0,{id:'connect',key:'nav_connect',icon:'i-message-circle',group:'grp_people',always:true});
+}
+
+let com161State=null,com161Loading=false,com161Error='',com161RoomId=null,com161Realtime=null;
+function com161L(ar,en){return lang==='ar'?ar:en}
+function com161Rows(k){return Array.isArray(com161State?.[k])?com161State[k]:[]}
+function com161Room(){return com161Rows('rooms').find(r=>r.id===com161RoomId)||com161Rows('rooms')[0]||null}
+function com161Date(v){if(!v)return'';try{return new Date(v).toLocaleTimeString(lang==='ar'?'ar-SA':'en-US',{hour:'2-digit',minute:'2-digit'})}catch(_){return''}}
+function com161Money(v){return `${Number(v||0).toLocaleString(lang==='ar'?'ar-SA':'en-US',{maximumFractionDigits:2})} ${com161L('ر.س','SAR')}`}
+
+async function com161Fetch(){
+  if(!currentWorkspaceId)return;
+  com161Loading=true;com161Error='';if(activeNav==='connect')renderModule();
+  const {data,error}=await sb.rpc('tasky_connect_state_v161',{p_workspace_id:currentWorkspaceId});
+  com161Loading=false;
+  if(error){com161Error=error.message||String(error);com161State=null}
+  else{
+    com161State=data||{};
+    if(!com161RoomId||!com161Rows('rooms').some(r=>r.id===com161RoomId))com161RoomId=com161Rows('rooms')[0]?.id||null;
+  }
+  if(activeNav==='connect')renderModule();
+}
+function com161InitRealtime(){
+  if(com161Realtime){try{sb.removeChannel(com161Realtime)}catch(_){}}
+  if(!currentWorkspaceId)return;
+  com161Realtime=sb.channel(`tasky-connect-v161-${currentWorkspaceId}`);
+  ['tasky_connect_messages_v161','tasky_connect_room_members_v161','tasky_connect_meal_sessions_v161','tasky_connect_meal_items_v161','tasky_connect_meal_votes_v161','tasky_connect_meal_contributions_v161']
+    .forEach(table=>com161Realtime.on('postgres_changes',{event:'*',schema:'public',table},()=>setTimeout(com161Fetch,80)));
+  com161Realtime.subscribe();
+}
+const renderModuleBaseV161=renderModule;
+renderModule=function(){
+  if(activeNav==='connect'){document.getElementById('moduleArea').innerHTML=com161Template();setTimeout(com161ScrollBottom,30);return}
+  return renderModuleBaseV161();
+};
+const setActiveNavBaseV161=setActiveNav;
+setActiveNav=function(id,...args){
+  const r=setActiveNavBaseV161(id,...args);
+  if(id==='connect'){if(!com161State&&!com161Loading)com161Fetch();if(!com161Realtime)com161InitRealtime()}
+  return r;
+};
+
+function com161Template(){
+  if(com161Loading&&!com161State)return `<div class="com161-empty">${com161L('جارٍ تحميل المحادثات…','Loading conversations…')}</div>`;
+  if(com161Error)return `<div class="com161-empty">${escapeHtml(com161Error)}<br><button class="com161-btn" onclick="com161Fetch()">${com161L('إعادة المحاولة','Retry')}</button></div>`;
+  const room=com161Room();
+  return `<div class="com161">
+    <div class="com161-head"><div><h2>${com161L('التواصل','Connect')}</h2><p>${com161L('شات الشركة العام، محادثات الفرق، مجموعات خاصة، ومحادثات الغداء والقهوة مع اختيار الأصناف والسعر والقطة والدفع من المحفظة.','Company chat, team rooms, private groups, and meal conversations with item selection, prices, shared pots and wallet payment.')}</p></div><div class="com161-actions"><button class="com161-btn" onclick="com161CreateRoom('private')">${com161L('محادثة جديدة','New conversation')}</button><button class="com161-btn primary" onclick="com161CreateMealRoom()">${com161L('محادثة غداء','Meal conversation')}</button></div></div>
+    <div class="com161-shell">
+      <aside class="com161-side">
+        <div class="com161-side-head"><b>${com161L('المحادثات','Conversations')}</b><button class="com161-btn" onclick="com161CreateRoom('private')">+</button></div>
+        ${com161RoomsTemplate()}
+      </aside>
+      <section class="com161-main">${room?com161ChatTemplate(room):`<div class="com161-empty">${com161L('أنشئ أو اختر محادثة.','Create or select a conversation.')}</div>`}</section>
+      <aside class="com161-info">${room?com161InfoTemplate(room):''}</aside>
+    </div>
+  </div>`;
+}
+function com161RoomsTemplate(){
+  const rooms=com161Rows('rooms');
+  const groups=[['general',com161L('عام','General')],['team',com161L('الفرق','Teams')],['private',com161L('المجموعات','Groups')],['meal',com161L('الغداء والقهوة','Meals')]];
+  return groups.map(g=>{
+    const rr=rooms.filter(r=>r.room_type===g[0]);
+    if(!rr.length)return'';
+    return `<div style="margin-bottom:8px"><div style="padding:4px 7px;color:var(--muted);font-size:7px;font-weight:800">${g[1]}</div>${rr.map(r=>`<button class="com161-room ${com161RoomId===r.id?'active':''}" onclick="com161SelectRoom('${r.id}')"><span class="com161-room-dot"></span><span class="com161-room-main"><b>${escapeHtml(r.name)}</b><small>${escapeHtml(r.last_message||r.description||'')}</small></span>${Number(r.unread_count||0)>0?`<span class="com161-chip">${Number(r.unread_count)}</span>`:''}</button>`).join('')}</div>`;
+  }).join('');
+}
+function com161SelectRoom(id){com161RoomId=id;renderModule();com161MarkRead(id)}
+function com161ChatTemplate(room){
+  const msgs=com161Rows('messages').filter(m=>m.room_id===room.id);
+  return `<div class="com161-chat-head"><div><h3>${escapeHtml(room.name)}</h3><p>${escapeHtml(room.description||'')} · ${Number(room.member_count||0)} ${com161L('أعضاء','members')}</p></div><div class="com161-actions">${room.room_type==='meal'?`<button class="com161-btn" onclick="com161OpenMealItem('${room.id}')">${com161L('إضافة صنف','Add item')}</button>`:''}<button class="com161-btn" onclick="com161OpenMembers('${room.id}')">${com161L('إضافة زملاء','Add colleagues')}</button></div></div>
+    <div class="com161-messages" id="com161Messages">${msgs.length?msgs.map(m=>`<div class="com161-msg ${m.sender_user_id===currentUserId?'mine':''}"><b>${escapeHtml(m.sender_name||'')}</b><p>${escapeHtml(m.body||'')}</p>${m.message_type!=='text'?`<span class="com161-chip">${escapeHtml(m.message_type)}</span>`:''}<small>${escapeHtml(com161Date(m.created_at))}</small></div>`).join(''):`<div class="com161-empty">${com161L('ابدأ المحادثة.','Start the conversation.')}</div>`}</div>
+    <div class="com161-compose"><textarea id="com161Composer" placeholder="${com161L('اكتب رسالة…','Write a message…')}" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();com161Send()}"></textarea><button class="com161-btn primary" onclick="com161Send()">${com161L('إرسال','Send')}</button></div>`;
+}
+function com161InfoTemplate(room){
+  const members=com161Rows('members').filter(m=>m.room_id===room.id);
+  const meal=com161Rows('meal_sessions').find(x=>x.room_id===room.id);
+  return `<h3>${com161L('تفاصيل المحادثة','Conversation details')}</h3>
+    ${meal?com161MealPanel(meal):''}
+    <h3 style="margin-top:12px">${com161L('الأعضاء','Members')}</h3>
+    <div class="com161-members">${members.slice(0,12).map(m=>`<div class="com161-member"><span class="com161-avatar">${escapeHtml((m.member_name||'?').slice(0,1).toUpperCase())}</span><div><b>${escapeHtml(m.member_name||'')}</b><small>${escapeHtml(m.role||'member')}</small></div></div>`).join('')||`<div class="com161-empty">${com161L('لا يوجد أعضاء.','No members.')}</div>`}</div>`;
+}
+function com161MealPanel(meal){
+  const items=com161Rows('meal_items').filter(x=>x.meal_session_id===meal.id);
+  const contrib=com161Rows('meal_contributions').filter(x=>x.meal_session_id===meal.id);
+  const paid=contrib.reduce((s,x)=>s+Number(x.amount||0),0),target=Number(meal.target_amount||0),pct=target?Math.min(100,paid/target*100):0;
+  return `<div class="com161-meal"><h4>${escapeHtml(meal.title||com161L('خطة الغداء','Meal plan'))}</h4><p>${com161L('المبلغ المستهدف','Target')}: ${com161Money(target)} · ${com161L('تم جمع','Collected')}: ${com161Money(paid)}</p><div class="com161-progress"><i style="width:${pct}%"></i></div>
+    <div class="com161-items">${items.map(i=>`<div class="com161-item"><div class="com161-item-top"><b>${escapeHtml(i.name)}</b><strong>${com161Money(i.price)}</strong></div><small>${Number(i.vote_count||0)} ${com161L('أصوات','votes')}</small><div class="com161-card-actions" style="margin-top:5px"><button class="com161-btn" onclick="com161VoteMealItem('${i.id}')">${com161L('اختيار','Vote')}</button></div></div>`).join('')||`<small>${com161L('أضيفوا الأصناف والأسعار ثم صوّتوا عليها.','Add items and prices, then vote.')}</small>`}</div>
+    <div class="com161-actions" style="margin-top:8px"><button class="com161-btn" onclick="com161Contribute('${meal.id}')">${com161L('المساهمة في القطة','Contribute')}</button><button class="com161-btn primary" onclick="com161PayMeal('${meal.id}')">${com161L('الدفع من المحفظة','Pay from wallet')}</button></div>
+  </div>`;
+}
+function com161ScrollBottom(){const el=document.getElementById('com161Messages');if(el)el.scrollTop=el.scrollHeight}
+async function com161Send(){
+  const input=document.getElementById('com161Composer'),body=input?.value.trim();if(!body||!com161RoomId)return;
+  input.value='';
+  const {error}=await sb.rpc('tasky_connect_message_send_v161',{p_room_id:com161RoomId,p_body:body,p_message_type:'text',p_payload:{}});
+  if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch();com161ScrollBottom();
+}
+async function com161MarkRead(id){await sb.rpc('tasky_connect_mark_read_v161',{p_room_id:id}).catch?.(()=>{})}
+
+function com161Modal(title,body){document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${escapeHtml(title)}</h3></div><button class="modal-close" onclick="closeAddModal()">×</button></div>${body}`;document.getElementById('addModalOverlay').classList.remove('hidden')}
+function com161CreateRoom(type='private'){
+  const people=com161Rows('workspace_people');
+  com161Modal(com161L('محادثة جديدة','New conversation'),`<div class="com161-form"><div class="com161-field full"><label>${com161L('اسم المحادثة','Conversation name')}</label><input id="com161RoomName"></div><div class="com161-field full"><label>${com161L('الوصف','Description')}</label><input id="com161RoomDesc"></div><div class="com161-field full"><label>${com161L('الزملاء','Colleagues')}</label><select id="com161RoomPeople" multiple size="8">${people.filter(p=>p.user_id!==currentUserId).map(p=>`<option value="${p.user_id}">${escapeHtml(p.name||p.email||'')}</option>`).join('')}</select></div><div class="com161-field full"><button class="com161-btn primary" onclick="com161SaveRoom('${type}')">${com161L('إنشاء','Create')}</button></div></div>`);
+}
+async function com161SaveRoom(type){
+  const selected=[...document.getElementById('com161RoomPeople').selectedOptions].map(o=>o.value);
+  const {data,error}=await sb.rpc('tasky_connect_room_create_v161',{p_workspace_id:currentWorkspaceId,p_name:document.getElementById('com161RoomName').value.trim(),p_description:document.getElementById('com161RoomDesc').value.trim()||null,p_room_type:type,p_member_ids:selected});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();com161RoomId=data?.id||null;await com161Fetch();
+}
+function com161OpenMembers(roomId){
+  const roomMembers=new Set(com161Rows('members').filter(m=>m.room_id===roomId).map(m=>m.user_id)),people=com161Rows('workspace_people').filter(p=>!roomMembers.has(p.user_id));
+  com161Modal(com161L('إضافة زملاء','Add colleagues'),`<div class="com161-form"><div class="com161-field full"><label>${com161L('الزملاء','Colleagues')}</label><select id="com161AddPeople" multiple size="10">${people.map(p=>`<option value="${p.user_id}">${escapeHtml(p.name||p.email||'')}</option>`).join('')}</select></div><div class="com161-field full"><button class="com161-btn primary" onclick="com161AddMembers('${roomId}')">${com161L('إضافة','Add')}</button></div></div>`);
+}
+async function com161AddMembers(roomId){
+  const ids=[...document.getElementById('com161AddPeople').selectedOptions].map(o=>o.value);
+  const {error}=await sb.rpc('tasky_connect_members_add_v161',{p_room_id:roomId,p_member_ids:ids});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();
+}
+function com161CreateMealRoom(){
+  const people=com161Rows('workspace_people');
+  com161Modal(com161L('محادثة غداء جديدة','New meal conversation'),`<div class="com161-form"><div class="com161-field"><label>${com161L('العنوان','Title')}</label><input id="com161MealTitle" placeholder="${com161L('غداء الخميس','Thursday lunch')}"></div><div class="com161-field"><label>${com161L('الميزانية المستهدفة','Target budget')}</label><input type="number" min="0" id="com161MealTarget" value="200"></div><div class="com161-field full"><label>${com161L('الزملاء','Colleagues')}</label><select id="com161MealPeople" multiple size="8">${people.filter(p=>p.user_id!==currentUserId).map(p=>`<option value="${p.user_id}">${escapeHtml(p.name||p.email||'')}</option>`).join('')}</select></div><div class="com161-field full"><button class="com161-btn primary" onclick="com161SaveMealRoom()">${com161L('إنشاء المحادثة','Create conversation')}</button></div></div>`);
+}
+async function com161SaveMealRoom(){
+  const ids=[...document.getElementById('com161MealPeople').selectedOptions].map(o=>o.value);
+  const {data,error}=await sb.rpc('tasky_connect_meal_room_create_v161',{p_workspace_id:currentWorkspaceId,p_title:document.getElementById('com161MealTitle').value.trim(),p_target_amount:Number(document.getElementById('com161MealTarget').value||0),p_member_ids:ids});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();com161RoomId=data?.room_id||null;await com161Fetch();
+}
+function com161OpenMealItem(roomId){
+  const meal=com161Rows('meal_sessions').find(x=>x.room_id===roomId);if(!meal)return;
+  com161Modal(com161L('إضافة صنف','Add meal item'),`<div class="com161-form"><div class="com161-field"><label>${com161L('الصنف','Item')}</label><input id="com161ItemName"></div><div class="com161-field"><label>${com161L('السعر','Price')}</label><input type="number" min="0" step="0.01" id="com161ItemPrice"></div><div class="com161-field full"><label>${com161L('ملاحظة / مطعم','Note / restaurant')}</label><input id="com161ItemNote"></div><div class="com161-field full"><button class="com161-btn primary" onclick="com161SaveMealItem('${meal.id}')">${com161L('إضافة','Add')}</button></div></div>`);
+}
+async function com161SaveMealItem(mealId){
+  const {error}=await sb.rpc('tasky_connect_meal_item_add_v161',{p_meal_session_id:mealId,p_name:document.getElementById('com161ItemName').value.trim(),p_price:Number(document.getElementById('com161ItemPrice').value||0),p_note:document.getElementById('com161ItemNote').value.trim()||null});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();
+}
+async function com161VoteMealItem(id){const {error}=await sb.rpc('tasky_connect_meal_item_vote_v161',{p_item_id:id});if(error)return taskyToast(error.message,{tone:'warning'});await com161Fetch()}
+function com161Contribute(mealId){
+  com161Modal(com161L('المساهمة في القطة','Contribute to pot'),`<div class="com161-form"><div class="com161-field full"><label>${com161L('المبلغ','Amount')}</label><input type="number" min="1" step="0.01" id="com161ContribAmt" value="25"></div><div class="com161-field full"><button class="com161-btn primary" onclick="com161SaveContribution('${mealId}')">${com161L('مساهمة من المحفظة','Contribute from wallet')}</button></div></div>`);
+}
+async function com161SaveContribution(mealId){
+  const {error}=await sb.rpc('tasky_connect_meal_contribute_v161',{p_meal_session_id:mealId,p_amount:Number(document.getElementById('com161ContribAmt').value||0)});
+  if(error)return taskyToast(error.message,{tone:'warning'});closeAddModal();await com161Fetch();
+}
+async function com161PayMeal(mealId){
+  const {data,error}=await sb.rpc('tasky_connect_meal_pay_v161',{p_meal_session_id:mealId});
+  if(error)return taskyToast(error.message,{tone:'warning'});
+  showTaskyDialog({title:com161L('حالة الدفع','Payment status'),message:data?.provider_required?com161L('تم تجهيز طلب الدفع. الإتمام الفعلي للمطعم يحتاج مزود الدفع/المطعم المربوط.','Payment intent is ready. Final restaurant settlement requires the connected payment/restaurant provider.'):com161L('تمت التسوية من المحفظة الداخلية.','Settled from the internal wallet.'),tone:'success'});
+  await com161Fetch();
+}
+</script>
+
 </body>
 </html>
