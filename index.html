@@ -50,7 +50,7 @@ html[data-tasky-warm-tab="1"] #authScreen{
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" onload="this.onload=null;this.rel='stylesheet'">
-<noscript><link href="https://fonts.googleapis.com/css2?family=Almarai:wght@400;700;800&family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet"></noscript>
+<noscript></noscript>
 <style>
   :root{
     --green:#2A6C2E; --green-bright:#82AF21; --green-tint:#E7F0DD;
@@ -2380,7 +2380,7 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
+<script>if(!window.supabase){document.write('<\/script>');}</script>
 
 <div id="authScreen" style="position:fixed;inset:0;background:var(--paper);z-index:200;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans Arabic',sans-serif;">
   <div class="auth-card-v178" style="width:360px;max-width:90vw;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;">
@@ -3592,6 +3592,24 @@ async function checkSession(){
 
             taskyResetLazyModulesV83(currentWorkspaceId);
 
+            /* V198: resolve requested warm-tab route immediately.
+               Do not paint Home first and wait for the later restore loop. */
+            let warmModuleV198=null;
+            let warmProjectV198=null;
+            try{
+              const warmUrlV198=new URL(location.href);
+              warmModuleV198=warmUrlV198.searchParams.get('tasky_module');
+              warmProjectV198=warmUrlV198.searchParams.get('tasky_project');
+              if(warmModuleV198){
+                activeNav=warmModuleV198;
+                window.__taskyWarmRouteHandledV198=true;
+              }else if(warmProjectV198){
+                activeNav='tasks';
+                activeProjectId=warmProjectV198;
+                window.__taskyWarmRouteHandledV198=true;
+              }
+            }catch(_){}
+
             if(authScreen){
               authScreen.style.display='none';
               authScreen.style.visibility='visible';
@@ -3608,7 +3626,40 @@ async function checkSession(){
             try{renderTeamAvatarStack();}catch(_){}
             try{renderRoleToggle();}catch(_){}
             try{renderNav();}catch(_){}
-            try{renderAll();}catch(_){}
+
+            /* Paint the requested section immediately from warm state.
+               For heavy modules, show its skeleton now and start only that module's fetch. */
+            try{
+              if(warmModuleV198){
+                const isTaskishV198=(warmModuleV198==='tasks'||warmModuleV198==='home');
+                const taskAreaV198=document.getElementById('taskArea');
+                const moduleAreaV198=document.getElementById('moduleArea');
+                const tasksOnlyV198=document.getElementById('tasksOnly');
+                if(taskAreaV198)taskAreaV198.classList.toggle('hidden',!isTaskishV198);
+                if(moduleAreaV198)moduleAreaV198.classList.toggle('hidden',isTaskishV198);
+                if(tasksOnlyV198)tasksOnlyV198.classList.toggle('hidden',warmModuleV198!=='tasks');
+
+                const breadcrumbV198=document.getElementById('breadcrumbLabel');
+                if(breadcrumbV198){
+                  breadcrumbV198.textContent=warmModuleV198==='tasks'
+                    ?(currentProject()?.name||t('nav_tasks'))
+                    :t((NAV_ITEMS.find(n=>n.id===warmModuleV198)||{}).key||'nav_home');
+                }
+
+                if(isTaskishV198){
+                  renderAll();
+                }else{
+                  taskyRenderModuleLoadingV83();
+                  taskyEnsureModuleLoadedV83(warmModuleV198);
+                }
+              }else{
+                renderAll();
+              }
+            }catch(e){
+              console.warn('Tasky V198 immediate warm route',e);
+              try{renderAll();}catch(_){}
+            }
+
             try{initTaskRealtime();}catch(_){}
 
             taskyBootHideV83();
@@ -15690,6 +15741,7 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-sync-stable');
 
   /* Independent tabs/windows restore their requested route after normal Tasky boot. */
   async function restoreRoute(){
+    if(window.__taskyWarmRouteHandledV198)return;
     const u=new URL(location.href);
     const moduleId=u.searchParams.get('tasky_module');
     const projectId=u.searchParams.get('tasky_project');
@@ -15883,6 +15935,12 @@ console.info('Tasky build',window.TASKY_BUILD,'tabs-no-reload');
 <script id="tasky-v197-build-marker">
 window.TASKY_BUILD='V197';
 console.info('Tasky build',window.TASKY_BUILD,'warm-new-tabs');
+</script>
+
+
+<script id="tasky-v198-build-marker">
+window.TASKY_BUILD='V198';
+console.info('Tasky build',window.TASKY_BUILD,'fast-warm-route');
 </script>
 
 </body>
