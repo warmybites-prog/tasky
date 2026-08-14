@@ -1977,6 +1977,57 @@ html body .sidebar-bottom.profile-open-v182 > .sidebar-signout-v173:hover{
 }
 </style>
 
+
+<style id="tasky-v183-sidebar-side-fix">
+/* V183 — Arabic sidebar on the physical RIGHT, English sidebar on the LEFT. */
+@media(min-width:821px){
+  html body .app{
+    display:flex !important;
+    flex-direction:row !important;
+  }
+
+  html[dir="rtl"] body .sidebar{
+    order:2 !important;
+    margin:0 !important;
+  }
+  html[dir="rtl"] body .main{
+    order:1 !important;
+  }
+
+  html[dir="ltr"] body .sidebar{
+    order:1 !important;
+    margin:0 !important;
+  }
+  html[dir="ltr"] body .main{
+    order:2 !important;
+  }
+}
+
+@media(max-width:820px){
+  html[dir="rtl"] body .sidebar{
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    right:0 !important;
+    left:auto !important;
+    transform:translateX(105%) !important;
+  }
+
+  html[dir="ltr"] body .sidebar{
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    left:0 !important;
+    right:auto !important;
+    transform:translateX(-105%) !important;
+  }
+
+  html body.mobile-sidebar-open .sidebar{
+    transform:translateX(0) !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -14978,6 +15029,12 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
 <script id="tasky-v182-build-marker">
 window.TASKY_BUILD='V182';
 console.info('Tasky build',window.TASKY_BUILD,'avatar-only-profile-restored');
+</script>
+
+
+<script id="tasky-v183-build-marker">
+window.TASKY_BUILD='V183';
+console.info('Tasky build',window.TASKY_BUILD,'rtl-sidebar-moved');
 </script>
 
 </body>
