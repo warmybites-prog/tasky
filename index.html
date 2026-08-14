@@ -15610,5 +15610,130 @@ window.TASKY_BUILD='V195';
 console.info('Tasky build',window.TASKY_BUILD,'asana-like-window-behavior');
 </script>
 
+
+<script id="tasky-v196-tab-stability-js">
+(function(){
+  /* ============================================================
+     V196 — Browser tabs stay warm.
+     Switching between Tasky tabs must NOT rerun the full workspace bootstrap.
+     Each tab remains independent, Asana-style.
+     ============================================================ */
+
+  function appReadyV196(){
+    try{
+      const app=document.querySelector('.app');
+      return !!currentWorkspaceId &&
+             !!currentUserId &&
+             !!app &&
+             app.style.display!=='none' &&
+             !app.classList.contains('hidden');
+    }catch(_){
+      return false;
+    }
+  }
+
+  /* Supabase auth events can fire across same-origin tabs.
+     If this tab is already initialized, verify the token quietly and keep UI/data in memory. */
+  if(typeof checkSession==='function' && !window.__taskyCheckSessionV196){
+    window.__taskyCheckSessionV196=true;
+    const baseCheckSessionV196=checkSession;
+
+    checkSession=async function(...args){
+      const opts=args[0];
+      const force=!!(opts && typeof opts==='object' && opts.force===true);
+
+      if(!force && appReadyV196()){
+        try{
+          const {data,error}=await sb.auth.getSession();
+          if(!error && data?.session?.user){
+            return true;
+          }
+        }catch(_){}
+      }
+
+      return baseCheckSessionV196.apply(this,args);
+    };
+  }
+
+  /* Once a tab is already usable, decorative global boot UI must not reopen
+     merely because the user switched away and came back. */
+  if(typeof taskyBootShowV83==='function' && !window.__taskyBootShowV196){
+    window.__taskyBootShowV196=true;
+    const baseBootShowV196=taskyBootShowV83;
+    taskyBootShowV83=function(...args){
+      if(appReadyV196())return;
+      return baseBootShowV196.apply(this,args);
+    };
+  }
+
+  if(typeof taskyBootReopenV83==='function' && !window.__taskyBootReopenV196){
+    window.__taskyBootReopenV196=true;
+    const baseBootReopenV196=taskyBootReopenV83;
+    taskyBootReopenV83=function(...args){
+      if(appReadyV196())return;
+      return baseBootReopenV196.apply(this,args);
+    };
+  }
+
+  /* Do not attach focus/visibility handlers that refetch or rerender data.
+     Switching browser tabs should be a pure browser operation. */
+
+  /* Save only tiny UI context so an unavoidable browser-level tab discard can
+     restore the same section after the document is reconstructed. */
+  function saveContextV196(){
+    try{
+      const key=`tasky_tab_ctx_v196_${currentWorkspaceId||'none'}`;
+      sessionStorage.setItem(key,JSON.stringify({
+        activeNav:typeof activeNav!=='undefined'?activeNav:'home',
+        activeProjectId:typeof activeProjectId!=='undefined'?activeProjectId:null,
+        at:Date.now()
+      }));
+    }catch(_){}
+  }
+
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='hidden')saveContextV196();
+  });
+  window.addEventListener('pagehide',saveContextV196,{passive:true});
+
+  /* If the browser itself discarded the tab (memory pressure), restore the route
+     after normal boot. This is the only case where a real reload cannot be prevented. */
+  async function restoreContextV196(){
+    try{
+      if(!performance.getEntriesByType('navigation')?.[0])return;
+      const navType=performance.getEntriesByType('navigation')[0].type;
+      if(navType!=='reload' && navType!=='back_forward')return;
+
+      for(let i=0;i<100;i++){
+        if(currentWorkspaceId && typeof setActiveNav==='function'){
+          const key=`tasky_tab_ctx_v196_${currentWorkspaceId}`;
+          const raw=sessionStorage.getItem(key);
+          if(raw){
+            const ctx=JSON.parse(raw);
+            if(ctx?.activeNav)await setActiveNav(ctx.activeNav);
+            if(ctx?.activeProjectId && typeof setActiveProject==='function'){
+              setActiveProject(ctx.activeProjectId);
+            }
+          }
+          return;
+        }
+        await new Promise(r=>setTimeout(r,100));
+      }
+    }catch(_){}
+  }
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',restoreContextV196,{once:true});
+  }else{
+    restoreContextV196();
+  }
+})();
+</script>
+
+<script id="tasky-v196-build-marker">
+window.TASKY_BUILD='V196';
+console.info('Tasky build',window.TASKY_BUILD,'tabs-no-reload');
+</script>
+
 </body>
 </html>
