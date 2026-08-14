@@ -17476,5 +17476,86 @@ window.TASKY_BUILD='V222';
 console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
 </script>
 
+
+<script id="tasky-v223-hr-lazy-fix-js">
+(function(){
+  async function taskyEnsureHrReadyV223(target){
+    if(!['hr','experience'].includes(target))return true;
+    try{
+      if(typeof taskyEnsureModuleLoadedV83==='function'){
+        await taskyEnsureModuleLoadedV83('hr');
+      }
+      return true;
+    }catch(err){
+      console.warn('Tasky V223 HR lazy load',err);
+      if(typeof taskyRenderMissingChunkV218==='function'){
+        try{taskyRenderMissingChunkV218('hr')}catch(_){}
+      }
+      return false;
+    }
+  }
+
+  /* HR app selection must hydrate its lazy chunk BEFORE active navigation. */
+  if(typeof taskySelectAppV217==='function'&&!window.__taskyHrSelectFixV223){
+    window.__taskyHrSelectFixV223=true;
+    const baseSelectAppV223=taskySelectAppV217;
+    taskySelectAppV217=async function(id,e){
+      if(id==='hr'){
+        e?.stopPropagation?.();
+        if(!taskyAppAvailableV217(id))return;
+        taskyCurrentAppV217=id;
+        taskySaveCurrentAppV217();
+        document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
+        document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
+        taskyRefreshAppChromeV217();
+
+        const landing=taskyFirstLandingV217(id);
+        const ready=await taskyEnsureHrReadyV223(landing);
+        if(!ready)return;
+        if(activeNav!==landing)await setActiveNav(landing);
+        else{
+          try{renderModule()}catch(_){}
+          taskyRefreshAppChromeV217();
+        }
+        return;
+      }
+      return baseSelectAppV223(id,e);
+    };
+  }
+
+  /* Direct sidebar/deep-route access to HR or Employee Experience also hydrates HR first. */
+  if(typeof setActiveNav==='function'&&!window.__taskyHrActiveFixV223){
+    window.__taskyHrActiveFixV223=true;
+    const baseActiveV223=setActiveNav;
+    setActiveNav=async function(id,...args){
+      if(['hr','experience'].includes(id)){
+        const ready=await taskyEnsureHrReadyV223(id);
+        if(!ready)return false;
+      }
+      return baseActiveV223(id,...args);
+    };
+  }
+
+  /* If startup lands directly on HR from URL/warm tab, hydrate after auth/workspace boot. */
+  let tries=0;
+  const timer=setInterval(async()=>{
+    tries++;
+    if(typeof currentWorkspaceId!=='undefined' && currentWorkspaceId && ['hr','experience'].includes(activeNav)){
+      clearInterval(timer);
+      const ready=await taskyEnsureHrReadyV223(activeNav);
+      if(ready){
+        try{renderModule()}catch(_){}
+        try{taskyRefreshAppChromeV217()}catch(_){}
+      }
+    }else if(tries>100){
+      clearInterval(timer);
+    }
+  },100);
+
+  window.TASKY_BUILD='V223';
+  console.info('Tasky build V223 — HR lazy loading fixed');
+})();
+</script>
+
 </body>
 </html>
