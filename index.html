@@ -2262,6 +2262,32 @@ html body{
 }
 </style>
 
+
+<style id="tasky-v186-role-center-css">
+/* V186 — Center the role label ("مدير" / "Admin") in every viewport. */
+html body .sidebar-bottom .role-toggle{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  text-align:center !important;
+}
+
+html body .sidebar-bottom .role-toggle button{
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
+  width:100% !important;
+  text-align:center !important;
+  margin:0 !important;
+}
+
+html[dir="rtl"] body .sidebar-bottom .role-toggle button,
+html[dir="ltr"] body .sidebar-bottom .role-toggle button{
+  text-align:center !important;
+  justify-content:center !important;
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -15359,6 +15385,12 @@ console.info('Tasky build',window.TASKY_BUILD,'stable-rtl-ltr-all-views');
 <script id="tasky-v185-build-marker">
 window.TASKY_BUILD='V185';
 console.info('Tasky build',window.TASKY_BUILD,'sidebar-grid-physical-right');
+</script>
+
+
+<script id="tasky-v186-build-marker">
+window.TASKY_BUILD='V186';
+console.info('Tasky build',window.TASKY_BUILD,'role-label-centered');
 </script>
 
 </body>
