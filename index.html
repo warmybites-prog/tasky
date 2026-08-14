@@ -2744,6 +2744,12 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
 }
 </style>
 
+
+<style id="tasky-v220-hr-experience-css">
+/* Employee Experience is a subsection of Tasky HR, not a separate top-level item. */
+#mainNav .tasky-hide-experience-top-v220{display:none !important}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -17275,6 +17281,113 @@ console.info('Tasky build V218 — app sub-navigation and chunk error fix');
   window.taskyRenderInnerSidebarV219=renderInnerSidebarV219;
   window.TASKY_BUILD='V219';
   console.info('Tasky build V219 — internal sections moved to sidebar');
+})();
+</script>
+
+
+<script id="tasky-v220-hr-experience-runtime-js">
+(function(){
+  function taskyFindNavItemByModuleV220(id){
+    const nav=document.getElementById('mainNav');if(!nav)return null;
+    return [...nav.querySelectorAll('.nav-item')].find(el=>{
+      const s=el.getAttribute('onclick')||'';
+      return s.includes(`'${id}'`) || s.includes(`"${id}"`);
+    })||null;
+  }
+
+  function taskyHrParentV220(){
+    return taskyFindNavItemByModuleV220('hr');
+  }
+
+  function taskyExperienceTopV220(){
+    return taskyFindNavItemByModuleV220('experience');
+  }
+
+  function taskyExperienceSectionButtonV220(){
+    const btn=document.createElement('button');
+    btn.type='button';
+    btn.className='tasky-inner-section-v219'+(activeNav==='experience'?' active':'');
+    btn.dataset.taskyExperienceV220='1';
+    btn.innerHTML=`<svg><use href="#i-heart"></use></svg><span class="tasky-inner-text-v219">${lang==='ar'?'تجربة الموظف':'Employee Experience'}</span>`;
+    btn.onclick=async()=>{
+      await setActiveNav('experience');
+      try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
+    };
+    return btn;
+  }
+
+  window.taskyNormalizeHrExperienceV220=function(){
+    const hrParent=taskyHrParentV220();
+    const expTop=taskyExperienceTopV220();
+    if(!hrParent)return;
+
+    /* The old separate Experience item is hidden while HR is the current app. */
+    if(expTop){
+      expTop.classList.toggle('tasky-hide-experience-top-v220',taskyCurrentAppV217==='hr');
+    }
+
+    if(taskyCurrentAppV217!=='hr')return;
+
+    /* Reuse V219 nested container when HR or Experience is open. */
+    let wrap=hrParent.nextElementSibling;
+    if(!wrap || !wrap.classList.contains('tasky-inner-sections-v219')){
+      wrap=document.createElement('div');
+      wrap.className='tasky-inner-sections-v219';
+      wrap.innerHTML=`<div class="tasky-inner-label-v219">${lang==='ar'?'أقسام الموارد البشرية':'HR sections'}</div>`;
+      hrParent.insertAdjacentElement('afterend',wrap);
+    }else{
+      const label=wrap.querySelector('.tasky-inner-label-v219');
+      if(label)label.textContent=lang==='ar'?'أقسام الموارد البشرية':'HR sections';
+    }
+
+    /* Employee Experience itself is always one of the HR app sections. */
+    if(!wrap.querySelector('[data-tasky-experience-v220="1"]')){
+      wrap.appendChild(taskyExperienceSectionButtonV220());
+    }else{
+      const b=wrap.querySelector('[data-tasky-experience-v220="1"]');
+      b.classList.toggle('active',activeNav==='experience');
+      const txt=b.querySelector('.tasky-inner-text-v219');
+      if(txt)txt.textContent=lang==='ar'?'تجربة الموظف':'Employee Experience';
+    }
+  };
+
+  /* Extend V219 renderer rather than replacing it. */
+  if(typeof taskyRenderInnerSidebarV219==='function'&&!window.__taskyHrExperienceWrapV220){
+    window.__taskyHrExperienceWrapV220=true;
+    const baseInnerV220=taskyRenderInnerSidebarV219;
+    taskyRenderInnerSidebarV219=function(...args){
+      const result=baseInnerV220.apply(this,args);
+      taskyNormalizeHrExperienceV220();
+      return result;
+    };
+  }
+
+  if(typeof taskyRefreshAppChromeV217==='function'&&!window.__taskyHrChromeV220){
+    window.__taskyHrChromeV220=true;
+    const baseChromeV220=taskyRefreshAppChromeV217;
+    taskyRefreshAppChromeV217=function(...args){
+      const result=baseChromeV220.apply(this,args);
+      setTimeout(taskyNormalizeHrExperienceV220,0);
+      return result;
+    };
+  }
+
+  if(typeof setActiveNav==='function'&&!window.__taskyHrActiveV220){
+    window.__taskyHrActiveV220=true;
+    const baseActiveV220=setActiveNav;
+    setActiveNav=async function(...args){
+      const result=await baseActiveV220.apply(this,args);
+      setTimeout(taskyNormalizeHrExperienceV220,0);
+      return result;
+    };
+  }
+
+  const run=()=>setTimeout(taskyNormalizeHrExperienceV220,0);
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',run,{once:true});
+  else run();
+
+  window.TASKY_BUILD='V220';
+  console.info('Tasky build V220 — Employee Experience nested under HR');
 })();
 </script>
 
