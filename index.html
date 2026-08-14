@@ -1843,7 +1843,6 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
   font-family:inherit;
   font-size:11.5px;
   font-weight:800;
-  cursor:pointer;
   z-index:2;
 }
 .auth-lang-v178:hover{border-color:var(--green);color:var(--green);}
@@ -2528,19 +2527,7 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 .tasky-workspace-logo-preview-v204.has-logo{
   background:#fff;
 }
-.tasky-workspace-logo-edit-v204{
-  position:absolute;
-  inset-inline-end:6px;
-  bottom:6px;
-  width:26px;
-  height:26px;
-  border-radius:9px;
-  background:rgba(18,41,26,.88);
-  color:#fff;
-  display:grid;
-  place-items:center;
-}
-.tasky-workspace-logo-edit-v204 svg{width:14px;height:14px}
+
 .tasky-workspace-brand-copy-v204{
   min-width:0;
   flex:1;
@@ -2562,6 +2549,124 @@ html[dir="ltr"] .tasky-workspace-brand-copy-v204{align-items:flex-start;text-ali
 @media(max-width:640px){
   .tasky-workspace-brand-v204{align-items:flex-start}
   .tasky-workspace-logo-preview-v204{width:72px;height:72px;flex-basis:72px;border-radius:16px}
+}
+</style>
+
+
+<style id="tasky-v206-workspace-settings-css">
+.tasky-workspace-settings-v206{
+  padding:24px !important;
+}
+.tasky-workspace-head-v206{
+  margin-bottom:18px !important;
+}
+.tasky-workspace-form-v206{
+  display:flex;
+  flex-direction:column;
+  gap:18px;
+}
+.tasky-workspace-main-v206{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(320px,.8fr);
+  gap:18px;
+  align-items:stretch;
+}
+.tasky-workspace-logo-block-v206,
+.tasky-workspace-name-block-v206{
+  border:1px solid var(--border);
+  background:var(--paper);
+  border-radius:16px;
+}
+.tasky-workspace-logo-block-v206{
+  display:flex;
+  align-items:center;
+  gap:18px;
+  padding:18px;
+}
+.tasky-workspace-name-block-v206{
+  padding:18px;
+  display:flex;
+  align-items:center;
+}
+.tasky-workspace-name-block-v206 .settings-field{
+  width:100%;
+  margin:0;
+}
+.tasky-workspace-name-block-v206 .settings-field small{
+  display:block;
+  margin-top:8px;
+  color:var(--muted);
+  font-size:10.5px;
+  line-height:1.6;
+}
+.tasky-workspace-logo-meta-v206{
+  min-width:0;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:6px;
+}
+.tasky-workspace-logo-meta-v206 b{
+  font-size:13px;
+}
+.tasky-workspace-logo-meta-v206 span{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.7;
+}
+.tasky-workspace-logo-btn-v206{
+  align-self:flex-start;
+  margin-top:4px;
+}
+html[dir="rtl"] .tasky-workspace-logo-meta-v206{
+  text-align:right;
+  align-items:flex-start;
+}
+html[dir="ltr"] .tasky-workspace-logo-meta-v206{
+  text-align:left;
+  align-items:flex-start;
+}
+.tasky-workspace-actions-v206{
+  display:flex;
+  justify-content:flex-end;
+  padding-top:2px;
+}
+html[dir="rtl"] .tasky-workspace-actions-v206{
+  justify-content:flex-start;
+}
+.tasky-workspace-actions-v206 .primary-btn{
+  min-width:150px;
+  justify-content:center;
+}
+
+@media(max-width:900px){
+  .tasky-workspace-main-v206{
+    grid-template-columns:1fr;
+  }
+}
+@media(max-width:640px){
+  .tasky-workspace-settings-v206{
+    padding:16px !important;
+  }
+  .tasky-workspace-logo-block-v206{
+    align-items:flex-start;
+    padding:14px;
+  }
+  .tasky-workspace-logo-preview-v204{
+    width:72px;
+    height:72px;
+    flex-basis:72px;
+  }
+  .tasky-workspace-name-block-v206{
+    padding:14px;
+  }
+  .tasky-workspace-actions-v206,
+  html[dir="rtl"] .tasky-workspace-actions-v206{
+    justify-content:stretch;
+  }
+  .tasky-workspace-actions-v206 .primary-btn{
+    width:100%;
+  }
 }
 </style>
 
@@ -7516,34 +7621,57 @@ function settingsWorkspaceTemplate(){
     ? `<img src="${escapeHtml(currentWorkspaceLogoUrl)}" alt="${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}">`
     : `<span>${escapeHtml(workspaceInitials(currentWorkspaceName||''))}</span>`;
 
-  return `<div class="settings-card">
-    <div class="settings-card-head"><div><h3>${lang==='ar'?'إعدادات مساحة العمل':'Workspace settings'}</h3><p>${lang==='ar'?'اسم الفريق وهوية مساحة العمل. التعديل متاح للمدير فقط.':'Team name and workspace identity. Admins only.'}</p></div></div>
-
-    <div class="tasky-workspace-brand-v204">
-      <button type="button" class="tasky-workspace-logo-preview-v204 ${hasLogo?'has-logo':''}" onclick="openWorkspaceBrandingModal()" aria-label="${lang==='ar'?'تغيير شعار مساحة العمل':'Change workspace logo'}">
-        ${logo}
-        <span class="tasky-workspace-logo-edit-v204"><svg><use href="#i-camera"/></svg></span>
-      </button>
-      <div class="tasky-workspace-brand-copy-v204">
-        <b>${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}</b>
-        <span>${hasLogo
-          ? (lang==='ar'?'الشعار الحالي المستخدم في القائمة وهوية مساحة العمل.':'Current logo used in the sidebar and workspace identity.')
-          : (lang==='ar'?'لا يوجد شعار مرفوع حاليًا؛ يتم عرض الأحرف الأولى مؤقتًا.':'No logo uploaded yet; initials are shown as a fallback.')
-        }</span>
-        <button type="button" class="chip-btn" onclick="openWorkspaceBrandingModal()"><svg><use href="#i-camera"/></svg>${hasLogo?(lang==='ar'?'تغيير الشعار':'Change logo'):(lang==='ar'?'رفع شعار':'Upload logo')}</button>
+  return `<div class="settings-card tasky-workspace-settings-v206">
+    <div class="settings-card-head tasky-workspace-head-v206">
+      <div>
+        <h3>${lang==='ar'?'إعدادات مساحة العمل':'Workspace settings'}</h3>
+        <p>${lang==='ar'?'إدارة اسم مساحة العمل وهويتها البصرية. التعديل متاح للمدير فقط.':'Manage the workspace name and visual identity. Admins only.'}</p>
       </div>
     </div>
 
-    <form onsubmit="saveWorkspaceSettings(event)">
-      <div class="settings-form-grid">
-        <div class="settings-field full"><label>${lang==='ar'?'اسم مساحة العمل':'Workspace name'}</label><input id="settingsWorkspaceName" maxlength="120" required value="${escapeHtml(currentWorkspaceName||'')}"></div>
+    <form onsubmit="saveWorkspaceSettings(event)" class="tasky-workspace-form-v206">
+      <div class="tasky-workspace-main-v206">
+        <div class="tasky-workspace-logo-block-v206">
+          <div class="tasky-workspace-logo-preview-v204 ${hasLogo?'has-logo':''}" aria-label="${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}">
+            ${logo}
+          </div>
+          <div class="tasky-workspace-logo-meta-v206">
+            <b>${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}</b>
+            <span>${hasLogo
+              ? (lang==='ar'?'الشعار الحالي المستخدم في القائمة وهوية مساحة العمل.':'Current logo used in the sidebar and workspace identity.')
+              : (lang==='ar'?'لا يوجد شعار مرفوع حاليًا؛ يتم عرض الأحرف الأولى مؤقتًا.':'No logo uploaded yet; initials are shown as a fallback.')
+            }</span>
+            <button type="button" class="chip-btn tasky-workspace-logo-btn-v206" onclick="openWorkspaceBrandingModal()">
+              <svg><use href="#i-camera"/></svg>${hasLogo?(lang==='ar'?'تغيير الشعار':'Change logo'):(lang==='ar'?'رفع شعار':'Upload logo')}
+            </button>
+          </div>
+        </div>
+
+        <div class="tasky-workspace-name-block-v206">
+          <div class="settings-field">
+            <label>${lang==='ar'?'اسم مساحة العمل':'Workspace name'}</label>
+            <input id="settingsWorkspaceName" maxlength="120" required value="${escapeHtml(currentWorkspaceName||'')}">
+            <small>${lang==='ar'?'يظهر هذا الاسم لأعضاء الفريق وفي القائمة الرئيسية.':'This name appears to team members and in the main navigation.'}</small>
+          </div>
+        </div>
       </div>
-      <div class="settings-actions">
-        <button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ':'Save'}</button>
+
+      <div class="tasky-workspace-actions-v206">
+        <button class="primary-btn" type="submit">
+          <svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ التغييرات':'Save changes'}
+        </button>
       </div>
     </form>
   </div>
-  <div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'ملخص مساحة العمل':'Workspace summary'}</h3></div></div><div class="settings-summary-grid"><div class="settings-summary"><span>${lang==='ar'?'الباقة الفعلية':'Active plan'}</span><b>${t('plan_'+currentPlan+'_name')}</b></div><div class="settings-summary"><span>${lang==='ar'?'الأعضاء النشطون':'Active members'}</span><b>${teamMembers.filter(m=>m.status==='active').length}</b></div><div class="settings-summary"><span>${lang==='ar'?'دورك':'Your role'}</span><b>${currentUserRole==='admin'?t('role_admin'):t('role_member')}</b></div></div></div>`;
+
+  <div class="settings-card">
+    <div class="settings-card-head"><div><h3>${lang==='ar'?'ملخص مساحة العمل':'Workspace summary'}</h3></div></div>
+    <div class="settings-summary-grid">
+      <div class="settings-summary"><span>${lang==='ar'?'الباقة الفعلية':'Active plan'}</span><b>${t('plan_'+currentPlan+'_name')}</b></div>
+      <div class="settings-summary"><span>${lang==='ar'?'الأعضاء النشطون':'Active members'}</span><b>${teamMembers.filter(m=>m.status==='active').length}</b></div>
+      <div class="settings-summary"><span>${lang==='ar'?'دورك':'Your role'}</span><b>${currentUserRole==='admin'?t('role_admin'):t('role_member')}</b></div>
+    </div>
+  </div>`;
 }
 function settingsAppearanceTemplate(){
   const darkSelected=!!document.body.classList.contains('dark');
@@ -16350,6 +16478,18 @@ console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile-order');
 <script id="tasky-v204-build-marker">
 window.TASKY_BUILD='V204';
 console.info('Tasky build',window.TASKY_BUILD,'workspace-logo-preview');
+</script>
+
+
+<script id="tasky-v205-build-marker">
+window.TASKY_BUILD='V205';
+console.info('Tasky build',window.TASKY_BUILD,'workspace-logo-clean');
+</script>
+
+
+<script id="tasky-v206-build-marker">
+window.TASKY_BUILD='V206';
+console.info('Tasky build',window.TASKY_BUILD,'workspace-settings-layout');
 </script>
 
 </body>
