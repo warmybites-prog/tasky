@@ -2442,6 +2442,55 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 }
 </style>
 
+
+<style id="tasky-v203-bilingual-profile-order-css">
+/* V203 — bilingual profile columns follow the interface language.
+   Arabic UI: Arabic is on the right (start side).
+   English UI: English is on the left (start side). */
+@media(min-width:721px){
+  .tasky-profile-lang-grid-v202{
+    direction:ltr !important;
+    grid-template-columns:minmax(0,1fr) minmax(0,1fr) !important;
+  }
+
+  /* Physical left column = English, physical right column = Arabic.
+     This makes the active language sit on its natural reading/start side. */
+  .tasky-profile-lang-grid-v202 .tasky-v203-name-en{grid-column:1;grid-row:1}
+  .tasky-profile-lang-grid-v202 .tasky-v203-name-ar{grid-column:2;grid-row:1}
+  .tasky-profile-lang-grid-v202 .tasky-v203-title-en{grid-column:1;grid-row:2}
+  .tasky-profile-lang-grid-v202 .tasky-v203-title-ar{grid-column:2;grid-row:2}
+  .tasky-profile-lang-grid-v202 .settings-field.full{grid-column:1/-1}
+}
+
+/* Keep labels aligned with each language, independent of page direction. */
+.tasky-profile-lang-grid-v202 .tasky-v203-name-ar,
+.tasky-profile-lang-grid-v202 .tasky-v203-title-ar{direction:rtl;text-align:right}
+.tasky-profile-lang-grid-v202 .tasky-v203-name-en,
+.tasky-profile-lang-grid-v202 .tasky-v203-title-en{direction:ltr;text-align:left}
+
+@media(max-width:720px){
+  .tasky-profile-lang-grid-v202 .tasky-v203-name-ar,
+  .tasky-profile-lang-grid-v202 .tasky-v203-name-en,
+  .tasky-profile-lang-grid-v202 .tasky-v203-title-ar,
+  .tasky-profile-lang-grid-v202 .tasky-v203-title-en{
+    grid-column:auto !important;
+    grid-row:auto !important;
+  }
+
+  /* Mobile order follows chosen UI language. */
+  html[dir="rtl"] .tasky-profile-lang-grid-v202 .tasky-v203-name-ar{order:1}
+  html[dir="rtl"] .tasky-profile-lang-grid-v202 .tasky-v203-name-en{order:2}
+  html[dir="rtl"] .tasky-profile-lang-grid-v202 .tasky-v203-title-ar{order:3}
+  html[dir="rtl"] .tasky-profile-lang-grid-v202 .tasky-v203-title-en{order:4}
+
+  html[dir="ltr"] .tasky-profile-lang-grid-v202 .tasky-v203-name-en{order:1}
+  html[dir="ltr"] .tasky-profile-lang-grid-v202 .tasky-v203-name-ar{order:2}
+  html[dir="ltr"] .tasky-profile-lang-grid-v202 .tasky-v203-title-en{order:3}
+  html[dir="ltr"] .tasky-profile-lang-grid-v202 .tasky-v203-title-ar{order:4}
+  .tasky-profile-lang-grid-v202 .settings-field.full{order:5}
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -7336,10 +7385,10 @@ function settingsProfileTemplate(me){
       <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;margin-bottom:7px">${lang==='ar'?'الصورة الشخصية':'Profile photo'}</div><div class="profile-avatar-actions"><label class="avatar-upload-label"><svg style="width:16px;height:16px"><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الصورة':'Change photo'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadMyAvatar(this)"></label>${me?.avatarUrl?`<button type="button" class="chip-btn" onclick="removeMyAvatar()">${lang==='ar'?'إزالة الصورة':'Remove photo'}</button>`:''}</div><div class="profile-avatar-note">${lang==='ar'?'PNG بخلفية شفافة يبقى شفافًا · JPG أو WEBP · يتم قص الصورة وتخفيف حجمها تلقائيًا.':'Transparent PNG stays transparent · JPG or WEBP · automatically cropped and optimized.'}</div></div>
     </div>
     <form onsubmit="saveMyProfile(event)"><div class="settings-form-grid tasky-profile-lang-grid-v202">
-      <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل — عربي':'Full name — Arabic'}</label><input id="settingsFullNameAr" dir="rtl" maxlength="120" value="${escapeHtml(nameAr)}" placeholder="محمد الشهراني"></div>
-      <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل — إنجليزي':'Full name — English'}</label><input id="settingsFullNameEn" dir="ltr" maxlength="120" value="${escapeHtml(nameEn)}" placeholder="Mohammed Alshahrani"></div>
-      <div class="settings-field"><label>${lang==='ar'?'المسمى الوظيفي — عربي':'Job title — Arabic'}</label><input id="settingsJobTitleAr" dir="rtl" maxlength="120" value="${escapeHtml(titleAr)}" placeholder="${lang==='ar'?'رئيس التسويق':'رئيس التسويق'}"></div>
-      <div class="settings-field"><label>${lang==='ar'?'المسمى الوظيفي — إنجليزي':'Job title — English'}</label><input id="settingsJobTitleEn" dir="ltr" maxlength="120" value="${escapeHtml(titleEn)}" placeholder="Head of Marketing"></div>
+      <div class="settings-field tasky-v203-name-ar"><label>${lang==='ar'?'الاسم الكامل — عربي':'Full name — Arabic'}</label><input id="settingsFullNameAr" dir="rtl" maxlength="120" value="${escapeHtml(nameAr)}" placeholder="محمد الشهراني"></div>
+      <div class="settings-field tasky-v203-name-en"><label>${lang==='ar'?'الاسم الكامل — إنجليزي':'Full name — English'}</label><input id="settingsFullNameEn" dir="ltr" maxlength="120" value="${escapeHtml(nameEn)}" placeholder="Mohammed Alshahrani"></div>
+      <div class="settings-field tasky-v203-title-ar"><label>${lang==='ar'?'المسمى الوظيفي — عربي':'Job title — Arabic'}</label><input id="settingsJobTitleAr" dir="rtl" maxlength="120" value="${escapeHtml(titleAr)}" placeholder="${lang==='ar'?'رئيس التسويق':'رئيس التسويق'}"></div>
+      <div class="settings-field tasky-v203-title-en"><label>${lang==='ar'?'المسمى الوظيفي — إنجليزي':'Job title — English'}</label><input id="settingsJobTitleEn" dir="ltr" maxlength="120" value="${escapeHtml(titleEn)}" placeholder="Head of Marketing"></div>
       <div class="settings-field full"><label>${lang==='ar'?'البريد الإلكتروني':'Email'}</label><input value="${escapeHtml(currentUserEmail||me?.email||'')}" disabled></div>
     </div><div class="settings-actions"><button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ التغييرات':'Save changes'}</button></div></form>
   </div>`;
@@ -16188,6 +16237,12 @@ console.info('Tasky build',window.TASKY_BUILD,'settings-selection-fix');
 <script id="tasky-v202-build-marker">
 window.TASKY_BUILD='V202';
 console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile');
+</script>
+
+
+<script id="tasky-v203-build-marker">
+window.TASKY_BUILD='V203';
+console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile-order');
 </script>
 
 </body>
