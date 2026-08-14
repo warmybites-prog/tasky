@@ -2711,7 +2711,8 @@ function taskyModuleDescriptorV83(id){
     crm:{key:'crm',load:()=>fetchCrmData()},vendors:{key:'procurement',load:()=>fetchProcurementData()},surveys:{key:'surveys',load:()=>fetchSurveys()},
     support:{key:'support',load:()=>fetchSupportTickets()},hr:{key:'hr',load:()=>fetchHrDataV72()},
     billing:{key:'billing',load:()=>Promise.allSettled([fetchPendingPlanRequest(),fetchCommercialRuntimeV69({render:false}),fetchPricingCatalogV731({render:false})])},
-    reports:{key:'reports',load:()=>Promise.allSettled([fetchInventory(),fetchEvents(),fetchBudgets(),fetchMarketingData(),fetchProcurementData()])}
+    reports:{key:'reports',load:()=>Promise.allSettled([fetchInventory(),fetchEvents(),fetchBudgets(),fetchMarketingData(),fetchProcurementData()])},
+    analytics:{key:'analytics',load:()=>Promise.allSettled([fetchInventory(),fetchEvents(),fetchBudgets(),fetchMarketingData(),fetchProcurementData()])}
   };
   return map[id]||null;
 }
@@ -15172,15 +15173,15 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
 
   function moduleAllowed(id) {
     try {
-      if (typeof window.taskyModuleAvailableV165 === 'function') {
-        const available = window.taskyModuleAvailableV165(id);
+      if (typeof taskyModuleAvailableV165 === 'function') {
+        const available = taskyModuleAvailableV165(id);
         if (available === false) return false;
       }
     } catch (_) {}
 
     try {
-      if (typeof window.planAllows === 'function' && window.currentPlan) {
-        const allowed = window.planAllows(window.currentPlan, id);
+      if (typeof planAllows === 'function' && currentPlan) {
+        const allowed = planAllows(currentPlan, id);
         if (allowed === false) return false;
       }
     } catch (_) {}
@@ -15191,8 +15192,8 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
   async function loadIndicatorSource(id) {
     if (!moduleAllowed(id)) return {id, skipped:true};
 
-    if (typeof window.taskyEnsureModuleLoadedV83 === 'function') {
-      return window.taskyEnsureModuleLoadedV83(id);
+    if (typeof taskyEnsureModuleLoadedV83 === 'function') {
+      return taskyEnsureModuleLoadedV83(id);
     }
 
     // Compatibility fallback for builds where V83 loader is unavailable.
@@ -15209,17 +15210,17 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
   }
 
   function refreshHomeAfterHydration() {
-    if (window.activeNav !== 'home') return;
+    if (activeNav !== 'home') return;
     try {
-      if (typeof window.renderAll === 'function') window.renderAll();
-      else if (typeof window.renderModule === 'function') window.renderModule();
+      if (typeof renderAll === 'function') renderAll();
+      else if (typeof renderModule === 'function') renderModule();
     } catch (e) {
       console.warn('V170 home indicator rerender', e);
     }
   }
 
   async function hydrateHomeIndicators({force=false}={}) {
-    const workspace = window.currentWorkspaceId;
+    const workspace = currentWorkspaceId;
     if (!workspace) return false;
 
     const fresh = (
@@ -15253,7 +15254,7 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
   function scheduleHomeHydration(delay=0) {
     clearTimeout(state.renderTimer);
     state.renderTimer = setTimeout(() => {
-      if (window.activeNav === 'home' && window.currentWorkspaceId) {
+      if (activeNav === 'home' && currentWorkspaceId) {
         hydrateHomeIndicators().catch(e => console.warn('V170 home hydration', e));
       }
     }, delay);
@@ -15281,7 +15282,7 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
     const wrapped = async function(...args) {
       const result = await fn.apply(this,args);
       state.lastHydratedAt = 0;
-      if (window.activeNav === 'home') refreshHomeAfterHydration();
+      if (activeNav === 'home') refreshHomeAfterHydration();
       return result;
     };
     wrapped.__taskyV170Wrapped = true;
@@ -15304,8 +15305,8 @@ console.info('Tasky build',window.TASKY_BUILD,'home-direct');
       installNavigationHook();
       installFetchHooks();
 
-      if (window.currentWorkspaceId) {
-        if (window.activeNav === 'home') scheduleHomeHydration(60);
+      if (currentWorkspaceId) {
+        if (activeNav === 'home') scheduleHomeHydration(60);
         if (++tries > 30) clearInterval(timer);
       } else if (++tries > 60) {
         clearInterval(timer);
@@ -16029,6 +16030,59 @@ console.info('Tasky build',window.TASKY_BUILD,'fast-warm-route');
 <script id="tasky-v199-build-marker">
 window.TASKY_BUILD='V199';
 console.info('Tasky build',window.TASKY_BUILD,'calendar-preference');
+</script>
+
+
+<script id="tasky-v200-live-kpi-runtime-js">
+(function(){
+  const KPI_MODULES_V200=new Set(['reports','analytics']);
+
+  async function ensureLiveKpisV200(id){
+    if(!KPI_MODULES_V200.has(id) || !currentWorkspaceId)return false;
+    try{
+      await taskyEnsureModuleLoadedV83(id);
+      if(activeNav===id)renderModule();
+      return true;
+    }catch(e){
+      console.warn('Tasky V200 KPI hydration',e);
+      return false;
+    }
+  }
+
+  /* Hook the actual lexical navigation function, not window.setActiveNav.
+     This covers normal navigation after all previous wrappers are installed. */
+  if(typeof setActiveNav==='function'&&!window.__taskyKpiNavV200){
+    window.__taskyKpiNavV200=true;
+    const baseSetActiveNavV200=setActiveNav;
+    setActiveNav=function(id,...args){
+      const result=baseSetActiveNavV200(id,...args);
+      if(KPI_MODULES_V200.has(id)){
+        Promise.resolve(result).finally(()=>ensureLiveKpisV200(id));
+      }
+      return result;
+    };
+  }
+
+  /* Fresh startup/warm-tab can land directly on Analytics/Reports before a click. */
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    if(currentWorkspaceId && KPI_MODULES_V200.has(activeNav)){
+      clearInterval(timer);
+      ensureLiveKpisV200(activeNav);
+    }else if(tries>80){
+      clearInterval(timer);
+    }
+  },100);
+
+  window.taskyRefreshLiveKpisV200=function(){
+    return ensureLiveKpisV200(activeNav);
+  };
+})();
+</script>
+<script id="tasky-v200-build-marker">
+window.TASKY_BUILD='V200';
+console.info('Tasky build',window.TASKY_BUILD,'live-kpi-hydration');
 </script>
 
 </body>
