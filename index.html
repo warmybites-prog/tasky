@@ -15268,47 +15268,62 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
     const h=Math.min(900,Math.max(620,Math.round(screen.availHeight*.82)));
     return `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h}`;
   }
-  let taskyPopupWindowV190=null;
+  const taskyPopupWindowsV194=new Map();
+
+  function taskyPopupIdV194(){
+    try{return crypto.randomUUID();}
+    catch(_){return `${Date.now()}_${Math.random().toString(36).slice(2)}`;}
+  }
+
   function openTaskyPopup(url){
     try{
       const target=new URL(url,location.href);
+      const moduleId=target.searchParams.get('tasky_module');
+      const projectId=target.searchParams.get('tasky_project');
+      const popupId=taskyPopupIdV194();
+
       const payload={
-        type:'tasky:navigate:v190',
-        moduleId:target.searchParams.get('tasky_module'),
-        projectId:target.searchParams.get('tasky_project'),
+        type:'tasky:navigate:v194',
+        popupId,
+        moduleId,
+        projectId,
         href:target.href
       };
 
-      /* Reuse one popup. Never force location.replace() on an already-booting child. */
-      if(taskyPopupWindowV190 && !taskyPopupWindowV190.closed){
-        try{
-          taskyPopupWindowV190.focus();
-          taskyPopupWindowV190.postMessage(payload,location.origin);
-          return true;
-        }catch(_){}
-      }
-
-      /* First opening: open the popup in lightweight popup mode only.
-         The requested route is sent by postMessage, so boot is allowed to finish cleanly. */
+      /* Every request gets its own independent Tasky popup window.
+         Unique window names prevent one popup from hijacking another. */
       const shell=new URL(location.href);
       shell.searchParams.set('tasky_popup','1');
+      shell.searchParams.set('tasky_popup_id',popupId);
       shell.searchParams.delete('tasky_module');
       shell.searchParams.delete('tasky_project');
 
-      const win=window.open(shell.href,'tasky_workspace_popup_v190',popupFeatures());
+      const name=`tasky_popup_${popupId}`;
+      const win=window.open(shell.href,name,popupFeatures());
       if(!win)return false;
-      taskyPopupWindowV190=win;
+
+      taskyPopupWindowsV194.set(popupId,win);
       try{win.focus();}catch(_){}
 
-      /* Send route immediately and again shortly after in case the child listener
-         has not attached yet. Child queues it until Tasky is fully ready. */
-      const send=()=>{try{if(!win.closed)win.postMessage(payload,location.origin);}catch(_){}};
+      const send=()=>{
+        try{
+          if(win.closed){
+            taskyPopupWindowsV194.delete(popupId);
+            return;
+          }
+          win.postMessage(payload,location.origin);
+        }catch(_){}
+      };
+
+      /* Route is queued safely in child until Tasky bootstrap is ready. */
       setTimeout(send,80);
-      setTimeout(send,500);
-      setTimeout(send,1200);
+      setTimeout(send,350);
+      setTimeout(send,800);
+      setTimeout(send,1500);
+
       return true;
     }catch(e){
-      console.warn('Tasky popup V190',e);
+      console.warn('Tasky popup V194',e);
       return false;
     }
   }
@@ -15539,89 +15554,6 @@ console.info('Tasky build',window.TASKY_BUILD,'role-label-centered');
 window.TASKY_BUILD='V188';
 console.info('Tasky build',window.TASKY_BUILD,'sidebar-collapse-resize');
 </script>
-
-<script id="tasky-v190-popup-runtime-js">
-(function(){
-  const isPopup=(()=>{
-    try{return new URL(location.href).searchParams.get('tasky_popup')==='1';}
-    catch(_){return false;}
-  })();
-  if(!isPopup)return;
-
-  document.documentElement.setAttribute('data-tasky-popup','1');
-
-  let pendingRouteV190=null;
-  let applyingV190=false;
-
-  function taskyReadyV190(){
-    try{
-      return !!currentWorkspaceId &&
-             typeof setActiveNav==='function' &&
-             typeof setActiveProject==='function' &&
-             !!document.querySelector('.app');
-    }catch(_){return false;}
-  }
-
-  async function applyRouteV190(route){
-    if(!route||applyingV190)return;
-    if(!taskyReadyV190()){pendingRouteV190=route;return;}
-    applyingV190=true;
-    try{
-      if(route.moduleId){
-        await setActiveNav(route.moduleId);
-      }else if(route.projectId){
-        setActiveProject(route.projectId);
-      }
-      try{
-        const u=new URL(location.href);
-        u.searchParams.set('tasky_popup','1');
-        u.searchParams.delete('tasky_module');
-        u.searchParams.delete('tasky_project');
-        if(route.moduleId)u.searchParams.set('tasky_module',route.moduleId);
-        if(route.projectId)u.searchParams.set('tasky_project',route.projectId);
-        history.replaceState({},'',u.href);
-      }catch(_){}
-      pendingRouteV190=null;
-    }catch(e){
-      console.warn('Tasky popup route V190',e);
-      pendingRouteV190=route;
-    }finally{
-      applyingV190=false;
-    }
-  }
-
-  window.addEventListener('message',e=>{
-    if(e.origin!==location.origin)return;
-    const d=e.data;
-    if(!d||d.type!=='tasky:navigate:v190')return;
-    pendingRouteV190=d;
-    applyRouteV190(d);
-  });
-
-  /* Route from URL if popup was restored/refreshed manually. */
-  try{
-    const u=new URL(location.href);
-    const moduleId=u.searchParams.get('tasky_module');
-    const projectId=u.searchParams.get('tasky_project');
-    if(moduleId||projectId)pendingRouteV190={moduleId,projectId};
-  }catch(_){}
-
-  /* Wait for normal Tasky bootstrap to finish. No forced DOM mutations. */
-  let tries=0;
-  const timer=setInterval(()=>{
-    tries++;
-    if(taskyReadyV190()){
-      window.__taskyPopupReadyV190=true;
-      if(pendingRouteV190)applyRouteV190(pendingRouteV190);
-      if(tries>40&&!pendingRouteV190)clearInterval(timer);
-    }
-    if(tries>120)clearInterval(timer);
-  },100);
-
-  window.addEventListener('beforeunload',()=>{window.__taskyPopupReadyV190=false;});
-})();
-</script>
-
 <script id="tasky-v192-multiwindow-safe-js">
 (function(){
   const INSTANCE=(crypto.randomUUID?crypto.randomUUID():`${Date.now()}_${Math.random()}`);
@@ -15713,6 +15645,98 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-collapse-resize');
 <script id="tasky-v192-build-marker">
 window.TASKY_BUILD='V192';
 console.info('Tasky build',window.TASKY_BUILD,'sidebar-sync-stable');
+</script>
+
+<script id="tasky-v194-popup-runtime-js">
+(function(){
+  const url=(()=>{try{return new URL(location.href);}catch(_){return null;}})();
+  if(!url || url.searchParams.get('tasky_popup')!=='1')return;
+
+  document.documentElement.setAttribute('data-tasky-popup','1');
+  const popupId=url.searchParams.get('tasky_popup_id')||'unknown';
+
+  let pending=null;
+  let applying=false;
+
+  function ready(){
+    try{
+      return !!currentWorkspaceId &&
+             !!currentUserId &&
+             typeof setActiveNav==='function' &&
+             typeof setActiveProject==='function' &&
+             !!document.querySelector('.app');
+    }catch(_){return false;}
+  }
+
+  async function applyRoute(route){
+    if(!route || applying)return;
+    if(route.popupId && route.popupId!==popupId)return;
+    if(!ready()){pending=route;return;}
+
+    applying=true;
+    try{
+      if(route.moduleId){
+        await setActiveNav(route.moduleId);
+      }else if(route.projectId){
+        setActiveProject(route.projectId);
+      }
+
+      try{
+        const u=new URL(location.href);
+        u.searchParams.set('tasky_popup','1');
+        u.searchParams.set('tasky_popup_id',popupId);
+        u.searchParams.delete('tasky_module');
+        u.searchParams.delete('tasky_project');
+        if(route.moduleId)u.searchParams.set('tasky_module',route.moduleId);
+        if(route.projectId)u.searchParams.set('tasky_project',route.projectId);
+        history.replaceState({},'',u.href);
+      }catch(_){}
+
+      pending=null;
+    }catch(e){
+      console.warn('Tasky popup V194 route',e);
+      pending=route;
+    }finally{
+      applying=false;
+    }
+  }
+
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin)return;
+    const d=e.data;
+    if(!d || d.type!=='tasky:navigate:v194')return;
+    if(d.popupId && d.popupId!==popupId)return;
+    pending=d;
+    applyRoute(d);
+  });
+
+  /* Manual reload of a popup restores its current route from URL. */
+  const moduleId=url.searchParams.get('tasky_module');
+  const projectId=url.searchParams.get('tasky_project');
+  if(moduleId||projectId){
+    pending={type:'tasky:navigate:v194',popupId,moduleId,projectId};
+  }
+
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    if(ready()){
+      window.__taskyPopupReadyV194=true;
+      if(pending)applyRoute(pending);
+      if(!pending && tries>40)clearInterval(timer);
+    }
+    if(tries>150)clearInterval(timer);
+  },100);
+
+  window.addEventListener('beforeunload',()=>{
+    window.__taskyPopupReadyV194=false;
+  });
+})();
+</script>
+
+<script id="tasky-v194-build-marker">
+window.TASKY_BUILD='V194';
+console.info('Tasky build',window.TASKY_BUILD,'multiple-stable-popups');
 </script>
 
 </body>
