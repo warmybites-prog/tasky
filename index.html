@@ -2,6 +2,55 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 
+<script id="tasky-v199-calendar-early">
+(function(){
+  const saved=localStorage.getItem('tasky_calendar_v199');
+  window.taskyCalendarV199=(saved==='hijri')?'hijri':'gregorian';
+  document.documentElement.setAttribute('data-tasky-calendar',window.taskyCalendarV199);
+
+  const NativeDTF=Intl.DateTimeFormat;
+  const NativeToLocaleDateString=Date.prototype.toLocaleDateString;
+  const NativeToLocaleString=Date.prototype.toLocaleString;
+
+  function calendarId(){
+    return window.taskyCalendarV199==='hijri'?'islamic-umalqura':'gregory';
+  }
+  function localeFor(locale){
+    const raw=locale || (document.documentElement.lang==='en'?'en-US':'ar-SA');
+    try{
+      const loc=new Intl.Locale(raw);
+      return new Intl.Locale(loc.baseName,{calendar:calendarId()}).toString();
+    }catch(_){
+      return raw;
+    }
+  }
+  function optionsFor(options){
+    return Object.assign({},options||{}, {calendar:calendarId()});
+  }
+
+  function TaskyDateTimeFormatV199(locale,options){
+    return new NativeDTF(localeFor(locale),optionsFor(options));
+  }
+  TaskyDateTimeFormatV199.prototype=NativeDTF.prototype;
+  Object.setPrototypeOf(TaskyDateTimeFormatV199,NativeDTF);
+  TaskyDateTimeFormatV199.supportedLocalesOf=NativeDTF.supportedLocalesOf.bind(NativeDTF);
+  Intl.DateTimeFormat=TaskyDateTimeFormatV199;
+
+  Date.prototype.toLocaleDateString=function(locale,options){
+    try{return NativeToLocaleDateString.call(this,localeFor(locale),optionsFor(options));}
+    catch(_){return NativeToLocaleDateString.call(this,locale,options);}
+  };
+  Date.prototype.toLocaleString=function(locale,options){
+    try{return NativeToLocaleString.call(this,localeFor(locale),optionsFor(options));}
+    catch(_){return NativeToLocaleString.call(this,locale,options);}
+  };
+
+  window.taskyCalendarIdV199=calendarId;
+  window.taskyCalendarLocaleV199=localeFor;
+})();
+</script>
+
+
 <script id="tasky-v197-warm-tab-early">
 (function(){
   try{
@@ -7292,6 +7341,7 @@ function settingsAppearanceTemplate(){
   return `<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'المظهر واللغة':'Appearance & language'}</h3><p>${lang==='ar'?'تُحفظ هذه التفضيلات على هذا الجهاز.':'These preferences are saved on this device.'}</p></div></div><div class="preference-grid">
     <div class="preference-card"><h4>${lang==='ar'?'اللغة':'Language'}</h4><div class="settings-inline-actions"><button class="chip-btn ${lang==='ar'?'active':''}" onclick="if(lang!=='ar')toggleLang()">العربية</button><button class="chip-btn ${lang==='en'?'active':''}" onclick="if(lang!=='en')toggleLang()">English</button></div></div>
     <div class="preference-card"><h4>${lang==='ar'?'الوضع':'Mode'}</h4><div class="settings-inline-actions"><button class="chip-btn" onclick="setMode(false)"><svg><use href="#i-sun"/></svg>${lang==='ar'?'فاتح':'Light'}</button><button class="chip-btn" onclick="setMode(true)"><svg><use href="#i-moon"/></svg>${lang==='ar'?'داكن':'Dark'}</button></div></div>
+    <div class="preference-card"><h4>${lang==='ar'?'نظام التاريخ':'Calendar system'}</h4><p style="font-size:10.5px;color:var(--muted);line-height:1.7;margin:0 0 10px">${lang==='ar'?'الميلادي هو الافتراضي. يمكنك عرض التواريخ بالهجري (أم القرى).':'Gregorian is the default. You can display dates in Hijri (Umm al-Qura).'}</p><div class="settings-inline-actions"><button class="chip-btn ${taskyCalendarV199==='gregorian'?'active':''}" onclick="setTaskyCalendarV199('gregorian')">${lang==='ar'?'ميلادي':'Gregorian'}</button><button class="chip-btn ${taskyCalendarV199==='hijri'?'active':''}" onclick="setTaskyCalendarV199('hijri')">${lang==='ar'?'هجري':'Hijri'}</button></div></div>
     <div class="preference-card" style="grid-column:1/-1"><h4>${lang==='ar'?'لون الواجهة':'Accent color'}</h4><div class="swatch-row" style="margin:0">${Object.entries(THEMES).map(([id,th])=>`<div class="swatch ${themeName===id?'active':''}" style="background:${th.primary}" onclick="setTheme('${id}')" title="${lang==='ar'?th.label_ar:th.label_en}"></div>`).join('')}</div></div>
   </div></div>`;
 }
@@ -14734,7 +14784,8 @@ if('requestIdleCallback' in window){
 /* Cache date/time formatters used repeatedly in dense tables. */
 const taskyIntlCacheV167=new Map();
 function taskyIntlFormatterV167(locale,options){
-  const key=locale+'|'+JSON.stringify(options||{});
+  const cal=(window.taskyCalendarV199||'gregorian');
+  const key=cal+'|'+locale+'|'+JSON.stringify(options||{});
   if(!taskyIntlCacheV167.has(key))taskyIntlCacheV167.set(key,new Intl.DateTimeFormat(locale,options));
   return taskyIntlCacheV167.get(key);
 }
@@ -15941,6 +15992,43 @@ console.info('Tasky build',window.TASKY_BUILD,'warm-new-tabs');
 <script id="tasky-v198-build-marker">
 window.TASKY_BUILD='V198';
 console.info('Tasky build',window.TASKY_BUILD,'fast-warm-route');
+</script>
+
+
+<script id="tasky-v199-calendar-runtime-js">
+(function(){
+  window.setTaskyCalendarV199=function(mode){
+    const next=mode==='hijri'?'hijri':'gregorian';
+    window.taskyCalendarV199=next;
+    localStorage.setItem('tasky_calendar_v199',next);
+    document.documentElement.setAttribute('data-tasky-calendar',next);
+
+    /* Dense-table formatter cache must be rebuilt with the new calendar. */
+    try{if(typeof taskyIntlCacheV167!=='undefined')taskyIntlCacheV167.clear();}catch(_){}
+
+    /* Refresh all visible date labels immediately. */
+    try{renderNav();}catch(_){}
+    try{
+      if(typeof activeNav!=='undefined' && activeNav!=='home' && activeNav!=='tasks')renderModule();
+      else renderAll();
+    }catch(_){}
+  };
+
+  /* Keep preference synchronized between browser tabs/windows. */
+  window.addEventListener('storage',e=>{
+    if(e.key!=='tasky_calendar_v199')return;
+    const next=e.newValue==='hijri'?'hijri':'gregorian';
+    if(next===window.taskyCalendarV199)return;
+    window.taskyCalendarV199=next;
+    document.documentElement.setAttribute('data-tasky-calendar',next);
+    try{if(typeof taskyIntlCacheV167!=='undefined')taskyIntlCacheV167.clear();}catch(_){}
+    try{if(activeNav!=='home'&&activeNav!=='tasks')renderModule();else renderAll();}catch(_){}
+  });
+})();
+</script>
+<script id="tasky-v199-build-marker">
+window.TASKY_BUILD='V199';
+console.info('Tasky build',window.TASKY_BUILD,'calendar-preference');
 </script>
 
 </body>
