@@ -16792,17 +16792,31 @@ const TASKY_APPS_V217={
     ar:'الموارد البشرية',en:'Tasky HR',short:'HR',color:'#7F6AA8',
     modules:['hr','experience'],shared:[],landing:['hr','experience']
   },
-  inventory:{
-    ar:'المخزون والمشتريات',en:'Tasky Inventory',short:'INV',color:'#D9A441',
-    modules:['inventory','vendors','assets'],shared:[],landing:['inventory','vendors','assets']
-  },
   sales:{
     ar:'المبيعات والعملاء',en:'Tasky CRM',short:'CRM',color:'#1F7A6C',
     modules:['crm'],shared:[],landing:['crm']
   },
-  service:{
-    ar:'خدمة العملاء',en:'Tasky Service',short:'SD',color:'#1F5C7A',
-    modules:['requests','bookings'],shared:[],landing:['requests','bookings']
+
+  /* Standalone operational apps */
+  requests:{
+    ar:'الطلبات',en:'Tasky Requests',short:'REQ',color:'#2F6485',
+    modules:['requests'],shared:[],landing:['requests']
+  },
+  bookings:{
+    ar:'الحجوزات',en:'Tasky Bookings',short:'BK',color:'#5A7A44',
+    modules:['bookings'],shared:[],landing:['bookings']
+  },
+  inventory:{
+    ar:'المخزون',en:'Tasky Inventory',short:'INV',color:'#D9A441',
+    modules:['inventory'],shared:[],landing:['inventory']
+  },
+  procurement:{
+    ar:'المشتريات والموردون',en:'Tasky Procurement',short:'PO',color:'#A87332',
+    modules:['vendors'],shared:[],landing:['vendors']
+  },
+  assets:{
+    ar:'الأصول',en:'Tasky Assets',short:'AST',color:'#66778A',
+    modules:['assets'],shared:[],landing:['assets']
   },
   events:{
     ar:'الفعاليات',en:'Tasky Events',short:'EV',color:'#5B4B8A',
@@ -16812,13 +16826,33 @@ const TASKY_APPS_V217={
     ar:'الميزانيات',en:'Tasky Finance',short:'FIN',color:'#2A6C2E',
     modules:['budgets'],shared:[],landing:['budgets']
   },
-  collaboration:{
-    ar:'التعاون والتواصل',en:'Tasky Collaboration',short:'CO',color:'#3E7086',
-    modules:['meetings','connect','comms'],shared:[],landing:['meetings','connect','comms']
+  meetings:{
+    ar:'الاجتماعات',en:'Tasky Meetings',short:'MTG',color:'#466C86',
+    modules:['meetings'],shared:[],landing:['meetings']
   },
-  insights:{
-    ar:'التحليلات والاستبيانات',en:'Tasky Insights',short:'BI',color:'#6B7280',
-    modules:['analytics','reports','surveys','integrations'],shared:[],landing:['analytics','reports','surveys','integrations']
+  connect:{
+    ar:'التواصل',en:'Tasky Connect',short:'CN',color:'#3E7086',
+    modules:['connect'],shared:[],landing:['connect']
+  },
+  comms:{
+    ar:'المراسلات',en:'Tasky Comms',short:'COM',color:'#526B7B',
+    modules:['comms'],shared:[],landing:['comms']
+  },
+  analytics:{
+    ar:'التحليلات',en:'Tasky Analytics',short:'BI',color:'#57687A',
+    modules:['analytics'],shared:[],landing:['analytics']
+  },
+  reports:{
+    ar:'التقارير',en:'Tasky Reports',short:'RPT',color:'#69737A',
+    modules:['reports'],shared:[],landing:['reports']
+  },
+  surveys:{
+    ar:'الاستبيانات',en:'Tasky Surveys',short:'SV',color:'#846B92',
+    modules:['surveys'],shared:[],landing:['surveys']
+  },
+  integrations:{
+    ar:'التكاملات',en:'Tasky Integrations',short:'API',color:'#52645B',
+    modules:['integrations'],shared:[],landing:['integrations']
   }
 };
 
@@ -17434,6 +17468,12 @@ console.info('Tasky build V218 — app sub-navigation and chunk error fix');
 <script id="tasky-v221-build-marker">
 window.TASKY_BUILD='V221';
 console.info('Tasky build',window.TASKY_BUILD,'inner-sidebar-click-fix');
+</script>
+
+
+<script id="tasky-v222-build-marker">
+window.TASKY_BUILD='V222';
+console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
 </script>
 
 </body>
