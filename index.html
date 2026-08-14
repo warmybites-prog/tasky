@@ -2750,6 +2750,23 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
 #mainNav .tasky-hide-experience-top-v220{display:none !important}
 </style>
 
+
+<style id="tasky-v221-inner-click-css">
+.tasky-inner-sections-v219,
+.tasky-inner-section-v219{
+  pointer-events:auto !important;
+}
+.tasky-inner-section-v219{
+  position:relative;
+  z-index:2;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+.tasky-inner-section-v219:active{
+  transform:translateY(1px);
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -17227,18 +17244,38 @@ console.info('Tasky build V218 — app sub-navigation and chunk error fix');
     const wrap=document.createElement('div');
     wrap.className='tasky-inner-sections-v219';
     wrap.innerHTML=`<div class="tasky-inner-label-v219">${lang==='ar'?'أقسام التطبيق':'App sections'}</div>`;
-    btns.forEach(srcBtn=>{
+    btns.forEach((srcBtn,index)=>{
       const txt=(srcBtn.textContent||'').replace(/\s+/g,' ').trim();if(!txt)return;
       const b=document.createElement('button');
       b.type='button';
+      b.dataset.taskySourceIndexV221=String(index);
       b.className='tasky-inner-section-v219'+(sourceActiveV219(srcBtn)?' active':'');
       b.innerHTML=`<svg><use href="#${iconForV219(txt)}"></use></svg><span class="tasky-inner-text-v219"></span>`;
       b.querySelector('.tasky-inner-text-v219').textContent=txt;
-      b.onclick=()=>{
-        srcBtn.click();
-        setTimeout(renderInnerSidebarV219,0);
+      b.addEventListener('click',event=>{
+        event.preventDefault();
+        event.stopPropagation();
+
+        /* Resolve the CURRENT source strip/button at click time.
+           Lazy modules often replace their DOM after each render, so keeping the
+           original button node causes dead sidebar buttons. */
+        const currentSource=findInternalTabsV219();
+        const currentButtons=currentSource?directButtonsV219(currentSource):[];
+        const currentBtn=currentButtons[Number(b.dataset.taskySourceIndexV221)];
+
+        if(currentBtn){
+          currentBtn.dispatchEvent(new MouseEvent('click',{
+            bubbles:true,
+            cancelable:true,
+            view:window
+          }));
+        }else{
+          console.warn('V221: source subsection button not found', txt, activeNav);
+        }
+
+        setTimeout(renderInnerSidebarV219,20);
         try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
-      };
+      });
       wrap.appendChild(b);
     });
     parent.insertAdjacentElement('afterend',wrap);
@@ -17309,10 +17346,12 @@ console.info('Tasky build V218 — app sub-navigation and chunk error fix');
     btn.className='tasky-inner-section-v219'+(activeNav==='experience'?' active':'');
     btn.dataset.taskyExperienceV220='1';
     btn.innerHTML=`<svg><use href="#i-heart"></use></svg><span class="tasky-inner-text-v219">${lang==='ar'?'تجربة الموظف':'Employee Experience'}</span>`;
-    btn.onclick=async()=>{
+    btn.addEventListener('click',async event=>{
+      event.preventDefault();
+      event.stopPropagation();
       await setActiveNav('experience');
       try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
-    };
+    });
     return btn;
   }
 
@@ -17389,6 +17428,12 @@ console.info('Tasky build V218 — app sub-navigation and chunk error fix');
   window.TASKY_BUILD='V220';
   console.info('Tasky build V220 — Employee Experience nested under HR');
 })();
+</script>
+
+
+<script id="tasky-v221-build-marker">
+window.TASKY_BUILD='V221';
+console.info('Tasky build',window.TASKY_BUILD,'inner-sidebar-click-fix');
 </script>
 
 </body>
