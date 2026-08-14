@@ -2708,6 +2708,62 @@ html[dir="rtl"] .tasky-workspace-actions-v206{
 }
 </style>
 
+
+<style id="tasky-v210-notification-css">
+/* Unified notification card + delete behavior */
+#notifDropdown{
+  width:min(380px,calc(100vw - 24px)) !important;
+  padding:8px !important;
+}
+#notifDropdown .notif-dropdown-head{
+  padding:9px 8px 11px !important;
+}
+#notifDropdown .notif-swipe-v210{
+  position:relative;
+  overflow:hidden;
+  border-radius:13px;
+  margin:6px 0;
+  background:var(--danger);
+}
+#notifDropdown .notif-item{
+  position:relative;
+  z-index:2;
+  margin:0;
+  padding:11px 10px;
+  border:1px solid var(--border);
+  border-radius:13px;
+  background:var(--card);
+  transition:transform .18s ease,background .18s ease,border-color .18s ease;
+  touch-action:pan-y;
+}
+#notifDropdown .notif-item.unread{
+  background:color-mix(in srgb,var(--green-tint) 62%,var(--card));
+  border-color:color-mix(in srgb,var(--green) 18%,var(--border));
+}
+#notifDropdown .notif-row{align-items:center !important}
+#notifDropdown .notif-copy .txt{font-size:12.5px;line-height:1.55;font-weight:700}
+#notifDropdown .notif-copy .time{font-size:9.5px;margin-top:5px}
+#notifDropdown .notif-delete-v210{
+  width:34px;height:34px;flex:none;border:0;border-radius:10px;
+  background:transparent;color:var(--danger);display:grid;place-items:center;
+}
+#notifDropdown .notif-delete-v210:hover{background:var(--danger-tint)}
+#notifDropdown .notif-delete-v210 svg{width:16px;height:16px}
+#notifDropdown .notif-swipe-delete-v210{
+  position:absolute;inset:0;z-index:1;background:var(--danger);color:#fff;
+  display:flex;align-items:center;justify-content:flex-end;padding:0 18px;
+  font-size:11px;font-weight:800;
+}
+html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-start}
+@media(max-width:1024px){
+  #notifDropdown .notif-delete-v210{display:none}
+  #notifDropdown{max-height:min(72dvh,620px)}
+}
+@media(min-width:1025px){
+  #notifDropdown .notif-swipe-delete-v210{display:none}
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -16790,6 +16846,125 @@ console.info('Tasky build',window.TASKY_BUILD,'workspace-settings-layout');
 <script id="tasky-v209-build-marker">
 window.TASKY_BUILD='V209';
 console.info('Tasky build',window.TASKY_BUILD,'splash-logo-corrected');
+</script>
+
+
+<script id="tasky-v210-notification-runtime-js">
+(function(){
+  const oldRenderNotificationDropdownV210=renderNotificationDropdown;
+
+  function notifDeleteIconV210(){
+    return `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M7 7l1 13h8l1-13"/><path d="M10 11v5M14 11v5"/></svg>`;
+  }
+
+  window.deleteTaskyNotificationV210=async function(id,e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    const n=userNotifications.find(x=>String(x.id)===String(id));
+    if(!n)return false;
+    let error=null;
+    try{
+      if(n._source==='hr79'){
+        const res=await sb.from('tasky_hr_automation_inbox_v79')
+          .delete()
+          .eq('workspace_id',currentWorkspaceId)
+          .eq('user_id',currentUserId)
+          .eq('id',id);
+        error=res.error;
+      }else{
+        const res=await sb.rpc('tasky_auth_notification_delete_v210',{
+          p_workspace_id:currentWorkspaceId,
+          p_notification_id:id
+        });
+        error=res.error;
+      }
+    }catch(err){error=err}
+    if(error){
+      console.warn('V210 notification delete',error);
+      taskyToast(lang==='ar'?'تعذّر حذف الإشعار':'Could not delete notification',{tone:'warning'});
+      return false;
+    }
+    userNotifications=userNotifications.filter(x=>String(x.id)!==String(id));
+    updateNotificationBadge();
+    renderNotificationDropdown();
+    return true;
+  };
+
+  renderNotificationDropdown=function(){
+    const dd=document.getElementById('notifDropdown'); if(!dd)return;
+    const unread=userNotifications.filter(n=>!n.is_read).length;
+    const head=`<div class="notif-dropdown-head"><b>${lang==='ar'?'الإشعارات':'Notifications'}${unread?` · ${unread}`:''}</b>${unread?`<button class="notif-mark-all" onclick="event.stopPropagation();markAllNotificationsRead()">${lang==='ar'?'تحديد الكل كمقروء':'Mark all read'}</button>`:''}</div>`;
+    const rows=userNotifications.map(n=>{
+      const actor=taskMemberById(n.actor_id);
+      const preview=notificationPreview(n);
+      return `<div class="notif-swipe-v210" data-notification-id="${escapeHtml(n.id)}">
+        <div class="notif-swipe-delete-v210">${lang==='ar'?'حذف':'Delete'}</div>
+        <div class="notif-item ${n.is_read?'':'unread'}" onclick="openNotification('${n.id}')">
+          <div class="notif-row">${memberAvatarHtml(actor,30)}
+            <div class="notif-copy">
+              <div class="txt">${escapeHtml(notificationText(n))}</div>
+              ${preview?`<div style="font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>`:''}
+              <div class="time">${escapeHtml(formatDateTime(n.created_at))}</div>
+            </div>
+            <button type="button" class="notif-delete-v210" onclick="deleteTaskyNotificationV210('${n.id}',event)" aria-label="${lang==='ar'?'حذف الإشعار':'Delete notification'}">${notifDeleteIconV210()}</button>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+    dd.innerHTML=head+(rows||`<div class="notif-empty">${lang==='ar'?'لا توجد إشعارات جديدة':'No notifications yet'}</div>`);
+    taskyBindNotificationSwipeV210(dd);
+  };
+
+  window.taskyBindNotificationSwipeV210=function(root){
+    if(!matchMedia('(max-width:1024px)').matches)return;
+    root.querySelectorAll('.notif-swipe-v210').forEach(wrap=>{
+      if(wrap.dataset.swipeBound==='1')return;
+      wrap.dataset.swipeBound='1';
+      const card=wrap.querySelector('.notif-item');
+      let startX=0,startY=0,dx=0,active=false;
+      card.addEventListener('pointerdown',e=>{
+        if(e.pointerType==='mouse')return;
+        startX=e.clientX;startY=e.clientY;dx=0;active=true;
+        try{card.setPointerCapture(e.pointerId)}catch(_){}
+      });
+      card.addEventListener('pointermove',e=>{
+        if(!active)return;
+        const mx=e.clientX-startX,my=e.clientY-startY;
+        if(Math.abs(my)>Math.abs(mx)&&Math.abs(my)>10){active=false;card.style.transform='';return}
+        dx=mx;
+        const dir=document.documentElement.dir==='rtl'?1:-1;
+        const translated=Math.max(-96,Math.min(96,dx));
+        if(translated*dir>0)card.style.transform=`translateX(${translated}px)`;
+      });
+      const finish=async()=>{
+        if(!active){card.style.transform='';return}
+        active=false;
+        const dir=document.documentElement.dir==='rtl'?1:-1;
+        if(dx*dir>72){
+          card.style.transform=`translateX(${dir*120}px)`;
+          await deleteTaskyNotificationV210(wrap.dataset.notificationId);
+        }else{
+          card.style.transform='';
+        }
+      };
+      card.addEventListener('pointerup',finish);
+      card.addEventListener('pointercancel',()=>{active=false;card.style.transform=''});
+    });
+  };
+
+  /* Read state should update the visible count immediately after an item is opened. */
+  const baseOpenNotificationV210=openNotification;
+  openNotification=async function(id){
+    const result=await baseOpenNotificationV210(id);
+    updateNotificationBadge();
+    const dd=document.getElementById('notifDropdown');
+    if(dd&&!dd.classList.contains('hidden'))renderNotificationDropdown();
+    return result;
+  };
+})();
+</script>
+<script id="tasky-v210-build-marker">
+window.TASKY_BUILD='V210';
+console.info('Tasky build',window.TASKY_BUILD,'notification-delete-and-swipe');
 </script>
 
 </body>
