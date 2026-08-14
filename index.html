@@ -2433,6 +2433,15 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 }
 </style>
 
+
+<style id="tasky-v202-bilingual-profile-css">
+.tasky-profile-lang-grid-v202 .settings-field input[dir="rtl"]{text-align:right}
+.tasky-profile-lang-grid-v202 .settings-field input[dir="ltr"]{text-align:left}
+@media(max-width:720px){
+  .tasky-profile-lang-grid-v202{grid-template-columns:1fr !important}
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -4523,6 +4532,26 @@ function initialsFromName(name, email){
   return (email || '؟؟').slice(0,2).toUpperCase();
 }
 
+
+/* V202 — bilingual profile display helpers */
+function taskyProfileNameV202(profile,fallback=''){
+  if(!profile)return fallback||'';
+  const preferred=lang==='ar'?(profile.full_name_ar||profile.full_name_en):(profile.full_name_en||profile.full_name_ar);
+  return preferred||profile.full_name||fallback||'';
+}
+function taskyProfileJobTitleV202(profile){
+  if(!profile)return null;
+  const preferred=lang==='ar'?(profile.job_title_ar||profile.job_title_en):(profile.job_title_en||profile.job_title_ar);
+  return preferred||profile.job_title||null;
+}
+function taskyMemberNameV202(member){
+  if(!member)return '';
+  return (lang==='ar'?(member.fullNameAr||member.fullNameEn):(member.fullNameEn||member.fullNameAr))||member.fullName||member.email||'';
+}
+function taskyMemberJobTitleV202(member){
+  if(!member)return null;
+  return (lang==='ar'?(member.jobTitleAr||member.jobTitleEn):(member.jobTitleEn||member.jobTitleAr))||member.jobTitle||null;
+}
 async function fetchTeamMembers(){
   if(!currentWorkspaceId) return;
   const { data, error } = await sb
@@ -4541,7 +4570,7 @@ async function fetchTeamMembers(){
   if(userIds.length){
     const { data: profileRows, error: profileError } = await sb
       .from('profiles')
-      .select('id, full_name, job_title, avatar_url')
+      .select('id, full_name, full_name_ar, full_name_en, job_title, job_title_ar, job_title_en, avatar_url')
       .in('id', userIds);
     if(profileError) console.error('تعذّر تحميل ملفات أعضاء الفريق', profileError);
     profilesById = Object.fromEntries((profileRows || []).map(p => [p.id, p]));
@@ -4556,13 +4585,17 @@ async function fetchTeamMembers(){
       id: row.id,
       userId: row.user_id || null,
       email,
-      fullName,
+      fullName: taskyProfileNameV202(profile,row.invited_name||email),
+      fullNameAr: profile?.full_name_ar || null,
+      fullNameEn: profile?.full_name_en || null,
       invitedName: row.invited_name || null,
       invitedBy: row.invited_by || null,
-      invitedByName: inviter?.full_name || null,
+      invitedByName: inviter?taskyProfileNameV202(inviter,null):null,
       invitedAt: row.invited_at || null,
       joinedAt: row.joined_at || null,
-      jobTitle: profile?.job_title || null,
+      jobTitle: taskyProfileJobTitleV202(profile),
+      jobTitleAr: profile?.job_title_ar || null,
+      jobTitleEn: profile?.job_title_en || null,
       avatarUrl: profile?.avatar_url || null,
       role: row.role,
       status: row.status,
@@ -4575,14 +4608,16 @@ async function fetchTeamMembers(){
 function applyCurrentUserProfile(){
   const me = teamMembers.find(m => m.userId === currentUserId);
   if(!me) return;
+  const displayName=taskyMemberNameV202(me);
+  const displayTitle=taskyMemberJobTitleV202(me);
   const nameEl = document.getElementById('userName');
   const roleEl = document.getElementById('userRole');
   const avatarEl = document.querySelector('.sidebar-bottom .avatar');
-  if(nameEl) nameEl.textContent = me.fullName || me.email;
-  if(roleEl) roleEl.textContent = me.jobTitle || (me.role === 'admin' ? t('role_admin') : t('role_member'));
+  if(nameEl) nameEl.textContent = displayName || me.email;
+  if(roleEl) roleEl.textContent = displayTitle || (me.role === 'admin' ? t('role_admin') : t('role_member'));
   if(avatarEl){
     avatarEl.style.background = me.color;
-    avatarEl.innerHTML = me.avatarUrl ? `<img src="${escapeHtml(me.avatarUrl)}" alt="">` : escapeHtml(me.initials);
+    avatarEl.innerHTML = me.avatarUrl ? `<img src="${escapeHtml(me.avatarUrl)}" alt="">` : escapeHtml(initialsFromName(displayName,me.email));
   }
 }
 
@@ -7290,15 +7325,21 @@ function settingsTemplate(){
 }
 function settingsProfileTemplate(me){
   const avatar=me?.avatarUrl?`<img src="${escapeHtml(me.avatarUrl)}" alt="">`:escapeHtml(me?.initials||'؟');
+  const nameAr=me?.fullNameAr||((lang==='ar'&&!me?.fullNameEn)?me?.fullName:'')||'';
+  const nameEn=me?.fullNameEn||((lang==='en'&&!me?.fullNameAr)?me?.fullName:'')||'';
+  const titleAr=me?.jobTitleAr||((lang==='ar'&&!me?.jobTitleEn)?me?.jobTitle:'')||'';
+  const titleEn=me?.jobTitleEn||((lang==='en'&&!me?.jobTitleAr)?me?.jobTitle:'')||'';
   return `<div class="settings-card">
-    <div class="settings-card-head"><div class="settings-profile-line"><div><h3>${lang==='ar'?'ملفك الشخصي':'Your profile'}</h3><p>${lang==='ar'?'هذه البيانات تظهر لأعضاء فريقك وعند إسناد المهام والإشارات.':'This information is shown to teammates, assignees, and mentions.'}</p></div></div></div>
+    <div class="settings-card-head"><div class="settings-profile-line"><div><h3>${lang==='ar'?'ملفك الشخصي':'Your profile'}</h3><p>${lang==='ar'?'أضف الاسم والمسمى الوظيفي بالعربية والإنجليزية، وسيعرض تاسكي النسخة المطابقة للغة الواجهة تلقائيًا.':'Add your name and job title in Arabic and English. Tasky will automatically display the version that matches the interface language.'}</p></div></div></div>
     <div class="profile-avatar-editor">
       <div class="settings-profile-avatar ${me?.avatarUrl?'has-photo':''}" style="background:${me?.avatarUrl?'transparent':(me?.color||'var(--green)')}" id="settingsAvatarPreview">${avatar}</div>
       <div style="flex:1;min-width:0"><div style="font-weight:800;font-size:13px;margin-bottom:7px">${lang==='ar'?'الصورة الشخصية':'Profile photo'}</div><div class="profile-avatar-actions"><label class="avatar-upload-label"><svg style="width:16px;height:16px"><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الصورة':'Change photo'}<input type="file" accept="image/png,image/jpeg,image/webp" onchange="uploadMyAvatar(this)"></label>${me?.avatarUrl?`<button type="button" class="chip-btn" onclick="removeMyAvatar()">${lang==='ar'?'إزالة الصورة':'Remove photo'}</button>`:''}</div><div class="profile-avatar-note">${lang==='ar'?'PNG بخلفية شفافة يبقى شفافًا · JPG أو WEBP · يتم قص الصورة وتخفيف حجمها تلقائيًا.':'Transparent PNG stays transparent · JPG or WEBP · automatically cropped and optimized.'}</div></div>
     </div>
-    <form onsubmit="saveMyProfile(event)"><div class="settings-form-grid">
-      <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل':'Full name'}</label><input id="settingsFullName" required maxlength="120" value="${escapeHtml(me?.fullName||'')}"></div>
-      <div class="settings-field"><label>${lang==='ar'?'المسمى الوظيفي':'Job title'}</label><input id="settingsJobTitle" maxlength="120" value="${escapeHtml(me?.jobTitle||'')}"></div>
+    <form onsubmit="saveMyProfile(event)"><div class="settings-form-grid tasky-profile-lang-grid-v202">
+      <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل — عربي':'Full name — Arabic'}</label><input id="settingsFullNameAr" dir="rtl" maxlength="120" value="${escapeHtml(nameAr)}" placeholder="محمد الشهراني"></div>
+      <div class="settings-field"><label>${lang==='ar'?'الاسم الكامل — إنجليزي':'Full name — English'}</label><input id="settingsFullNameEn" dir="ltr" maxlength="120" value="${escapeHtml(nameEn)}" placeholder="Mohammed Alshahrani"></div>
+      <div class="settings-field"><label>${lang==='ar'?'المسمى الوظيفي — عربي':'Job title — Arabic'}</label><input id="settingsJobTitleAr" dir="rtl" maxlength="120" value="${escapeHtml(titleAr)}" placeholder="${lang==='ar'?'رئيس التسويق':'رئيس التسويق'}"></div>
+      <div class="settings-field"><label>${lang==='ar'?'المسمى الوظيفي — إنجليزي':'Job title — English'}</label><input id="settingsJobTitleEn" dir="ltr" maxlength="120" value="${escapeHtml(titleEn)}" placeholder="Head of Marketing"></div>
       <div class="settings-field full"><label>${lang==='ar'?'البريد الإلكتروني':'Email'}</label><input value="${escapeHtml(currentUserEmail||me?.email||'')}" disabled></div>
     </div><div class="settings-actions"><button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ التغييرات':'Save changes'}</button></div></form>
   </div>`;
@@ -7371,12 +7412,40 @@ function settingsBillingTemplate(){
 }
 async function saveMyProfile(e){
   e.preventDefault();
-  const fullName=document.getElementById('settingsFullName').value.trim();
-  const jobTitle=document.getElementById('settingsJobTitle').value.trim();
-  const {data,error}=await sb.rpc('update_my_profile',{p_full_name:fullName,p_job_title:jobTitle||null});
-  if(error){ showTaskyDialog({title:lang==='ar'?'تعذّر الحفظ':'Could not save',message:error.message,tone:'error'}); return; }
-  const me=currentMember(); if(me){ me.fullName=data?.full_name||fullName; me.jobTitle=data?.job_title||jobTitle||null; me.initials=initialsFromName(me.fullName,me.email); }
-  applyCurrentUserProfile(); taskyToast(lang==='ar'?'تم تحديث ملفك الشخصي':'Profile updated',{tone:'success'}); renderModule();
+  const fullNameAr=document.getElementById('settingsFullNameAr').value.trim();
+  const fullNameEn=document.getElementById('settingsFullNameEn').value.trim();
+  const jobTitleAr=document.getElementById('settingsJobTitleAr').value.trim();
+  const jobTitleEn=document.getElementById('settingsJobTitleEn').value.trim();
+
+  if(!fullNameAr&&!fullNameEn){
+    showTaskyDialog({title:lang==='ar'?'الاسم مطلوب':'Name required',message:lang==='ar'?'أدخل الاسم بالعربية أو الإنجليزية على الأقل.':'Enter your name in Arabic or English at minimum.',tone:'warning'});
+    return;
+  }
+
+  const {data,error}=await sb.rpc('update_my_profile_v202',{
+    p_full_name_ar:fullNameAr||null,
+    p_full_name_en:fullNameEn||null,
+    p_job_title_ar:jobTitleAr||null,
+    p_job_title_en:jobTitleEn||null
+  });
+  if(error){
+    showTaskyDialog({title:lang==='ar'?'تعذّر الحفظ':'Could not save',message:error.message,tone:'error'});
+    return;
+  }
+
+  const me=currentMember();
+  if(me){
+    me.fullNameAr=data?.full_name_ar||fullNameAr||null;
+    me.fullNameEn=data?.full_name_en||fullNameEn||null;
+    me.jobTitleAr=data?.job_title_ar||jobTitleAr||null;
+    me.jobTitleEn=data?.job_title_en||jobTitleEn||null;
+    me.fullName=taskyMemberNameV202(me);
+    me.jobTitle=taskyMemberJobTitleV202(me);
+    me.initials=initialsFromName(me.fullName,me.email);
+  }
+  applyCurrentUserProfile();
+  taskyToast(lang==='ar'?'تم تحديث ملفك الشخصي':'Profile updated',{tone:'success'});
+  renderModule();
 }
 async function saveWorkspaceSettings(e){
   e.preventDefault();
@@ -10600,8 +10669,8 @@ fetchTeamMembers=async function(){
   const {data,error}=await sb.from('workspace_members').select('id, user_id, role, status, invited_name, invited_email, invited_by, invited_at, joined_at').eq('workspace_id',currentWorkspaceId).in('status',['active','invited']).order('invited_at',{ascending:true});
   if(error){console.error('تعذّر تحميل أعضاء الفريق',error);return}
   const memberships=data||[],userIds=[...new Set(memberships.flatMap(r=>[r.user_id,r.invited_by]).filter(Boolean))];let profilesById={};
-  if(userIds.length){const pr=await sb.from('profiles').select('id, full_name, job_title, avatar_url').in('id',userIds);if(pr.error)console.error('تعذّر تحميل ملفات أعضاء الفريق',pr.error);profilesById=Object.fromEntries((pr.data||[]).map(p=>[p.id,p]))}
-  teamMembers=memberships.map((row,i)=>{const email=row.invited_email||'—',profile=row.user_id?profilesById[row.user_id]:null,fullName=profile?.full_name||row.invited_name||email,inviter=row.invited_by?profilesById[row.invited_by]:null;return{id:row.id,userId:row.user_id||null,email,fullName,invitedName:row.invited_name||null,invitedBy:row.invited_by||null,invitedByName:inviter?.full_name||null,invitedAt:row.invited_at||null,joinedAt:row.joined_at||null,jobTitle:profile?.job_title||null,avatarUrl:profile?.avatar_url||null,role:row.role,status:row.status,color:MEMBER_COLORS[i%MEMBER_COLORS.length],initials:initialsFromName(fullName,email)}})
+  if(userIds.length){const pr=await sb.from('profiles').select('id, full_name, full_name_ar, full_name_en, job_title, job_title_ar, job_title_en, avatar_url').in('id',userIds);if(pr.error)console.error('تعذّر تحميل ملفات أعضاء الفريق',pr.error);profilesById=Object.fromEntries((pr.data||[]).map(p=>[p.id,p]))}
+  teamMembers=memberships.map((row,i)=>{const email=row.invited_email||'—',profile=row.user_id?profilesById[row.user_id]:null,fullName=taskyProfileNameV202(profile,row.invited_name||email),inviter=row.invited_by?profilesById[row.invited_by]:null;return{id:row.id,userId:row.user_id||null,email,fullName,fullNameAr:profile?.full_name_ar||null,fullNameEn:profile?.full_name_en||null,invitedName:row.invited_name||null,invitedBy:row.invited_by||null,invitedByName:inviter?taskyProfileNameV202(inviter,null):null,invitedAt:row.invited_at||null,joinedAt:row.joined_at||null,jobTitle:taskyProfileJobTitleV202(profile),jobTitleAr:profile?.job_title_ar||null,jobTitleEn:profile?.job_title_en||null,avatarUrl:profile?.avatar_url||null,role:row.role,status:row.status,color:MEMBER_COLORS[i%MEMBER_COLORS.length],initials:initialsFromName(fullName,email)}})
 };
 
 // Replace optimistic/direct membership mutations with protected V95 RPCs.
@@ -15395,6 +15464,7 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
 
     const err=document.getElementById('authError');
     if(err)err.style.textAlign=lang==='ar'?'right':'left';
+    try{applyCurrentUserProfile();}catch(_){}
   };
 
   /* The language picked on the login screen becomes the application language. */
@@ -16112,6 +16182,12 @@ console.info('Tasky build',window.TASKY_BUILD,'live-kpi-hydration');
 <script id="tasky-v201-build-marker">
 window.TASKY_BUILD='V201';
 console.info('Tasky build',window.TASKY_BUILD,'settings-selection-fix');
+</script>
+
+
+<script id="tasky-v202-build-marker">
+window.TASKY_BUILD='V202';
+console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile');
 </script>
 
 </body>
