@@ -15612,9 +15612,222 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-collapse-resize');
   window.addEventListener('beforeunload',()=>{window.__taskyPopupReadyV190=false;});
 })();
 </script>
-<script id="tasky-v190-build-marker">
-window.TASKY_BUILD='V190';
-console.info('Tasky build',window.TASKY_BUILD,'popup-stable-message-routing');
+
+<script id="tasky-v191-multiwindow-sync-js">
+(function(){
+  /* ============================================================
+     V191 — Multi-window stability + synchronization
+     1) Prevent a second Tasky window's Supabase SIGNED_IN broadcast
+        from forcing the already-loaded first window through full boot.
+     2) When a window becomes active again, refresh only its visible data,
+        never the whole workspace bootstrap.
+     3) Broadcast lightweight sync hints between Tasky windows.
+     ============================================================ */
+
+  const INSTANCE_V191 =
+    (crypto.randomUUID ? crypto.randomUUID() : `${Date.now()}_${Math.random()}`);
+
+  let channelV191 = null;
+  try{
+    if('BroadcastChannel' in window){
+      channelV191 = new BroadcastChannel('tasky_sync_v191');
+    }
+  }catch(_){}
+
+  function appIsAlreadyReadyV191(){
+    try{
+      const app=document.querySelector('.app');
+      return !!currentWorkspaceId &&
+             !!currentUserId &&
+             !!app &&
+             app.style.display !== 'none';
+    }catch(_){
+      return false;
+    }
+  }
+
+  /* ------------------------------------------------------------
+     Stop redundant full workspace bootstrap.
+     Supabase auth state is shared across same-origin windows.
+     Opening/focusing another Tasky window can emit SIGNED_IN again.
+     The old handler calls checkSession(), which performs the full 8→100%
+     workspace bootstrap. If this window is already loaded, that is unnecessary.
+     ------------------------------------------------------------ */
+  if(typeof checkSession==='function' && !window.__taskyCheckSessionV191){
+    window.__taskyCheckSessionV191=true;
+    const baseCheckSessionV191=checkSession;
+
+    checkSession=async function(...args){
+      const opts=args[0];
+      const force=opts && typeof opts==='object' && opts.force===true;
+
+      if(!force && appIsAlreadyReadyV191()){
+        /* Verify the auth token quietly, but NEVER reopen the global boot screen. */
+        try{
+          const {data,error}=await sb.auth.getSession();
+          if(!error && data?.session?.user){
+            return true;
+          }
+        }catch(_){
+          /* If the quiet check itself fails, fall through to authoritative boot. */
+        }
+      }
+      return baseCheckSessionV191.apply(this,args);
+    };
+  }
+
+  /* Extra safety: once an app is already running, do not allow the decorative
+     global boot overlay to reopen unless the app is genuinely hidden/uninitialized. */
+  if(typeof taskyBootReopenV83==='function' && !window.__taskyBootReopenV191){
+    window.__taskyBootReopenV191=true;
+    const baseBootReopenV191=taskyBootReopenV83;
+    taskyBootReopenV83=function(...args){
+      if(appIsAlreadyReadyV191())return;
+      return baseBootReopenV191.apply(this,args);
+    };
+  }
+  if(typeof taskyBootShowV83==='function' && !window.__taskyBootShowV191){
+    window.__taskyBootShowV191=true;
+    const baseBootShowV191=taskyBootShowV83;
+    taskyBootShowV83=function(...args){
+      if(appIsAlreadyReadyV191())return;
+      return baseBootShowV191.apply(this,args);
+    };
+  }
+
+  /* ------------------------------------------------------------
+     Lightweight data sync.
+     This refreshes the CURRENT view/module only, so switching between
+     windows reflects changes without restarting Tasky.
+     ------------------------------------------------------------ */
+  let syncingV191=false;
+  let lastSyncV191=0;
+
+  async function syncCurrentWindowV191(reason='sync'){
+    if(syncingV191 || !appIsAlreadyReadyV191())return;
+    if(Date.now()-lastSyncV191 < 450)return;
+
+    syncingV191=true;
+    lastSyncV191=Date.now();
+
+    try{
+      const jobs=[];
+
+      /* Core task/project data power Home and Tasks. */
+      if(activeNav==='home' || activeNav==='tasks'){
+        if(typeof fetchProjects==='function')jobs.push(Promise.resolve(fetchProjects()));
+        if(typeof fetchProjectMemberships==='function')jobs.push(Promise.resolve(fetchProjectMemberships()));
+        if(typeof fetchTasks==='function')jobs.push(Promise.resolve(fetchTasks()));
+      }
+
+      /* Force only the visible lazy module to refresh from source. */
+      if(activeNav && !['home','tasks'].includes(activeNav) &&
+         typeof taskyEnsureModuleLoadedV83==='function'){
+        jobs.push(Promise.resolve(
+          taskyEnsureModuleLoadedV83(activeNav,{force:true})
+        ));
+      }
+
+      if(typeof fetchNotifications==='function'){
+        jobs.push(Promise.resolve(fetchNotifications()));
+      }
+
+      await Promise.allSettled(jobs);
+
+      try{
+        if(activeNav==='home' || activeNav==='tasks'){
+          renderAll();
+        }else{
+          renderModule();
+        }
+        renderNav();
+      }catch(_){}
+
+      console.debug('Tasky V191 sync',reason,activeNav);
+    }finally{
+      syncingV191=false;
+    }
+  }
+
+  window.taskySyncCurrentWindowV191=syncCurrentWindowV191;
+
+  function broadcastSyncV191(reason='change'){
+    try{
+      channelV191?.postMessage({
+        type:'tasky:sync:v191',
+        source:INSTANCE_V191,
+        workspaceId:currentWorkspaceId||null,
+        reason,
+        at:Date.now()
+      });
+    }catch(_){}
+  }
+  window.taskyBroadcastSyncV191=broadcastSyncV191;
+
+  if(channelV191){
+    channelV191.onmessage=e=>{
+      const d=e.data;
+      if(!d || d.type!=='tasky:sync:v191' || d.source===INSTANCE_V191)return;
+      if(d.workspaceId && currentWorkspaceId && d.workspaceId!==currentWorkspaceId)return;
+      syncCurrentWindowV191(`broadcast:${d.reason||'change'}`);
+    };
+  }
+
+  /* Returning to any already-open window does a small data sync, not a boot. */
+  document.addEventListener('visibilitychange',()=>{
+    if(document.visibilityState==='visible'){
+      syncCurrentWindowV191('visible');
+    }
+  });
+  window.addEventListener('focus',()=>{
+    syncCurrentWindowV191('focus');
+  },{passive:true});
+
+  /* ------------------------------------------------------------
+     Broadcast successful mutating RPCs.
+     Existing Supabase Realtime remains the primary synchronization layer.
+     This fills gaps for modules whose tables/RPCs don't have a realtime
+     listener in the current window.
+     ------------------------------------------------------------ */
+  if(sb && typeof sb.rpc==='function' && !window.__taskyRpcSyncV191){
+    window.__taskyRpcSyncV191=true;
+    const baseRpcV191=sb.rpc.bind(sb);
+
+    const READISH_V191=/^(get_|list_|fetch_|search_|check_|tasky_.*(?:runtime|summary|context|catalog|read|lookup|preview|stats|metrics))/i;
+
+    sb.rpc=function(fn,args,options){
+      const result=baseRpcV191(fn,args,options);
+
+      if(!READISH_V191.test(String(fn||''))){
+        Promise.resolve(result).then(res=>{
+          if(!res?.error){
+            broadcastSyncV191(`rpc:${String(fn||'write')}`);
+          }
+        }).catch(()=>{});
+      }
+      return result;
+    };
+  }
+
+  /* When a popup receives a route from its opener, ensure latest data is pulled
+     after navigation without forcing full workspace bootstrap. */
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin)return;
+    if(e.data?.type==='tasky:navigate:v190'){
+      setTimeout(()=>syncCurrentWindowV191('popup-route'),120);
+    }
+  });
+
+  /* One initial lightweight sync after normal boot settles. */
+  setTimeout(()=>{
+    if(appIsAlreadyReadyV191())syncCurrentWindowV191('initial-ready');
+  },900);
+})();
+</script>
+
+<script id="tasky-v191-build-marker">
+window.TASKY_BUILD='V191';
+console.info('Tasky build',window.TASKY_BUILD,'multiwindow-sync-no-reboot');
 </script>
 
 </body>
