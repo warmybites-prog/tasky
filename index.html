@@ -1,6 +1,24 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
+
+<script id="tasky-v184-first-paint-lang">
+(function(){
+  try{
+    var saved=localStorage.getItem('tasky_lang');
+    var l=(saved==='en'||saved==='ar')?saved:'ar';
+    var root=document.documentElement;
+    root.setAttribute('lang',l);
+    root.setAttribute('dir',l==='ar'?'rtl':'ltr');
+    root.setAttribute('data-tasky-lang-ready','1');
+  }catch(_){
+    document.documentElement.setAttribute('lang','ar');
+    document.documentElement.setAttribute('dir','rtl');
+    document.documentElement.setAttribute('data-tasky-lang-ready','1');
+  }
+})();
+</script>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>تاسكي — منصة إدارة الأعمال</title>
@@ -1977,54 +1995,194 @@ html body .sidebar-bottom.profile-open-v182 > .sidebar-signout-v173:hover{
 }
 </style>
 
+<style id="tasky-v184-rtl-ltr-stable-css">
+/* ============================================================
+   V184 — Stable RTL/LTR foundation across all viewports
+   Arabic  => sidebar RIGHT
+   English => sidebar LEFT
+   Direction is applied before first paint.
+   ============================================================ */
 
-<style id="tasky-v183-sidebar-side-fix">
-/* V183 — Arabic sidebar on the physical RIGHT, English sidebar on the LEFT. */
+/* Avoid visual transitions while the initial layout is settling. */
+html:not([data-tasky-ready-v184]) *,
+html:not([data-tasky-ready-v184]) *::before,
+html:not([data-tasky-ready-v184]) *::after{
+  transition:none !important;
+  animation:none !important;
+}
+
+/* Base reading direction */
+html[dir="rtl"] body{direction:rtl;text-align:right;}
+html[dir="ltr"] body{direction:ltr;text-align:left;}
+
+/* Main shell: explicit physical sidebar placement. */
 @media(min-width:821px){
   html body .app{
     display:flex !important;
     flex-direction:row !important;
+    width:100% !important;
   }
 
   html[dir="rtl"] body .sidebar{
     order:2 !important;
-    margin:0 !important;
+    flex:0 0 var(--sidebar-w, 280px) !important;
+    border-left:0 !important;
+    border-right:0 !important;
   }
   html[dir="rtl"] body .main{
     order:1 !important;
+    min-width:0 !important;
+    flex:1 1 auto !important;
   }
 
   html[dir="ltr"] body .sidebar{
     order:1 !important;
-    margin:0 !important;
+    flex:0 0 var(--sidebar-w, 280px) !important;
+    border-left:0 !important;
+    border-right:0 !important;
   }
   html[dir="ltr"] body .main{
     order:2 !important;
+    min-width:0 !important;
+    flex:1 1 auto !important;
   }
 }
 
+/* Mobile/tablet off-canvas direction. */
 @media(max-width:820px){
-  html[dir="rtl"] body .sidebar{
+  html body .sidebar{
     position:fixed !important;
     top:0 !important;
     bottom:0 !important;
+    z-index:1200 !important;
+    overflow:hidden !important;
+  }
+
+  html[dir="rtl"] body .sidebar{
     right:0 !important;
     left:auto !important;
     transform:translateX(105%) !important;
   }
-
   html[dir="ltr"] body .sidebar{
-    position:fixed !important;
-    top:0 !important;
-    bottom:0 !important;
     left:0 !important;
     right:auto !important;
     transform:translateX(-105%) !important;
   }
-
   html body.mobile-sidebar-open .sidebar{
     transform:translateX(0) !important;
   }
+}
+
+/* Sidebar internals */
+html body .sidebar .main-nav{
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior:contain;
+  -webkit-overflow-scrolling:touch;
+}
+html[dir="rtl"] body .sidebar,
+html[dir="rtl"] body .sidebar *{text-align:right;}
+html[dir="ltr"] body .sidebar,
+html[dir="ltr"] body .sidebar *{text-align:left;}
+
+/* Icon/label rows follow reading direction naturally. */
+html[dir="rtl"] body .nav-item,
+html[dir="rtl"] body .project-item,
+html[dir="rtl"] body .workspace,
+html[dir="rtl"] body .new-task-btn{
+  direction:rtl !important;
+}
+html[dir="ltr"] body .nav-item,
+html[dir="ltr"] body .project-item,
+html[dir="ltr"] body .workspace,
+html[dir="ltr"] body .new-task-btn{
+  direction:ltr !important;
+}
+
+/* Topbar / breadcrumb direction */
+html[dir="rtl"] body .topbar{direction:rtl !important;}
+html[dir="ltr"] body .topbar{direction:ltr !important;}
+html[dir="rtl"] body .breadcrumb{direction:rtl !important;text-align:right !important;}
+html[dir="ltr"] body .breadcrumb{direction:ltr !important;text-align:left !important;}
+
+/* Forms and dialogs */
+html[dir="rtl"] body input,
+html[dir="rtl"] body textarea,
+html[dir="rtl"] body select,
+html[dir="rtl"] body .modal-card,
+html[dir="rtl"] body .tasky-dialog{direction:rtl;text-align:right;}
+html[dir="ltr"] body input,
+html[dir="ltr"] body textarea,
+html[dir="ltr"] body select,
+html[dir="ltr"] body .modal-card,
+html[dir="ltr"] body .tasky-dialog{direction:ltr;text-align:left;}
+
+/* Keep numeric / technical values readable. */
+html body input[type="email"],
+html body input[type="url"],
+html body input[type="tel"],
+html body input[type="number"],
+html body code,
+html body pre{
+  direction:ltr !important;
+  text-align:left !important;
+}
+
+/* Tables */
+html[dir="rtl"] body table{direction:rtl;}
+html[dir="ltr"] body table{direction:ltr;}
+html[dir="rtl"] body th,
+html[dir="rtl"] body td{text-align:right;}
+html[dir="ltr"] body th,
+html[dir="ltr"] body td{text-align:left;}
+
+/* Generic flex groups: use logical direction without reversing DOM unexpectedly. */
+html[dir="rtl"] body .toolbar,
+html[dir="rtl"] body .toolbar-actions,
+html[dir="rtl"] body .command-bar,
+html[dir="rtl"] body .modal-actions{direction:rtl;}
+html[dir="ltr"] body .toolbar,
+html[dir="ltr"] body .toolbar-actions,
+html[dir="ltr"] body .command-bar,
+html[dir="ltr"] body .modal-actions{direction:ltr;}
+
+/* Avatar-only profile trigger: right in Arabic, left in English. */
+html[dir="rtl"] body .sidebar-bottom{
+  margin-left:auto !important;
+  margin-right:0 !important;
+}
+html[dir="ltr"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
+}
+
+/* Expanded account card stays inside the sidebar in all viewports. */
+html body .sidebar-bottom.profile-open-v182{
+  left:8px !important;
+  right:8px !important;
+  max-width:calc(100% - 16px) !important;
+}
+
+/* Mobile safe areas / compact view */
+@media(max-width:820px){
+  html body .main{
+    width:100% !important;
+    min-width:0 !important;
+  }
+  html body .topbar{
+    padding-inline:12px !important;
+  }
+  html body .content,
+  html body .module-content{
+    max-width:100% !important;
+    overflow-x:hidden !important;
+  }
+}
+
+/* Prevent horizontal RTL overflow from physical left/right remnants. */
+html body{
+  overflow-x:hidden !important;
 }
 </style>
 
@@ -15031,10 +15189,94 @@ window.TASKY_BUILD='V182';
 console.info('Tasky build',window.TASKY_BUILD,'avatar-only-profile-restored');
 </script>
 
+<script id="tasky-v184-direction-runtime">
+(function(){
+  function syncV184(){
+    try{
+      var saved=localStorage.getItem('tasky_lang');
+      var l=(saved==='en'||saved==='ar')?saved:(typeof lang!=='undefined'?lang:'ar');
+      if(typeof lang!=='undefined' && lang!==l) lang=l;
 
-<script id="tasky-v183-build-marker">
-window.TASKY_BUILD='V183';
-console.info('Tasky build',window.TASKY_BUILD,'rtl-sidebar-moved');
+      var root=document.documentElement;
+      root.setAttribute('lang',l);
+      root.setAttribute('dir',l==='ar'?'rtl':'ltr');
+      root.setAttribute('data-tasky-lang-ready','1');
+
+      document.body?.classList.toggle('tasky-rtl-v184',l==='ar');
+      document.body?.classList.toggle('tasky-ltr-v184',l==='en');
+
+      /* Close the mobile drawer during a language-side flip so it reopens cleanly
+         from the correct edge instead of animating across the whole screen. */
+      if(document.body?.classList.contains('mobile-sidebar-open')){
+        document.body.classList.remove('mobile-sidebar-open');
+      }
+
+      requestAnimationFrame(function(){
+        root.setAttribute('data-tasky-ready-v184','1');
+      });
+    }catch(e){
+      document.documentElement.setAttribute('data-tasky-ready-v184','1');
+    }
+  }
+
+  /* Login language selection is authoritative for the post-login UI. */
+  if(typeof window.toggleAuthLanguageV178==='function'&&!window.__taskyV184AuthLang){
+    window.__taskyV184AuthLang=true;
+    const baseAuthLang=window.toggleAuthLanguageV178;
+    window.toggleAuthLanguageV178=function(...args){
+      const r=baseAuthLang.apply(this,args);
+      try{localStorage.setItem('tasky_lang',lang);}catch(_){}
+      syncV184();
+      return r;
+    };
+  }
+
+  /* In-app language switch. */
+  if(typeof toggleLang==='function'&&!window.__taskyV184ToggleLang){
+    window.__taskyV184ToggleLang=true;
+    const baseToggle=toggleLang;
+    toggleLang=function(...args){
+      const r=baseToggle.apply(this,args);
+      try{localStorage.setItem('tasky_lang',lang);}catch(_){}
+      syncV184();
+      return r;
+    };
+  }
+
+  /* Apply after auth/session bootstrap too. */
+  if(typeof handleAuthSubmit==='function'&&!window.__taskyV184AuthSubmit){
+    window.__taskyV184AuthSubmit=true;
+    const baseSubmit=handleAuthSubmit;
+    handleAuthSubmit=async function(...args){
+      const chosen=typeof lang!=='undefined'?lang:(localStorage.getItem('tasky_lang')||'ar');
+      localStorage.setItem('tasky_lang',chosen);
+      const r=await baseSubmit.apply(this,args);
+      syncV184();
+      try{
+        applyChrome();
+        renderNav();
+        renderViewTabs();
+        renderModule();
+        renderAll();
+      }catch(_){}
+      return r;
+    };
+  }
+
+  /* Keep direction stable across resize/orientation and dynamic rerenders. */
+  window.addEventListener('resize',syncV184,{passive:true});
+  window.addEventListener('orientationchange',function(){setTimeout(syncV184,60);},{passive:true});
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',syncV184,{once:true});
+  }else{
+    syncV184();
+  }
+})();
+</script>
+<script id="tasky-v184-build-marker">
+window.TASKY_BUILD='V184';
+console.info('Tasky build',window.TASKY_BUILD,'stable-rtl-ltr-all-views');
 </script>
 
 </body>
