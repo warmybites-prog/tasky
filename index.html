@@ -1957,6 +1957,34 @@ html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
 }
 </style>
 
+
+<style id="tasky-v178-auth-language-css">
+.auth-card-v178{position:relative;}
+.auth-lang-v178{
+  position:absolute;
+  top:14px;
+  inset-inline-end:14px;
+  min-width:46px;
+  height:34px;
+  padding:0 10px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--paper);
+  color:var(--ink-soft);
+  font-family:inherit;
+  font-size:11.5px;
+  font-weight:800;
+  cursor:pointer;
+  z-index:2;
+}
+.auth-lang-v178:hover{border-color:var(--green);color:var(--green);}
+html[dir="ltr"] #authScreen{font-family:"Inter",sans-serif !important;}
+html[dir="rtl"] #authScreen{font-family:"IBM Plex Sans Arabic",sans-serif !important;}
+@media(max-width:560px){
+  .auth-lang-v178{top:11px;inset-inline-end:11px;height:32px;min-width:43px;font-size:11px;}
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -1972,7 +2000,8 @@ html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
 <script>if(!window.supabase){document.write('<script src="https://unpkg.com/@supabase/supabase-js@2"><\/script>');}</script>
 
 <div id="authScreen" style="position:fixed;inset:0;background:var(--paper);z-index:200;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Sans Arabic',sans-serif;">
-  <div style="width:360px;max-width:90vw;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;">
+  <div class="auth-card-v178" style="width:360px;max-width:90vw;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:32px;text-align:center;">
+    <button id="authLangBtnV178" class="auth-lang-v178" type="button" onclick="toggleAuthLanguageV178()" aria-label="Change language">EN</button>
     <div class="auth-brand-lockup">
       <div class="auth-brand-shell">
         <div id="authWordmark" aria-label="Tasky logo"></div>
@@ -2106,7 +2135,7 @@ html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
         <div id="previewAsLabel" style="font-size:10px;color:#6E8168;text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px;font-family:'IBM Plex Mono',monospace;"></div>
         <div class="role-toggle" id="roleToggle"></div>
       </div>
-      <button class="sidebar-signout-v173" onclick="signOutUser()" style="background:none;border:none;font-size:11.5px;text-align:center;cursor:pointer;padding:4px;">تسجيل الخروج</button>
+      <button id="sidebarSignoutV178" class="sidebar-signout-v173" onclick="signOutUser()" style="background:none;border:none;font-size:11.5px;text-align:center;cursor:pointer;padding:4px;">تسجيل الخروج</button>
     </div>
   </aside>
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()" aria-hidden="true"></div>
@@ -14774,6 +14803,119 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
 <script id="tasky-v177-build-marker">
 window.TASKY_BUILD='V177';
 console.info('Tasky build',window.TASKY_BUILD,'rtl-avatar-en-translation');
+</script>
+
+
+<script id="tasky-v178-language-runtime-js">
+(function(){
+  const AUTH_TEXT_V178={
+    ar:{
+      subtitle:'سجّل دخولك لمتابعة العمل',
+      fullName:'الاسم الكامل',
+      company:'اسم شركتك أو فريقك',
+      email:'البريد الإلكتروني',
+      password:'كلمة المرور',
+      signIn:'تسجيل الدخول',
+      signUp:'إنشاء الحساب',
+      forgot:'نسيت كلمة المرور؟',
+      noAccount:'ما عندك حساب؟',
+      haveAccount:'عندك حساب؟',
+      createAccount:'إنشاء حساب جديد',
+      signOut:'تسجيل الخروج',
+      langButton:'EN'
+    },
+    en:{
+      subtitle:'Sign in to continue working',
+      fullName:'Full name',
+      company:'Company or team name',
+      email:'Email address',
+      password:'Password',
+      signIn:'Sign in',
+      signUp:'Create account',
+      forgot:'Forgot your password?',
+      noAccount:"Don't have an account?",
+      haveAccount:'Already have an account?',
+      createAccount:'Create a new account',
+      signOut:'Sign out',
+      langButton:'عربي'
+    }
+  };
+
+  function authTextV178(){return AUTH_TEXT_V178[window.lang==='en'?'en':'ar'];}
+
+  window.applyAuthLanguageV178=function(){
+    const x=authTextV178();
+    const root=document.documentElement;
+    root.setAttribute('lang',window.lang==='en'?'en':'ar');
+    root.setAttribute('dir',window.lang==='en'?'ltr':'rtl');
+
+    const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
+    const setPh=(id,value)=>{const el=document.getElementById(id);if(el)el.placeholder=value;};
+
+    setText('authSubtitle',x.subtitle);
+    setPh('authFullName',x.fullName);
+    setPh('authCompany',x.company);
+    setPh('authEmail',x.email);
+    setPh('authPassword',x.password);
+    setText('authForgotBtnV97',x.forgot);
+    setText('authLangBtnV178',x.langButton);
+    setText('sidebarSignoutV178',x.signOut);
+
+    const signup=window.authMode==='signup';
+    setText('authSubmitBtn',signup?x.signUp:x.signIn);
+    setText('authToggleText',signup?x.haveAccount:x.noAccount);
+    setText('authToggleBtn',signup?x.signIn:x.createAccount);
+
+    const err=document.getElementById('authError');
+    if(err)err.style.textAlign=window.lang==='en'?'left':'right';
+  };
+
+  window.toggleAuthLanguageV178=function(){
+    window.lang=window.lang==='ar'?'en':'ar';
+    try{localStorage.setItem('tasky_lang',window.lang);}catch(_){}
+    window.applyAuthLanguageV178();
+
+    // Sync the rest of the product too, without requiring login first.
+    try{if(typeof window.applyChrome==='function')window.applyChrome();}catch(_){}
+    try{if(typeof window.renderSignupLaunchGateV70==='function')window.renderSignupLaunchGateV70();}catch(_){}
+    try{if(typeof window.renderInviteLegalV70==='function')window.renderInviteLegalV70();}catch(_){}
+  };
+
+  // Replace the hard-coded auth mode labels with bilingual labels.
+  window.toggleAuthMode=function(){
+    window.authMode=window.authMode==='signin'?'signup':'signin';
+    const fields=document.getElementById('signupOnlyFields');
+    if(fields)fields.style.display=window.authMode==='signup'?'block':'none';
+    const err=document.getElementById('authError');
+    if(err)err.style.display='none';
+    window.applyAuthLanguageV178();
+    try{if(typeof window.renderSignupLaunchGateV70==='function')window.renderSignupLaunchGateV70();}catch(_){}
+  };
+
+  // Existing topbar language toggle must update login/profile labels too.
+  if(typeof window.toggleLang==='function' && !window.__taskyToggleLangV178){
+    window.__taskyToggleLangV178=true;
+    const baseToggleLangV178=window.toggleLang;
+    window.toggleLang=function(...args){
+      const result=baseToggleLangV178.apply(this,args);
+      window.applyAuthLanguageV178();
+      return result;
+    };
+  }
+
+  function bootLanguageV178(){
+    window.applyAuthLanguageV178();
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',bootLanguageV178,{once:true});
+  }else{
+    bootLanguageV178();
+  }
+})();
+</script>
+<script id="tasky-v178-build-marker">
+window.TASKY_BUILD='V178';
+console.info('Tasky build',window.TASKY_BUILD,'login-language-signout-translation');
 </script>
 
 </body>
