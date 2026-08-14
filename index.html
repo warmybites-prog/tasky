@@ -1738,226 +1738,6 @@ body.sidebar-collapsed .sidebar{scrollbar-width:none!important}body.sidebar-coll
 @media(max-width:650px){.meet102-guest-meta,.meet102-guest-form{grid-template-columns:1fr}.meet102-guest-form .full{grid-column:auto}.meet102-guest-screen{padding:16px}.meet102-guest-card{border-radius:18px;padding:20px 16px}}
 
 </style>
-
-<style id="tasky-v177-sidebar-profile-css">
-/* V177 — language-aware avatar position + contained profile popover.
-   RTL = physical right. LTR = physical left. */
-
-html body .sidebar{
-  position:relative !important;
-  overflow:hidden !important;
-}
-html body .sidebar .main-nav{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-}
-
-/* Avatar only when collapsed. */
-html body .sidebar-bottom{
-  margin-top:auto !important;
-  width:42px !important;
-  min-width:42px !important;
-  max-width:42px !important;
-  min-height:42px !important;
-  max-height:42px !important;
-  padding:5px !important;
-  border:1px solid rgba(255,255,255,.08) !important;
-  border-radius:12px !important;
-  background:#12291A !important;
-  display:block !important;
-  position:relative !important;
-  overflow:visible !important;
-  transition:none !important;
-  box-shadow:none !important;
-  z-index:20 !important;
-  flex:0 0 auto !important;
-
-  /* Critical: flex-start maps to right in RTL and left in LTR. */
-  align-self:flex-start !important;
-  margin-inline-start:0 !important;
-  margin-inline-end:0 !important;
-}
-
-html body .sidebar-bottom > div:first-child{
-  display:block !important;
-  width:30px !important;
-  height:30px !important;
-  padding:0 !important;
-  margin:0 !important;
-}
-html body .sidebar-bottom .avatar{
-  width:30px !important;
-  height:30px !important;
-  margin:0 !important;
-  cursor:pointer !important;
-  box-shadow:0 0 0 1px rgba(255,255,255,.08) !important;
-}
-html body .sidebar-bottom .user-info,
-html body .sidebar-bottom > div:nth-child(2),
-html body .sidebar-bottom > .sidebar-signout-v173{
-  display:none !important;
-}
-html body #previewAsLabel{display:none !important;}
-
-/* Expanded card always stays inside sidebar. */
-html body .sidebar-bottom.profile-open-v175{
-  position:absolute !important;
-  inset-inline-start:8px !important;
-  inset-inline-end:8px !important;
-  bottom:calc(8px + env(safe-area-inset-bottom)) !important;
-  width:auto !important;
-  min-width:0 !important;
-  max-width:none !important;
-  min-height:0 !important;
-  max-height:min(210px,44dvh) !important;
-  padding:9px !important;
-  border-radius:14px !important;
-  display:grid !important;
-  grid-template-columns:minmax(0,1fr) 92px !important;
-  grid-template-rows:auto auto !important;
-  gap:6px 8px !important;
-  align-items:center !important;
-  overflow:auto !important;
-  box-shadow:0 14px 34px rgba(0,0,0,.24) !important;
-  background:#10291A !important;
-  margin:0 !important;
-  align-self:auto !important;
-}
-
-html body .sidebar-bottom.profile-open-v175 > div:first-child{
-  display:flex !important;
-  grid-column:1 !important;
-  grid-row:1 / 3 !important;
-  align-items:flex-start !important;
-  gap:8px !important;
-  width:auto !important;
-  height:auto !important;
-  min-width:0 !important;
-}
-html body .sidebar-bottom.profile-open-v175 .avatar{
-  width:32px !important;
-  height:32px !important;
-  flex:0 0 32px !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info{
-  display:flex !important;
-  flex-direction:column !important;
-  min-width:0 !important;
-  flex:1 1 auto !important;
-  padding-top:1px !important;
-  line-height:1.2 !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info b{
-  display:block !important;
-  color:#fff !important;
-  font-size:12px !important;
-  line-height:1.35 !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info span{
-  display:block !important;
-  color:#8FA089 !important;
-  font-size:10px !important;
-  line-height:1.35 !important;
-  margin-top:2px !important;
-  white-space:nowrap !important;
-  overflow:hidden !important;
-  text-overflow:ellipsis !important;
-}
-html body .sidebar-bottom.profile-open-v175 > div:nth-child(2){
-  display:block !important;
-  grid-column:2 !important;
-  grid-row:1 !important;
-  width:100% !important;
-  min-width:0 !important;
-  margin:0 !important;
-}
-html body .sidebar-bottom.profile-open-v175 .role-toggle{
-  width:100% !important;
-  min-height:27px !important;
-  padding:2px !important;
-  margin:0 !important;
-  border-radius:8px !important;
-}
-html body .sidebar-bottom.profile-open-v175 .role-toggle button{
-  min-height:23px !important;
-  padding:3px 5px !important;
-  font-size:9px !important;
-  line-height:1.15 !important;
-  border-radius:6px !important;
-  white-space:nowrap !important;
-}
-html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173{
-  display:block !important;
-  grid-column:2 !important;
-  grid-row:2 !important;
-  width:100% !important;
-  min-height:24px !important;
-  margin:0 !important;
-  padding:4px 5px !important;
-  border:0 !important;
-  border-radius:8px !important;
-  background:transparent !important;
-  color:#E36C65 !important;
-  font-size:9.1px !important;
-  font-weight:700 !important;
-  line-height:1.2 !important;
-  text-align:center !important;
-  white-space:nowrap !important;
-}
-html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
-  background:rgba(192,69,61,.12) !important;
-  color:#FF8A82 !important;
-}
-
-/* Same rule in every viewport. */
-@media(max-width:820px){
-  html body .sidebar{
-    position:fixed !important;
-    overflow:hidden !important;
-  }
-  html body .sidebar-bottom{
-    align-self:flex-start !important;
-    width:40px !important;
-    min-width:40px !important;
-    max-width:40px !important;
-    min-height:40px !important;
-    max-height:40px !important;
-    padding:5px !important;
-  }
-  html body .sidebar-bottom > div:first-child,
-  html body .sidebar-bottom .avatar{
-    width:28px !important;
-    height:28px !important;
-  }
-  html body .sidebar-bottom.profile-open-v175{
-    inset-inline-start:7px !important;
-    inset-inline-end:7px !important;
-    bottom:calc(7px + env(safe-area-inset-bottom)) !important;
-    grid-template-columns:minmax(0,1fr) 88px !important;
-    max-height:min(195px,43dvh) !important;
-    padding:8px !important;
-  }
-}
-@media(max-width:480px), (max-height:700px){
-  html body .sidebar-bottom{
-    align-self:flex-start !important;
-  }
-  html body .sidebar-bottom.profile-open-v175{
-    grid-template-columns:minmax(0,1fr) 84px !important;
-    gap:5px 7px !important;
-    max-height:min(185px,46dvh) !important;
-  }
-  html body .sidebar-bottom.profile-open-v175 .user-info b{font-size:11px !important;}
-  html body .sidebar-bottom.profile-open-v175 .user-info span{font-size:9px !important;}
-}
-</style>
-
-
 <style id="tasky-v178-auth-language-css">
 .auth-card-v178{position:relative;}
 .auth-lang-v178{
@@ -1982,6 +1762,185 @@ html[dir="ltr"] #authScreen{font-family:"Inter",sans-serif !important;}
 html[dir="rtl"] #authScreen{font-family:"IBM Plex Sans Arabic",sans-serif !important;}
 @media(max-width:560px){
   .auth-lang-v178{top:11px;inset-inline-end:11px;height:32px;min-width:43px;font-size:11px;}
+}
+</style>
+
+
+<style id="tasky-v179-sidebar-direction-css">
+/* V179 — physical sidebar position follows selected language on every viewport. */
+html body .app{
+  display:flex !important;
+  flex-direction:row !important;
+}
+html[dir="rtl"] body .sidebar{order:2 !important;}
+html[dir="rtl"] body .main{order:1 !important;}
+html[dir="ltr"] body .sidebar{order:1 !important;}
+html[dir="ltr"] body .main{order:2 !important;}
+
+html body .sidebar{
+  position:relative !important;
+  overflow:hidden !important;
+}
+html body .sidebar .main-nav{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+}
+
+/* Collapsed account trigger. */
+html body .sidebar-bottom{
+  margin-top:auto !important;
+  width:42px !important;
+  min-width:42px !important;
+  max-width:42px !important;
+  min-height:42px !important;
+  max-height:42px !important;
+  padding:5px !important;
+  border:1px solid rgba(255,255,255,.08) !important;
+  border-radius:12px !important;
+  background:#12291A !important;
+  display:block !important;
+  position:relative !important;
+  overflow:visible !important;
+  transition:none !important;
+  box-shadow:none !important;
+  z-index:20 !important;
+  flex:0 0 auto !important;
+  align-self:auto !important;
+}
+/* Physical placement, independent of flex writing-direction quirks. */
+html[dir="rtl"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
+}
+html[dir="ltr"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
+}
+/* In RTL sidebar content flows right-to-left; push avatar to physical right. */
+html[dir="rtl"] body .sidebar-bottom{
+  margin-left:auto !important;
+  margin-right:0 !important;
+}
+/* In LTR keep avatar on physical left. */
+html[dir="ltr"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
+}
+
+html body .sidebar-bottom > div:first-child{
+  display:block !important;
+  width:30px !important;
+  height:30px !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+html body .sidebar-bottom .avatar{
+  width:30px !important;
+  height:30px !important;
+  margin:0 !important;
+  cursor:pointer !important;
+}
+html body .sidebar-bottom .user-info,
+html body .sidebar-bottom > div:nth-child(2),
+html body .sidebar-bottom > .sidebar-signout-v173{
+  display:none !important;
+}
+html body #previewAsLabel{display:none !important;}
+
+/* Expanded profile stays inside sidebar boundaries. */
+html body .sidebar-bottom.profile-open-v175{
+  position:absolute !important;
+  left:8px !important;
+  right:8px !important;
+  bottom:calc(8px + env(safe-area-inset-bottom)) !important;
+  width:auto !important;
+  min-width:0 !important;
+  max-width:none !important;
+  min-height:0 !important;
+  max-height:min(210px,44dvh) !important;
+  margin:0 !important;
+  padding:9px !important;
+  border-radius:14px !important;
+  display:grid !important;
+  grid-template-columns:minmax(0,1fr) 92px !important;
+  grid-template-rows:auto auto !important;
+  gap:6px 8px !important;
+  align-items:center !important;
+  overflow:auto !important;
+  background:#10291A !important;
+  box-shadow:0 14px 34px rgba(0,0,0,.24) !important;
+}
+html body .sidebar-bottom.profile-open-v175 > div:first-child{
+  display:flex !important;
+  grid-column:1 !important;
+  grid-row:1 / 3 !important;
+  align-items:flex-start !important;
+  gap:8px !important;
+  width:auto !important;
+  height:auto !important;
+  min-width:0 !important;
+}
+html body .sidebar-bottom.profile-open-v175 .avatar{
+  width:32px !important;height:32px !important;flex:0 0 32px !important;
+}
+html body .sidebar-bottom.profile-open-v175 .user-info{
+  display:flex !important;
+  flex-direction:column !important;
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  line-height:1.2 !important;
+}
+html body .sidebar-bottom.profile-open-v175 .user-info b{
+  display:block !important;color:#fff !important;font-size:12px !important;
+  white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;
+}
+html body .sidebar-bottom.profile-open-v175 .user-info span{
+  display:block !important;color:#8FA089 !important;font-size:10px !important;
+  margin-top:2px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;
+}
+html body .sidebar-bottom.profile-open-v175 > div:nth-child(2){
+  display:block !important;grid-column:2 !important;grid-row:1 !important;width:100% !important;
+}
+html body .sidebar-bottom.profile-open-v175 .role-toggle{width:100% !important;min-height:27px !important;padding:2px !important;}
+html body .sidebar-bottom.profile-open-v175 .role-toggle button{min-height:23px !important;padding:3px 5px !important;font-size:9px !important;}
+html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173{
+  display:block !important;grid-column:2 !important;grid-row:2 !important;width:100% !important;
+  min-height:24px !important;padding:4px 5px !important;border:0 !important;border-radius:8px !important;
+  background:transparent !important;color:#E36C65 !important;font-size:9.1px !important;font-weight:700 !important;
+}
+html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
+  background:rgba(192,69,61,.12) !important;color:#FF8A82 !important;
+}
+
+/* Mobile/tablet drawer physically follows language. */
+@media(max-width:820px){
+  html body .sidebar{
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    overflow:hidden !important;
+    order:initial !important;
+  }
+  html[dir="rtl"] body .sidebar{
+    right:0 !important;left:auto !important;
+    transform:translateX(105%) !important;
+  }
+  html[dir="ltr"] body .sidebar{
+    left:0 !important;right:auto !important;
+    transform:translateX(-105%) !important;
+  }
+  html body.mobile-sidebar-open .sidebar{transform:translateX(0) !important;}
+  html body .sidebar-bottom{width:40px !important;min-width:40px !important;max-width:40px !important;min-height:40px !important;max-height:40px !important;}
+  html body .sidebar-bottom > div:first-child,
+  html body .sidebar-bottom .avatar{width:28px !important;height:28px !important;}
+  html body .sidebar-bottom.profile-open-v175{
+    left:7px !important;right:7px !important;
+    grid-template-columns:minmax(0,1fr) 88px !important;
+    max-height:min(195px,43dvh) !important;
+    padding:8px !important;
+  }
 }
 </style>
 
@@ -14800,57 +14759,31 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
 })();
 </script>
 
-<script id="tasky-v177-build-marker">
-window.TASKY_BUILD='V177';
-console.info('Tasky build',window.TASKY_BUILD,'rtl-avatar-en-translation');
-</script>
-
-
-<script id="tasky-v178-language-runtime-js">
+<script id="tasky-v179-language-popup-runtime-js">
 (function(){
-  const AUTH_TEXT_V178={
+  const AUTH_V179={
     ar:{
-      subtitle:'سجّل دخولك لمتابعة العمل',
-      fullName:'الاسم الكامل',
-      company:'اسم شركتك أو فريقك',
-      email:'البريد الإلكتروني',
-      password:'كلمة المرور',
-      signIn:'تسجيل الدخول',
-      signUp:'إنشاء الحساب',
-      forgot:'نسيت كلمة المرور؟',
-      noAccount:'ما عندك حساب؟',
-      haveAccount:'عندك حساب؟',
-      createAccount:'إنشاء حساب جديد',
-      signOut:'تسجيل الخروج',
-      langButton:'EN'
+      subtitle:'سجّل دخولك لمتابعة العمل',fullName:'الاسم الكامل',company:'اسم شركتك أو فريقك',
+      email:'البريد الإلكتروني',password:'كلمة المرور',signIn:'تسجيل الدخول',signUp:'إنشاء الحساب',
+      forgot:'نسيت كلمة المرور؟',noAccount:'ما عندك حساب؟',haveAccount:'عندك حساب؟',
+      createAccount:'إنشاء حساب جديد',signOut:'تسجيل الخروج',langButton:'EN'
     },
     en:{
-      subtitle:'Sign in to continue working',
-      fullName:'Full name',
-      company:'Company or team name',
-      email:'Email address',
-      password:'Password',
-      signIn:'Sign in',
-      signUp:'Create account',
-      forgot:'Forgot your password?',
-      noAccount:"Don't have an account?",
-      haveAccount:'Already have an account?',
-      createAccount:'Create a new account',
-      signOut:'Sign out',
-      langButton:'عربي'
+      subtitle:'Sign in to continue working',fullName:'Full name',company:'Company or team name',
+      email:'Email address',password:'Password',signIn:'Sign in',signUp:'Create account',
+      forgot:'Forgot your password?',noAccount:"Don't have an account?",haveAccount:'Already have an account?',
+      createAccount:'Create a new account',signOut:'Sign out',langButton:'عربي'
     }
   };
 
-  function authTextV178(){return AUTH_TEXT_V178[window.lang==='en'?'en':'ar'];}
+  function textV179(){return AUTH_V179[lang==='en'?'en':'ar'];}
+  function setText(id,v){const el=document.getElementById(id);if(el)el.textContent=v;}
+  function setPh(id,v){const el=document.getElementById(id);if(el)el.placeholder=v;}
 
-  window.applyAuthLanguageV178=function(){
-    const x=authTextV178();
-    const root=document.documentElement;
-    root.setAttribute('lang',window.lang==='en'?'en':'ar');
-    root.setAttribute('dir',window.lang==='en'?'ltr':'rtl');
-
-    const setText=(id,value)=>{const el=document.getElementById(id);if(el)el.textContent=value;};
-    const setPh=(id,value)=>{const el=document.getElementById(id);if(el)el.placeholder=value;};
+  window.applyAuthLanguageV179=function(){
+    const x=textV179();
+    document.documentElement.setAttribute('lang',lang);
+    document.documentElement.setAttribute('dir',lang==='ar'?'rtl':'ltr');
 
     setText('authSubtitle',x.subtitle);
     setPh('authFullName',x.fullName);
@@ -14861,61 +14794,158 @@ console.info('Tasky build',window.TASKY_BUILD,'rtl-avatar-en-translation');
     setText('authLangBtnV178',x.langButton);
     setText('sidebarSignoutV178',x.signOut);
 
-    const signup=window.authMode==='signup';
+    const signup=authMode==='signup';
     setText('authSubmitBtn',signup?x.signUp:x.signIn);
     setText('authToggleText',signup?x.haveAccount:x.noAccount);
     setText('authToggleBtn',signup?x.signIn:x.createAccount);
 
     const err=document.getElementById('authError');
-    if(err)err.style.textAlign=window.lang==='en'?'left':'right';
+    if(err)err.style.textAlign=lang==='ar'?'right':'left';
   };
 
+  /* The language picked on the login screen becomes the application language. */
   window.toggleAuthLanguageV178=function(){
-    window.lang=window.lang==='ar'?'en':'ar';
-    try{localStorage.setItem('tasky_lang',window.lang);}catch(_){}
-    window.applyAuthLanguageV178();
-
-    // Sync the rest of the product too, without requiring login first.
-    try{if(typeof window.applyChrome==='function')window.applyChrome();}catch(_){}
-    try{if(typeof window.renderSignupLaunchGateV70==='function')window.renderSignupLaunchGateV70();}catch(_){}
-    try{if(typeof window.renderInviteLegalV70==='function')window.renderInviteLegalV70();}catch(_){}
+    lang=lang==='ar'?'en':'ar';
+    localStorage.setItem('tasky_lang',lang);
+    window.applyAuthLanguageV179();
+    try{applyChrome();}catch(_){}
+    try{renderSignupLaunchGateV70();}catch(_){}
+    try{renderInviteLegalV70();}catch(_){}
   };
 
-  // Replace the hard-coded auth mode labels with bilingual labels.
-  window.toggleAuthMode=function(){
-    window.authMode=window.authMode==='signin'?'signup':'signin';
-    const fields=document.getElementById('signupOnlyFields');
-    if(fields)fields.style.display=window.authMode==='signup'?'block':'none';
-    const err=document.getElementById('authError');
-    if(err)err.style.display='none';
-    window.applyAuthLanguageV178();
-    try{if(typeof window.renderSignupLaunchGateV70==='function')window.renderSignupLaunchGateV70();}catch(_){}
-  };
-
-  // Existing topbar language toggle must update login/profile labels too.
-  if(typeof window.toggleLang==='function' && !window.__taskyToggleLangV178){
-    window.__taskyToggleLangV178=true;
-    const baseToggleLangV178=window.toggleLang;
-    window.toggleLang=function(...args){
-      const result=baseToggleLangV178.apply(this,args);
-      window.applyAuthLanguageV178();
-      return result;
+  /* Keep auth labels synced when user changes language after login too. */
+  if(typeof toggleLang==='function'&&!window.__taskyV179ToggleLang){
+    window.__taskyV179ToggleLang=true;
+    const baseToggle=toggleLang;
+    toggleLang=function(...args){
+      const r=baseToggle.apply(this,args);
+      window.applyAuthLanguageV179();
+      return r;
     };
   }
 
-  function bootLanguageV178(){
-    window.applyAuthLanguageV178();
+  if(typeof toggleAuthMode==='function'&&!window.__taskyV179ToggleAuthMode){
+    window.__taskyV179ToggleAuthMode=true;
+    const baseMode=toggleAuthMode;
+    toggleAuthMode=function(...args){
+      const r=baseMode.apply(this,args);
+      window.applyAuthLanguageV179();
+      return r;
+    };
   }
-  if(document.readyState==='loading'){
-    document.addEventListener('DOMContentLoaded',bootLanguageV178,{once:true});
-  }else{
-    bootLanguageV178();
+
+  /* Re-assert chosen language after successful authentication/session bootstrap. */
+  if(typeof handleAuthSubmit==='function'&&!window.__taskyV179AuthSubmit){
+    window.__taskyV179AuthSubmit=true;
+    const baseSubmit=handleAuthSubmit;
+    handleAuthSubmit=async function(...args){
+      localStorage.setItem('tasky_lang',lang);
+      const r=await baseSubmit.apply(this,args);
+      const chosen=localStorage.getItem('tasky_lang')||lang;
+      if(chosen!==lang)lang=chosen;
+      try{applyChrome();renderNav();renderViewTabs();renderModule();renderAll();}catch(_){}
+      window.applyAuthLanguageV179();
+      return r;
+    };
   }
+
+  /* ---------- Open sections/links in a separate popup window ----------
+     Normal click keeps current navigation.
+     Ctrl/Cmd/Shift-click or middle-click opens a second Tasky window.
+     External target=_blank links are opened directly from the user gesture.
+  */
+  function popupFeatures(){
+    const w=Math.min(1280,Math.max(760,Math.round(screen.availWidth*.78)));
+    const h=Math.min(900,Math.max(620,Math.round(screen.availHeight*.82)));
+    return `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h}`;
+  }
+  function openTaskyPopup(url){
+    const win=window.open(url,'_blank',popupFeatures());
+    if(win)try{win.focus();}catch(_){}
+    return !!win;
+  }
+  function appPopupUrl(kind,id){
+    const u=new URL(location.href);
+    u.searchParams.set('tasky_popup','1');
+    u.searchParams.set(kind,id);
+    return u.toString();
+  }
+  function extractNavId(el){
+    const code=el?.getAttribute?.('onclick')||'';
+    let m=code.match(/setActiveNav\(['"]([^'"]+)['"]/);
+    if(m)return {kind:'tasky_module',id:m[1]};
+    m=code.match(/setActiveProject\(['"]([^'"]+)['"]/);
+    if(m)return {kind:'tasky_project',id:m[1]};
+    return null;
+  }
+
+  document.addEventListener('auxclick',function(e){
+    if(e.button!==1)return;
+    const item=e.target.closest('.nav-item,.project-item,a[href]');
+    if(!item)return;
+    const nav=extractNavId(item);
+    if(nav){e.preventDefault();openTaskyPopup(appPopupUrl(nav.kind,nav.id));return;}
+    if(item.matches('a[href]')){
+      const href=item.href;
+      if(href){e.preventDefault();openTaskyPopup(href);}
+    }
+  },true);
+
+  document.addEventListener('click',function(e){
+    const item=e.target.closest('.nav-item,.project-item,a[href]');
+    if(!item)return;
+
+    const modified=e.ctrlKey||e.metaKey||e.shiftKey;
+    const nav=extractNavId(item);
+    if(modified&&nav){
+      e.preventDefault();e.stopImmediatePropagation();
+      openTaskyPopup(appPopupUrl(nav.kind,nav.id));
+      return;
+    }
+
+    if(item.matches('a[href]')){
+      const href=item.getAttribute('href')||'';
+      const target=item.getAttribute('target');
+      const external=/^https?:/i.test(href)&&!href.startsWith(location.origin);
+      if((target==='_blank'||(modified&&external))&&href){
+        e.preventDefault();e.stopImmediatePropagation();
+        openTaskyPopup(item.href);
+      }
+    }
+  },true);
+
+  /* If this window was opened for a specific Tasky section, navigate there
+     after the normal authenticated application boot completes. */
+  async function resolvePopupRoute(){
+    const u=new URL(location.href);
+    if(u.searchParams.get('tasky_popup')!=='1')return;
+    const moduleId=u.searchParams.get('tasky_module');
+    const projectId=u.searchParams.get('tasky_project');
+    for(let i=0;i<80;i++){
+      if(document.querySelector('.app')&&currentWorkspaceId){
+        try{
+          if(moduleId)await setActiveNav(moduleId);
+          else if(projectId)setActiveProject(projectId);
+        }catch(err){console.warn('Tasky popup route',err);}
+        return;
+      }
+      await new Promise(r=>setTimeout(r,100));
+    }
+  }
+
+  function bootV179(){
+    const saved=localStorage.getItem('tasky_lang');
+    if(saved==='ar'||saved==='en')lang=saved;
+    window.applyAuthLanguageV179();
+    resolvePopupRoute();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bootV179,{once:true});
+  else bootV179();
 })();
 </script>
-<script id="tasky-v178-build-marker">
-window.TASKY_BUILD='V178';
-console.info('Tasky build',window.TASKY_BUILD,'login-language-signout-translation');
+<script id="tasky-v179-build-marker">
+window.TASKY_BUILD='V179';
+console.info('Tasky build',window.TASKY_BUILD,'language-sidebar-popups');
 </script>
 
 </body>
