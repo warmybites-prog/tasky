@@ -1765,182 +1765,71 @@ html[dir="rtl"] #authScreen{font-family:"IBM Plex Sans Arabic",sans-serif !impor
 }
 </style>
 
+<style id="tasky-v180-sidebar-direction-css">
+/* V180 — force physical sidebar side by language in every viewport.
+   Arabic RTL => sidebar RIGHT.
+   English LTR => sidebar LEFT. */
 
-<style id="tasky-v179-sidebar-direction-css">
-/* V179 — physical sidebar position follows selected language on every viewport. */
-html body .app{
-  display:flex !important;
-  flex-direction:row !important;
-}
-html[dir="rtl"] body .sidebar{order:2 !important;}
-html[dir="rtl"] body .main{order:1 !important;}
-html[dir="ltr"] body .sidebar{order:1 !important;}
-html[dir="ltr"] body .main{order:2 !important;}
+/* Desktop / wide screens */
+@media(min-width:821px){
+  html body .app{
+    display:flex !important;
+    flex-direction:row !important;
+  }
 
-html body .sidebar{
-  position:relative !important;
-  overflow:hidden !important;
-}
-html body .sidebar .main-nav{
-  flex:1 1 auto !important;
-  min-height:0 !important;
-  overflow-y:auto !important;
-  overflow-x:hidden !important;
-}
+  html[dir="rtl"] body .sidebar{
+    order:2 !important;
+    margin-left:0 !important;
+    margin-right:auto !important;
+  }
+  html[dir="rtl"] body .main{
+    order:1 !important;
+  }
 
-/* Collapsed account trigger. */
-html body .sidebar-bottom{
-  margin-top:auto !important;
-  width:42px !important;
-  min-width:42px !important;
-  max-width:42px !important;
-  min-height:42px !important;
-  max-height:42px !important;
-  padding:5px !important;
-  border:1px solid rgba(255,255,255,.08) !important;
-  border-radius:12px !important;
-  background:#12291A !important;
-  display:block !important;
-  position:relative !important;
-  overflow:visible !important;
-  transition:none !important;
-  box-shadow:none !important;
-  z-index:20 !important;
-  flex:0 0 auto !important;
-  align-self:auto !important;
-}
-/* Physical placement, independent of flex writing-direction quirks. */
-html[dir="rtl"] body .sidebar-bottom{
-  margin-left:0 !important;
-  margin-right:auto !important;
-}
-html[dir="ltr"] body .sidebar-bottom{
-  margin-left:0 !important;
-  margin-right:auto !important;
-}
-/* In RTL sidebar content flows right-to-left; push avatar to physical right. */
-html[dir="rtl"] body .sidebar-bottom{
-  margin-left:auto !important;
-  margin-right:0 !important;
-}
-/* In LTR keep avatar on physical left. */
-html[dir="ltr"] body .sidebar-bottom{
-  margin-left:0 !important;
-  margin-right:auto !important;
+  html[dir="ltr"] body .sidebar{
+    order:1 !important;
+    margin-left:0 !important;
+    margin-right:auto !important;
+  }
+  html[dir="ltr"] body .main{
+    order:2 !important;
+  }
 }
 
-html body .sidebar-bottom > div:first-child{
-  display:block !important;
-  width:30px !important;
-  height:30px !important;
-  padding:0 !important;
-  margin:0 !important;
-}
-html body .sidebar-bottom .avatar{
-  width:30px !important;
-  height:30px !important;
-  margin:0 !important;
-  cursor:pointer !important;
-}
-html body .sidebar-bottom .user-info,
-html body .sidebar-bottom > div:nth-child(2),
-html body .sidebar-bottom > .sidebar-signout-v173{
-  display:none !important;
-}
-html body #previewAsLabel{display:none !important;}
-
-/* Expanded profile stays inside sidebar boundaries. */
-html body .sidebar-bottom.profile-open-v175{
-  position:absolute !important;
-  left:8px !important;
-  right:8px !important;
-  bottom:calc(8px + env(safe-area-inset-bottom)) !important;
-  width:auto !important;
-  min-width:0 !important;
-  max-width:none !important;
-  min-height:0 !important;
-  max-height:min(210px,44dvh) !important;
-  margin:0 !important;
-  padding:9px !important;
-  border-radius:14px !important;
-  display:grid !important;
-  grid-template-columns:minmax(0,1fr) 92px !important;
-  grid-template-rows:auto auto !important;
-  gap:6px 8px !important;
-  align-items:center !important;
-  overflow:auto !important;
-  background:#10291A !important;
-  box-shadow:0 14px 34px rgba(0,0,0,.24) !important;
-}
-html body .sidebar-bottom.profile-open-v175 > div:first-child{
-  display:flex !important;
-  grid-column:1 !important;
-  grid-row:1 / 3 !important;
-  align-items:flex-start !important;
-  gap:8px !important;
-  width:auto !important;
-  height:auto !important;
-  min-width:0 !important;
-}
-html body .sidebar-bottom.profile-open-v175 .avatar{
-  width:32px !important;height:32px !important;flex:0 0 32px !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info{
-  display:flex !important;
-  flex-direction:column !important;
-  min-width:0 !important;
-  flex:1 1 auto !important;
-  line-height:1.2 !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info b{
-  display:block !important;color:#fff !important;font-size:12px !important;
-  white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;
-}
-html body .sidebar-bottom.profile-open-v175 .user-info span{
-  display:block !important;color:#8FA089 !important;font-size:10px !important;
-  margin-top:2px !important;white-space:nowrap !important;overflow:hidden !important;text-overflow:ellipsis !important;
-}
-html body .sidebar-bottom.profile-open-v175 > div:nth-child(2){
-  display:block !important;grid-column:2 !important;grid-row:1 !important;width:100% !important;
-}
-html body .sidebar-bottom.profile-open-v175 .role-toggle{width:100% !important;min-height:27px !important;padding:2px !important;}
-html body .sidebar-bottom.profile-open-v175 .role-toggle button{min-height:23px !important;padding:3px 5px !important;font-size:9px !important;}
-html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173{
-  display:block !important;grid-column:2 !important;grid-row:2 !important;width:100% !important;
-  min-height:24px !important;padding:4px 5px !important;border:0 !important;border-radius:8px !important;
-  background:transparent !important;color:#E36C65 !important;font-size:9.1px !important;font-weight:700 !important;
-}
-html body .sidebar-bottom.profile-open-v175 > .sidebar-signout-v173:hover{
-  background:rgba(192,69,61,.12) !important;color:#FF8A82 !important;
-}
-
-/* Mobile/tablet drawer physically follows language. */
+/* Mobile / tablet drawer */
 @media(max-width:820px){
-  html body .sidebar{
+  html body .app{position:relative !important;}
+
+  html[dir="rtl"] body .sidebar{
     position:fixed !important;
     top:0 !important;
     bottom:0 !important;
-    overflow:hidden !important;
-    order:initial !important;
-  }
-  html[dir="rtl"] body .sidebar{
-    right:0 !important;left:auto !important;
+    right:0 !important;
+    left:auto !important;
     transform:translateX(105%) !important;
   }
   html[dir="ltr"] body .sidebar{
-    left:0 !important;right:auto !important;
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    left:0 !important;
+    right:auto !important;
     transform:translateX(-105%) !important;
   }
-  html body.mobile-sidebar-open .sidebar{transform:translateX(0) !important;}
-  html body .sidebar-bottom{width:40px !important;min-width:40px !important;max-width:40px !important;min-height:40px !important;max-height:40px !important;}
-  html body .sidebar-bottom > div:first-child,
-  html body .sidebar-bottom .avatar{width:28px !important;height:28px !important;}
-  html body .sidebar-bottom.profile-open-v175{
-    left:7px !important;right:7px !important;
-    grid-template-columns:minmax(0,1fr) 88px !important;
-    max-height:min(195px,43dvh) !important;
-    padding:8px !important;
+
+  html body.mobile-sidebar-open .sidebar{
+    transform:translateX(0) !important;
   }
+}
+
+/* Account avatar follows sidebar language side too */
+html[dir="rtl"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
+}
+html[dir="ltr"] body .sidebar-bottom{
+  margin-left:0 !important;
+  margin-right:auto !important;
 }
 </style>
 
@@ -14943,9 +14832,10 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
   else bootV179();
 })();
 </script>
-<script id="tasky-v179-build-marker">
-window.TASKY_BUILD='V179';
-console.info('Tasky build',window.TASKY_BUILD,'language-sidebar-popups');
+
+<script id="tasky-v180-build-marker">
+window.TASKY_BUILD='V180';
+console.info('Tasky build',window.TASKY_BUILD,'rtl-sidebar-right');
 </script>
 
 </body>
