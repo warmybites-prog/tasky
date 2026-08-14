@@ -2491,6 +2491,80 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 }
 </style>
 
+
+<style id="tasky-v204-workspace-logo-css">
+.tasky-workspace-brand-v204{
+  display:flex;
+  align-items:center;
+  gap:16px;
+  margin:0 0 22px;
+  padding:16px;
+  border:1px solid var(--border);
+  border-radius:14px;
+  background:var(--paper);
+}
+.tasky-workspace-logo-preview-v204{
+  position:relative;
+  width:88px;
+  height:88px;
+  flex:0 0 88px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background:var(--card);
+  color:var(--green);
+  display:grid;
+  place-items:center;
+  overflow:hidden;
+  cursor:pointer;
+  font:800 24px/1 "Inter","IBM Plex Sans Arabic",sans-serif;
+}
+.tasky-workspace-logo-preview-v204 img{
+  width:100%;
+  height:100%;
+  object-fit:contain;
+  padding:8px;
+  box-sizing:border-box;
+}
+.tasky-workspace-logo-preview-v204.has-logo{
+  background:#fff;
+}
+.tasky-workspace-logo-edit-v204{
+  position:absolute;
+  inset-inline-end:6px;
+  bottom:6px;
+  width:26px;
+  height:26px;
+  border-radius:9px;
+  background:rgba(18,41,26,.88);
+  color:#fff;
+  display:grid;
+  place-items:center;
+}
+.tasky-workspace-logo-edit-v204 svg{width:14px;height:14px}
+.tasky-workspace-brand-copy-v204{
+  min-width:0;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  gap:6px;
+}
+.tasky-workspace-brand-copy-v204 b{font-size:13px}
+.tasky-workspace-brand-copy-v204 span{
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.7;
+}
+.tasky-workspace-brand-copy-v204 .chip-btn{margin-top:4px}
+html[dir="rtl"] .tasky-workspace-brand-copy-v204{align-items:flex-end;text-align:right}
+html[dir="ltr"] .tasky-workspace-brand-copy-v204{align-items:flex-start;text-align:left}
+
+@media(max-width:640px){
+  .tasky-workspace-brand-v204{align-items:flex-start}
+  .tasky-workspace-logo-preview-v204{width:72px;height:72px;flex-basis:72px;border-radius:16px}
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -7437,10 +7511,37 @@ async function removeMyAvatar(){
   await fetchTeamMembers(); applyCurrentUserProfile(); renderTeamAvatarStack(); renderAll(); renderModule(); taskyToast(lang==='ar'?'تمت إزالة الصورة الشخصية':'Profile photo removed',{tone:'success'});
 }
 function settingsWorkspaceTemplate(){
-  const logo=currentWorkspaceLogoUrl?`<img src="${escapeHtml(currentWorkspaceLogoUrl)}" style="width:100%;height:100%;object-fit:cover" alt="">`:escapeHtml(workspaceInitials(currentWorkspaceName||''));
+  const hasLogo=!!currentWorkspaceLogoUrl;
+  const logo=hasLogo
+    ? `<img src="${escapeHtml(currentWorkspaceLogoUrl)}" alt="${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}">`
+    : `<span>${escapeHtml(workspaceInitials(currentWorkspaceName||''))}</span>`;
+
   return `<div class="settings-card">
     <div class="settings-card-head"><div><h3>${lang==='ar'?'إعدادات مساحة العمل':'Workspace settings'}</h3><p>${lang==='ar'?'اسم الفريق وهوية مساحة العمل. التعديل متاح للمدير فقط.':'Team name and workspace identity. Admins only.'}</p></div></div>
-    <form onsubmit="saveWorkspaceSettings(event)"><div class="settings-form-grid"><div class="settings-field full"><label>${lang==='ar'?'اسم مساحة العمل':'Workspace name'}</label><input id="settingsWorkspaceName" maxlength="120" required value="${escapeHtml(currentWorkspaceName||'')}"></div></div><div class="settings-actions"><button type="button" class="chip-btn" onclick="openWorkspaceBrandingModal()"><svg><use href="#i-camera"/></svg>${lang==='ar'?'تغيير الشعار':'Change logo'}</button><button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ':'Save'}</button></div></form>
+
+    <div class="tasky-workspace-brand-v204">
+      <button type="button" class="tasky-workspace-logo-preview-v204 ${hasLogo?'has-logo':''}" onclick="openWorkspaceBrandingModal()" aria-label="${lang==='ar'?'تغيير شعار مساحة العمل':'Change workspace logo'}">
+        ${logo}
+        <span class="tasky-workspace-logo-edit-v204"><svg><use href="#i-camera"/></svg></span>
+      </button>
+      <div class="tasky-workspace-brand-copy-v204">
+        <b>${lang==='ar'?'شعار مساحة العمل':'Workspace logo'}</b>
+        <span>${hasLogo
+          ? (lang==='ar'?'الشعار الحالي المستخدم في القائمة وهوية مساحة العمل.':'Current logo used in the sidebar and workspace identity.')
+          : (lang==='ar'?'لا يوجد شعار مرفوع حاليًا؛ يتم عرض الأحرف الأولى مؤقتًا.':'No logo uploaded yet; initials are shown as a fallback.')
+        }</span>
+        <button type="button" class="chip-btn" onclick="openWorkspaceBrandingModal()"><svg><use href="#i-camera"/></svg>${hasLogo?(lang==='ar'?'تغيير الشعار':'Change logo'):(lang==='ar'?'رفع شعار':'Upload logo')}</button>
+      </div>
+    </div>
+
+    <form onsubmit="saveWorkspaceSettings(event)">
+      <div class="settings-form-grid">
+        <div class="settings-field full"><label>${lang==='ar'?'اسم مساحة العمل':'Workspace name'}</label><input id="settingsWorkspaceName" maxlength="120" required value="${escapeHtml(currentWorkspaceName||'')}"></div>
+      </div>
+      <div class="settings-actions">
+        <button class="primary-btn" type="submit"><svg><use href="#i-check"/></svg>${lang==='ar'?'حفظ':'Save'}</button>
+      </div>
+    </form>
   </div>
   <div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'ملخص مساحة العمل':'Workspace summary'}</h3></div></div><div class="settings-summary-grid"><div class="settings-summary"><span>${lang==='ar'?'الباقة الفعلية':'Active plan'}</span><b>${t('plan_'+currentPlan+'_name')}</b></div><div class="settings-summary"><span>${lang==='ar'?'الأعضاء النشطون':'Active members'}</span><b>${teamMembers.filter(m=>m.status==='active').length}</b></div><div class="settings-summary"><span>${lang==='ar'?'دورك':'Your role'}</span><b>${currentUserRole==='admin'?t('role_admin'):t('role_member')}</b></div></div></div>`;
 }
@@ -16243,6 +16344,12 @@ console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile');
 <script id="tasky-v203-build-marker">
 window.TASKY_BUILD='V203';
 console.info('Tasky build',window.TASKY_BUILD,'bilingual-profile-order');
+</script>
+
+
+<script id="tasky-v204-build-marker">
+window.TASKY_BUILD='V204';
+console.info('Tasky build',window.TASKY_BUILD,'workspace-logo-preview');
 </script>
 
 </body>
