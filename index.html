@@ -1,6 +1,29 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
+
+<script id="tasky-v197-warm-tab-early">
+(function(){
+  try{
+    const u=new URL(location.href);
+    if(u.searchParams.get('tasky_warm_tab')==='1'){
+      document.documentElement.setAttribute('data-tasky-warm-tab','1');
+    }
+  }catch(_){}
+})();
+</script>
+<style id="tasky-v197-warm-tab-css">
+html[data-tasky-warm-tab="1"] #taskyBootV83{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+html[data-tasky-warm-tab="1"] #authScreen{
+  visibility:hidden;
+}
+</style>
+
 <script id="tasky-v184-first-paint-lang">
 (function(){
   try{
@@ -3525,6 +3548,86 @@ async function checkSession(){
   taskySessionCheckPromiseV751=(async()=>{
     const appEl=document.querySelector('.app');
     const authScreen=document.getElementById('authScreen');
+
+    /* V197 warm new-tab start:
+       A new browser tab still has its own JS context, but when it was opened
+       from an already-running Tasky tab we can reuse the opener's hydrated
+       core state instead of rebuilding the whole workspace from scratch. */
+    try{
+      const u=new URL(location.href);
+      const warm=u.searchParams.get('tasky_warm_tab')==='1';
+      if(warm && window.opener && !window.opener.closed && !currentWorkspaceId){
+        let snap=null;
+        try{
+          if(window.opener.location.origin===location.origin &&
+             typeof window.opener.taskyExportWarmStateV197==='function'){
+            snap=window.opener.taskyExportWarmStateV197();
+          }
+        }catch(_){}
+
+        if(snap?.currentWorkspaceId && snap?.currentUserId){
+          /* Verify the shared Supabase session quietly. */
+          const warmSession=await sb.auth.getSession();
+          const warmUser=warmSession?.data?.session?.user||null;
+
+          if(warmUser && warmUser.id===snap.currentUserId){
+            currentUserId=snap.currentUserId;
+            currentUserEmail=snap.currentUserEmail||warmUser.email||null;
+            currentWorkspaceId=snap.currentWorkspaceId;
+            currentWorkspaceName=snap.currentWorkspaceName||null;
+            currentWorkspaceLogoUrl=snap.currentWorkspaceLogoUrl||null;
+            currentUserRole=snap.currentUserRole||'member';
+            if(snap.currentPlan && PLANS[snap.currentPlan])currentPlan=snap.currentPlan;
+
+            projects=Array.isArray(snap.projects)?snap.projects:[];
+            projectMemberships=Array.isArray(snap.projectMemberships)?snap.projectMemberships:[];
+            tasks=Array.isArray(snap.tasks)?snap.tasks:[];
+            teamMembers=Array.isArray(snap.teamMembers)?snap.teamMembers:[];
+
+            if(snap.platformRuntime)platformRuntime=snap.platformRuntime;
+            if(snap.platformReleaseRuntime)platformReleaseRuntime=snap.platformReleaseRuntime;
+            if(snap.commercialRuntimeV69 && typeof commercialRuntimeV69!=='undefined'){
+              commercialRuntimeV69=snap.commercialRuntimeV69;
+            }
+
+            taskyResetLazyModulesV83(currentWorkspaceId);
+
+            if(authScreen){
+              authScreen.style.display='none';
+              authScreen.style.visibility='visible';
+            }
+            if(appEl)appEl.style.display='flex';
+
+            const wsLabel=document.getElementById('workspaceLabel');
+            if(wsLabel&&currentWorkspaceName)wsLabel.textContent=currentWorkspaceName;
+
+            try{renderWorkspaceBrand();}catch(_){}
+            try{renderPlatformRuntimeUi();}catch(_){}
+            try{renderPlatformReleaseRuntimeV66();}catch(_){}
+            try{applyCurrentUserProfile();}catch(_){}
+            try{renderTeamAvatarStack();}catch(_){}
+            try{renderRoleToggle();}catch(_){}
+            try{renderNav();}catch(_){}
+            try{renderAll();}catch(_){}
+            try{initTaskRealtime();}catch(_){}
+
+            taskyBootHideV83();
+
+            /* Requested module/project is restored by the existing V195 route
+               restore logic. Heavy module data still lazy-loads only if needed. */
+            setTimeout(()=>{
+              try{taskyScheduleIdleHydrationV83();}catch(_){}
+            },250);
+
+            return true;
+          }
+        }
+      }
+    }catch(warmError){
+      console.warn('Tasky V197 warm start fallback',warmError);
+      /* If warm start cannot be used, continue with normal authoritative boot. */
+    }
+
     if(!currentWorkspaceId||appEl?.style.display==='none'){taskyBootReopenV83();taskyBootShowV83();}
 
     try{
@@ -15236,6 +15339,7 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
     u.searchParams.delete('tasky_popup_id');
     u.searchParams.delete('tasky_module');
     u.searchParams.delete('tasky_project');
+    u.searchParams.set('tasky_warm_tab','1');
     if(kind==='tasky_module')u.searchParams.set('tasky_module',id);
     if(kind==='tasky_project')u.searchParams.set('tasky_project',id);
     return u.toString();
@@ -15733,6 +15837,52 @@ console.info('Tasky build',window.TASKY_BUILD,'asana-like-window-behavior');
 <script id="tasky-v196-build-marker">
 window.TASKY_BUILD='V196';
 console.info('Tasky build',window.TASKY_BUILD,'tabs-no-reload');
+</script>
+
+
+<script id="tasky-v197-warm-state-export-js">
+(function(){
+  function cloneV197(v){
+    try{return structuredClone(v);}
+    catch(_){
+      try{return JSON.parse(JSON.stringify(v));}
+      catch(__){return null;}
+    }
+  }
+
+  window.taskyExportWarmStateV197=function(){
+    try{
+      if(!currentWorkspaceId || !currentUserId)return null;
+      return {
+        version:197,
+        currentUserId,
+        currentUserEmail,
+        currentWorkspaceId,
+        currentWorkspaceName,
+        currentWorkspaceLogoUrl,
+        currentUserRole,
+        currentPlan,
+        projects:cloneV197(projects)||[],
+        projectMemberships:cloneV197(projectMemberships)||[],
+        tasks:cloneV197(tasks)||[],
+        teamMembers:cloneV197(teamMembers)||[],
+        platformRuntime:cloneV197(platformRuntime)||null,
+        platformReleaseRuntime:cloneV197(platformReleaseRuntime)||null,
+        commercialRuntimeV69:typeof commercialRuntimeV69!=='undefined'
+          ? cloneV197(commercialRuntimeV69) : null
+      };
+    }catch(e){
+      console.warn('Tasky warm snapshot export',e);
+      return null;
+    }
+  };
+})();
+</script>
+
+
+<script id="tasky-v197-build-marker">
+window.TASKY_BUILD='V197';
+console.info('Tasky build',window.TASKY_BUILD,'warm-new-tabs');
 </script>
 
 </body>
