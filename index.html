@@ -16492,5 +16492,97 @@ window.TASKY_BUILD='V206';
 console.info('Tasky build',window.TASKY_BUILD,'workspace-settings-layout');
 </script>
 
+
+<script id="tasky-v207-brand-checkmark">
+(function(){
+  const TASKY_BRAND_ICON_URL = "data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iVVRGLTgiPz4KPHN2ZyBpZD0iTGF5ZXJfMiIgZGF0YS1uYW1lPSJMYXllciAyIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAyOC4wNSAyMy44NSI+CiAgPGRlZnM+CiAgICA8c3R5bGU+CiAgICAgIC5jbHMtMSB7CiAgICAgICAgZmlsbDogIzgyYWYyMTsKICAgICAgICBmaWxsLXJ1bGU6IGV2ZW5vZGQ7CiAgICAgIH0KICAgIDwvc3R5bGU+CiAgPC9kZWZzPgogIDxnIGlkPSJMYXllcl8xLTIiIGRhdGEtbmFtZT0iTGF5ZXIgMSI+CiAgICA8cGF0aCBjbGFzcz0iY2xzLTEiIGQ9Ik0xLjY1LDE0LjM5aDUuODVjLjQ2LDAsLjkxLS4yLDEuMjItLjU0TDIwLjc2LjU0Yy4zMS0uMzQuNzUtLjU0LDEuMjItLjU0aDQuNDNjMS40MiwwLDIuMTcsMS42OCwxLjIzLDIuNzRMOS4zMiwyMy4zYy0uNjIuNy0xLjY5Ljc0LTIuMzYuMDlMLjUxLDE3LjIyYy0xLjA3LTEuMDItLjM1LTIuODMsMS4xNC0yLjgzaDBaIi8+CiAgPC9nPgo8L3N2Zz4=";
+  const TASKY_BRAND_ICON_SVG = '<?xml version="1.0" encoding="UTF-8"?>\n<svg id="Layer_2" data-name="Layer 2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 28.05 23.85">\n  <defs>\n    <style>\n      .cls-1 {\n        fill: #82af21;\n        fill-rule: evenodd;\n      }\n    </style>\n  </defs>\n  <g id="Layer_1-2" data-name="Layer 1">\n    <path class="cls-1" d="M1.65,14.39h5.85c.46,0,.91-.2,1.22-.54L20.76.54c.31-.34.75-.54,1.22-.54h4.43c1.42,0,2.17,1.68,1.23,2.74L9.32,23.3c-.62.7-1.69.74-2.36.09L.51,17.22c-1.07-1.02-.35-2.83,1.14-2.83h0Z"/>\n  </g>\n</svg>';
+  window.TASKY_BRAND_ICON_URL = TASKY_BRAND_ICON_URL;
+  window.TASKY_BRAND_ICON_SVG = TASKY_BRAND_ICON_SVG;
+
+  function ensureFavicon(){
+    let link = document.querySelector('link[rel="icon"]');
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    if (link.href !== TASKY_BRAND_ICON_URL) link.href = TASKY_BRAND_ICON_URL;
+  }
+
+  function hydrateDefaultWorkspaceLogo(){
+    try {
+      if (typeof currentWorkspaceLogoUrl !== 'undefined' && !currentWorkspaceLogoUrl) {
+        currentWorkspaceLogoUrl = TASKY_BRAND_ICON_URL;
+      }
+    } catch (e) {}
+    try {
+      if (window.state && !window.state.currentWorkspaceLogoUrl) {
+        window.state.currentWorkspaceLogoUrl = TASKY_BRAND_ICON_URL;
+      }
+    } catch (e) {}
+    try {
+      if (!localStorage.getItem('tasky_workspace_logo')) {
+        localStorage.setItem('tasky_workspace_logo', TASKY_BRAND_ICON_URL);
+      }
+    } catch (e) {}
+  }
+
+  function replaceWorkspacePreview(){
+    document.querySelectorAll('.workspace-logo-preview-v204').forEach(function(el){
+      const hasCustomImg = el.querySelector('img');
+      const shouldReplace = !hasCustomImg || el.dataset.taskyDefaultLogo === '1' || !el.classList.contains('has-logo');
+      if (shouldReplace) {
+        el.classList.add('has-logo');
+        el.dataset.taskyDefaultLogo = '1';
+        el.innerHTML = '<img src="' + TASKY_BRAND_ICON_URL + '" alt="' + (document.documentElement.dir === 'rtl' ? 'شعار مساحة العمل' : 'Workspace logo') + '">';
+      }
+    });
+  }
+
+  function replaceCommonBrandImages(){
+    document.querySelectorAll('img[data-tasky-brand], img[data-default-workspace-logo]').forEach(function(img){
+      img.src = TASKY_BRAND_ICON_URL;
+    });
+  }
+
+  function patchBrand(){
+    hydrateDefaultWorkspaceLogo();
+    ensureFavicon();
+    replaceWorkspacePreview();
+    replaceCommonBrandImages();
+  }
+
+  let raf = 0;
+  function queuePatch(){
+    if (raf) cancelAnimationFrame(raf);
+    raf = requestAnimationFrame(function(){
+      raf = 0;
+      patchBrand();
+    });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', queuePatch, { once: true });
+  } else {
+    queuePatch();
+  }
+
+  const mo = new MutationObserver(function(){ queuePatch(); });
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+
+  const oldRenderRoot = window.renderRoot;
+  if (typeof oldRenderRoot === 'function') {
+    window.renderRoot = function(){
+      const result = oldRenderRoot.apply(this, arguments);
+      queuePatch();
+      return result;
+    };
+  }
+
+  console.info('Tasky build V207 — brand checkmark replaced');
+})();
+</script>
+
 </body>
 </html>
