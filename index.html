@@ -2186,6 +2186,82 @@ html body{
 }
 </style>
 
+
+<style id="tasky-v185-sidebar-physical-position-css">
+/* ============================================================
+   V185 — Deterministic physical sidebar placement
+   Root cause fixed: `direction: rtl` reverses a flex row's physical axis,
+   so using flex `order` was not reliable for putting the sidebar on the right.
+
+   Desktop Arabic  : [ MAIN ][ SIDEBAR ]  => sidebar physical RIGHT
+   Desktop English : [ SIDEBAR ][ MAIN ]  => sidebar physical LEFT
+   ============================================================ */
+@media(min-width:821px){
+  html body .app{
+    display:grid !important;
+    direction:ltr !important; /* grid coordinates remain physical, not bidi-reversed */
+    width:100% !important;
+    grid-template-rows:100vh !important;
+  }
+
+  html body .sidebar{
+    grid-area:sidebar !important;
+    width:264px !important;
+    min-width:264px !important;
+    max-width:264px !important;
+    order:initial !important;
+    margin:0 !important;
+  }
+  html body .main{
+    grid-area:main !important;
+    min-width:0 !important;
+    width:auto !important;
+    order:initial !important;
+  }
+
+  /* Arabic: sidebar is literally the second (right-most) grid column. */
+  html[dir="rtl"] body .app{
+    grid-template-columns:minmax(0,1fr) 264px !important;
+    grid-template-areas:"main sidebar" !important;
+  }
+
+  /* English: sidebar is literally the first (left-most) grid column. */
+  html[dir="ltr"] body .app{
+    grid-template-columns:264px minmax(0,1fr) !important;
+    grid-template-areas:"sidebar main" !important;
+  }
+
+  /* Restore correct text direction inside each grid area. */
+  html[dir="rtl"] body .sidebar,
+  html[dir="rtl"] body .main{direction:rtl !important;}
+  html[dir="ltr"] body .sidebar,
+  html[dir="ltr"] body .main{direction:ltr !important;}
+}
+
+/* Mobile/tablet drawer also follows the physical language side. */
+@media(max-width:820px){
+  html[dir="rtl"] body .sidebar{
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    right:0 !important;
+    left:auto !important;
+    transform:translateX(105%) !important;
+  }
+  html[dir="ltr"] body .sidebar{
+    position:fixed !important;
+    top:0 !important;
+    bottom:0 !important;
+    left:0 !important;
+    right:auto !important;
+    transform:translateX(-105%) !important;
+  }
+  html body.mobile-sidebar-open .sidebar{
+    transform:translateX(0) !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -15277,6 +15353,12 @@ console.info('Tasky build',window.TASKY_BUILD,'avatar-only-profile-restored');
 <script id="tasky-v184-build-marker">
 window.TASKY_BUILD='V184';
 console.info('Tasky build',window.TASKY_BUILD,'stable-rtl-ltr-all-views');
+</script>
+
+
+<script id="tasky-v185-build-marker">
+window.TASKY_BUILD='V185';
+console.info('Tasky build',window.TASKY_BUILD,'sidebar-grid-physical-right');
 </script>
 
 </body>
