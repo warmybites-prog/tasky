@@ -2315,6 +2315,65 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 }
 </style>
 
+
+<style id="tasky-v188-sidebar-collapse-resize-css">
+/* V188 — when desktop sidebar closes, its grid column collapses too.
+   This fixes the empty reserved space visible after hiding the sidebar. */
+@media(min-width:821px){
+  html body .app{
+    transition:grid-template-columns .18s ease !important;
+  }
+
+  /* Arabic open: main + right sidebar */
+  html[dir="rtl"] body:not(.sidebar-collapsed) .app{
+    grid-template-columns:minmax(0,1fr) 264px !important;
+    grid-template-areas:"main sidebar" !important;
+  }
+
+  /* English open: left sidebar + main */
+  html[dir="ltr"] body:not(.sidebar-collapsed) .app{
+    grid-template-columns:264px minmax(0,1fr) !important;
+    grid-template-areas:"sidebar main" !important;
+  }
+
+  /* Closed: no reserved sidebar column. Main uses the full viewport. */
+  html[dir="rtl"] body.sidebar-collapsed .app,
+  html[dir="ltr"] body.sidebar-collapsed .app{
+    grid-template-columns:minmax(0,1fr) 0 !important;
+    grid-template-areas:"main sidebar" !important;
+  }
+
+  html[dir="ltr"] body.sidebar-collapsed .app{
+    grid-template-columns:0 minmax(0,1fr) !important;
+    grid-template-areas:"sidebar main" !important;
+  }
+
+  body.sidebar-collapsed .sidebar{
+    width:0 !important;
+    min-width:0 !important;
+    max-width:0 !important;
+    padding-left:0 !important;
+    padding-right:0 !important;
+    border:0 !important;
+    opacity:0 !important;
+    overflow:hidden !important;
+    pointer-events:none !important;
+  }
+
+  body.sidebar-collapsed .main{
+    width:100% !important;
+    min-width:0 !important;
+    max-width:none !important;
+  }
+
+  body.sidebar-collapsed .content,
+  body.sidebar-collapsed .module-content{
+    width:100% !important;
+    max-width:none !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -15497,6 +15556,12 @@ console.info('Tasky build',window.TASKY_BUILD,'role-label-centered');
 <script id="tasky-v187-build-marker">
 window.TASKY_BUILD='V187';
 console.info('Tasky build',window.TASKY_BUILD,'fast-popup-no-splash');
+</script>
+
+
+<script id="tasky-v188-build-marker">
+window.TASKY_BUILD='V188';
+console.info('Tasky build',window.TASKY_BUILD,'sidebar-collapse-resize');
 </script>
 
 </body>
