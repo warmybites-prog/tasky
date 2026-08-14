@@ -2374,14 +2374,8 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
 }
 </style>
 
-
-<style id="tasky-v189-popup-no-boot-css">
-/* The real Tasky startup overlay is #taskyBootV83. Never show it in popup mode. */
-html[data-tasky-popup="1"] #taskyBootV83,
-html[data-tasky-popup="1"] .tasky-boot83-card,
-html[data-tasky-popup="1"] .tasky-boot83-track,
-html[data-tasky-popup="1"] .tasky-boot83-pct,
-html[data-tasky-popup="1"] .tasky-boot83-sub{
+<style id="tasky-v190-popup-css">
+html[data-tasky-popup="1"] #taskyBootV83{
   display:none !important;
   visibility:hidden !important;
   opacity:0 !important;
@@ -15265,44 +15259,47 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-inline');
     const h=Math.min(900,Math.max(620,Math.round(screen.availHeight*.82)));
     return `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h}`;
   }
-  let taskyPopupWindowV189=null;
+  let taskyPopupWindowV190=null;
   function openTaskyPopup(url){
     try{
       const target=new URL(url,location.href);
-      const moduleId=target.searchParams.get('tasky_module');
-      const projectId=target.searchParams.get('tasky_project');
+      const payload={
+        type:'tasky:navigate:v190',
+        moduleId:target.searchParams.get('tasky_module'),
+        projectId:target.searchParams.get('tasky_project'),
+        href:target.href
+      };
 
-      /* If our Tasky popup is already alive, switch its section directly.
-         This avoids a full page reload and avoids running startup/boot again. */
-      if(taskyPopupWindowV189 && !taskyPopupWindowV189.closed){
+      /* Reuse one popup. Never force location.replace() on an already-booting child. */
+      if(taskyPopupWindowV190 && !taskyPopupWindowV190.closed){
         try{
-          const child=taskyPopupWindowV189;
-          if(child.location.origin===location.origin && child.document?.readyState==='complete'){
-            if(moduleId && typeof child.setActiveNav==='function'){
-              child.history.replaceState({},'',target.href);
-              Promise.resolve(child.setActiveNav(moduleId)).catch(()=>{});
-              child.focus();
-              return true;
-            }
-            if(projectId && typeof child.setActiveProject==='function'){
-              child.history.replaceState({},'',target.href);
-              child.setActiveProject(projectId);
-              child.focus();
-              return true;
-            }
-          }
+          taskyPopupWindowV190.focus();
+          taskyPopupWindowV190.postMessage(payload,location.origin);
+          return true;
         }catch(_){}
       }
 
-      /* First popup opening only: load Tasky once in a named reusable window. */
-      const win=window.open(target.href,'tasky_workspace_popup_v189',popupFeatures());
-      if(win){
-        taskyPopupWindowV189=win;
-        try{win.focus();}catch(_){}
-      }
-      return !!win;
+      /* First opening: open the popup in lightweight popup mode only.
+         The requested route is sent by postMessage, so boot is allowed to finish cleanly. */
+      const shell=new URL(location.href);
+      shell.searchParams.set('tasky_popup','1');
+      shell.searchParams.delete('tasky_module');
+      shell.searchParams.delete('tasky_project');
+
+      const win=window.open(shell.href,'tasky_workspace_popup_v190',popupFeatures());
+      if(!win)return false;
+      taskyPopupWindowV190=win;
+      try{win.focus();}catch(_){}
+
+      /* Send route immediately and again shortly after in case the child listener
+         has not attached yet. Child queues it until Tasky is fully ready. */
+      const send=()=>{try{if(!win.closed)win.postMessage(payload,location.origin);}catch(_){}};
+      setTimeout(send,80);
+      setTimeout(send,500);
+      setTimeout(send,1200);
+      return true;
     }catch(e){
-      console.warn('Tasky popup V189',e);
+      console.warn('Tasky popup V190',e);
       return false;
     }
   }
@@ -15534,36 +15531,90 @@ window.TASKY_BUILD='V188';
 console.info('Tasky build',window.TASKY_BUILD,'sidebar-collapse-resize');
 </script>
 
-
-<script id="tasky-v189-popup-runtime-js">
+<script id="tasky-v190-popup-runtime-js">
 (function(){
-  function isPopupV189(){
+  const isPopup=(()=>{
     try{return new URL(location.href).searchParams.get('tasky_popup')==='1';}
     catch(_){return false;}
-  }
-  if(!isPopupV189())return;
+  })();
+  if(!isPopup)return;
 
   document.documentElement.setAttribute('data-tasky-popup','1');
 
-  function killBootV189(){
-    const boot=document.getElementById('taskyBootV83');
-    if(boot){
-      boot.style.setProperty('display','none','important');
-      boot.style.setProperty('visibility','hidden','important');
-      boot.style.setProperty('opacity','0','important');
-      boot.classList.add('hidden');
+  let pendingRouteV190=null;
+  let applyingV190=false;
+
+  function taskyReadyV190(){
+    try{
+      return !!currentWorkspaceId &&
+             typeof setActiveNav==='function' &&
+             typeof setActiveProject==='function' &&
+             !!document.querySelector('.app');
+    }catch(_){return false;}
+  }
+
+  async function applyRouteV190(route){
+    if(!route||applyingV190)return;
+    if(!taskyReadyV190()){pendingRouteV190=route;return;}
+    applyingV190=true;
+    try{
+      if(route.moduleId){
+        await setActiveNav(route.moduleId);
+      }else if(route.projectId){
+        setActiveProject(route.projectId);
+      }
+      try{
+        const u=new URL(location.href);
+        u.searchParams.set('tasky_popup','1');
+        u.searchParams.delete('tasky_module');
+        u.searchParams.delete('tasky_project');
+        if(route.moduleId)u.searchParams.set('tasky_module',route.moduleId);
+        if(route.projectId)u.searchParams.set('tasky_project',route.projectId);
+        history.replaceState({},'',u.href);
+      }catch(_){}
+      pendingRouteV190=null;
+    }catch(e){
+      console.warn('Tasky popup route V190',e);
+      pendingRouteV190=route;
+    }finally{
+      applyingV190=false;
     }
   }
 
-  killBootV189();
-  const mo=new MutationObserver(killBootV189);
-  mo.observe(document.documentElement,{subtree:true,childList:true,attributes:true,attributeFilter:['class','style']});
-  setTimeout(()=>mo.disconnect(),8000);
+  window.addEventListener('message',e=>{
+    if(e.origin!==location.origin)return;
+    const d=e.data;
+    if(!d||d.type!=='tasky:navigate:v190')return;
+    pendingRouteV190=d;
+    applyRouteV190(d);
+  });
+
+  /* Route from URL if popup was restored/refreshed manually. */
+  try{
+    const u=new URL(location.href);
+    const moduleId=u.searchParams.get('tasky_module');
+    const projectId=u.searchParams.get('tasky_project');
+    if(moduleId||projectId)pendingRouteV190={moduleId,projectId};
+  }catch(_){}
+
+  /* Wait for normal Tasky bootstrap to finish. No forced DOM mutations. */
+  let tries=0;
+  const timer=setInterval(()=>{
+    tries++;
+    if(taskyReadyV190()){
+      window.__taskyPopupReadyV190=true;
+      if(pendingRouteV190)applyRouteV190(pendingRouteV190);
+      if(tries>40&&!pendingRouteV190)clearInterval(timer);
+    }
+    if(tries>120)clearInterval(timer);
+  },100);
+
+  window.addEventListener('beforeunload',()=>{window.__taskyPopupReadyV190=false;});
 })();
 </script>
-<script id="tasky-v189-build-marker">
-window.TASKY_BUILD='V189';
-console.info('Tasky build',window.TASKY_BUILD,'popup-reuse-no-reload');
+<script id="tasky-v190-build-marker">
+window.TASKY_BUILD='V190';
+console.info('Tasky build',window.TASKY_BUILD,'popup-stable-message-routing');
 </script>
 
 </body>
