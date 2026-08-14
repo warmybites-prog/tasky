@@ -2764,27 +2764,64 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
 }
 </style>
 
-
-<style id="tasky-v212-topbar-side-css">
-/* V212 — stable CSS-only topbar positioning.
-   Arabic: action buttons physically left, breadcrumb physically right.
-   English: action buttons physically right, breadcrumb physically left.
-   No DOM rebuilding and no JavaScript observers. */
+<style id="tasky-v213-topbar-groups-css">
+/* V213 — menu + breadcrumb stay together.
+   Arabic: menu/title group on the RIGHT, remaining actions on the LEFT.
+   English: exact reverse. */
 @media(min-width:821px){
   .topbar{
     display:flex !important;
     align-items:center !important;
     justify-content:space-between !important;
+    gap:18px !important;
     direction:ltr !important;
   }
 
-  /* English / LTR */
-  html[dir="ltr"] .topbar .breadcrumb{
+  .topbar-leading-v213{
+    display:flex;
+    align-items:center;
+    gap:12px;
+    min-width:0;
+    flex:none;
+  }
+  .topbar-leading-v213 .breadcrumb{
+    min-width:0;
+    white-space:nowrap;
+  }
+  .topbar .topbar-right{
+    display:flex !important;
+    align-items:center !important;
+    gap:12px !important;
+    min-width:0;
+    flex:none;
+  }
+
+  /* Arabic: actions left / menu + title right */
+  html[dir="rtl"] .topbar .topbar-right{
+    order:1 !important;
+    margin-right:0 !important;
+    margin-left:auto !important;
+    direction:rtl !important;
+  }
+  html[dir="rtl"] .topbar-leading-v213{
+    order:2 !important;
+    margin-left:0 !important;
+    margin-right:auto !important;
+    direction:rtl !important;
+  }
+  html[dir="rtl"] .topbar-leading-v213 .sidebar-toggle-btn{order:1}
+  html[dir="rtl"] .topbar-leading-v213 .breadcrumb{
+    order:2;
+    direction:rtl !important;
+    text-align:right !important;
+  }
+
+  /* English: menu + title left / actions right */
+  html[dir="ltr"] .topbar-leading-v213{
     order:1 !important;
     margin-right:auto !important;
     margin-left:0 !important;
     direction:ltr !important;
-    text-align:left !important;
   }
   html[dir="ltr"] .topbar .topbar-right{
     order:2 !important;
@@ -2792,27 +2829,24 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
     margin-right:0 !important;
     direction:ltr !important;
   }
-
-  /* Arabic / RTL */
-  html[dir="rtl"] .topbar .topbar-right{
-    order:1 !important;
-    margin-right:auto !important;
-    margin-left:0 !important;
-    direction:rtl !important;
-  }
-  html[dir="rtl"] .topbar .breadcrumb{
-    order:2 !important;
-    margin-left:auto !important;
-    margin-right:0 !important;
-    direction:rtl !important;
-    text-align:right !important;
+  html[dir="ltr"] .topbar-leading-v213 .sidebar-toggle-btn{order:1}
+  html[dir="ltr"] .topbar-leading-v213 .breadcrumb{
+    order:2;
+    direction:ltr !important;
+    text-align:left !important;
   }
 }
 
-/* Keep compact/mobile header behavior unchanged except correct language direction. */
+/* Tablet/mobile: preserve compact behavior and keep menu/title together. */
 @media(max-width:820px){
-  html[dir="rtl"] .topbar{direction:rtl !important}
-  html[dir="ltr"] .topbar{direction:ltr !important}
+  .topbar-leading-v213{
+    display:flex;
+    align-items:center;
+    gap:9px;
+    min-width:0;
+  }
+  html[dir="rtl"] .topbar-leading-v213{direction:rtl}
+  html[dir="ltr"] .topbar-leading-v213{direction:ltr}
 }
 </style>
 
@@ -2976,13 +3010,15 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
   <!-- ============ MAIN ============ -->
   <main class="main">
     <header class="topbar">
-      <div class="breadcrumb"><span id="breadcrumbRoot"></span> <span>/</span> <b id="breadcrumbLabel">الرئيسية</b></div>
-      <div class="topbar-right">
+      <div class="topbar-leading-v213">
         <button class="sidebar-toggle-btn" type="button" onclick="toggleSidebar()" id="sidebarToggleBtn" aria-label="إظهار أو إخفاء القائمة الجانبية" aria-expanded="true">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round">
             <path d="M4 7h16M4 12h16M4 17h16"/>
           </svg>
         </button>
+        <div class="breadcrumb"><span id="breadcrumbRoot"></span> <span>/</span> <b id="breadcrumbLabel">الرئيسية</b></div>
+      </div>
+      <div class="topbar-right">
         <div class="search-box"><svg><use href="#i-search"/></svg><input id="topSearch" oninput="onSearch(this.value)"></div>
         <button class="lang-btn" onclick="toggleLang()" id="langBtn">EN</button>
         <div style="position:relative">
@@ -17019,10 +17055,9 @@ window.TASKY_BUILD='V210';
 console.info('Tasky build',window.TASKY_BUILD,'notification-delete-and-swipe');
 </script>
 
-
-<script id="tasky-v212-build-marker">
-window.TASKY_BUILD='V212';
-console.info('Tasky build',window.TASKY_BUILD,'topbar-side-fixed-css-only');
+<script id="tasky-v213-build-marker">
+window.TASKY_BUILD='V213';
+console.info('Tasky build',window.TASKY_BUILD,'topbar-menu-title-group');
 </script>
 
 </body>
