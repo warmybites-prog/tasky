@@ -2763,134 +2763,6 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
   #notifDropdown .notif-swipe-delete-v210{display:none}
 }
 </style>
-
-
-<style id="tasky-v214-topbar-stable-css">
-/* V214 — stable topbar layout without changing the original HTML.
-   Uses display:contents so the existing menu button can sit with the breadcrumb
-   while the remaining actions stay on the opposite physical side. */
-
-.topbar{
-  display:flex !important;
-  align-items:center !important;
-  width:100% !important;
-  direction:ltr !important;
-  gap:10px !important;
-}
-
-/* Let the original children of .topbar-right participate directly in .topbar. */
-.topbar > .topbar-right{
-  display:contents !important;
-}
-
-/* All action controls except the sidebar/menu button stay as one side group. */
-.topbar > .topbar-right > :not(.sidebar-toggle-btn){
-  flex:0 0 auto;
-}
-
-/* ---------- Arabic ---------- */
-/* Physical left: all actions except menu.
-   Physical right: breadcrumb + menu button. */
-html[dir="rtl"] .topbar > .topbar-right > :not(.sidebar-toggle-btn){
-  order:1 !important;
-}
-html[dir="rtl"] .topbar > .breadcrumb{
-  order:2 !important;
-  margin-left:0 !important;
-  margin-right:auto !important;
-  direction:rtl !important;
-  text-align:right !important;
-}
-html[dir="rtl"] .topbar > .topbar-right > .sidebar-toggle-btn{
-  order:3 !important;
-  margin:0 !important;
-  direction:rtl !important;
-}
-
-/* ---------- English ---------- */
-/* Physical left: menu button + breadcrumb.
-   Physical right: all remaining actions. */
-html[dir="ltr"] .topbar > .topbar-right > .sidebar-toggle-btn{
-  order:1 !important;
-  margin:0 !important;
-  direction:ltr !important;
-}
-html[dir="ltr"] .topbar > .breadcrumb{
-  order:2 !important;
-  margin-left:0 !important;
-  margin-right:auto !important;
-  direction:ltr !important;
-  text-align:left !important;
-}
-html[dir="ltr"] .topbar > .topbar-right > :not(.sidebar-toggle-btn){
-  order:3 !important;
-}
-
-/* Keep menu and breadcrumb visually close. */
-.topbar > .breadcrumb{
-  flex:0 1 auto !important;
-  white-space:nowrap;
-}
-.topbar > .topbar-right > .sidebar-toggle-btn{
-  flex:0 0 auto !important;
-}
-
-/* Tablet */
-@media(max-width:1024px){
-  .topbar{
-    gap:8px !important;
-    padding-inline:16px !important;
-  }
-  .topbar .search-box{
-    width:min(220px,26vw) !important;
-  }
-}
-
-/* Mobile */
-@media(max-width:700px){
-  .topbar{
-    gap:6px !important;
-    padding-inline:10px !important;
-    flex-wrap:nowrap !important;
-  }
-
-  .topbar .search-box{
-    display:none !important;
-  }
-
-  .topbar > .breadcrumb{
-    min-width:0 !important;
-    overflow:hidden;
-    text-overflow:ellipsis;
-  }
-
-  .topbar > .breadcrumb span,
-  .topbar > .breadcrumb b{
-    white-space:nowrap;
-  }
-
-  .topbar .lang-btn{
-    padding-inline:9px !important;
-  }
-
-  .topbar .icon-btn,
-  .topbar .sidebar-toggle-btn{
-    flex:0 0 auto !important;
-  }
-}
-
-/* Very small mobile: hide less-critical palette button only if needed,
-   keeping menu, breadcrumb, notifications, language and new task usable. */
-@media(max-width:480px){
-  .topbar .topbar-right > div:has(> .icon-btn[onclick*="toggleThemePanel"]){
-    display:none !important;
-  }
-  #topNewTaskBtn{
-    padding-inline:10px !important;
-  }
-}
-</style>
-
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -17094,10 +16966,221 @@ window.TASKY_BUILD='V210';
 console.info('Tasky build',window.TASKY_BUILD,'notification-delete-and-swipe');
 </script>
 
+<style id="tasky-v215-final-layout-css">
+/* ============================================================
+   V215 — FINAL topbar direction
+   Arabic:  [actions ...]  [breadcrumb][menu]   -> menu/title RIGHT
+   English: [menu][breadcrumb]  [actions ...]   -> menu/title LEFT
+   ============================================================ */
 
-<script id="tasky-v214-build-marker">
-window.TASKY_BUILD='V214';
-console.info('Tasky build',window.TASKY_BUILD,'topbar-stable-all-devices');
+html[dir="rtl"] body .topbar,
+html[dir="ltr"] body .topbar{
+  display:flex !important;
+  align-items:center !important;
+  width:100% !important;
+  gap:10px !important;
+  direction:ltr !important; /* physical left-to-right ordering is intentional */
+}
+
+/* Expose existing topbar-right children to the parent flex without changing DOM. */
+html body .topbar > .topbar-right{
+  display:contents !important;
+}
+
+/* ARABIC: all actions left, breadcrumb + menu right */
+html[dir="rtl"] body .topbar > .topbar-right > :not(.sidebar-toggle-btn){
+  order:1 !important;
+  flex:0 0 auto !important;
+}
+html[dir="rtl"] body .topbar > .breadcrumb{
+  order:2 !important;
+  margin-left:auto !important;   /* spacer BEFORE breadcrumb */
+  margin-right:0 !important;
+  direction:rtl !important;
+  text-align:right !important;
+  flex:0 1 auto !important;
+  white-space:nowrap !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > .sidebar-toggle-btn{
+  order:3 !important;
+  margin:0 !important;
+  flex:0 0 auto !important;
+}
+
+/* ENGLISH: menu + breadcrumb left, actions right */
+html[dir="ltr"] body .topbar > .topbar-right > .sidebar-toggle-btn{
+  order:1 !important;
+  margin:0 !important;
+  flex:0 0 auto !important;
+}
+html[dir="ltr"] body .topbar > .breadcrumb{
+  order:2 !important;
+  margin-left:0 !important;
+  margin-right:auto !important;  /* spacer AFTER breadcrumb */
+  direction:ltr !important;
+  text-align:left !important;
+  flex:0 1 auto !important;
+  white-space:nowrap !important;
+}
+html[dir="ltr"] body .topbar > .topbar-right > :not(.sidebar-toggle-btn){
+  order:3 !important;
+  flex:0 0 auto !important;
+}
+
+/* Notification dropdown is positioned by V215 JS in viewport coordinates. */
+#notifDropdown.tasky-notif-fixed-v215{
+  position:fixed !important;
+  right:auto !important;
+  bottom:auto !important;
+  max-width:calc(100vw - 16px) !important;
+  width:min(380px,calc(100vw - 16px)) !important;
+  max-height:min(72dvh,620px) !important;
+  overflow:auto !important;
+  z-index:40000 !important;
+}
+
+/* Tablet */
+@media(max-width:1024px){
+  html[dir="rtl"] body .topbar,
+  html[dir="ltr"] body .topbar{
+    gap:8px !important;
+    padding-inline:14px !important;
+  }
+  .topbar .search-box{width:min(210px,24vw) !important}
+}
+
+/* Mobile */
+@media(max-width:700px){
+  html[dir="rtl"] body .topbar,
+  html[dir="ltr"] body .topbar{
+    gap:6px !important;
+    padding-inline:9px !important;
+    flex-wrap:nowrap !important;
+  }
+  .topbar .search-box{display:none !important}
+  .topbar > .breadcrumb{
+    min-width:0 !important;
+    overflow:hidden !important;
+    text-overflow:ellipsis !important;
+  }
+  .topbar > .breadcrumb span,
+  .topbar > .breadcrumb b{white-space:nowrap !important}
+  #notifDropdown.tasky-notif-fixed-v215{
+    width:min(360px,calc(100vw - 12px)) !important;
+    max-width:calc(100vw - 12px) !important;
+  }
+}
+</style>
+
+
+<script id="tasky-v215-notification-position-js">
+(function(){
+  function positionNotifV215(){
+    const dd=document.getElementById('notifDropdown');
+    if(!dd || dd.classList.contains('hidden'))return;
+
+    const bell=dd.parentElement?.querySelector('button.icon-btn');
+    if(!bell)return;
+
+    dd.classList.add('tasky-notif-fixed-v215');
+
+    const br=bell.getBoundingClientRect();
+    const width=Math.min(380,Math.max(260,window.innerWidth-16));
+    const actual=Math.min(width,window.innerWidth-16);
+
+    /* Center under bell then clamp fully inside viewport. */
+    let left=br.left+(br.width/2)-(actual/2);
+    left=Math.max(8,Math.min(left,window.innerWidth-actual-8));
+    let top=br.bottom+8;
+
+    /* If there is not enough room below, open upward. */
+    const estimatedHeight=Math.min(dd.scrollHeight||420,Math.min(window.innerHeight*.72,620));
+    if(top+estimatedHeight>window.innerHeight-8){
+      top=Math.max(8,br.top-estimatedHeight-8);
+    }
+
+    dd.style.left=Math.round(left)+'px';
+    dd.style.top=Math.round(top)+'px';
+    dd.style.right='auto';
+  }
+
+  window.taskyPositionNotifV215=positionNotifV215;
+
+  /* Hook the actual lexical toggle function after its original definition. */
+  if(typeof toggleNotif==='function'&&!window.__taskyToggleNotifV215){
+    window.__taskyToggleNotifV215=true;
+    const baseToggleNotifV215=toggleNotif;
+    toggleNotif=async function(...args){
+      const result=await baseToggleNotifV215.apply(this,args);
+      requestAnimationFrame(positionNotifV215);
+      return result;
+    };
+  }
+
+  const baseRenderNotifV215=typeof renderNotificationDropdown==='function'?renderNotificationDropdown:null;
+  if(baseRenderNotifV215&&!window.__taskyRenderNotifV215){
+    window.__taskyRenderNotifV215=true;
+    renderNotificationDropdown=function(...args){
+      const result=baseRenderNotifV215.apply(this,args);
+      requestAnimationFrame(positionNotifV215);
+      return result;
+    };
+  }
+
+  window.addEventListener('resize',positionNotifV215,{passive:true});
+  window.addEventListener('scroll',positionNotifV215,{passive:true,capture:true});
+})();
+</script>
+
+<script id="tasky-v215-build-marker">
+window.TASKY_BUILD='V215';
+console.info('Tasky build',window.TASKY_BUILD,'arabic-topbar-and-notification-position-fixed');
+</script>
+
+
+<style id="tasky-v216-arabic-topbar-mirror-css">
+/* V216 — English order is already correct.
+   Arabic is now the exact physical mirror of the English action order.
+
+   English LTR actions: Language → Theme → Notifications → New Task
+   Arabic  LTR physical: New Task → Notifications → Theme → Language
+*/
+
+/* Keep the existing V215 side placement:
+   Arabic actions LEFT, breadcrumb+menu RIGHT. */
+html[dir="rtl"] body .topbar > .topbar-right > #topNewTaskBtn{
+  order:1 !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > div:has(> .icon-btn[onclick*="toggleNotif"]){
+  order:2 !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > div:has(> .icon-btn[onclick*="toggleThemePanel"]){
+  order:3 !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > .lang-btn{
+  order:4 !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > .search-box{
+  order:5 !important;
+}
+
+/* Spacer starts before breadcrumb so breadcrumb + menu stay on the far right. */
+html[dir="rtl"] body .topbar > .breadcrumb{
+  order:20 !important;
+  margin-left:auto !important;
+  margin-right:0 !important;
+}
+html[dir="rtl"] body .topbar > .topbar-right > .sidebar-toggle-btn{
+  order:21 !important;
+}
+
+/* Do not change the English arrangement at all. */
+</style>
+
+
+<script id="tasky-v216-build-marker">
+window.TASKY_BUILD='V216';
+console.info('Tasky build',window.TASKY_BUILD,'arabic-topbar-exact-mirror');
 </script>
 
 </body>
