@@ -2417,6 +2417,22 @@ html[dir="ltr"] body .sidebar-bottom .role-toggle button{
   }
 }
 </style>
+
+<style id="tasky-v201-settings-selected-css">
+/* V201 — clear selected state for Appearance & language controls */
+.settings-content .settings-inline-actions .chip-btn.active,
+.settings-content .preference-card .chip-btn.active{
+  background:var(--green-tint) !important;
+  color:var(--green) !important;
+  border-color:color-mix(in srgb,var(--green) 28%,var(--border)) !important;
+  font-weight:800 !important;
+}
+.settings-content .settings-inline-actions .chip-btn.active svg,
+.settings-content .preference-card .chip-btn.active svg{
+  color:var(--green) !important;
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -7339,10 +7355,11 @@ function settingsWorkspaceTemplate(){
   <div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'ملخص مساحة العمل':'Workspace summary'}</h3></div></div><div class="settings-summary-grid"><div class="settings-summary"><span>${lang==='ar'?'الباقة الفعلية':'Active plan'}</span><b>${t('plan_'+currentPlan+'_name')}</b></div><div class="settings-summary"><span>${lang==='ar'?'الأعضاء النشطون':'Active members'}</span><b>${teamMembers.filter(m=>m.status==='active').length}</b></div><div class="settings-summary"><span>${lang==='ar'?'دورك':'Your role'}</span><b>${currentUserRole==='admin'?t('role_admin'):t('role_member')}</b></div></div></div>`;
 }
 function settingsAppearanceTemplate(){
+  const darkSelected=!!document.body.classList.contains('dark');
   return `<div class="settings-card"><div class="settings-card-head"><div><h3>${lang==='ar'?'المظهر واللغة':'Appearance & language'}</h3><p>${lang==='ar'?'تُحفظ هذه التفضيلات على هذا الجهاز.':'These preferences are saved on this device.'}</p></div></div><div class="preference-grid">
-    <div class="preference-card"><h4>${lang==='ar'?'اللغة':'Language'}</h4><div class="settings-inline-actions"><button class="chip-btn ${lang==='ar'?'active':''}" onclick="if(lang!=='ar')toggleLang()">العربية</button><button class="chip-btn ${lang==='en'?'active':''}" onclick="if(lang!=='en')toggleLang()">English</button></div></div>
-    <div class="preference-card"><h4>${lang==='ar'?'الوضع':'Mode'}</h4><div class="settings-inline-actions"><button class="chip-btn" onclick="setMode(false)"><svg><use href="#i-sun"/></svg>${lang==='ar'?'فاتح':'Light'}</button><button class="chip-btn" onclick="setMode(true)"><svg><use href="#i-moon"/></svg>${lang==='ar'?'داكن':'Dark'}</button></div></div>
-    <div class="preference-card"><h4>${lang==='ar'?'نظام التاريخ':'Calendar system'}</h4><p style="font-size:10.5px;color:var(--muted);line-height:1.7;margin:0 0 10px">${lang==='ar'?'الميلادي هو الافتراضي. يمكنك عرض التواريخ بالهجري (أم القرى).':'Gregorian is the default. You can display dates in Hijri (Umm al-Qura).'}</p><div class="settings-inline-actions"><button class="chip-btn ${taskyCalendarV199==='gregorian'?'active':''}" onclick="setTaskyCalendarV199('gregorian')">${lang==='ar'?'ميلادي':'Gregorian'}</button><button class="chip-btn ${taskyCalendarV199==='hijri'?'active':''}" onclick="setTaskyCalendarV199('hijri')">${lang==='ar'?'هجري':'Hijri'}</button></div></div>
+    <div class="preference-card"><h4>${lang==='ar'?'اللغة':'Language'}</h4><div class="settings-inline-actions"><button type="button" class="chip-btn ${lang==='ar'?'active':''}" onclick="if(lang!=='ar')toggleLang()">العربية</button><button type="button" class="chip-btn ${lang==='en'?'active':''}" onclick="if(lang!=='en')toggleLang()">English</button></div></div>
+    <div class="preference-card"><h4>${lang==='ar'?'الوضع':'Mode'}</h4><div class="settings-inline-actions"><button class="chip-btn ${!darkSelected?'active':''}" onclick="setMode(false);setTimeout(()=>{if(activeNav==='settings')renderModule()},0)"><svg><use href="#i-sun"/></svg>${lang==='ar'?'فاتح':'Light'}</button><button class="chip-btn ${darkSelected?'active':''}" onclick="setMode(true);setTimeout(()=>{if(activeNav==='settings')renderModule()},0)"><svg><use href="#i-moon"/></svg>${lang==='ar'?'داكن':'Dark'}</button></div></div>
+    <div class="preference-card"><h4>${lang==='ar'?'نظام التاريخ':'Calendar system'}</h4><p style="font-size:10.5px;color:var(--muted);line-height:1.7;margin:0 0 10px">${lang==='ar'?'الميلادي هو الافتراضي. يمكنك عرض التواريخ بالهجري (أم القرى).':'Gregorian is the default. You can display dates in Hijri (Umm al-Qura).'}</p><div class="settings-inline-actions"><button type="button" class="chip-btn ${taskyCalendarV199==='gregorian'?'active':''}" onclick="window.setTaskyCalendarV199('gregorian')">${lang==='ar'?'ميلادي':'Gregorian'}</button><button type="button" class="chip-btn ${taskyCalendarV199==='hijri'?'active':''}" onclick="window.setTaskyCalendarV199('hijri')">${lang==='ar'?'هجري':'Hijri'}</button></div></div>
     <div class="preference-card" style="grid-column:1/-1"><h4>${lang==='ar'?'لون الواجهة':'Accent color'}</h4><div class="swatch-row" style="margin:0">${Object.entries(THEMES).map(([id,th])=>`<div class="swatch ${themeName===id?'active':''}" style="background:${th.primary}" onclick="setTheme('${id}')" title="${lang==='ar'?th.label_ar:th.label_en}"></div>`).join('')}</div></div>
   </div></div>`;
 }
@@ -15998,7 +16015,8 @@ console.info('Tasky build',window.TASKY_BUILD,'fast-warm-route');
 
 <script id="tasky-v199-calendar-runtime-js">
 (function(){
-  window.setTaskyCalendarV199=function(mode){
+  window.setTaskyCalendarV199=setTaskyCalendarV199;
+  function setTaskyCalendarV199(mode){
     const next=mode==='hijri'?'hijri':'gregorian';
     window.taskyCalendarV199=next;
     localStorage.setItem('tasky_calendar_v199',next);
@@ -16007,13 +16025,18 @@ console.info('Tasky build',window.TASKY_BUILD,'fast-warm-route');
     /* Dense-table formatter cache must be rebuilt with the new calendar. */
     try{if(typeof taskyIntlCacheV167!=='undefined')taskyIntlCacheV167.clear();}catch(_){}
 
-    /* Refresh all visible date labels immediately. */
-    try{renderNav();}catch(_){}
+    /* Re-render Settings itself so the active button highlight changes immediately. */
     try{
-      if(typeof activeNav!=='undefined' && activeNav!=='home' && activeNav!=='tasks')renderModule();
-      else renderAll();
+      if(typeof activeNav!=='undefined' && activeNav==='settings'){
+        renderModule();
+      }else if(typeof activeNav!=='undefined' && activeNav!=='home' && activeNav!=='tasks'){
+        renderModule();
+      }else{
+        renderAll();
+      }
+      renderNav();
     }catch(_){}
-  };
+  }
 
   /* Keep preference synchronized between browser tabs/windows. */
   window.addEventListener('storage',e=>{
@@ -16083,6 +16106,12 @@ console.info('Tasky build',window.TASKY_BUILD,'calendar-preference');
 <script id="tasky-v200-build-marker">
 window.TASKY_BUILD='V200';
 console.info('Tasky build',window.TASKY_BUILD,'live-kpi-hydration');
+</script>
+
+
+<script id="tasky-v201-build-marker">
+window.TASKY_BUILD='V201';
+console.info('Tasky build',window.TASKY_BUILD,'settings-selection-fix');
 </script>
 
 </body>
