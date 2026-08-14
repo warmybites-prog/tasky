@@ -2,6 +2,33 @@
 <html lang="ar" dir="rtl" id="htmlRoot">
 <head>
 
+<script id="tasky-v187-popup-early-boot">
+(function(){
+  try{
+    const u=new URL(location.href);
+    if(u.searchParams.get('tasky_popup')==='1'){
+      document.documentElement.setAttribute('data-tasky-popup','1');
+      sessionStorage.setItem('tasky_popup_fast_v187','1');
+    }
+  }catch(_){}
+})();
+</script>
+<style id="tasky-v187-popup-fast-css">
+/* Popup windows reuse the already-loaded session and do not show the full-screen launch splash. */
+html[data-tasky-popup="1"] #launchSplash,
+html[data-tasky-popup="1"] .launch-splash,
+html[data-tasky-popup="1"] #bootSplash,
+html[data-tasky-popup="1"] #loadingScreen,
+html[data-tasky-popup="1"] .loading-screen,
+html[data-tasky-popup="1"] .tasky-loading-screen{
+  display:none !important;
+  visibility:hidden !important;
+  opacity:0 !important;
+  pointer-events:none !important;
+}
+</style>
+
+
 <script id="tasky-v184-first-paint-lang">
 (function(){
   try{
@@ -15391,6 +15418,85 @@ console.info('Tasky build',window.TASKY_BUILD,'sidebar-grid-physical-right');
 <script id="tasky-v186-build-marker">
 window.TASKY_BUILD='V186';
 console.info('Tasky build',window.TASKY_BUILD,'role-label-centered');
+</script>
+
+
+<script id="tasky-v187-popup-runtime-patch">
+(function(){
+  /* Reuse a named popup window instead of creating a new cold window every time.
+     This keeps the same browser process/window warm and avoids repeated launch UX. */
+  window.__taskyPopupRefV187 = window.__taskyPopupRefV187 || null;
+
+  function popupFeaturesV187(){
+    const w=Math.min(1280,Math.max(760,Math.round(screen.availWidth*.78)));
+    const h=Math.min(900,Math.max(620,Math.round(screen.availHeight*.82)));
+    return `popup=yes,resizable=yes,scrollbars=yes,width=${w},height=${h}`;
+  }
+
+  window.taskyOpenFastPopupV187=function(url){
+    let win=window.__taskyPopupRefV187;
+    try{
+      if(!win || win.closed){
+        win=window.open('about:blank','tasky_workspace_popup_v187',popupFeaturesV187());
+        window.__taskyPopupRefV187=win;
+      }
+      if(!win)return false;
+
+      /* Lightweight instant shell while the target route hydrates. */
+      try{
+        if(win.location.href==='about:blank'){
+          win.document.open();
+          win.document.write(`<!doctype html><html lang="${document.documentElement.lang||'ar'}" dir="${document.documentElement.dir||'rtl'}"><head><meta charset="utf-8"><title>Tasky</title><style>html,body{margin:0;height:100%;font-family:system-ui;background:#f6f7f3;color:#17311f}.w{height:100%;display:grid;place-items:center}.c{font-size:14px;opacity:.68}</style></head><body><div class="w"><div class="c">${document.documentElement.lang==='en'?'Opening…':'جارٍ الفتح…'}</div></div></body></html>`);
+          win.document.close();
+        }
+      }catch(_){}
+
+      win.location.replace(url);
+      try{win.focus();}catch(_){}
+      return true;
+    }catch(e){
+      console.warn('Tasky fast popup',e);
+      return false;
+    }
+  };
+
+  /* Override old popup opener used by V179 listeners. */
+  try{
+    if(typeof openTaskyPopup==='function'){
+      openTaskyPopup=function(url){return window.taskyOpenFastPopupV187(url);};
+    }
+  }catch(_){}
+
+  /* Popup mode: never run the decorative progress animation. Show app as soon as auth shell exists. */
+  async function fastPopupBootV187(){
+    const u=new URL(location.href);
+    if(u.searchParams.get('tasky_popup')!=='1')return;
+
+    document.documentElement.setAttribute('data-tasky-popup','1');
+
+    // Skip any artificial progress timers where possible.
+    const hideSplash=()=>{
+      ['launchSplash','bootSplash','loadingScreen'].forEach(id=>{
+        const el=document.getElementById(id);
+        if(el){el.style.display='none';el.classList.add('hidden');}
+      });
+      document.querySelectorAll('.launch-splash,.loading-screen,.tasky-loading-screen').forEach(el=>{
+        el.style.display='none';el.classList.add('hidden');
+      });
+    };
+    hideSplash();
+    const mo=new MutationObserver(hideSplash);
+    mo.observe(document.documentElement,{subtree:true,childList:true});
+    setTimeout(()=>mo.disconnect(),5000);
+  }
+
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',fastPopupBootV187,{once:true});
+  else fastPopupBootV187();
+})();
+</script>
+<script id="tasky-v187-build-marker">
+window.TASKY_BUILD='V187';
+console.info('Tasky build',window.TASKY_BUILD,'fast-popup-no-splash');
 </script>
 
 </body>
