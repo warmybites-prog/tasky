@@ -2904,6 +2904,129 @@ html[dir="rtl"] .tasky-nav-row-v233.expanded .chev{transform:rotate(-90deg)}
 }
 </style>
 
+
+<style id="tasky-v234-ui-stability-css">
+/* ============================================================
+   V234 — UI + scroll stability
+   ============================================================ */
+
+/* Every sidebar icon gets an explicit box. Without width/height, an SVG
+   defaults to a very large intrinsic viewport on some browsers. */
+#mainNav .tasky-native-icon-v234,
+#mainNav .tasky-native-tab-v233 > svg,
+#mainNav .tasky-nav-row-v233 > svg:not(.chev),
+#mainNav .tasky-nav-child-v233 > svg{
+  width:18px !important;
+  height:18px !important;
+  min-width:18px !important;
+  min-height:18px !important;
+  max-width:18px !important;
+  max-height:18px !important;
+  flex:0 0 18px !important;
+  display:block !important;
+  overflow:visible !important;
+}
+#mainNav .tasky-nav-children-v233 .tasky-native-icon-v234,
+#mainNav .tasky-nav-children-v233 .tasky-native-tab-v233 > svg{
+  width:15px !important;
+  height:15px !important;
+  min-width:15px !important;
+  min-height:15px !important;
+  max-width:15px !important;
+  max-height:15px !important;
+  flex-basis:15px !important;
+}
+#mainNav .tasky-nav-row-v233 > svg.chev{
+  width:13px !important;
+  height:13px !important;
+  min-width:13px !important;
+  min-height:13px !important;
+  max-width:13px !important;
+  max-height:13px !important;
+  flex:0 0 13px !important;
+}
+
+/* Prevent old module tab CSS from stretching moved buttons. */
+#mainNav .tasky-native-tab-v233{
+  width:100% !important;
+  min-width:0 !important;
+  max-width:100% !important;
+  height:auto !important;
+  min-height:42px !important;
+  max-height:50px !important;
+  overflow:hidden !important;
+  flex:0 0 auto !important;
+  line-height:1.25 !important;
+}
+#mainNav .tasky-nav-children-v233 .tasky-native-tab-v233{
+  min-height:38px !important;
+  max-height:44px !important;
+}
+#mainNav .tasky-native-label-v233{
+  min-width:0 !important;
+  flex:1 1 auto !important;
+  overflow:hidden !important;
+  text-overflow:ellipsis !important;
+  white-space:nowrap !important;
+}
+
+/* One scroll owner: mainNav. Vertical swipe must work even when it starts on
+   a menu row/button. */
+html body .sidebar .main-nav,
+#mainNav.tasky-native-nav-v233{
+  flex:1 1 0% !important;
+  min-height:0 !important;
+  max-height:none !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-y:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+  padding-bottom:max(22px,env(safe-area-inset-bottom)) !important;
+  scrollbar-width:thin !important;
+}
+#mainNav.tasky-native-nav-v233 > *{
+  flex-shrink:0 !important;
+}
+#mainNav .tasky-native-tab-v233,
+#mainNav .tasky-nav-row-v233,
+#mainNav .tasky-nav-child-v233,
+#mainNav a.project-item{
+  touch-action:pan-y !important;
+}
+
+/* App list itself must also remain independently scrollable. */
+.tasky-app-menu-v217{
+  max-height:min(68dvh,560px) !important;
+  overflow-y:auto !important;
+  overflow-x:hidden !important;
+  overscroll-behavior-y:contain !important;
+  -webkit-overflow-scrolling:touch !important;
+  touch-action:pan-y !important;
+}
+
+/* Compact consistent spacing. */
+#mainNav.tasky-native-nav-v233{gap:3px !important}
+#mainNav .tasky-nav-row-v233{min-height:43px !important;max-height:48px !important}
+#mainNav .tasky-nav-child-v233{min-height:37px !important;max-height:43px !important}
+
+@media(max-width:820px){
+  #mainNav .tasky-native-tab-v233,
+  #mainNav .tasky-nav-row-v233{
+    min-height:46px !important;
+    max-height:50px !important;
+  }
+  #mainNav .tasky-nav-children-v233 .tasky-native-tab-v233,
+  #mainNav .tasky-nav-child-v233{
+    min-height:42px !important;
+    max-height:46px !important;
+  }
+  html body .sidebar .main-nav{
+    padding-bottom:max(28px,calc(env(safe-area-inset-bottom) + 12px)) !important;
+  }
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -15460,10 +15583,10 @@ function taskyIntlFormatterV167(locale,options){
 <script id="tasky-v1681-lazy-loader-js">
 
 const TASKY_LAZY_CHUNKS_V1681={
-  hr:{url:'chunks/hr.js?v=233',loaded:false,promise:null},
-  meetings:{url:'chunks/meetings.js?v=233',loaded:false,promise:null},
-  brainstorm:{url:'chunks/brainstorm.js?v=233',loaded:false,promise:null},
-  bookings:{url:'chunks/bookings.js?v=233',loaded:false,promise:null}
+  hr:{url:'chunks/hr.js?v=234',loaded:false,promise:null},
+  meetings:{url:'chunks/meetings.js?v=234',loaded:false,promise:null},
+  brainstorm:{url:'chunks/brainstorm.js?v=234',loaded:false,promise:null},
+  bookings:{url:'chunks/bookings.js?v=234',loaded:false,promise:null}
 };
 function taskyLazyChunkLoadedV1681(name){return !!TASKY_LAZY_CHUNKS_V1681[name]?.loaded}
 function taskyLazyLoadScriptV1681(url){
@@ -16959,6 +17082,15 @@ const HR_GROUPS_V233=[
 let taskyModuleObserverV233=null;
 let taskyObserverBoundV233=false;
 let taskyRenderingNavV233=false;
+let taskySourceGenerationSeqV234=0;
+
+function taskySourceGenerationV234(source,selector){
+  if(!source)return '';
+  if(!source.dataset.taskySourceGenerationV234){
+    source.dataset.taskySourceGenerationV234=`${selector}::${++taskySourceGenerationSeqV234}`;
+  }
+  return source.dataset.taskySourceGenerationV234;
+}
 
 function taskyL233(ar,en){return lang==='ar'?ar:en}
 function taskyAppLabelV233(id){const a=TASKY_APPS_V233[id]||TASKY_APPS_V233.work;return lang==='ar'?a.ar:a.en}
@@ -17010,7 +17142,7 @@ function taskyIconV233(text){
   for(const [rx,icon] of ICON_RULES_V233)if(rx.test(String(text||'')))return icon;
   return 'i-file';
 }
-function taskySvgV233(icon){return `<svg><use href="#${icon||'i-file'}"/></svg>`}
+function taskySvgV233(icon){return `<svg class="tasky-native-icon-v234" aria-hidden="true"><use href="#${icon||'i-file'}"/></svg>`}
 function taskyRowV233(label,icon,onclick,active=false,extra=''){
   return `<button type="button" class="tasky-nav-row-v233 ${active?'active':''}" ${extra||''} onclick="${onclick}">
     ${taskySvgV233(icon)}<span class="txt">${escapeHtml(String(label||''))}</span>
@@ -17034,17 +17166,39 @@ function taskyAfterNavV233(){
    runs without a module rerender. */
 function taskyRestoreMovedTabsV233(){
   const moved=[...document.querySelectorAll('#mainNav .tasky-native-tab-v233[data-v233-source]')];
-  const bySource=new Map();
+  const groups=new Map();
+
   moved.forEach(btn=>{
-    const sel=btn.dataset.v233Source;
-    if(!bySource.has(sel))bySource.set(sel,[]);
-    bySource.get(sel).push(btn);
+    const sel=btn.dataset.v233Source||'';
+    const generation=btn.dataset.taskySourceGenerationV234||'';
+    const key=`${sel}@@${generation}`;
+    if(!groups.has(key))groups.set(key,{sel,generation,buttons:[]});
+    groups.get(key).buttons.push(btn);
   });
-  for(const [sel,buttons] of bySource){
+
+  for(const {sel,generation,buttons} of groups.values()){
     const source=document.querySelector(`#moduleArea ${sel}`);
     if(!source)continue;
-    buttons.sort((a,b)=>Number(a.dataset.v233Order||0)-Number(b.dataset.v233Order||0))
+
+    /*
+      Restore only when this is literally the same source generation.
+      If renderModule() replaced the source DOM, the new source either has no
+      generation token or a different one. In that case the old moved buttons
+      must be discarded with the old sidebar — never appended to the fresh
+      source, otherwise duplicates accumulate after every click.
+    */
+    if(!generation || source.dataset.taskySourceGenerationV234!==generation)continue;
+
+    const liveButtons=[...source.children].filter(x=>x.tagName==='BUTTON');
+    const sameGeneration=liveButtons.every(
+      b=>b.dataset.taskySourceGenerationV234===generation
+    );
+    if(!sameGeneration)continue;
+
+    buttons
+      .sort((a,b)=>Number(a.dataset.v233Order||0)-Number(b.dataset.v233Order||0))
       .forEach(btn=>source.appendChild(btn));
+
     source.classList.remove('tasky-native-source-empty-v233','tasky-native-source-promoted-v233');
   }
 }
@@ -17068,10 +17222,11 @@ function taskyResumeObserverV233(){
 function taskyOriginalLabelV233(btn){
   return btn.dataset.v233OriginalLabel || String(btn.textContent||'').replace(/\s+/g,' ').trim();
 }
-function taskyDecorateNativeV233(btn,{label=null,icon=null,primary=true,source,order}){
+function taskyDecorateNativeV233(btn,{label=null,icon=null,primary=true,source,order,generation=''}){
   if(!btn.dataset.v233OriginalLabel)btn.dataset.v233OriginalLabel=String(btn.textContent||'').replace(/\s+/g,' ').trim();
   btn.dataset.v233Source=source;
   btn.dataset.v233Order=String(order);
+  btn.dataset.taskySourceGenerationV234=generation||'';
   btn.classList.add('tasky-native-tab-v233');
   btn.classList.toggle('tasky-native-primary-v233',!!primary);
 
@@ -17095,20 +17250,35 @@ function taskySourceButtonsV233(selector){
 function taskyMoveButtonsV233(slot,selector,orderedButtons,options={}){
   const source=document.querySelector(`#moduleArea ${selector}`);
   if(!slot||!source||!orderedButtons.length)return false;
+
+  const generation=taskySourceGenerationV234(source,selector);
+
+  /* Mark every live button in this source generation, including HR buttons
+     that remain in the hidden source while another group is expanded. */
+  [...source.children]
+    .filter(x=>x.tagName==='BUTTON')
+    .forEach(btn=>btn.dataset.taskySourceGenerationV234=generation);
+
   orderedButtons.forEach((item,visualIndex)=>{
     const btn=item.btn||item;
     const sourceIndex=Number(item.sourceIndex ?? [...source.children].indexOf(btn));
+
     taskyDecorateNativeV233(btn,{
       label:item.label||null,
       icon:item.icon||null,
       primary:item.primary!==false,
       source:selector,
-      order:sourceIndex>=0?sourceIndex:visualIndex
+      order:sourceIndex>=0?sourceIndex:visualIndex,
+      generation
     });
+
     slot.appendChild(btn);
   });
+
   source.classList.add('tasky-native-source-promoted-v233');
-  if(![...source.children].some(x=>x.tagName==='BUTTON'))source.classList.add('tasky-native-source-empty-v233');
+  if(![...source.children].some(x=>x.tagName==='BUTTON')){
+    source.classList.add('tasky-native-source-empty-v233');
+  }
   return true;
 }
 
@@ -17593,6 +17763,47 @@ window.taskyV233Audit=function(){
 console.info('Tasky build V233 — native DOM navigation');
 </script>
 
+
+
+<script id="tasky-v234-diagnostics-js">
+window.taskyV234Audit=function(){
+  const nav=document.getElementById('mainNav');
+  const rows=[...(nav?.querySelectorAll('button,a.project-item')||[])];
+  const labels=rows.map(x=>String(x.textContent||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+  const duplicates=[...new Set(labels.filter((x,i,a)=>a.indexOf(x)!==i))];
+
+  const giantIcons=[...(nav?.querySelectorAll('svg')||[])]
+    .map(svg=>({svg,w:svg.getBoundingClientRect().width,h:svg.getBoundingClientRect().height}))
+    .filter(x=>x.w>28||x.h>28)
+    .map(x=>({w:Math.round(x.w),h:Math.round(x.h)}));
+
+  const sources=[...document.querySelectorAll(
+    '#moduleArea .hr72-tabs,#moduleArea .crm-tabs,#moduleArea .req150-tabs,#moduleArea .exp160-tabs,#moduleArea .book140-tabs,#moduleArea .meet10622-tabs,#moduleArea .surv-tabs'
+  )].map(source=>({
+    className:source.className,
+    generation:source.dataset.taskySourceGenerationV234||'',
+    buttonCount:[...source.children].filter(x=>x.tagName==='BUTTON').length
+  }));
+
+  return {
+    build:window.TASKY_BUILD,
+    app:typeof taskyCurrentAppV233!=='undefined'?taskyCurrentAppV233:null,
+    activeNav:typeof activeNav!=='undefined'?activeNav:null,
+    sidebar:{
+      clientHeight:nav?.clientHeight||0,
+      scrollHeight:nav?.scrollHeight||0,
+      scrollable:!!nav && nav.scrollHeight>nav.clientHeight,
+      scrollTop:nav?.scrollTop||0
+    },
+    duplicateLabels:duplicates,
+    giantIcons,
+    sources
+  };
+};
+
+window.TASKY_BUILD='V234';
+console.info('Tasky build V234 — generation-safe native navigation + fixed sidebar UI');
+</script>
 
 </body>
 </html>
