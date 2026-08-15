@@ -3496,7 +3496,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V237',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V238',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3580,9 +3580,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V237',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V238',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V237'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V238'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10621,7 +10621,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;let session=null;try{session=(await sb.auth.getSession()).data?.session;}catch(_){}if(!session?.user?.id)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V237',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;let session=null;try{session=(await sb.auth.getSession()).data?.session;}catch(_){}if(!session?.user?.id)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V238',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -18123,7 +18123,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyConnectedHealthV235=function(){
     return {
-      build:'V237',
+      build:'V238',
       contract:'CP1',
       workspace_id:currentWorkspaceId||null,
       active_nav:activeNav||null,
@@ -18192,10 +18192,10 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyDocumentsOpenEditorV237=function(id=null,type='letter'){const doc=id?docsRowsV237.find(x=>String(x.id)===String(id)):null;docsEditorV237=doc?{...doc,approver_user_id:docsApprovalsV237.find(a=>String(a.document_id)===String(doc.id)&&a.status==='pending')?.approver_user_id||'',metadata:doc.metadata||{}}:defaultEditor237(type);docsViewV237='create';if(activeNav!=='documents')setActiveNav('documents');else{renderNav();renderModule()}};
   window.taskyDocumentsSetViewV237=function(view,event){event?.preventDefault?.();event?.stopPropagation?.();docsViewV237=view;if(view==='create'&&!docsEditorV237)docsEditorV237=defaultEditor237();if(activeNav!=='documents')setActiveNav('documents');else{renderNav();renderModule()}try{taskyAfterNavV233()}catch(_){}return false};
 
-  function docsNav237(nav){[['home','الرئيسية','Home','i-home'],['create','إنشاء مستند','Create document','i-file'],['letters','الخطابات الرسمية','Official letters','i-mail'],['templates','القوالب والورق الرسمي','Templates & letterhead','i-layers'],['drafts','المسودات','Drafts','i-file'],['approvals','بانتظار الاعتماد','Pending approval','i-check'],['signing','بانتظار التوقيع','Pending signature','i-pen'],['assets','التوقيعات والأختام','Signatures & seals','i-shield'],['archive','الأرشيف','Archive','i-download'],['settings','الإعدادات','Settings','i-settings']].forEach(r=>nav.insertAdjacentHTML('beforeend',taskyRowV233(lang==='ar'?r[1]:r[2],r[3],`taskyDocumentsSetViewV237('${r[0]}',event);return false`,docsViewV237===r[0])))}
+  function docsNav237(nav){[['home','الرئيسية','Home','i-home'],['create','إنشاء مستند','Create document','i-file'],['letters','الخطابات الرسمية','Official letters','i-mail'],['templates','القوالب والورق الرسمي','Templates & letterhead','i-layers'],['drafts','المسودات','Drafts','i-file'],['approvals','بانتظار الاعتماد','Pending approval','i-check'],['signing','بانتظار التوقيع','Pending signature','i-pen'],['assets','التوقيعات والأختام','Signatures & seals','i-shield'],['archive','الأرشيف','Archive','i-download'],['settings','إعدادات المستندات','Documents Settings','i-settings']].forEach(r=>nav.insertAdjacentHTML('beforeend',taskyRowV233(lang==='ar'?r[1]:r[2],r[3],`taskyDocumentsSetViewV237('${r[0]}',event);return false`,docsViewV237===r[0])))}
   const baseAppNavV237=taskyRenderAppNavV233;taskyRenderAppNavV233=function(nav){if(taskyCurrentAppV233==='documents'){docsNav237(nav);return}return baseAppNavV237(nav)};
   const baseLandingV237=taskyLandingModuleV233;taskyLandingModuleV233=function(appId){if(appId==='documents')return 'documents';return baseLandingV237(appId)};
-  const baseCurrentLabelV237=taskyCurrentLabelV233;taskyCurrentLabelV233=function(){if(taskyCurrentAppV233==='documents'&&activeNav==='documents'){const map={home:['الرئيسية','Home'],create:['إنشاء مستند','Create document'],letters:['الخطابات الرسمية','Official letters'],templates:['القوالب والورق الرسمي','Templates & letterhead'],drafts:['المسودات','Drafts'],approvals:['بانتظار الاعتماد','Pending approval'],signing:['بانتظار التوقيع','Pending signature'],assets:['التوقيعات والأختام','Signatures & seals'],archive:['الأرشيف','Archive'],settings:['الإعدادات','Settings']};const x=map[docsViewV237]||map.home;return lang==='ar'?x[0]:x[1]}return baseCurrentLabelV237()};
+  const baseCurrentLabelV237=taskyCurrentLabelV233;taskyCurrentLabelV233=function(){if(taskyCurrentAppV233==='documents'&&activeNav==='documents'){const map={home:['الرئيسية','Home'],create:['إنشاء مستند','Create document'],letters:['الخطابات الرسمية','Official letters'],templates:['القوالب والورق الرسمي','Templates & letterhead'],drafts:['المسودات','Drafts'],approvals:['بانتظار الاعتماد','Pending approval'],signing:['بانتظار التوقيع','Pending signature'],assets:['التوقيعات والأختام','Signatures & seals'],archive:['الأرشيف','Archive'],settings:['إعدادات المستندات','Documents Settings']};const x=map[docsViewV237]||map.home;return lang==='ar'?x[0]:x[1]}return baseCurrentLabelV237()};
 
   function modeBanner237(){return docsBackendV237==='db'?`<div class="docs237-mode db">✓ ${L237('متصل بقاعدة بيانات مساحة العمل — المستندات مشتركة بين الفريق حسب الصلاحيات.','Connected to workspace database — documents are shared according to permissions.')}</div>`:`<div class="docs237-mode local">⚠ ${L237('وضع محلي مؤقت: شغّل ملف SQL المرفق لتفعيل المزامنة بين أعضاء الفريق والتوقيعات والاعتمادات المشتركة.','Temporary local mode: run the included SQL to enable team-synced documents, signatures and approvals.')}</div>`}
   function pageConfig237(tpl){return{accent:tpl?.config?.accent||'#82AF21',show_logo:tpl?.config?.show_logo!==false,logo_position:tpl?.config?.logo_position||'start',header:lang==='ar'?(tpl?.config?.header_ar||currentWorkspaceName||''):(tpl?.config?.header_en||currentWorkspaceName||''),subtitle:lang==='ar'?(tpl?.config?.subtitle_ar||''):(tpl?.config?.subtitle_en||''),footer:lang==='ar'?(tpl?.config?.footer_ar||''):(tpl?.config?.footer_en||''),margin:Number(tpl?.config?.page_margin_mm||18)}}
@@ -18244,8 +18244,111 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   clearInterval(docsRefreshTimerV237);docsRefreshTimerV237=setInterval(()=>{if(activeNav==='documents'&&docsBackendV237==='db'&&document.visibilityState==='visible'&&navigator.onLine)load237({force:true})},25000);
 
   try{taskyRenderAppSwitcherV233();taskyRenderNavV233()}catch(_){}
-  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V237',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
+  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V238',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
   window.TASKY_BUILD='V237';console.info('Tasky build V237 — Tasky Documents');
+})();
+</script>
+
+
+<script id="tasky-v238-app-settings-labels-js">
+(function(){
+  const APP_SETTINGS_LABELS_V238={
+    work:{ar:'إعدادات إدارة العمل',en:'Work Settings'},
+    marketing:{ar:'إعدادات التسويق',en:'Marketing Settings'},
+    hr:{ar:'إعدادات الموارد البشرية',en:'HR Settings'},
+    sales:{ar:'إعدادات المبيعات والعملاء',en:'CRM Settings'},
+    requests:{ar:'إعدادات الطلبات',en:'Requests Settings'},
+    bookings:{ar:'إعدادات الحجوزات',en:'Bookings Settings'},
+    inventory:{ar:'إعدادات المخزون',en:'Inventory Settings'},
+    procurement:{ar:'إعدادات المشتريات والموردين',en:'Procurement Settings'},
+    events:{ar:'إعدادات الفعاليات',en:'Events Settings'},
+    finance:{ar:'إعدادات الميزانيات',en:'Finance Settings'},
+    meetings:{ar:'إعدادات الاجتماعات',en:'Meetings Settings'},
+    connect:{ar:'إعدادات التواصل',en:'Connect Settings'},
+    analytics:{ar:'إعدادات التحليلات',en:'Analytics Settings'},
+    reports:{ar:'إعدادات التقارير',en:'Reports Settings'},
+    surveys:{ar:'إعدادات الاستبيانات',en:'Surveys Settings'},
+    integrations:{ar:'إعدادات التكاملات',en:'Integrations Settings'},
+    documents:{ar:'إعدادات المستندات',en:'Documents Settings'}
+  };
+
+  function normalizedSettingsV238(value){
+    return String(value||'').replace(/\s+/g,' ').trim().toLocaleLowerCase();
+  }
+
+  function isGenericAppSettingsV238(value){
+    const n=normalizedSettingsV238(value);
+    return [
+      'الإعدادات',
+      'اعدادات',
+      'الإعدادات العامة',
+      'اعدادات عامة',
+      'settings',
+      'general settings'
+    ].includes(n);
+  }
+
+  window.taskyAppSettingsLabelV238=function(appId=taskyCurrentAppV233){
+    const item=APP_SETTINGS_LABELS_V238[appId]||null;
+    if(!item)return lang==='ar'?'إعدادات التطبيق':'App Settings';
+    return lang==='ar'?item.ar:item.en;
+  };
+
+  /*
+    Native module tabs are the app-level rows promoted into the sidebar by
+    V233/V234. Rename only generic "Settings" rows here.
+
+    The Account section is rendered separately by taskySharedHtmlV233(), so its
+    global "الإعدادات / Settings" row intentionally remains unchanged.
+  */
+  if(typeof taskyDecorateNativeV233==='function'){
+    const baseDecorateNativeV238=taskyDecorateNativeV233;
+    taskyDecorateNativeV233=function(btn,options={}){
+      const original=options.label||taskyOriginalLabelV233(btn);
+      if(isGenericAppSettingsV238(original)){
+        options={...options,label:taskyAppSettingsLabelV238(taskyCurrentAppV233),icon:'i-settings'};
+      }
+      return baseDecorateNativeV238(btn,options);
+    };
+  }
+
+  /*
+    Some app rows can be rendered directly rather than promoted from native
+    tabs. Normalize only direct rows whose action is NOT the global account
+    route setActiveNav('settings').
+  */
+  if(typeof taskyRowV233==='function'){
+    const baseRowV238=taskyRowV233;
+    taskyRowV233=function(label,icon,onclick,active=false,extra=''){
+      const isAccountSettings=String(onclick||'').includes("setActiveNav('settings')");
+      if(!isAccountSettings&&isGenericAppSettingsV238(label)){
+        label=taskyAppSettingsLabelV238(taskyCurrentAppV233);
+        icon='i-settings';
+      }
+      return baseRowV238(label,icon,onclick,active,extra);
+    };
+  }
+
+  try{
+    taskyRenderNavV233();
+    taskySyncBreadcrumbV233();
+  }catch(_){}
+
+  window.taskySettingsLabelAuditV238=function(){
+    const app=taskyCurrentAppV233;
+    const rows=[...document.querySelectorAll('#mainNav button')].map(x=>String(x.textContent||'').replace(/\s+/g,' ').trim());
+    const accountLabel=lang==='ar'?'الإعدادات':'Settings';
+    return {
+      build:'V238',
+      app,
+      expected_app_settings:taskyAppSettingsLabelV238(app),
+      app_settings_rows:rows.filter(x=>/إعدادات|settings/i.test(x)),
+      account_settings_preserved:rows.includes(accountLabel)
+    };
+  };
+
+  window.TASKY_BUILD='V238';
+  console.info('Tasky build V238 — app-specific settings labels');
 })();
 </script>
 
