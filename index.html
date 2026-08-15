@@ -2796,6 +2796,18 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
 }
 </style>
 
+
+<style id="tasky-v225-subsections-clean-css">
+.tasky-live-inner-wrap-v225 > button{
+  justify-content:flex-start !important;
+}
+.tasky-live-inner-wrap-v225 > button > span{
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+</style>
+
 </head>
 <body>
 <div id="taskyBootV83" role="status" aria-live="polite">
@@ -17306,76 +17318,109 @@ console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
 </script>
 
 
-<script id="tasky-v224-live-subsections-runtime-js">
+
+<script id="tasky-v225-live-subsections-runtime-js">
 (function(){
-  const ICONS_V224=[
-    [/موظف|employees?|staff|people/i,'i-users'],
-    [/وقت|دوام|حضور|إجاز|attendance|leave|time/i,'i-clock'],
-    [/دورة حياة|lifecycle|onboard|offboard/i,'i-cycle'],
-    [/أداء|performance|kpi/i,'i-chart'],
-    [/مزايا|benefit|compensation/i,'i-gift'],
-    [/تقارير|reports?/i,'i-chart'],
-    [/إجراء|procedure|workflow/i,'i-check'],
-    [/أرش|archive|document/i,'i-file'],
-    [/تقييم|evaluation|assessment/i,'i-star'],
-    [/جاهزية|readiness|launch/i,'i-shield'],
-    [/رواتب|payroll|salary/i,'i-wallet'],
-    [/توظيف|recruit/i,'i-user-plus'],
-    [/تدريب|learning|training/i,'i-book'],
-    [/طلبات|requests?/i,'i-inbox'],
-    [/عملاء محتمل|leads?/i,'i-user-plus'],
-    [/خط المبيعات|pipeline/i,'i-chart'],
-    [/عروض|quotation|quotes?/i,'i-file'],
-    [/فواتير|تحصيل|invoice|collection/i,'i-wallet'],
-    [/عملاء|customers?/i,'i-users'],
-    [/متابعات|activities|follow/i,'i-check'],
-    [/إعدادات|settings?/i,'i-settings'],
-    [/محتوى|content/i,'i-file'],
-    [/تقويم|calendar/i,'i-calendar'],
-    [/تحليل|analytics?/i,'i-chart'],
-    [/مخزون|inventory/i,'i-box'],
-    [/مورد|vendor|supplier/i,'i-users'],
-    [/ميزاني|budget|finance/i,'i-wallet'],
-    [/فعاليات|events?/i,'i-calendar'],
-    [/المزيد|more/i,'i-more']
+  const ICONS_V225=[
+    [/^الموظفون$|^employees$/i,'i-users'],
+    [/الوقت والإجازات|time\s*&\s*leave/i,'i-clock'],
+    [/دورة حياة الموظف|employee lifecycle/i,'i-cycle'],
+    [/الأداء والمزايا|performance\s*&\s*benefits/i,'i-chart'],
+    [/^التقارير$|^reports$/i,'i-chart'],
+    [/^المزيد$|^more$/i,'i-more'],
+    [/تجربة الموظف|employee experience/i,'i-heart'],
+    [/الحضور والدوام|attendance/i,'i-clock'],
+    [/الإجراءات والأرشفة|procedures?\s*&\s*archive/i,'i-file'],
+    [/التقييم والجاهزية|evaluation\s*&\s*readiness/i,'i-shield'],
+    [/الرواتب|payroll/i,'i-wallet'],
+    [/التوظيف|recruitment/i,'i-user-plus'],
+    [/التدريب|training/i,'i-book']
   ];
 
-  const STRONG_V224=/موظف|وقت|دوام|حضور|إجاز|دورة حياة|أداء|مزايا|تقارير|إجراء|أرش|تقييم|جاهزية|رواتب|توظيف|تدريب|employees?|attendance|leave|lifecycle|performance|benefits?|reports?|procedures?|archive|evaluation|readiness|payroll|recruit/i;
-  const EXCLUDE_V224='.view-tabs,.mkt-view-toggle,.settings-nav,.mode-toggle,.bplan-toggle,.pricing-model-switch,.crm-tabs,.board-header,.topbar,.platform-tabs';
-  let observerV224=null;
-  let lastNavV224='';
+  /* These are navigation sections — NOT quick actions. */
+  const HR_SECTION_LABELS_V225=[
+    /^(الموظفون|Employees)$/i,
+    /^(الوقت والإجازات|Time\s*&\s*Leave)$/i,
+    /^(دورة حياة الموظف|Employee Lifecycle)$/i,
+    /^(الأداء والمزايا|Performance\s*&\s*Benefits)$/i,
+    /^(التقارير|Reports)$/i,
+    /^(المزيد|More)$/i,
+    /^(الحضور والدوام|Attendance)$/i,
+    /^(الإجراءات والأرشفة|Procedures?\s*&\s*Archive)$/i,
+    /^(التقييم والجاهزية|Evaluation\s*&\s*Readiness)$/i,
+    /^(الرواتب|Payroll)$/i,
+    /^(التوظيف|Recruitment)$/i,
+    /^(التدريب|Training)$/i
+  ];
 
-  function iconForV224(text){
-    for(const [rx,id] of ICONS_V224)if(rx.test(text))return id;
+  const QUICK_ACTION_V225=
+    /موظف جديد|new employee|طلب إجازة|leave request|تسجيل حضور|check.?in|إضافة عقد|add contract|onboarding|طلب hr|hr request|إضافة ملف|سجل طلب سريع|حضور أو غياب|عقد أو وثيقة|تهيئة موظف جديد/i;
+
+  let observerV225=null;
+  let lastModuleV225='';
+
+  function cleanTextV225(btn){
+    return (btn.textContent||'').replace(/\s+/g,' ').trim();
+  }
+  function iconForV225(text){
+    for(const [rx,id] of ICONS_V225)if(rx.test(text))return id;
     return 'i-grid';
   }
-
-  function directButtonsV224(el){
+  function directButtonsV225(el){
     return [...el.children].filter(x=>x.tagName==='BUTTON');
   }
+  function isHrSectionLabelV225(text){
+    return HR_SECTION_LABELS_V225.some(rx=>rx.test(text));
+  }
+  function isQuickActionButtonV225(btn){
+    const text=cleanTextV225(btn);
+    if(QUICK_ACTION_V225.test(text))return true;
 
-  function scoreV224(el){
-    if(!el || el.matches(EXCLUDE_V224) || el.closest('.tasky-live-inner-wrap-v224'))return -1;
-    const btns=directButtonsV224(el);
-    if(btns.length<3 || btns.length>12)return -1;
-    const labels=btns.map(b=>(b.textContent||'').replace(/\s+/g,' ').trim()).filter(Boolean);
-    if(labels.length<3)return -1;
-    const strong=labels.filter(x=>STRONG_V224.test(x)).length;
-    return strong>=2 ? strong*10+labels.length : -1;
+    /* Quick actions usually carry a title + helper description.
+       Functional section tabs are intentionally concise. */
+    const nestedText=[...btn.querySelectorAll('small,p,span')].map(x=>(x.textContent||'').trim()).filter(Boolean);
+    if(nestedText.length>=2 && text.length>24)return true;
+    if(text.length>34)return true;
+    return false;
   }
 
-  function findSourceV224(){
+  function scoreSourceV225(el){
+    if(!el || el.closest('.tasky-live-inner-wrap-v224,.tasky-live-inner-wrap-v225'))return -1;
+    const btns=directButtonsV225(el);
+    if(btns.length<3 || btns.length>12)return -1;
+
+    const labels=btns.map(cleanTextV225).filter(Boolean);
+    if(labels.length<3)return -1;
+
+    /* Explicitly reject quick-action collections. */
+    const quick=btns.filter(isQuickActionButtonV225).length;
+    if(quick>=Math.ceil(btns.length/2))return -1;
+
+    if(activeNav==='hr'){
+      const sectionMatches=labels.filter(isHrSectionLabelV225).length;
+      if(sectionMatches<3)return -1;
+      return 100 + sectionMatches*10 - quick;
+    }
+
+    /* For other modules, only accept clearly tab-like wrappers. */
+    const tabish = el.matches('[role="tablist"],.tabs,.module-tabs,.section-tabs,.hr-tabs') ||
+                   btns.filter(b=>b.getAttribute('role')==='tab'||b.hasAttribute('aria-selected')).length>=2;
+    return tabish ? 40 + labels.length : -1;
+  }
+
+  function findSourceV225(){
     const area=document.getElementById('moduleArea');
     if(!area || ['home','tasks','settings','billing','support'].includes(activeNav))return null;
+
     let best=null,bestScore=-1;
     for(const el of area.querySelectorAll('div,nav,section')){
-      const s=scoreV224(el);
+      const s=scoreSourceV225(el);
       if(s>bestScore){best=el;bestScore=s}
     }
     return best;
   }
 
-  function navItemForV224(moduleId){
+  function navItemForV225(moduleId){
     const nav=document.getElementById('mainNav');
     if(!nav)return null;
     return [...nav.querySelectorAll('.nav-item')].find(el=>{
@@ -17384,42 +17429,55 @@ console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
     })||null;
   }
 
-  function removeOldWrapsV224(exceptModule=''){
-    document.querySelectorAll('.tasky-live-inner-wrap-v224').forEach(w=>{
-      if(!exceptModule || w.dataset.module!==exceptModule)w.remove();
-    });
-  }
+  function decorateButtonV225(btn){
+    if(btn.dataset.taskyDecoratedV225==='1')return;
+    btn.dataset.taskyDecoratedV225='1';
 
-  function decorateLiveButtonV224(btn){
-    if(btn.dataset.taskyLiveDecoratedV224==='1')return;
-    btn.dataset.taskyLiveDecoratedV224='1';
-    const label=(btn.textContent||'').replace(/\s+/g,' ').trim();
-    const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
-    svg.setAttribute('class','tasky-live-inner-icon-v224');
-    const use=document.createElementNS('http://www.w3.org/2000/svg','use');
-    use.setAttribute('href','#'+iconForV224(label));
-    svg.appendChild(use);
-    btn.insertBefore(svg,btn.firstChild);
+    /* Strip any helper description accidentally present; sidebar subsection is label only. */
+    const originalLabel=cleanTextV225(btn);
+    const matched=HR_SECTION_LABELS_V225.find(rx=>rx.test(originalLabel));
+    let label=originalLabel;
 
-    /* Do NOT preventDefault/stopPropagation.
-       The original button's click handler is the real module handler. */
+    if(activeNav==='hr' && matched){
+      /* Keep the concise title if the original button contains nested helper copy. */
+      const candidates=[...btn.querySelectorAll('b,strong,.title,.label,span')].map(x=>(x.textContent||'').replace(/\s+/g,' ').trim()).filter(Boolean);
+      label=candidates.find(x=>isHrSectionLabelV225(x)) || originalLabel;
+      btn.innerHTML='';
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','tasky-live-inner-icon-v224');
+      const use=document.createElementNS('http://www.w3.org/2000/svg','use');
+      use.setAttribute('href','#'+iconForV225(label));
+      svg.appendChild(use);
+      btn.appendChild(svg);
+      const span=document.createElement('span');
+      span.textContent=label;
+      btn.appendChild(span);
+    }else{
+      const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');
+      svg.setAttribute('class','tasky-live-inner-icon-v224');
+      const use=document.createElementNS('http://www.w3.org/2000/svg','use');
+      use.setAttribute('href','#'+iconForV225(label));
+      svg.appendChild(use);
+      btn.insertBefore(svg,btn.firstChild);
+    }
+
     btn.addEventListener('click',()=>{
-      setTimeout(()=>{
-        try{taskyPromoteInnerSectionsV224()}catch(_){}
-        try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
-      },20);
+      setTimeout(()=>taskyPromoteInnerSectionsV225(),20);
+      try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
     });
   }
 
-  function ensureExperienceInHrV224(wrap){
+  function ensureExperienceSectionV225(wrap){
     if(taskyCurrentAppV217!=='hr')return;
-    const expTop=navItemForV224('experience');
+
+    const expTop=navItemForV225('experience');
     if(expTop)expTop.classList.add('tasky-hide-experience-top-v224');
 
-    if(wrap.querySelector('[data-tasky-experience-v224="1"]'))return;
+    if(wrap.querySelector('[data-tasky-experience-v225="1"]'))return;
+
     const btn=document.createElement('button');
     btn.type='button';
-    btn.dataset.taskyExperienceV224='1';
+    btn.dataset.taskyExperienceV225='1';
     btn.className=activeNav==='experience'?'active':'';
     btn.innerHTML=`<svg class="tasky-live-inner-icon-v224"><use href="#i-heart"></use></svg><span>${lang==='ar'?'تجربة الموظف':'Employee Experience'}</span>`;
     btn.addEventListener('click',async()=>{
@@ -17429,98 +17487,96 @@ console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
     wrap.appendChild(btn);
   }
 
-  window.taskyPromoteInnerSectionsV224=function(){
+  window.taskyPromoteInnerSectionsV225=function(){
     const moduleId=activeNav==='experience'?'hr':activeNav;
-    const parent=navItemForV224(moduleId);
-
-    if(lastNavV224 && lastNavV224!==moduleId){
-      removeOldWrapsV224(moduleId);
-    }
-    lastNavV224=moduleId;
-
+    const parent=navItemForV225(moduleId);
     if(!parent)return;
 
-    /* If the module just rerendered, a fresh original tab strip will exist.
-       Move those real controls into a new sidebar wrapper. */
-    const source=findSourceV224();
+    if(lastModuleV225 && lastModuleV225!==moduleId){
+      document.querySelectorAll('.tasky-live-inner-wrap-v225').forEach(x=>x.remove());
+    }
+    lastModuleV225=moduleId;
+
+    const source=findSourceV225();
     if(source){
-      const buttons=directButtonsV224(source);
-      if(buttons.length>=3){
-        document.querySelectorAll(`.tasky-live-inner-wrap-v224[data-module="${moduleId}"]`).forEach(x=>x.remove());
+      const buttons=directButtonsV225(source).filter(btn=>!isQuickActionButtonV225(btn));
+
+      /* HR must only expose actual functional subsections. */
+      const navButtons=activeNav==='hr'
+        ? buttons.filter(btn=>isHrSectionLabelV225(cleanTextV225(btn)))
+        : buttons;
+
+      if(navButtons.length>=3){
+        document.querySelectorAll(`.tasky-live-inner-wrap-v225[data-module="${moduleId}"]`).forEach(x=>x.remove());
 
         const wrap=document.createElement('div');
-        wrap.className='tasky-live-inner-wrap-v224';
+        wrap.className='tasky-live-inner-wrap-v224 tasky-live-inner-wrap-v225';
         wrap.dataset.module=moduleId;
         wrap.innerHTML=`<div class="tasky-live-inner-title-v224">${lang==='ar'?(moduleId==='hr'?'أقسام الموارد البشرية':'أقسام التطبيق'):(moduleId==='hr'?'HR sections':'App sections')}</div>`;
 
-        /* MOVE the actual buttons — do not clone them. */
-        buttons.forEach(btn=>{
-          decorateLiveButtonV224(btn);
+        /* Move the actual section controls, never the quick-action controls. */
+        navButtons.forEach(btn=>{
+          decorateButtonV225(btn);
           wrap.appendChild(btn);
         });
 
         source.classList.add('tasky-original-tabs-host-v224');
         parent.insertAdjacentElement('afterend',wrap);
 
-        if(moduleId==='hr')ensureExperienceInHrV224(wrap);
+        if(moduleId==='hr')ensureExperienceSectionV225(wrap);
         return;
       }
     }
 
-    /* No fresh source means it was already moved. Keep the current live wrapper. */
-    const existing=document.querySelector(`.tasky-live-inner-wrap-v224[data-module="${moduleId}"]`);
-    if(existing && moduleId==='hr')ensureExperienceInHrV224(existing);
-
-    if(taskyCurrentAppV217!=='hr'){
-      const expTop=navItemForV224('experience');
-      expTop?.classList.remove('tasky-hide-experience-top-v224');
-    }
+    const existing=document.querySelector(`.tasky-live-inner-wrap-v225[data-module="${moduleId}"]`);
+    if(existing && moduleId==='hr')ensureExperienceSectionV225(existing);
   };
 
-  function queueV224(){
-    requestAnimationFrame(()=>setTimeout(taskyPromoteInnerSectionsV224,0));
+  function queueV225(){
+    requestAnimationFrame(()=>setTimeout(taskyPromoteInnerSectionsV225,0));
   }
 
-  if(typeof renderModule==='function'&&!window.__taskyRenderModuleV224){
-    window.__taskyRenderModuleV224=true;
+  if(typeof renderModule==='function'&&!window.__taskyRenderModuleV225){
+    window.__taskyRenderModuleV225=true;
     const base=renderModule;
     renderModule=function(...args){
       const result=base.apply(this,args);
-      queueV224();
+      queueV225();
       return result;
     };
   }
 
-  if(typeof setActiveNav==='function'&&!window.__taskySetActiveNavV224){
-    window.__taskySetActiveNavV224=true;
+  if(typeof setActiveNav==='function'&&!window.__taskySetActiveNavV225){
+    window.__taskySetActiveNavV225=true;
     const base=setActiveNav;
     setActiveNav=async function(...args){
       const result=await base.apply(this,args);
-      queueV224();
+      queueV225();
       return result;
     };
   }
 
-  function bindObserverV224(){
+  function bindObserverV225(){
     const area=document.getElementById('moduleArea');
     if(!area)return;
-    observerV224?.disconnect();
+    observerV225?.disconnect();
     let timer=0;
-    observerV224=new MutationObserver(()=>{
+    observerV225=new MutationObserver(()=>{
       clearTimeout(timer);
-      timer=setTimeout(taskyPromoteInnerSectionsV224,60);
+      timer=setTimeout(taskyPromoteInnerSectionsV225,60);
     });
-    observerV224.observe(area,{childList:true,subtree:true});
+    observerV225.observe(area,{childList:true,subtree:true});
   }
 
-  const start=()=>{bindObserverV224();queueV224()};
+  const start=()=>{bindObserverV225();queueV225()};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
 
-  window.TASKY_BUILD='V224';
-  console.info('Tasky build V224 — live internal section buttons');
+  window.TASKY_BUILD='V225';
+  console.info('Tasky build V225 — HR subsections only, quick actions excluded');
 })();
 </script>
+
 
 </body>
 </html>
