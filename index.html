@@ -2675,206 +2675,166 @@ html[dir="rtl"] #notifDropdown .notif-swipe-delete-v210{justify-content:flex-sta
 </style>
 
 
-<style id="tasky-v218-subnav-css">
-.tasky-app-subnav-v218{
-  display:flex;flex-direction:column;gap:3px;margin:2px 0 9px;padding:5px;
-  border-radius:11px;background:rgba(255,255,255,.025)
-}
-.tasky-app-subnav-head-v218{
-  padding:5px 7px 4px;color:#71836D;font-size:9.5px;font-weight:700
-}
-.tasky-app-subnav-item-v218{
-  width:100%;border:0;background:transparent;color:#AFC0AA;border-radius:9px;
-  padding:8px 9px;display:flex;align-items:center;gap:9px;text-align:start;
-  font-size:12px;cursor:pointer
-}
-.tasky-app-subnav-item-v218 svg{width:16px;height:16px;flex:none;opacity:.85}
-.tasky-app-subnav-item-v218:hover{background:rgba(255,255,255,.05);color:#fff}
-.tasky-app-subnav-item-v218.active{
-  background:rgba(255,255,255,.10);color:#fff;font-weight:800
-}
-.tasky-app-subnav-item-v218 .count{
-  margin-inline-start:auto;min-width:20px;height:20px;padding:0 6px;border-radius:999px;
-  background:rgba(255,255,255,.08);display:grid;place-items:center;font-size:9px;color:#AFC0AA
-}
-.tasky-app-subnav-item-v218.active .count{color:#fff;background:rgba(130,175,33,.2)}
+<style id="tasky-v230-navigation-css">
+/* ============================================================
+   TASKY V230 — APPLICATION + SUBSECTION NAVIGATION
+   The App Switcher already names the current app, so the sidebar
+   never repeats the app name as another group heading.
+   ============================================================ */
 
-.tasky-crm-toolbar-v218{justify-content:flex-end !important}
-.tasky-crm-toolbar-v218>input{width:min(420px,100%) !important}
-
-.tasky-missing-chunk-v218{
-  background:var(--card);border:1px solid var(--border);border-radius:18px;padding:28px;
-  max-width:720px;margin:24px auto;text-align:center
-}
-.tasky-missing-chunk-v218 .icon{
-  width:52px;height:52px;border-radius:16px;margin:0 auto 12px;background:var(--amber-tint);
-  color:#8A6510;display:grid;place-items:center
-}
-.tasky-missing-chunk-v218 .icon svg{width:24px;height:24px}
-.tasky-missing-chunk-v218 h3{font-size:17px;margin-bottom:7px}
-.tasky-missing-chunk-v218 p{font-size:12px;color:var(--muted);line-height:1.8;margin:0 auto;max-width:560px}
-.tasky-missing-chunk-v218 .chip-btn{margin:14px auto 0}
-
-@media(max-width:820px){
-  .tasky-app-subnav-item-v218{min-height:42px;font-size:12.5px}
-}
-</style>
-
-<style id="tasky-v224-live-subsections-css">
-/* V224 — use the REAL internal section buttons in the sidebar.
-   We move the original DOM controls instead of cloning them, so all native
-   module handlers and lazy-chunk closures remain intact. */
-.tasky-live-inner-wrap-v224{
+.tasky-suite-nav-v230{
   display:flex;
   flex-direction:column;
-  gap:3px;
-  margin:3px 0 10px;
-  padding:5px 4px 7px;
-  border-radius:11px;
-  background:rgba(255,255,255,.025);
+  gap:4px;
+  min-width:0;
 }
-.tasky-live-inner-title-v224{
-  padding:4px 8px 5px;
-  color:#71836D;
-  font-size:9.5px;
-  font-weight:700;
-}
-.tasky-live-inner-wrap-v224 > button{
-  width:100% !important;
-  min-height:41px !important;
-  margin:0 !important;
-  border:0 !important;
-  border-radius:9px !important;
-  background:transparent !important;
-  color:#AFC0AA !important;
-  padding:8px 9px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:flex-start !important;
-  gap:9px !important;
-  text-align:start !important;
-  font-size:12px !important;
-  cursor:pointer !important;
-  pointer-events:auto !important;
-  box-shadow:none !important;
-  transform:none !important;
-  position:relative;
-  z-index:2;
-}
-.tasky-live-inner-wrap-v224 > button:hover{
-  background:rgba(255,255,255,.055) !important;
-  color:#fff !important;
-}
-.tasky-live-inner-wrap-v224 > button.active,
-.tasky-live-inner-wrap-v224 > button[aria-selected="true"],
-.tasky-live-inner-wrap-v224 > button[data-active="true"]{
-  background:rgba(255,255,255,.105) !important;
-  color:#fff !important;
-  font-weight:800 !important;
-}
-.tasky-live-inner-icon-v224{
-  width:16px;
-  height:16px;
-  flex:none;
-  opacity:.9;
-  pointer-events:none;
-}
-.tasky-live-inner-wrap-v224 > button > *{
-  pointer-events:none;
-}
-.tasky-original-tabs-host-v224{
-  display:none !important;
-}
-#mainNav .tasky-hide-experience-top-v224{
-  display:none !important;
-}
-@media(max-width:820px){
-  .tasky-live-inner-wrap-v224 > button{
-    min-height:44px !important;
-    font-size:12.5px !important;
-  }
-}
-</style>
-
-
-<style id="tasky-v225-subsections-clean-css">
-.tasky-live-inner-wrap-v225 > button{
-  justify-content:flex-start !important;
-}
-.tasky-live-inner-wrap-v225 > button > span{
-  white-space:nowrap;
-  overflow:hidden;
-  text-overflow:ellipsis;
-}
-</style>
-
-<style id="tasky-v228-hr-subnav-css">
-/* HR app name is already shown in the App Switcher: hide duplicate group label. */
-#mainNav .tasky-hr-duplicate-heading-v228{display:none !important}
-
-/* Keep the real HR tabs alive for their original handlers, but remove them visually. */
-#moduleArea .hr72-tabs.tasky-hr-source-v228{
-  position:fixed !important;
-  inset:auto auto -10000px -10000px !important;
-  width:2px !important;
-  height:2px !important;
-  overflow:hidden !important;
-  opacity:.001 !important;
-  pointer-events:none !important;
-  margin:0 !important;
-  padding:0 !important;
-}
-
-/* Hide the old top-level Experience row while HR app is selected. */
-#mainNav .tasky-hide-exp-top-v228{display:none !important}
-
-.tasky-hr-subnav-v228{
-  display:flex;
-  flex-direction:column;
-  gap:3px;
-  margin:4px 0 10px;
-  padding:3px 4px 6px;
-  border-radius:11px;
-  background:rgba(255,255,255,.025);
-}
-.tasky-hr-subnav-v228 button{
+.tasky-suite-nav-v230 .tasky-suite-item-v230{
   width:100%;
-  min-height:42px;
+  min-height:43px;
   border:0;
-  border-radius:9px;
+  border-radius:10px;
   background:transparent;
   color:#AFC0AA;
-  padding:8px 9px;
+  padding:9px 11px;
   display:flex;
   align-items:center;
-  justify-content:flex-start;
   gap:9px;
   text-align:start;
-  font-size:12px;
+  font:inherit;
+  font-size:12.5px;
   cursor:pointer;
-  pointer-events:auto !important;
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
-.tasky-hr-subnav-v228 button:hover{background:rgba(255,255,255,.055);color:#fff}
-.tasky-hr-subnav-v228 button.active{
+.tasky-suite-nav-v230 .tasky-suite-item-v230:hover{
+  background:rgba(255,255,255,.055);
+  color:#fff;
+}
+.tasky-suite-nav-v230 .tasky-suite-item-v230.active{
   background:rgba(255,255,255,.105);
   color:#fff;
-  font-weight:800;
+  font-weight:850;
+  box-shadow:inset -3px 0 0 var(--green-bright);
 }
-.tasky-hr-subnav-v228 svg{
-  width:16px;height:16px;flex:none;opacity:.9;pointer-events:none
+html[dir="ltr"] .tasky-suite-nav-v230 .tasky-suite-item-v230.active{
+  box-shadow:inset 3px 0 0 var(--green-bright);
 }
-.tasky-hr-subnav-v228 .txt{
+.tasky-suite-nav-v230 .tasky-suite-item-v230 svg{
+  width:18px;height:18px;flex:none;opacity:.92;pointer-events:none
+}
+.tasky-suite-nav-v230 .tasky-suite-item-v230 .txt{
   min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none
 }
+.tasky-suite-nav-v230 .tasky-suite-item-v230 .chev{
+  width:13px;height:13px;margin-inline-start:auto;opacity:.55;transition:.15s
+}
+.tasky-suite-nav-v230 .tasky-suite-item-v230.expanded .chev{transform:rotate(90deg)}
+html[dir="rtl"] .tasky-suite-nav-v230 .tasky-suite-item-v230.expanded .chev{transform:rotate(-90deg)}
+
+.tasky-suite-children-v230{
+  margin:0 12px 5px;
+  padding-inline-start:10px;
+  border-inline-start:1px solid rgba(255,255,255,.09);
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.tasky-suite-child-v230{
+  width:100%;
+  min-height:36px;
+  border:0;
+  border-radius:8px;
+  background:transparent;
+  color:#8FA38B;
+  padding:7px 9px;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  text-align:start;
+  font:inherit;
+  font-size:10.7px;
+  cursor:pointer;
+  touch-action:manipulation;
+  -webkit-tap-highlight-color:transparent;
+}
+.tasky-suite-child-v230:hover{background:rgba(255,255,255,.045);color:#fff}
+.tasky-suite-child-v230.active{background:rgba(130,175,33,.13);color:#EAF1E6;font-weight:800}
+.tasky-suite-child-v230 svg{width:14px;height:14px;flex:none;opacity:.8;pointer-events:none}
+.tasky-suite-child-v230 .txt{min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;pointer-events:none}
+
+.tasky-suite-account-label-v230{
+  margin:15px 10px 4px;
+  padding-top:11px;
+  border-top:1px solid rgba(255,255,255,.065);
+  color:#71836D;
+  font-size:9.5px;
+  font-weight:750;
+}
+.tasky-suite-context-label-v230{
+  margin:7px 10px 2px;
+  color:#71836D;
+  font-size:9.2px;
+  font-weight:750;
+}
+.tasky-suite-projects-v230{
+  margin:0 10px 7px;
+  padding:5px 0 4px;
+  border-inline-start:1px solid rgba(255,255,255,.08);
+}
+.tasky-suite-projects-v230 .project-item{
+  min-height:33px;
+  cursor:pointer;
+}
+.tasky-suite-empty-v230{
+  color:#71836D;
+  font-size:9px;
+  padding:7px 12px;
+}
+
+/* Functional navigation has been promoted to the sidebar.
+   View-mode controls such as Board/List remain in content. */
+html.tasky-suite-ready-v230 #moduleArea .hr72-tabs,
+html.tasky-suite-ready-v230 #moduleArea .crm-tabs,
+html.tasky-suite-ready-v230 #moduleArea .req150-tabs,
+html.tasky-suite-ready-v230 #moduleArea .exp160-tabs,
+html.tasky-suite-ready-v230 #moduleArea .surv-tabs,
+html.tasky-suite-ready-v230 #moduleArea .book140-tabs.tasky-tabs-promoted-v230,
+html.tasky-suite-ready-v230 #moduleArea .meet10622-tabs.tasky-tabs-promoted-v230{
+  display:none !important;
+}
+
+/* Do NOT hide view-mode controls. */
+html.tasky-suite-ready-v230 #moduleArea .view-tabs,
+html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
+  display:flex;
+}
+
+/* Inline module failure instead of a platform-blocking dialog. */
+.tasky-module-missing-v230{
+  max-width:720px;
+  margin:28px auto;
+  padding:26px;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background:var(--card);
+  text-align:center;
+}
+.tasky-module-missing-v230 .icon{
+  width:50px;height:50px;border-radius:15px;margin:0 auto 12px;
+  display:grid;place-items:center;background:var(--amber-tint);color:#8A6510
+}
+.tasky-module-missing-v230 .icon svg{width:23px;height:23px}
+.tasky-module-missing-v230 h3{margin:0 0 7px;font-size:17px}
+.tasky-module-missing-v230 p{margin:0;color:var(--muted);font-size:11.5px;line-height:1.8}
 
 @media(max-width:820px){
-  .tasky-hr-subnav-v228{padding-bottom:10px}
-  .tasky-hr-subnav-v228 button{
-    min-height:46px;
-    font-size:13px;
-  }
+  .tasky-suite-nav-v230 .tasky-suite-item-v230{min-height:46px;font-size:13px}
+  .tasky-suite-child-v230{min-height:42px;font-size:11.5px}
+  .tasky-suite-children-v230{margin-inline:10px}
+}
+@media(max-height:560px) and (orientation:landscape){
+  .tasky-suite-nav-v230 .tasky-suite-item-v230{min-height:40px}
+  .tasky-suite-child-v230{min-height:36px}
 }
 </style>
 
@@ -9588,7 +9548,7 @@ function crmTemplate(){
   return `<div class="crm-shell">
     <div class="crm-head"><div><h2>${lang==='ar'?'العملاء والمبيعات':'Sales & Customers'}</h2><p>${lang==='ar'?'إدارة العملاء المحتملين، الفرص، العروض، المبيعات والتحصيل من مكان واحد.':'Manage leads, opportunities, quotations, sales and collections in one place.'}</p><span class="crm-head-role"><svg style="width:11px;height:11px"><use href="#i-shield"/></svg>${escapeHtml(crmRoleLabel(crmCurrentRole))}</span></div><div class="crm-head-actions"><button class="chip-btn" onclick="runCrmIntegrityAudit()">${lang==='ar'?'فحص الترابط':'Integrity check'}</button>${salesActions}</div></div>
     <div class="crm-kpis"><div><span>${lang==='ar'?'قيمة خط المبيعات':'Pipeline value'}</span><b>${crmCompactMoney(pipeline)}</b><small>${open.length} ${lang==='ar'?'فرصة مفتوحة':'open opportunities'}</small></div><div><span>${lang==='ar'?'التوقع المرجّح':'Weighted forecast'}</span><b>${crmCompactMoney(forecast)}</b><small>${lang==='ar'?'حسب احتمال كل مرحلة':'Based on stage probability'}</small></div><div><span>${lang==='ar'?'مبيعات محققة هذا الشهر':'Won this month'}</span><b>${crmCompactMoney(wonMonth)}</b><small>${crmSalesOrders.filter(x=>x.status==='confirmed').length} ${lang==='ar'?'عملية بيع مؤكدة إجمالًا':'confirmed sales total'}</small></div><div><span>${lang==='ar'?'متابعات متأخرة':'Overdue follow-ups'}</span><b>${overdue}</b><small>${lang==='ar'?'تحتاج إجراء':'Need action'}</small></div></div>
-    <div class="crm-toolbar tasky-crm-toolbar-v218"><input value="${escapeHtml(crmSearch)}" oninput="crmSearch=this.value;renderModule()" placeholder="${lang==='ar'?'بحث في العملاء والفرص...':'Search leads, customers and opportunities...'}"></div>
+    <div class="crm-toolbar"><div class="crm-tabs"><button class="${crmView==='leads'?'active':''}" onclick="setCrmView('leads')">${lang==='ar'?'العملاء المحتملون':'Leads'}${crmLeads.filter(x=>!['converted','unqualified'].includes(x.status)).length?` · ${crmLeads.filter(x=>!['converted','unqualified'].includes(x.status)).length}`:''}</button><button class="${crmView==='pipeline'?'active':''}" onclick="setCrmView('pipeline')">${lang==='ar'?'خط المبيعات':'Pipeline'}</button><button class="${crmView==='quotes'?'active':''}" onclick="setCrmView('quotes')">${lang==='ar'?'العروض والمبيعات':'Quotations & Sales'}${crmQuotes.filter(x=>['sent','viewed'].includes(x.status)).length?` · ${crmQuotes.filter(x=>['sent','viewed'].includes(x.status)).length}`:''}</button><button class="${crmView==='billing'?'active':''}" onclick="setCrmView('billing')">${lang==='ar'?'الفواتير والتحصيل':'Invoices & Collections'}${crmInvoices.filter(x=>x.status==='overdue').length?` · ${crmInvoices.filter(x=>x.status==='overdue').length}`:''}</button><button class="${crmView==='customers'?'active':''}" onclick="setCrmView('customers')">${lang==='ar'?'العملاء':'Customers'}</button><button class="${crmView==='activities'?'active':''}" onclick="setCrmView('activities')">${lang==='ar'?'المتابعات':'Activities'}</button>${settingsTab}${launchTab}</div><input value="${escapeHtml(crmSearch)}" oninput="crmSearch=this.value;renderModule()" placeholder="${lang==='ar'?'بحث في العملاء والفرص...':'Search leads, customers and opportunities...'}"></div>
     ${crmView==='launch86'?crm86Template():crmView==='settings'?crmSettingsHtml():crmView==='leads'?crmLeadsHtml():crmView==='quotes'?crmQuotationsHtml():crmView==='billing'?crmBillingHtml():crmView==='customers'?crmCustomersHtml():crmView==='activities'?crmActivitiesHtml():crmPipelineHtml()}
   </div>`;
 }
@@ -15434,7 +15394,7 @@ function taskyIntlFormatterV167(locale,options){
 <script id="tasky-v1681-lazy-loader-js">
 
 const TASKY_LAZY_CHUNKS_V1681={
-  hr:{url:'chunks/hr.js?v=1681',loaded:false,promise:null},
+  hr:{url:'chunks/hr.js?v=230',loaded:false,promise:null},
   meetings:{url:'chunks/meetings.js?v=1681',loaded:false,promise:null},
   brainstorm:{url:'chunks/brainstorm.js?v=1681',loaded:false,promise:null},
   bookings:{url:'chunks/bookings.js?v=1681',loaded:false,promise:null}
@@ -15452,12 +15412,18 @@ async function taskyLazyLoadChunkV1681(name){
   if(!c||c.loaded)return true;
   if(c.promise)return c.promise;
   c.promise=(async()=>{
-    try{await taskyLazyLoadScriptV1681(c.url);c.loaded=true;if(typeof renderNav==='function')renderNav();return true}
+    try{
+      await taskyLazyLoadScriptV1681(c.url);
+      if(name==='hr' && typeof setHrTabV72!=='function'){
+        throw new Error('HR chunk loaded without the expected HR API');
+      }
+      c.loaded=true;
+      if(typeof renderNav==='function')renderNav();
+      return true;
+    }
     catch(e){
       console.error('Tasky lazy chunk failed',name,e);
-      window.__taskyMissingChunkV218=window.__taskyMissingChunkV218||{};
-      window.__taskyMissingChunkV218[name]=true;
-      if(activeNav===name && typeof taskyRenderMissingChunkV218==='function')taskyRenderMissingChunkV218(name);
+      if(typeof taskyRenderMissingChunkV230==='function')taskyRenderMissingChunkV230(name,e);
       throw e;
     }finally{c.promise=null}
   })();
@@ -16886,94 +16852,140 @@ html[dir="rtl"] body .topbar > .topbar-right > .sidebar-toggle-btn{
 
 </style>
 
-<script id="tasky-v217-modular-suite-js">
-/* Tasky V217 — Modular Suite
-   Application visibility is derived from the workspace's existing V165 module
-   entitlements. No second subscription model is introduced. */
+
+<script id="tasky-v230-navigation-runtime-js">
+/* ============================================================
+   TASKY V230 — deterministic suite navigation
+   Built from the clean V217 base after auditing the real module
+   APIs and the lazy-loaded HR source.
+   ============================================================ */
+
 const TASKY_APPS_V217={
   work:{
     ar:'إدارة العمل',en:'Tasky Work',short:'W',color:'#82AF21',
-    modules:['home','tasks'],shared:['team'],landing:['home','tasks']
+    modules:['home','tasks'],availability:['home'],home:['home','tasks']
   },
   marketing:{
     ar:'التسويق',en:'Tasky Marketing',short:'M',color:'#4A8BAA',
-    modules:['campaigns','content','media'],shared:[],landing:['campaigns','content','media']
+    modules:['campaigns','content'],availability:['campaigns','content'],home:['campaigns','content']
   },
   hr:{
     ar:'الموارد البشرية',en:'Tasky HR',short:'HR',color:'#7F6AA8',
-    modules:['hr','experience'],shared:[],landing:['hr','experience']
+    modules:['hr','experience'],availability:['hr'],home:['hr']
   },
   sales:{
     ar:'المبيعات والعملاء',en:'Tasky CRM',short:'CRM',color:'#1F7A6C',
-    modules:['crm'],shared:[],landing:['crm']
+    modules:['crm'],availability:['crm'],home:['crm']
   },
-
-  /* Standalone operational apps */
   requests:{
     ar:'الطلبات',en:'Tasky Requests',short:'REQ',color:'#2F6485',
-    modules:['requests'],shared:[],landing:['requests']
+    modules:['requests'],availability:['requests'],home:['requests']
   },
   bookings:{
     ar:'الحجوزات',en:'Tasky Bookings',short:'BK',color:'#5A7A44',
-    modules:['bookings'],shared:[],landing:['bookings']
+    modules:['bookings'],availability:['bookings'],home:['bookings']
   },
   inventory:{
     ar:'المخزون',en:'Tasky Inventory',short:'INV',color:'#D9A441',
-    modules:['inventory'],shared:[],landing:['inventory']
+    modules:['inventory'],availability:['inventory'],home:['inventory']
   },
   procurement:{
     ar:'المشتريات والموردون',en:'Tasky Procurement',short:'PO',color:'#A87332',
-    modules:['vendors'],shared:[],landing:['vendors']
-  },
-  assets:{
-    ar:'الأصول',en:'Tasky Assets',short:'AST',color:'#66778A',
-    modules:['assets'],shared:[],landing:['assets']
+    modules:['vendors'],availability:['vendors'],home:['vendors']
   },
   events:{
     ar:'الفعاليات',en:'Tasky Events',short:'EV',color:'#5B4B8A',
-    modules:['events'],shared:[],landing:['events']
+    modules:['events'],availability:['events'],home:['events']
   },
   finance:{
     ar:'الميزانيات',en:'Tasky Finance',short:'FIN',color:'#2A6C2E',
-    modules:['budgets'],shared:[],landing:['budgets']
+    modules:['budgets'],availability:['budgets'],home:['budgets']
   },
   meetings:{
     ar:'الاجتماعات',en:'Tasky Meetings',short:'MTG',color:'#466C86',
-    modules:['meetings'],shared:[],landing:['meetings']
+    modules:['meetings'],availability:['meetings'],home:['meetings']
   },
   connect:{
     ar:'التواصل',en:'Tasky Connect',short:'CN',color:'#3E7086',
-    modules:['connect'],shared:[],landing:['connect']
-  },
-  comms:{
-    ar:'المراسلات',en:'Tasky Comms',short:'COM',color:'#526B7B',
-    modules:['comms'],shared:[],landing:['comms']
+    modules:['connect'],availability:['connect'],home:['connect']
   },
   analytics:{
     ar:'التحليلات',en:'Tasky Analytics',short:'BI',color:'#57687A',
-    modules:['analytics'],shared:[],landing:['analytics']
+    modules:['analytics'],availability:['analytics'],home:['analytics']
   },
   reports:{
     ar:'التقارير',en:'Tasky Reports',short:'RPT',color:'#69737A',
-    modules:['reports'],shared:[],landing:['reports']
+    modules:['reports'],availability:['reports'],home:['reports']
   },
   surveys:{
     ar:'الاستبيانات',en:'Tasky Surveys',short:'SV',color:'#846B92',
-    modules:['surveys'],shared:[],landing:['surveys']
+    modules:['surveys'],availability:['surveys'],home:['surveys']
   },
   integrations:{
     ar:'التكاملات',en:'Tasky Integrations',short:'API',color:'#52645B',
-    modules:['integrations'],shared:[],landing:['integrations']
+    modules:['integrations'],availability:['integrations'],home:['integrations']
   }
 };
 
+/* V90 explicitly removed the legacy local/demo Media, Comms and Asset Library
+   from launch navigation. V230 therefore does not advertise them as apps. */
+const TASKY_POST_LAUNCH_HIDDEN_APPS_V230=new Set(['media','comms','assets']);
+
 const TASKY_SHARED_MODULES_V217=new Set(['support','settings','billing','team']);
 let taskyCurrentAppV217='work';
+let taskyHrExpandedGroupV230='';
+const taskyDynamicSelectionV230={bookings:'',meetings:''};
 
-function taskyAppLabelV217(id){
-  const app=TASKY_APPS_V217[id]||TASKY_APPS_V217.work;
-  return lang==='ar'?app.ar:app.en;
-}
+const TASKY_HR_GROUPS_V230=[
+  {
+    key:'employees',ar:'الموظفون',en:'Employees',icon:'i-users',defaultTab:'employees',
+    tabs:['employees','org','documents']
+  },
+  {
+    key:'time',ar:'الوقت والإجازات',en:'Time & Leave',icon:'i-calendar',defaultTab:'attendance',
+    tabs:['attendance','leaves','calendar80']
+  },
+  {
+    key:'lifecycle',ar:'دورة حياة الموظف',en:'Employee Lifecycle',icon:'i-user-plus',defaultTab:'selfservice82',
+    tabs:['selfservice82','requests','onboarding','offboarding','changes']
+  },
+  {
+    key:'performance',ar:'الأداء والمزايا',en:'Performance & Benefits',icon:'i-chart',defaultTab:'performance',
+    tabs:['performance','compensation','benefits83','expenses84','training']
+  },
+  {
+    key:'reports',ar:'التقارير',en:'Reports',icon:'i-download',defaultTab:'analytics',
+    tabs:['analytics','workforce']
+  },
+  {
+    key:'more',ar:'المزيد',en:'More',icon:'i-layers',defaultTab:'recruitment',
+    tabs:['recruitment','surveys','cases','assets','automation79','permissions','launch85']
+  }
+];
+
+const TASKY_CRM_VIEWS_V230=[
+  ['leads','العملاء المحتملون','Leads','i-user-plus'],
+  ['quotes','العروض والمبيعات','Quotations & Sales','i-file'],
+  ['billing','الفواتير والتحصيل','Invoices & Collections','i-wallet'],
+  ['customers','العملاء','Customers','i-users'],
+  ['activities','المتابعات','Activities','i-check'],
+  ['settings','إعدادات CRM','CRM Settings','i-settings']
+];
+
+const TASKY_GENERIC_ICONS_V230=[
+  [/طلب|request/i,'i-inbox'],[/موافق|approval/i,'i-check'],[/أصل|asset/i,'i-layers'],
+  [/معرفة|knowledge/i,'i-file'],[/مشاكل|problem|change/i,'i-shield'],[/عميل|customer/i,'i-users'],
+  [/SLA/i,'i-clock'],[/أتمت|automation/i,'i-settings'],[/تقرير|report/i,'i-chart'],
+  [/إعداد|setting/i,'i-settings'],[/محفظ|wallet|spend/i,'i-wallet'],[/غداء|قهوة|meal|coffee/i,'i-inbox'],
+  [/كوبون|خصم|benefit/i,'i-spark'],[/تذاكر|ticket/i,'i-file'],[/منتج|خدمات|marketplace/i,'i-box'],
+  [/تحد|challenge/i,'i-flag'],[/اقتراح|idea/i,'i-spark'],[/بطاقات|card/i,'i-file'],
+  [/تهيئة|onboarding/i,'i-user-plus'],[/سؤال|question/i,'i-file'],[/منطق|logic/i,'i-chart'],
+  [/توزيع|distribution/i,'i-users'],[/ردود|response/i,'i-inbox'],[/تحليل|analytics/i,'i-chart'],
+  [/حجز|booking/i,'i-calendar'],[/اجتماع|meeting/i,'i-camera']
+];
+
+function taskyL230(ar,en){return lang==='ar'?ar:en}
+
 function taskyModuleEnabledForWorkspaceV217(id){
   try{
     if(TASKY_MODULE_CATALOG_V165?.[id]?.essential)return true;
@@ -16981,23 +16993,18 @@ function taskyModuleEnabledForWorkspaceV217(id){
   }catch(_){}
   return true;
 }
+
 function taskyAppAvailableV217(id){
   const app=TASKY_APPS_V217[id];
   if(!app)return false;
-  /* Work is a real app only when Tasks/Projects is part of the workspace,
-     except legacy workspaces where V165 is not enforced yet. */
-  if(id==='work'){
-    try{
-      if(typeof taskyEntitlementsEnforcedV165==='function' && !taskyEntitlementsEnforcedV165())return true;
-    }catch(_){}
-    return taskyModuleEnabledForWorkspaceV217('tasks');
-  }
-  return app.modules.some(taskyModuleEnabledForWorkspaceV217);
+  if(id==='work')return true;
+  return app.availability.some(taskyModuleEnabledForWorkspaceV217);
 }
+
 function taskyAvailableAppsV217(){
-  const apps=Object.keys(TASKY_APPS_V217).filter(taskyAppAvailableV217);
-  return apps.length?apps:['work'];
+  return Object.keys(TASKY_APPS_V217).filter(taskyAppAvailableV217);
 }
+
 function taskyAppForModuleV217(moduleId){
   if(!moduleId||TASKY_SHARED_MODULES_V217.has(moduleId))return taskyCurrentAppV217;
   for(const [id,app] of Object.entries(TASKY_APPS_V217)){
@@ -17005,9 +17012,11 @@ function taskyAppForModuleV217(moduleId){
   }
   return taskyCurrentAppV217;
 }
+
 function taskyAppStorageKeyV217(){
   return `tasky_current_app_v217_${currentWorkspaceId||'guest'}`;
 }
+
 function taskyResolveCurrentAppV217(){
   const available=taskyAvailableAppsV217();
   const byRoute=taskyAppForModuleV217(activeNav);
@@ -17015,19 +17024,362 @@ function taskyResolveCurrentAppV217(){
   if(!available.includes(taskyCurrentAppV217)){
     let saved='';
     try{saved=localStorage.getItem(taskyAppStorageKeyV217())||''}catch(_){}
-    taskyCurrentAppV217=available.includes(saved)?saved:available[0];
+    taskyCurrentAppV217=available.includes(saved)?saved:(available[0]||'work');
   }
   return taskyCurrentAppV217;
 }
+
 function taskySaveCurrentAppV217(){
   try{localStorage.setItem(taskyAppStorageKeyV217(),taskyCurrentAppV217)}catch(_){}
 }
+
+function taskyAppLabelV217(id){
+  const app=TASKY_APPS_V217[id]||TASKY_APPS_V217.work;
+  return lang==='ar'?app.ar:app.en;
+}
+
 function taskyFirstLandingV217(appId){
-  const app=TASKY_APPS_V217[appId];
-  if(!app)return 'home';
-  return app.landing.find(id=>id==='home'||taskyModuleEnabledForWorkspaceV217(id))
+  const app=TASKY_APPS_V217[appId]||TASKY_APPS_V217.work;
+  return app.home.find(id=>id==='home'||taskyModuleEnabledForWorkspaceV217(id))
       ||app.modules.find(taskyModuleEnabledForWorkspaceV217)
       ||'home';
+}
+
+function taskyIconForTextV230(text){
+  for(const [rx,icon] of TASKY_GENERIC_ICONS_V230)if(rx.test(String(text||'')))return icon;
+  return 'i-file';
+}
+
+function taskyNavIconV230(icon){
+  return `<svg><use href="#${icon||'i-file'}"/></svg>`;
+}
+
+function taskyNavButtonV230({label,icon='i-file',active=false,action='',key='',module='',extra='',primary=true,expanded=false}){
+  const cls=primary?'tasky-suite-item-v230':'tasky-suite-child-v230';
+  const chev=expanded!==false&&primary?`<svg class="chev"><use href="#i-chevron"/></svg>`:'';
+  return `<button type="button" class="${cls} ${active?'active':''} ${expanded===true?'expanded':''}"
+    data-v230-action="${action}" data-v230-key="${key||''}" data-v230-module="${module||''}" ${extra||''}>
+    ${taskyNavIconV230(icon)}<span class="txt">${escapeHtml(String(label||''))}</span>${chev}
+  </button>`;
+}
+
+function taskyRenderProjectsV230(){
+  if(!taskyModuleEnabledForWorkspaceV217('tasks'))return '';
+  const colors=['var(--blue)','var(--teal)','var(--green)','var(--blue-deep)','var(--violet)','var(--amber)'];
+  const rows=(projects||[]).map((p,i)=>`
+    <button type="button" class="project-item ${activeProjectId===p.id?'active':''}" data-v230-action="project" data-v230-key="${p.id}">
+      <span class="dot" style="background:${colors[i%colors.length]}"></span>
+      <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</span>
+    </button>`).join('');
+  const add=taskyL230('مشروع جديد','New project');
+  return `<div class="tasky-suite-projects-v230">
+    ${rows||`<div class="tasky-suite-empty-v230">${taskyL230('لا توجد مشاريع بعد','No projects yet')}</div>`}
+    <button type="button" class="project-item create-project-item" data-v230-action="new-project">
+      ${taskyNavIconV230('i-plus')}${add}
+    </button>
+  </div>`;
+}
+
+function taskyHrApiReadyV230(){
+  return typeof setHrTabV72==='function' && typeof hrTabVisible72==='function' && typeof HR_TABS_V72!=='undefined';
+}
+function taskyHrTabExistsV230(id){
+  try{return taskyHrApiReadyV230() && HR_TABS_V72.some(x=>x[0]===id) && hrTabVisible72(id)}catch(_){return false}
+}
+function taskyHrTabLabelV230(id){
+  try{
+    const row=HR_TABS_V72.find(x=>x[0]===id);
+    if(row)return lang==='ar'?row[1]:row[2];
+  }catch(_){}
+  return id;
+}
+function taskyHrGroupForTabV230(tab){
+  return TASKY_HR_GROUPS_V230.find(g=>g.tabs.includes(tab))?.key||'';
+}
+function taskyHrDefaultV230(group){
+  const g=TASKY_HR_GROUPS_V230.find(x=>x.key===group);
+  if(!g)return 'dashboard';
+  return g.tabs.find(taskyHrTabExistsV230)||'dashboard';
+}
+
+async function taskyOpenHrTabV230(tab){
+  try{
+    if(activeNav!=='hr')await setActiveNav('hr');
+    if(!taskyHrApiReadyV230())return false;
+    if(!taskyHrTabExistsV230(tab))return false;
+    taskyHrExpandedGroupV230=taskyHrGroupForTabV230(tab);
+    setHrTabV72(tab);
+    setTimeout(taskyRenderSuiteNavV230,0);
+    return true;
+  }catch(err){
+    console.warn('V230 HR tab',tab,err);
+    return false;
+  }
+}
+
+async function taskyOpenHrGroupV230(group){
+  taskyHrExpandedGroupV230=group;
+  if(activeNav!=='hr')await setActiveNav('hr');
+  const target=taskyHrDefaultV230(group);
+  if(target!=='dashboard')setHrTabV72(target);
+  setTimeout(taskyRenderSuiteNavV230,0);
+}
+
+async function taskyOpenExperienceV230(tab='overview'){
+  if(!taskyModuleEnabledForWorkspaceV217('experience'))return;
+  if(activeNav!=='experience')await setActiveNav('experience');
+  if(typeof exp160SetTab==='function')exp160SetTab(tab);
+  setTimeout(taskyRenderSuiteNavV230,0);
+}
+
+function taskyExperienceChildrenV230(){
+  if(activeNav!=='experience'||typeof exp160Tabs==='undefined')return '';
+  return `<div class="tasky-suite-children-v230">${exp160Tabs.map(t=>
+    taskyNavButtonV230({
+      label:lang==='ar'?t[1]:t[2],icon:taskyIconForTextV230(lang==='ar'?t[1]:t[2]),
+      active:typeof exp160Tab!=='undefined'&&exp160Tab===t[0],
+      action:'experience-tab',key:t[0],primary:false
+    })
+  ).join('')}</div>`;
+}
+
+function taskyHrNavV230(){
+  const api=taskyHrApiReadyV230();
+  const activeTab=api?hrActiveTabV72:'dashboard';
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav==='hr'&&activeTab==='dashboard',
+    action:'app-home',key:'hr'
+  });
+
+  if(api){
+    for(const g of TASKY_HR_GROUPS_V230){
+      const visibleTabs=g.tabs.filter(taskyHrTabExistsV230);
+      if(!visibleTabs.length)continue;
+      const groupActive=activeNav==='hr'&&visibleTabs.includes(activeTab);
+      const expanded=groupActive||taskyHrExpandedGroupV230===g.key;
+      out+=taskyNavButtonV230({
+        label:lang==='ar'?g.ar:g.en,icon:g.icon,active:groupActive,
+        action:'hr-group',key:g.key,expanded
+      });
+      if(expanded){
+        out+=`<div class="tasky-suite-children-v230">${visibleTabs.map(id=>
+          taskyNavButtonV230({
+            label:taskyHrTabLabelV230(id),icon:taskyIconForTextV230(taskyHrTabLabelV230(id)),
+            active:activeNav==='hr'&&activeTab===id,
+            action:'hr-tab',key:id,primary:false
+          })
+        ).join('')}</div>`;
+      }
+    }
+  }
+
+  if(taskyModuleEnabledForWorkspaceV217('experience')){
+    const expActive=activeNav==='experience';
+    out+=taskyNavButtonV230({
+      label:taskyL230('تجربة الموظف','Employee Experience'),icon:'i-spark',
+      active:expActive,action:'experience',key:'overview',expanded:expActive
+    });
+    if(expActive)out+=taskyExperienceChildrenV230();
+  }
+  return out;
+}
+
+function taskyCrmCanSettingsV230(){
+  try{return (typeof crmCanSettings==='function'&&crmCanSettings())||(typeof crmCanTaxManage==='function'&&crmCanTaxManage())}catch(_){return false}
+}
+function taskyCrmNavV230(){
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav==='crm'&&typeof crmView!=='undefined'&&crmView==='pipeline',
+    action:'app-home',key:'sales'
+  });
+  for(const [id,ar,en,icon] of TASKY_CRM_VIEWS_V230){
+    if(id==='settings'&&!taskyCrmCanSettingsV230())continue;
+    out+=taskyNavButtonV230({
+      label:lang==='ar'?ar:en,icon,active:activeNav==='crm'&&crmView===id,
+      action:'crm-view',key:id
+    });
+  }
+  return out;
+}
+
+function taskyRequestsNavV230(){
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav==='requests'&&typeof req150Tab!=='undefined'&&req150Tab==='overview',
+    action:'app-home',key:'requests'
+  });
+  if(typeof req150Tabs!=='undefined'){
+    for(const t of req150Tabs){
+      if(t[0]==='overview')continue;
+      const label=lang==='ar'?t[1]:t[2];
+      out+=taskyNavButtonV230({
+        label,icon:taskyIconForTextV230(label),
+        active:activeNav==='requests'&&req150Tab===t[0],
+        action:'request-tab',key:t[0]
+      });
+    }
+  }
+  return out;
+}
+
+function taskySurveyNavV230(){
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav==='surveys'&&!(typeof surveyBuilderId!=='undefined'&&surveyBuilderId),
+    action:'app-home',key:'surveys'
+  });
+  if(activeNav==='surveys'&&typeof surveyBuilderId!=='undefined'&&surveyBuilderId){
+    out+=`<div class="tasky-suite-context-label-v230">${taskyL230('الاستبيان الحالي','Current survey')}</div>`;
+    const tabs=[
+      ['questions','الأسئلة','Questions','i-file'],
+      ['logic','المخطط والمنطق','Logic map','i-chart'],
+      ['distribution','التوزيع والدعوات','Distribution','i-users'],
+      ['responses','الردود','Responses','i-inbox'],
+      ['analytics','التحليلات','Analytics','i-chart']
+    ];
+    out+=`<div class="tasky-suite-children-v230">${tabs.map(t=>taskyNavButtonV230({
+      label:lang==='ar'?t[1]:t[2],icon:t[3],active:surveyBuilderTab===t[0],
+      action:'survey-tab',key:t[0],primary:false
+    })).join('')}</div>`;
+  }
+  return out;
+}
+
+function taskyNormalizeDynamicLabelV230(s){
+  return String(s||'').replace(/\s+/g,' ').trim();
+}
+function taskyDynamicTabsV230(appId,selector){
+  if(taskyCurrentAppV217!==appId)return '';
+  const source=document.querySelector(`#moduleArea ${selector}`);
+  if(!source)return '';
+  const buttons=[...source.querySelectorAll(':scope > button')];
+  if(buttons.length<2)return '';
+  source.classList.add('tasky-tabs-promoted-v230');
+
+  const rows=buttons.map((b,index)=>({
+    index,label:taskyNormalizeDynamicLabelV230(b.textContent),
+    active:b.classList.contains('active')||b.getAttribute('aria-selected')==='true'
+  })).filter(x=>x.label);
+
+  if(!rows.length)return '';
+  const first=rows[0];
+  if(first.active&&!taskyDynamicSelectionV230[appId])taskyDynamicSelectionV230[appId]=first.label;
+
+  /* The first app-wide tab is represented by Home when it is an overview/main tab. */
+  const contentRows=rows.slice(1);
+  if(!contentRows.length)return '';
+
+  return contentRows.map(x=>taskyNavButtonV230({
+    label:x.label,icon:taskyIconForTextV230(x.label),
+    active:x.active,action:'dynamic-tab',key:appId,primary:true,
+    extra:`data-v230-selector="${selector}" data-v230-index="${x.index}" data-v230-label="${escapeHtml(x.label)}"`
+  })).join('');
+}
+
+function taskySimpleAppNavV230(appId,moduleId,icon='i-home'){
+  return taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon,
+    active:activeNav===moduleId,
+    action:'app-home',key:appId
+  });
+}
+
+function taskyMarketingNavV230(){
+  const homeModule=taskyFirstLandingV217('marketing');
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav===homeModule,action:'app-home',key:'marketing'
+  });
+  if(taskyModuleEnabledForWorkspaceV217('content')&&homeModule!=='content'){
+    out+=taskyNavButtonV230({
+      label:taskyL230('المحتوى','Content'),icon:'i-file',
+      active:activeNav==='content',action:'module',module:'content'
+    });
+  }
+  if(taskyModuleEnabledForWorkspaceV217('campaigns')&&homeModule!=='campaigns'){
+    out+=taskyNavButtonV230({
+      label:taskyL230('الحملات','Campaigns'),icon:'i-spark',
+      active:activeNav==='campaigns',action:'module',module:'campaigns'
+    });
+  }
+  return out;
+}
+
+function taskyWorkNavV230(){
+  let out=taskyNavButtonV230({
+    label:taskyL230('الرئيسية','Home'),icon:'i-home',
+    active:activeNav==='home',action:'app-home',key:'work'
+  });
+  if(taskyModuleEnabledForWorkspaceV217('tasks')){
+    out+=taskyNavButtonV230({
+      label:taskyL230('المهام والمشاريع','Tasks & Projects'),icon:'i-check',
+      active:activeNav==='tasks',action:'module',module:'tasks'
+    });
+    if(activeNav==='tasks'||taskyCurrentAppV217==='work')out+=taskyRenderProjectsV230();
+  }
+  return out;
+}
+
+function taskyAppSpecificNavV230(){
+  switch(taskyCurrentAppV217){
+    case 'work':return taskyWorkNavV230();
+    case 'marketing':return taskyMarketingNavV230();
+    case 'hr':return taskyHrNavV230();
+    case 'sales':return taskyCrmNavV230();
+    case 'requests':return taskyRequestsNavV230();
+    case 'bookings':
+      return taskySimpleAppNavV230('bookings','bookings','i-home')
+        +taskyDynamicTabsV230('bookings','.book140-tabs');
+    case 'inventory':return taskySimpleAppNavV230('inventory','inventory');
+    case 'procurement':return taskySimpleAppNavV230('procurement','vendors');
+    case 'events':return taskySimpleAppNavV230('events','events');
+    case 'finance':return taskySimpleAppNavV230('finance','budgets');
+    case 'meetings':
+      return taskySimpleAppNavV230('meetings','meetings')
+        +taskyDynamicTabsV230('meetings','.meet10622-tabs');
+    case 'connect':return taskySimpleAppNavV230('connect','connect');
+    case 'analytics':return taskySimpleAppNavV230('analytics','analytics');
+    case 'reports':return taskySimpleAppNavV230('reports','reports');
+    case 'surveys':return taskySurveyNavV230();
+    case 'integrations':return taskySimpleAppNavV230('integrations','integrations');
+  }
+  return '';
+}
+
+function taskySharedNavV230(){
+  const rows=[];
+  rows.push(taskyNavButtonV230({
+    label:taskyL230('الدعم الفني','Support'),icon:'i-comment',
+    active:activeNav==='support',action:'module',module:'support'
+  }));
+  rows.push(taskyNavButtonV230({
+    label:taskyL230('الإعدادات','Settings'),icon:'i-settings',
+    active:activeNav==='settings',action:'module',module:'settings'
+  }));
+  if(taskyModuleEnabledForWorkspaceV217('team')){
+    rows.push(taskyNavButtonV230({
+      label:taskyL230('الفريق والصلاحيات','Team & Permissions'),icon:'i-users',
+      active:activeNav==='team',action:'module',module:'team'
+    }));
+  }
+  if(currentUserRole==='admin'){
+    rows.push(taskyNavButtonV230({
+      label:taskyL230('الباقة والاشتراك','Plan & Billing'),icon:'i-crown',
+      active:activeNav==='billing',action:'module',module:'billing'
+    }));
+  }
+  return `<div class="tasky-suite-account-label-v230">${taskyL230('الحساب','Account')}</div>${rows.join('')}`;
+}
+
+function taskyRenderSuiteNavV230(){
+  const nav=document.getElementById('mainNav');
+  if(!nav)return;
+  taskyResolveCurrentAppV217();
+  nav.classList.add('tasky-suite-nav-v230');
+  nav.innerHTML=taskyAppSpecificNavV230()+taskySharedNavV230();
+  taskySyncAppBreadcrumbV230();
 }
 
 function taskyRenderAppSwitcherV217(){
@@ -17051,10 +17403,8 @@ function taskyRenderAppSwitcherV217(){
   const available=taskyAvailableAppsV217();
   menu.innerHTML=`
     <div class="tasky-app-menu-head-v217">
-      <b>${lang==='ar'?'تطبيقات مساحة العمل':'Workspace apps'}</b>
-      <span>${lang==='ar'
-        ?'تظهر فقط التطبيقات المفعلة لهذه الشركة أو الفريق.'
-        :'Only apps enabled for this company or team are shown.'}</span>
+      <b>${taskyL230('تطبيقات مساحة العمل','Workspace apps')}</b>
+      <span>${taskyL230('تظهر فقط التطبيقات المفعلة لهذه الشركة أو الفريق.','Only apps enabled for this company or team are shown.')}</span>
     </div>
     ${available.map(id=>{
       const a=TASKY_APPS_V217[id];
@@ -17063,57 +17413,70 @@ function taskyRenderAppSwitcherV217(){
         <span class="tasky-app-option-icon-v217" style="background:${a.color}">${a.short}</span>
         <span class="tasky-app-option-copy-v217">
           <b>${lang==='ar'?a.ar:a.en}</b>
-          <span>${lang==='ar'?'مشترك في مساحة العمل':'Enabled for this workspace'}</span>
+          <span>${taskyL230('مشترك في مساحة العمل','Enabled for this workspace')}</span>
         </span>
         ${active?`<svg class="tasky-app-option-check-v217"><use href="#i-check"/></svg>`:''}
       </button>`;
     }).join('')}
-    <div class="tasky-app-shared-label-v217">${lang==='ar'?'الخدمات المشتركة تظهر داخل جميع التطبيقات':'Shared services remain available across apps'}</div>`;
+    <div class="tasky-app-shared-label-v217">${taskyL230('الخدمات المشتركة متاحة داخل جميع التطبيقات','Shared services remain available across apps')}</div>`;
 }
 
-function taskyApplyAppNavFilterV217(){
-  const nav=document.getElementById('mainNav');
-  if(!nav)return;
-  taskyResolveCurrentAppV217();
-  const app=TASKY_APPS_V217[taskyCurrentAppV217]||TASKY_APPS_V217.work;
-  const allowed=new Set([...app.modules,...app.shared,...TASKY_SHARED_MODULES_V217]);
-  if(taskyCurrentAppV217==='work')allowed.add('home');
-
-  const children=[...nav.children];
-  let currentHeader=null;
-  for(const el of children){
-    if(el.classList.contains('nav-group-label')){
-      currentHeader=el;
-      el.classList.add('tasky-app-hidden-v217');
-      continue;
-    }
-    if(el.classList.contains('projects-inline-wrap')){
-      const show=taskyCurrentAppV217==='work' && taskyModuleEnabledForWorkspaceV217('tasks');
-      el.classList.toggle('tasky-app-hidden-v217',!show);
-      continue;
-    }
-    if(!el.classList.contains('nav-item'))continue;
-
-    const action=el.getAttribute('onclick')||'';
-    const match=action.match(/(?:setActiveNav|taskyOpenModuleLockedV165|openPlatformModuleUnavailable)\('([^']+)'\)/);
-    const id=match?.[1]||'';
-    const visible=!id || allowed.has(id);
-    el.classList.toggle('tasky-app-hidden-v217',!visible);
-    if(visible&&currentHeader)currentHeader.classList.remove('tasky-app-hidden-v217');
+function taskyCurrentSectionLabelV230(){
+  if(TASKY_SHARED_MODULES_V217.has(activeNav)){
+    const item=NAV_ITEMS.find(x=>x.id===activeNav);
+    return item?t(item.key):taskyL230('الرئيسية','Home');
+  }
+  switch(taskyCurrentAppV217){
+    case 'work':
+      return activeNav==='home'?taskyL230('الرئيسية','Home'):taskyL230('المهام والمشاريع','Tasks & Projects');
+    case 'marketing':
+      return activeNav===taskyFirstLandingV217('marketing')?taskyL230('الرئيسية','Home'):
+        activeNav==='content'?taskyL230('المحتوى','Content'):taskyL230('الحملات','Campaigns');
+    case 'hr':
+      if(activeNav==='experience'){
+        if(typeof exp160Tabs!=='undefined'&&typeof exp160Tab!=='undefined'){
+          const x=exp160Tabs.find(t=>t[0]===exp160Tab);
+          if(x&&exp160Tab!=='overview')return lang==='ar'?x[1]:x[2];
+        }
+        return taskyL230('تجربة الموظف','Employee Experience');
+      }
+      if(typeof hrActiveTabV72!=='undefined'&&hrActiveTabV72!=='dashboard')return taskyHrTabLabelV230(hrActiveTabV72);
+      return taskyL230('الرئيسية','Home');
+    case 'sales':
+      if(typeof crmView!=='undefined'&&crmView!=='pipeline'){
+        const x=TASKY_CRM_VIEWS_V230.find(v=>v[0]===crmView);
+        return x?(lang==='ar'?x[1]:x[2]):taskyL230('الرئيسية','Home');
+      }
+      return taskyL230('الرئيسية','Home');
+    case 'requests':
+      if(typeof req150Tabs!=='undefined'&&typeof req150Tab!=='undefined'&&req150Tab!=='overview'){
+        const x=req150Tabs.find(t=>t[0]===req150Tab);if(x)return lang==='ar'?x[1]:x[2];
+      }
+      return taskyL230('الرئيسية','Home');
+    case 'surveys':
+      if(typeof surveyBuilderId!=='undefined'&&surveyBuilderId){
+        const map={questions:['الأسئلة','Questions'],logic:['المخطط والمنطق','Logic map'],distribution:['التوزيع والدعوات','Distribution'],responses:['الردود','Responses'],analytics:['التحليلات','Analytics']};
+        const x=map[surveyBuilderTab];if(x)return lang==='ar'?x[0]:x[1];
+      }
+      return taskyL230('الرئيسية','Home');
+    default:return taskyL230('الرئيسية','Home');
   }
 }
 
-function taskySyncAppBreadcrumbV217(){
-  /* Keep each module's own page title, but identify the active Tasky application
-     in the breadcrumb root. */
+function taskySyncAppBreadcrumbV230(){
   const root=document.getElementById('breadcrumbRoot');
+  const label=document.getElementById('breadcrumbLabel');
   if(root)root.textContent=taskyAppLabelV217(taskyCurrentAppV217);
+  if(label&&!TASKY_SHARED_MODULES_V217.has(activeNav))label.textContent=taskyCurrentSectionLabelV230();
 }
+
+function taskySyncAppBreadcrumbV217(){taskySyncAppBreadcrumbV230()}
+function taskyApplyAppNavFilterV217(){taskyRenderSuiteNavV230()}
 
 function taskyRefreshAppChromeV217(){
   taskyRenderAppSwitcherV217();
-  taskyApplyAppNavFilterV217();
-  taskySyncAppBreadcrumbV217();
+  taskyRenderSuiteNavV230();
+  taskySyncAppBreadcrumbV230();
 }
 
 window.taskyToggleAppMenuV217=function(e){
@@ -17126,25 +17489,239 @@ window.taskyToggleAppMenuV217=function(e){
   btn.setAttribute('aria-expanded',open?'true':'false');
   if(open)taskyRenderAppSwitcherV217();
 };
-window.taskySelectAppV217=async function(id,e){
-  e?.stopPropagation?.();
-  if(!taskyAppAvailableV217(id))return;
-  taskyCurrentAppV217=id;
-  taskySaveCurrentAppV217();
-  const menu=document.getElementById('taskyAppMenuV217');
-  const btn=document.getElementById('taskyAppSwitcherBtnV217');
-  menu?.classList.add('hidden');
-  btn?.setAttribute('aria-expanded','false');
-  taskyRefreshAppChromeV217();
 
-  const landing=taskyFirstLandingV217(id);
-  if(activeNav!==landing){
-    await setActiveNav(landing);
-  }else{
-    try{renderModule()}catch(_){}
+async function taskyOpenAppHomeV230(appId){
+  const app=TASKY_APPS_V217[appId];if(!app)return false;
+  taskyCurrentAppV217=appId;taskySaveCurrentAppV217();
+
+  if(appId==='work'){
+    await setActiveNav('home');return true;
+  }
+  if(appId==='marketing'){
+    await setActiveNav(taskyFirstLandingV217('marketing'));return true;
+  }
+  if(appId==='hr'){
+    try{
+      await setActiveNav('hr');
+      if(taskyHrApiReadyV230()){
+        hrActiveTabV72='dashboard';
+        renderModule();
+      }
+      taskyHrExpandedGroupV230='';
+      return true;
+    }catch(err){taskyRenderMissingChunkV230('hr',err);return false}
+  }
+  if(appId==='sales'){
+    await setActiveNav('crm');
+    if(typeof setCrmView==='function')setCrmView('pipeline');
+    return true;
+  }
+  if(appId==='requests'){
+    await setActiveNav('requests');
+    if(typeof req150SetTab==='function')req150SetTab('overview');
+    return true;
+  }
+  if(appId==='bookings'){
+    taskyDynamicSelectionV230.bookings='';
+    try{await setActiveNav('bookings');return true}catch(err){taskyRenderMissingChunkV230('bookings',err);return false}
+  }
+  if(appId==='inventory'){
+    if(typeof closeInv92Launch==='function')try{closeInv92Launch()}catch(_){}
+    await setActiveNav('inventory');return true;
+  }
+  if(appId==='procurement'){
+    try{proc87View='main'}catch(_){}
+    await setActiveNav('vendors');return true;
+  }
+  if(appId==='events'){
+    try{if(typeof closeOps89Launch==='function')closeOps89Launch()}catch(_){}
+    await setActiveNav('events');return true;
+  }
+  if(appId==='finance'){
+    try{if(typeof closeOps89Launch==='function')closeOps89Launch()}catch(_){}
+    await setActiveNav('budgets');return true;
+  }
+  if(appId==='meetings'){
+    taskyDynamicSelectionV230.meetings='';
+    try{await setActiveNav('meetings');return true}catch(err){taskyRenderMissingChunkV230('meetings',err);return false}
+  }
+  if(appId==='connect'){await setActiveNav('connect');return true}
+  if(appId==='analytics'){
+    try{if(typeof closeRep93Launch==='function')closeRep93Launch()}catch(_){}
+    await setActiveNav('analytics');return true;
+  }
+  if(appId==='reports'){
+    try{if(typeof closeRep93Launch==='function')closeRep93Launch()}catch(_){}
+    await setActiveNav('reports');return true;
+  }
+  if(appId==='surveys'){
+    try{if(typeof closeSurveyBuilder==='function'&&surveyBuilderId)closeSurveyBuilder()}catch(_){}
+    try{survey91LaunchOpen=false}catch(_){}
+    await setActiveNav('surveys');return true;
+  }
+  if(appId==='integrations'){
+    try{if(typeof closeInt94Launch==='function')closeInt94Launch()}catch(_){}
+    await setActiveNav('integrations');return true;
+  }
+  return false;
+}
+
+window.taskySelectAppV217=async function(id,e){
+  e?.preventDefault?.();e?.stopPropagation?.();
+  if(!taskyAppAvailableV217(id))return;
+  taskyCurrentAppV217=id;taskySaveCurrentAppV217();
+  document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
+  document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
+  taskyRenderAppSwitcherV217();
+  await taskyOpenAppHomeV230(id);
+  taskyRefreshAppChromeV217();
+};
+
+async function taskyOpenDynamicTabV230(appId,selector,index,label){
+  const source=document.querySelector(`#moduleArea ${selector}`);
+  if(!source)return false;
+  const buttons=[...source.querySelectorAll(':scope > button')];
+  let target=buttons[index];
+  if(!target||taskyNormalizeDynamicLabelV230(target.textContent)!==label){
+    target=buttons.find(b=>taskyNormalizeDynamicLabelV230(b.textContent)===label);
+  }
+  if(!target)return false;
+  target.click();
+  taskyDynamicSelectionV230[appId]=label;
+  setTimeout(taskyRenderSuiteNavV230,20);
+  return true;
+}
+
+async function taskyHandleSuiteActionV230(btn,event){
+  const action=btn.dataset.v230Action||'';
+  const key=btn.dataset.v230Key||'';
+  const module=btn.dataset.v230Module||'';
+
+  if(action==='app-home')await taskyOpenAppHomeV230(key);
+  else if(action==='module')await setActiveNav(module);
+  else if(action==='hr-group')await taskyOpenHrGroupV230(key);
+  else if(action==='hr-tab')await taskyOpenHrTabV230(key);
+  else if(action==='experience')await taskyOpenExperienceV230(key||'overview');
+  else if(action==='experience-tab')await taskyOpenExperienceV230(key);
+  else if(action==='crm-view'){
+    if(activeNav!=='crm')await setActiveNav('crm');
+    if(typeof setCrmView==='function')setCrmView(key);
+  }
+  else if(action==='request-tab'){
+    if(activeNav!=='requests')await setActiveNav('requests');
+    if(typeof req150SetTab==='function')req150SetTab(key);
+  }
+  else if(action==='survey-tab'){
+    if(typeof surveyBuilderId!=='undefined'&&surveyBuilderId&&typeof openSurveyBuilder==='function')openSurveyBuilder(surveyBuilderId,key);
+  }
+  else if(action==='dynamic-tab'){
+    await taskyOpenDynamicTabV230(key,btn.dataset.v230Selector,Number(btn.dataset.v230Index),btn.dataset.v230Label||'');
+  }
+  else if(action==='project'){
+    if(typeof setActiveProject==='function')setActiveProject(key);
+  }
+  else if(action==='new-project'){
+    if(typeof openProjectModal==='function')openProjectModal();
+  }
+
+  setTimeout(()=>{
     taskyRefreshAppChromeV217();
+    try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
+  },0);
+}
+
+function taskyInstallNavEventsV230(){
+  const nav=document.getElementById('mainNav');if(!nav||nav.dataset.taskyV230Events==='1')return;
+  nav.dataset.taskyV230Events='1';
+  nav.addEventListener('click',event=>{
+    const btn=event.target.closest?.('[data-v230-action]');
+    if(!btn||!nav.contains(btn))return;
+    event.preventDefault();event.stopPropagation();
+    taskyHandleSuiteActionV230(btn,event).catch(err=>console.warn('V230 nav action',err));
+  });
+}
+
+function taskyRenderMissingChunkV230(name,error){
+  const area=document.getElementById('moduleArea');
+  const taskArea=document.getElementById('taskArea');
+  if(taskArea)taskArea.classList.add('hidden');
+  if(area){
+    area.classList.remove('hidden');
+    const names={
+      hr:['الموارد البشرية','HR'],meetings:['الاجتماعات','Meetings'],
+      bookings:['الحجوزات','Bookings'],brainstorm:['العصف الذهني','Brainstorm']
+    };
+    const x=names[name]||[name,name];
+    area.innerHTML=`<div class="tasky-module-missing-v230">
+      <div class="icon">${taskyNavIconV230('i-plug')}</div>
+      <h3>${taskyL230('تعذّر فتح التطبيق','Could not open the app')}</h3>
+      <p>${taskyL230(
+        `ملف ${x[0]} غير متاح في النشر الحالي. بقية تاسكي ما زالت تعمل بشكل طبيعي.`,
+        `${x[1]} files are unavailable in this deployment. The rest of Tasky remains usable.`
+      )}</p>
+    </div>`;
+  }
+}
+window.taskyRenderMissingChunkV230=taskyRenderMissingChunkV230;
+
+/* Replace legacy sidebar rendering completely.
+   All legacy business logic remains; only the navigation DOM is standardized. */
+const taskyLegacyRenderNavV230=renderNav;
+renderNav=function(){
+  taskyInstallNavEventsV230();
+  taskyRenderSuiteNavV230();
+};
+
+/* This wrapper is last in the base document and therefore delegates into the
+   existing V168 lazy-loader chain rather than bypassing it. */
+const taskyBaseSetActiveNavV230=setActiveNav;
+setActiveNav=async function(id,...args){
+  const targetApp=taskyAppForModuleV217(id);
+  if(!TASKY_SHARED_MODULES_V217.has(id)&&taskyAppAvailableV217(targetApp)){
+    taskyCurrentAppV217=targetApp;
+    taskySaveCurrentAppV217();
+  }
+  try{
+    const result=await taskyBaseSetActiveNavV230(id,...args);
+    setTimeout(taskyRefreshAppChromeV217,0);
+    return result;
+  }catch(err){
+    if(['hr','meetings','bookings'].includes(id))taskyRenderMissingChunkV230(id,err);
+    throw err;
   }
 };
+
+/* Re-render sidebar when known internal state changes. */
+const taskyBaseRenderModuleV230=renderModule;
+renderModule=function(...args){
+  const result=taskyBaseRenderModuleV230.apply(this,args);
+  setTimeout(taskyRefreshAppChromeV217,0);
+  return result;
+};
+
+if(typeof taskyFetchEntitlementsV165==='function'){
+  const taskyBaseEntitlementsV230=taskyFetchEntitlementsV165;
+  taskyFetchEntitlementsV165=async function(...args){
+    const result=await taskyBaseEntitlementsV230.apply(this,args);
+    taskyResolveCurrentAppV217();
+    taskyRefreshAppChromeV217();
+    return result;
+  };
+}
+
+/* Dynamic lazy modules (Bookings / Meetings) render their tab strips after the
+   chunk executes; observe moduleArea only, never the whole document. */
+(function(){
+  const area=document.getElementById('moduleArea');if(!area)return;
+  let timer=0;
+  const mo=new MutationObserver(()=>{
+    if(!['bookings','meetings','surveys'].includes(activeNav))return;
+    clearTimeout(timer);
+    timer=setTimeout(taskyRefreshAppChromeV217,55);
+  });
+  mo.observe(area,{childList:true,subtree:true,attributes:true,attributeFilter:['class','aria-selected']});
+})();
+
 document.addEventListener('click',e=>{
   const wrap=document.getElementById('taskyAppSwitcherV217');
   if(wrap&&!wrap.contains(e.target)){
@@ -17153,48 +17730,15 @@ document.addEventListener('click',e=>{
   }
 });
 
-/* Final wrappers are intentionally small: they keep the existing V165
-   entitlement gate, lazy-loading and route logic intact. */
-if(typeof renderNav==='function'&&!window.__taskyRenderNavV217){
-  window.__taskyRenderNavV217=true;
-  const baseRenderNavV217=renderNav;
-  renderNav=function(...args){
-    const result=baseRenderNavV217.apply(this,args);
-    taskyRefreshAppChromeV217();
-    return result;
-  };
-}
-if(typeof setActiveNav==='function'&&!window.__taskySetActiveNavV217){
-  window.__taskySetActiveNavV217=true;
-  const baseSetActiveNavV217=setActiveNav;
-  setActiveNav=async function(id,...args){
-    const targetApp=taskyAppForModuleV217(id);
-    if(!TASKY_SHARED_MODULES_V217.has(id)&&taskyAppAvailableV217(targetApp)){
-      taskyCurrentAppV217=targetApp;
-      taskySaveCurrentAppV217();
-    }
-    const result=await baseSetActiveNavV217(id,...args);
-    taskyRefreshAppChromeV217();
-    return result;
-  };
-}
-if(typeof taskyFetchEntitlementsV165==='function'&&!window.__taskyEntitlementsAppsV217){
-  window.__taskyEntitlementsAppsV217=true;
-  const baseEntitlementsV217=taskyFetchEntitlementsV165;
-  taskyFetchEntitlementsV165=async function(...args){
-    const result=await baseEntitlementsV217.apply(this,args);
-    taskyResolveCurrentAppV217();
-    taskyRefreshAppChromeV217();
-    return result;
-  };
-}
-
-/* Warm/new tabs inherit the selected app for this workspace through the route. */
+/* Warm/new tabs can request a specific Tasky app. */
 try{
   const u=new URL(location.href);
   const requested=u.searchParams.get('tasky_app');
   if(requested&&TASKY_APPS_V217[requested])taskyCurrentAppV217=requested;
 }catch(_){}
+
+document.documentElement.classList.add('tasky-suite-ready-v230');
+taskyInstallNavEventsV230();
 
 if(document.readyState==='loading'){
   document.addEventListener('DOMContentLoaded',()=>taskyRefreshAppChromeV217(),{once:true});
@@ -17202,485 +17746,10 @@ if(document.readyState==='loading'){
   taskyRefreshAppChromeV217();
 }
 
-window.TASKY_BUILD='V217';
-console.info('Tasky build V217 — Modular Suite');
+window.TASKY_BUILD='V230';
+console.info('Tasky build V230 — audited modular navigation');
 </script>
 
-
-<script id="tasky-v218-subnav-runtime-js">
-const TASKY_CRM_SUBNAV_V218=[
-  {id:'leads',ar:'العملاء المحتملون',en:'Leads',icon:'i-user-plus',count:()=>crmLeads.filter(x=>!['converted','unqualified'].includes(x.status)).length},
-  {id:'pipeline',ar:'خط المبيعات',en:'Pipeline',icon:'i-chart',count:()=>crmOpportunities.filter(x=>!['won','lost'].includes(x.stage)).length},
-  {id:'quotes',ar:'العروض والمبيعات',en:'Quotations & Sales',icon:'i-file',count:()=>crmQuotes.filter(x=>['sent','viewed'].includes(x.status)).length},
-  {id:'billing',ar:'الفواتير والتحصيل',en:'Invoices & Collections',icon:'i-wallet',count:()=>crmInvoices.filter(x=>x.status==='overdue').length},
-  {id:'customers',ar:'العملاء',en:'Customers',icon:'i-users',count:()=>crmCompanies.length},
-  {id:'activities',ar:'المتابعات',en:'Activities',icon:'i-check',count:()=>crmActivities.filter(x=>!x.completedAt).length},
-  {id:'settings',ar:'إعدادات CRM',en:'CRM Settings',icon:'i-settings',show:()=>crmCanSettings()||crmCanTaxManage()},
-  {id:'launch86',ar:'جاهزية الإطلاق',en:'Launch Readiness',icon:'i-shield',show:()=>crmCanSettings()}
-];
-
-function taskyCrmSubnavHtmlV218(){
-  return `<div class="tasky-app-subnav-v218" id="taskyCrmSubnavV218">
-    <div class="tasky-app-subnav-head-v218">${lang==='ar'?'أقسام المبيعات والعملاء':'Sales & Customers sections'}</div>
-    ${TASKY_CRM_SUBNAV_V218.filter(x=>!x.show||x.show()).map(x=>{
-      let n=0;try{n=x.count?Number(x.count()||0):0}catch(_){}
-      return `<button type="button" class="tasky-app-subnav-item-v218 ${crmView===x.id?'active':''}" onclick="taskySetCrmViewV218('${x.id}')">
-        <svg><use href="#${x.icon}"/></svg>
-        <span>${lang==='ar'?x.ar:x.en}</span>
-        ${n?`<span class="count">${n>99?'99+':n}</span>`:''}
-      </button>`;
-    }).join('')}
-  </div>`;
-}
-
-window.taskySetCrmViewV218=function(view){
-  crmView=view;
-  try{renderModule()}catch(_){}
-  try{taskyRenderAppSubnavV218()}catch(_){}
-  try{taskyCloseDrawerAfterNavV1682()}catch(_){}
-};
-
-window.taskyRenderMissingChunkV218=function(name){
-  const el=document.getElementById('moduleArea');if(!el)return;
-  const labels={
-    hr:['الموارد البشرية','HR'],
-    meetings:['الاجتماعات','Meetings'],
-    brainstorm:['العصف الذهني','Brainstorm'],
-    bookings:['الحجوزات','Bookings']
-  };
-  const label=(labels[name]||[name,name])[lang==='ar'?0:1];
-  el.innerHTML=`<div class="tasky-missing-chunk-v218">
-    <div class="icon"><svg><use href="#i-plug"/></svg></div>
-    <h3>${lang==='ar'?'ملفات التطبيق غير متاحة':'App files are unavailable'}</h3>
-    <p>${lang==='ar'
-      ?`قسم ${escapeHtml(label)} يعتمد على ملف تطبيق منفصل غير موجود في النشر الحالي. لم يعد تاسكي يعرض رسالة خطأ منبثقة أو يوقف بقية المنصة.`
-      :`${escapeHtml(label)} depends on a separate app file that is not present in the current deployment. Tasky no longer blocks the rest of the platform with a modal error.`}</p>
-    <button class="chip-btn" onclick="setActiveNav('home')">${lang==='ar'?'العودة للرئيسية':'Back to Home'}</button>
-  </div>`;
-};
-
-window.taskyRenderAppSubnavV218=function(){
-  document.querySelectorAll('.tasky-app-subnav-v218').forEach(x=>x.remove());
-  if(taskyCurrentAppV217!=='sales')return;
-  const nav=document.getElementById('mainNav');if(!nav)return;
-
-  const crmItem=[...nav.querySelectorAll('.nav-item')].find(el=>{
-    const s=el.getAttribute('onclick')||'';
-    return /(?:setActiveNav|taskyOpenModuleLockedV165|openPlatformModuleUnavailable)\('crm'\)/.test(s);
-  });
-  if(!crmItem)return;
-  crmItem.insertAdjacentHTML('afterend',taskyCrmSubnavHtmlV218());
-};
-
-if(typeof taskyRefreshAppChromeV217==='function'&&!window.__taskyAppChromeSubnavV218){
-  window.__taskyAppChromeSubnavV218=true;
-  const baseChromeV218=taskyRefreshAppChromeV217;
-  taskyRefreshAppChromeV217=function(...args){
-    const result=baseChromeV218.apply(this,args);
-    taskyRenderAppSubnavV218();
-    return result;
-  };
-}
-
-if(typeof setCrmView==='function'&&!window.__taskySetCrmViewV218){
-  window.__taskySetCrmViewV218=true;
-  const baseSetCrmViewV218=setCrmView;
-  setCrmView=function(v){
-    const result=baseSetCrmViewV218(v);
-    taskyRenderAppSubnavV218();
-    return result;
-  };
-}
-
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',()=>setTimeout(taskyRenderAppSubnavV218,0),{once:true});
-}else{
-  setTimeout(taskyRenderAppSubnavV218,0);
-}
-
-window.TASKY_BUILD='V218';
-console.info('Tasky build V218 — app sub-navigation and chunk error fix');
-</script>
-<script id="tasky-v222-build-marker">
-window.TASKY_BUILD='V222';
-console.info('Tasky build',window.TASKY_BUILD,'standalone-app-boundaries');
-</script>
-<script id="tasky-v228-hr-subnav-runtime-js">
-(function(){
-  const HR_SECTIONS_V228=[
-    {key:'employees', ar:'الموظفون', en:'Employees', icon:'i-users',
-      aliases:[/^الموظفون$/i,/^employees$/i]},
-    {key:'time', ar:'الوقت والإجازات', en:'Time & Leave', icon:'i-clock',
-      aliases:[/الوقت والإجازات/i,/time\s*&\s*leave/i,/time.*leave/i]},
-    {key:'lifecycle', ar:'دورة حياة الموظف', en:'Employee Lifecycle', icon:'i-cycle',
-      aliases:[/دورة حياة الموظف/i,/employee lifecycle/i,/lifecycle/i]},
-    {key:'performance', ar:'الأداء والمزايا', en:'Performance & Benefits', icon:'i-chart',
-      aliases:[/الأداء والمزايا/i,/performance\s*&\s*benefits/i,/performance.*benefits/i]},
-    {key:'reports', ar:'التقارير', en:'Reports', icon:'i-chart',
-      aliases:[/^التقارير$/i,/^reports$/i]},
-    {key:'more', ar:'المزيد', en:'More', icon:'i-more',
-      aliases:[/^المزيد$/i,/^more$/i]},
-    {key:'experience', ar:'تجربة الموظف', en:'Employee Experience', icon:'i-heart',
-      aliases:[]}
-  ];
-
-  let observerV228=null;
-  let activeSectionV228='';
-
-  function navItemV228(id){
-    const nav=document.getElementById('mainNav'); if(!nav)return null;
-    return [...nav.querySelectorAll('.nav-item')].find(el=>{
-      const action=el.getAttribute('onclick')||'';
-      return action.includes(`'${id}'`) || action.includes(`"${id}"`);
-    })||null;
-  }
-
-  function sourceTabsV228(){
-    return document.querySelector('#moduleArea .hr72-tabs');
-  }
-
-  function normalizeTextV228(s){
-    return String(s||'').replace(/\s+/g,' ').trim();
-  }
-
-  function sourceButtonForV228(section){
-    const source=sourceTabsV228();
-    if(!source)return null;
-    const buttons=[...source.querySelectorAll(':scope > button')];
-
-    for(const btn of buttons){
-      const text=normalizeTextV228(btn.textContent);
-      if(section.aliases.some(rx=>rx.test(text)))return btn;
-    }
-    return null;
-  }
-
-  function activeFromSourceV228(){
-    const source=sourceTabsV228(); if(!source)return '';
-    for(const section of HR_SECTIONS_V228.filter(x=>x.key!=='experience')){
-      const btn=sourceButtonForV228(section);
-      if(btn && (
-        btn.classList.contains('active') ||
-        btn.getAttribute('aria-selected')==='true' ||
-        btn.getAttribute('data-active')==='true'
-      )) return section.key;
-    }
-    return '';
-  }
-
-  function normalizeChromeV228(){
-    const hr=navItemV228('hr');
-    const exp=navItemV228('experience');
-    if(!hr)return null;
-
-    if(taskyCurrentAppV217==='hr'){
-      const label=[...hr.querySelectorAll('span,b,strong')].find(x=>
-        /الموارد البشرية|Human Resources|HR|الرئيسية|Home/i.test(normalizeTextV228(x.textContent))
-      );
-      if(label)label.textContent=lang==='ar'?'الرئيسية':'Home';
-      const use=hr.querySelector('svg use');
-      if(use)use.setAttribute('href','#i-home');
-
-      if(exp)exp.classList.add('tasky-hide-exp-top-v228');
-
-      let group=hr.previousElementSibling;
-      while(group && !group.classList.contains('nav-group-label'))group=group.previousElementSibling;
-      if(group)group.classList.add('tasky-hr-duplicate-heading-v228');
-    }else{
-      exp?.classList.remove('tasky-hide-exp-top-v228');
-    }
-    return hr;
-  }
-
-  async function activateSectionV228(key){
-    const section=HR_SECTIONS_V228.find(x=>x.key===key);
-    if(!section)return false;
-
-    if(key==='experience'){
-      activeSectionV228='experience';
-      await setActiveNav('experience');
-      setTimeout(renderHrSubnavV228,20);
-      try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
-      return true;
-    }
-
-    /* Always be inside the HR module before resolving its live tab controls. */
-    if(activeNav!=='hr'){
-      await setActiveNav('hr');
-      try{
-        if(typeof taskyLazyLoadChunkV1681==='function' && !taskyLazyChunkLoadedV1681('hr')){
-          await taskyLazyLoadChunkV1681('hr');
-        }
-      }catch(_){}
-      await new Promise(r=>setTimeout(r,20));
-    }
-
-    let target=sourceButtonForV228(section);
-
-    /* Lazy HR may still be rendering; retry briefly instead of silently failing. */
-    if(!target){
-      for(let i=0;i<12&&!target;i++){
-        await new Promise(r=>setTimeout(r,35));
-        target=sourceButtonForV228(section);
-      }
-    }
-
-    if(!target){
-      console.warn('V228: HR source tab not found',key);
-      return false;
-    }
-
-    const before=normalizeTextV228(document.getElementById('moduleArea')?.textContent).slice(0,180);
-
-    /* Trigger the actual HR control and its original lazy-chunk handler. */
-    target.click();
-
-    await new Promise(r=>setTimeout(r,25));
-
-    /* Some mobile browsers behave differently with programmatic click on off-screen
-       controls. Dispatch a real bubbling mouse event if the active source did not change. */
-    if(activeFromSourceV228()!==key){
-      target.dispatchEvent(new MouseEvent('click',{
-        bubbles:true,cancelable:true,view:window
-      }));
-      await new Promise(r=>setTimeout(r,25));
-    }
-
-    activeSectionV228=key;
-    renderHrSubnavV228();
-    try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
-    return true;
-  }
-
-  function renderHrSubnavV228(){
-    const hr=normalizeChromeV228();
-    document.querySelectorAll('.tasky-hr-subnav-v228').forEach(x=>x.remove());
-
-    if(!hr || taskyCurrentAppV217!=='hr')return;
-
-    const source=sourceTabsV228();
-    if(source)source.classList.add('tasky-hr-source-v228');
-
-    if(activeNav==='experience')activeSectionV228='experience';
-    else{
-      const fromSource=activeFromSourceV228();
-      if(fromSource)activeSectionV228=fromSource;
-      else if(!activeSectionV228)activeSectionV228='employees';
-    }
-
-    const wrap=document.createElement('div');
-    wrap.className='tasky-hr-subnav-v228';
-
-    HR_SECTIONS_V228.forEach(section=>{
-      /* Only show real HR tabs that actually exist, plus Employee Experience. */
-      if(section.key!=='experience' && source && !sourceButtonForV228(section))return;
-      if(section.key!=='experience' && !source)return;
-
-      const btn=document.createElement('button');
-      btn.type='button';
-      btn.dataset.hrSectionV228=section.key;
-      if(activeSectionV228===section.key)btn.classList.add('active');
-      btn.innerHTML=`<svg><use href="#${section.icon}"></use></svg><span class="txt"></span>`;
-      btn.querySelector('.txt').textContent=lang==='ar'?section.ar:section.en;
-
-      /* Use click, plus pointerup for touch reliability without duplicate execution. */
-      let pointerHandled=false;
-      btn.addEventListener('pointerup',event=>{
-        if(event.pointerType==='touch'||event.pointerType==='pen'){
-          pointerHandled=true;
-          event.preventDefault();
-          event.stopPropagation();
-          activateSectionV228(section.key);
-          setTimeout(()=>pointerHandled=false,350);
-        }
-      });
-      btn.addEventListener('click',event=>{
-        if(pointerHandled)return;
-        event.preventDefault();
-        event.stopPropagation();
-        activateSectionV228(section.key);
-      });
-
-      wrap.appendChild(btn);
-    });
-
-    hr.insertAdjacentElement('afterend',wrap);
-  }
-
-  function queueV228(){
-    requestAnimationFrame(()=>setTimeout(renderHrSubnavV228,0));
-  }
-
-  /* Tasky HR always opens on its default Home view. */
-  if(typeof taskySelectAppV217==='function'&&!window.__taskyHrSelectV228){
-    window.__taskyHrSelectV228=true;
-    const baseSelect=taskySelectAppV217;
-    taskySelectAppV217=async function(id,e){
-      if(id==='hr'){
-        e?.stopPropagation?.();
-        if(!taskyAppAvailableV217(id))return;
-        taskyCurrentAppV217='hr';
-        taskySaveCurrentAppV217();
-        document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
-        document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
-        try{taskyRenderAppSwitcherV217()}catch(_){}
-
-        try{
-          if(typeof taskyLazyLoadChunkV1681==='function' && !taskyLazyChunkLoadedV1681('hr')){
-            await taskyLazyLoadChunkV1681('hr');
-          }
-        }catch(err){
-          console.warn('V229: HR chunk load failed',err);
-          document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
-          document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
-          if(typeof taskyRenderMissingChunkV218==='function')taskyRenderMissingChunkV218('hr');
-          return;
-        }
-
-        await setActiveNav('hr');
-        activeSectionV228='';
-        queueV228();
-        return;
-      }
-      return baseSelect(id,e);
-    };
-  }
-
-  if(typeof renderModule==='function'&&!window.__taskyHrRenderV228){
-    window.__taskyHrRenderV228=true;
-    const baseRender=renderModule;
-    renderModule=function(...args){
-      const result=baseRender.apply(this,args);
-      queueV228();
-      return result;
-    };
-  }
-
-  if(typeof setActiveNav==='function'&&!window.__taskyHrNavV228){
-    window.__taskyHrNavV228=true;
-    const baseNav=setActiveNav;
-    setActiveNav=async function(...args){
-      const result=await baseNav.apply(this,args);
-      queueV228();
-      return result;
-    };
-  }
-
-  if(typeof taskyRefreshAppChromeV217==='function'&&!window.__taskyHrChromeV228){
-    window.__taskyHrChromeV228=true;
-    const baseChrome=taskyRefreshAppChromeV217;
-    taskyRefreshAppChromeV217=function(...args){
-      const result=baseChrome.apply(this,args);
-      queueV228();
-      return result;
-    };
-  }
-
-  function bindObserverV228(){
-    const area=document.getElementById('moduleArea');if(!area)return;
-    observerV228?.disconnect();
-    let timer=0;
-    observerV228=new MutationObserver(()=>{
-      clearTimeout(timer);
-      timer=setTimeout(renderHrSubnavV228,80);
-    });
-    observerV228.observe(area,{
-      childList:true,subtree:true,attributes:true,
-      attributeFilter:['class','aria-selected','data-active']
-    });
-  }
-
-  const start=()=>{bindObserverV228();queueV228()};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
-
-  window.taskyActivateHrSectionV228=activateSectionV228;
-  window.TASKY_BUILD='V228';
-  console.info('Tasky build V228 — deterministic HR subnavigation');
-})();
-</script>
-
-
-<script id="tasky-v229-hr-app-open-runtime-js">
-(function(){
-  async function taskyEnsureHrChunkV229(){
-    try{
-      if(typeof taskyLazyChunkLoadedV1681==='function' && taskyLazyChunkLoadedV1681('hr')){
-        return typeof fetchHrDataV72==='function';
-      }
-      if(typeof taskyLazyLoadChunkV1681==='function'){
-        await taskyLazyLoadChunkV1681('hr');
-        return typeof fetchHrDataV72==='function';
-      }
-      return typeof fetchHrDataV72==='function';
-    }catch(err){
-      console.warn('Tasky V229 HR chunk unavailable',err);
-      return false;
-    }
-  }
-  window.taskyEnsureHrChunkV229=taskyEnsureHrChunkV229;
-
-  if(typeof setActiveNav==='function'&&!window.__taskyHrFinalNavV229){
-    window.__taskyHrFinalNavV229=true;
-    const baseSetActiveNavV229=setActiveNav;
-    setActiveNav=async function(id,...args){
-      if(id==='hr'||id==='experience'){
-        const ok=await taskyEnsureHrChunkV229();
-        if(!ok){
-          try{taskyRenderMissingChunkV218('hr')}catch(_){}
-          return false;
-        }
-      }
-      return baseSetActiveNavV229(id,...args);
-    };
-  }
-
-  /* Reliable App Switcher handling on desktop + touch/mobile. */
-  let hrPointerHandledV229=false;
-  async function openHrFromMenuV229(event){
-    event?.preventDefault?.();
-    event?.stopPropagation?.();
-
-    document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
-    document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
-
-    if(!taskyAppAvailableV217('hr'))return false;
-    taskyCurrentAppV217='hr';
-    taskySaveCurrentAppV217();
-    try{taskyRenderAppSwitcherV217()}catch(_){}
-
-    const ok=await taskyEnsureHrChunkV229();
-    if(!ok){
-      try{taskyRenderMissingChunkV218('hr')}catch(_){}
-      return false;
-    }
-    await setActiveNav('hr');
-    try{taskyRefreshAppChromeV217()}catch(_){}
-    return true;
-  }
-
-  document.addEventListener('pointerup',event=>{
-    if(event.pointerType!=='touch'&&event.pointerType!=='pen')return;
-    const option=event.target.closest?.('.tasky-app-option-v217');
-    if(!option)return;
-    if(!/الموارد البشرية|Tasky HR/i.test((option.textContent||'').replace(/\s+/g,' ').trim()))return;
-    hrPointerHandledV229=true;
-    openHrFromMenuV229(event);
-    setTimeout(()=>{hrPointerHandledV229=false},400);
-  },true);
-
-  document.addEventListener('click',event=>{
-    if(hrPointerHandledV229)return;
-    const option=event.target.closest?.('.tasky-app-option-v217');
-    if(!option)return;
-    if(!/الموارد البشرية|Tasky HR/i.test((option.textContent||'').replace(/\s+/g,' ').trim()))return;
-    openHrFromMenuV229(event);
-  },true);
-
-  window.TASKY_BUILD='V229';
-  console.info('Tasky build V229 — HR app opening fixed at lazy-loader root');
-})();
-</script>
 
 </body>
 </html>
