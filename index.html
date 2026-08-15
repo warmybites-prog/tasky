@@ -2839,10 +2839,14 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
 </style>
 
 
-<style id="tasky-v231-click-project-css">
-/* Make App Switcher rows unequivocally interactive above sidebar overlays. */
+<style id="tasky-v232-navigation-css">
+/* ============================================================
+   TASKY V232 — Reliable direct navigation
+   ============================================================ */
+
+/* App Switcher */
 .tasky-app-menu-v217{
-  z-index:5000 !important;
+  z-index:6000 !important;
   pointer-events:auto !important;
 }
 .tasky-app-option-v217{
@@ -2853,9 +2857,9 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
   touch-action:manipulation;
   -webkit-tap-highlight-color:transparent;
 }
-.tasky-app-option-v217 *{pointer-events:none}
+.tasky-app-option-v217 *{pointer-events:none !important}
 
-/* Suite sections are clickable on mouse and touch. */
+/* Sidebar */
 #mainNav,
 #mainNav .tasky-suite-item-v230,
 #mainNav .tasky-suite-child-v230,
@@ -2872,9 +2876,23 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
   -webkit-tap-highlight-color:transparent;
 }
 
-/* Restore the previous compact Tasks + Projects treatment exactly.
-   V230's button-based project cards inherited generic button styles, causing
-   the oversized white blocks seen in the screenshot. */
+/* Only hide a source tab strip AFTER V232 has successfully promoted it. */
+html.tasky-suite-ready-v230 #moduleArea .hr72-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .crm-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .req150-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .exp160-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .surv-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .book140-tabs:not(.tasky-tabs-promoted-v232),
+html.tasky-suite-ready-v230 #moduleArea .meet10622-tabs:not(.tasky-tabs-promoted-v232){
+  display:flex !important;
+}
+#moduleArea .tasky-tabs-promoted-v232{
+  display:none !important;
+}
+
+/* ============================================================
+   Restore the old compact Tasks + Projects sidebar design.
+   ============================================================ */
 #mainNav .projects-inline-wrap{
   margin:3px 0 8px !important;
   padding:7px 6px 6px !important;
@@ -2905,15 +2923,26 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
   justify-content:center !important;
   padding:0 !important;
 }
-#mainNav .projects-inline-plus:hover{background:rgba(255,255,255,.11) !important;color:#fff !important}
+#mainNav .projects-inline-plus:hover{
+  background:rgba(255,255,255,.11) !important;
+  color:#fff !important;
+}
 #mainNav .projects-inline-plus svg{width:13px !important;height:13px !important}
 #mainNav .projects-inline-list{
   max-height:190px !important;
   overflow-y:auto !important;
   padding-inline-end:2px !important;
 }
-#mainNav .projects-list{display:flex !important;flex-direction:column !important;gap:1px !important}
-#mainNav .projects-empty{font-size:11.5px !important;color:#71836D !important;padding:6px 10px !important}
+#mainNav .projects-list{
+  display:flex !important;
+  flex-direction:column !important;
+  gap:1px !important;
+}
+#mainNav .projects-empty{
+  font-size:11.5px !important;
+  color:#71836D !important;
+  padding:6px 10px !important;
+}
 #mainNav a.project-item{
   display:flex !important;
   align-items:center !important;
@@ -2931,9 +2960,15 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
   text-decoration:none !important;
 }
 #mainNav a.project-item:hover{background:rgba(255,255,255,.05) !important}
-#mainNav a.project-item.active{background:rgba(255,255,255,.1) !important;color:#fff !important}
+#mainNav a.project-item.active{
+  background:rgba(255,255,255,.1) !important;
+  color:#fff !important;
+}
 #mainNav a.project-item .dot{
-  width:8px !important;height:8px !important;border-radius:3px !important;flex:none !important
+  width:8px !important;
+  height:8px !important;
+  border-radius:3px !important;
+  flex:none !important;
 }
 #mainNav a.create-project-item{
   color:#9FB09B !important;
@@ -2945,10 +2980,19 @@ html.tasky-suite-ready-v230 #moduleArea .mkt-view-toggle{
   border-color:rgba(255,255,255,.22) !important;
 }
 
+/* No duplicate app-name heading inside the current app navigation. */
+.tasky-suite-duplicate-app-name-v232{display:none !important}
+
+/* Small visible busy state while changing apps. */
+.tasky-app-option-v217.tasky-app-opening-v232{
+  opacity:.72;
+  pointer-events:none !important;
+}
+
 @media(max-width:820px){
-  .tasky-app-option-v217{min-height:48px}
-  #mainNav .tasky-suite-item-v230{min-height:48px !important}
-  #mainNav .tasky-suite-child-v230{min-height:44px !important}
+  .tasky-app-option-v217{min-height:50px}
+  #mainNav .tasky-suite-item-v230{min-height:48px !important;font-size:13px !important}
+  #mainNav .tasky-suite-child-v230{min-height:44px !important;font-size:11.5px !important}
   #mainNav a.project-item{min-height:40px !important}
 }
 </style>
@@ -17180,27 +17224,18 @@ function taskyNavButtonV230({label,icon='i-file',active=false,action='',key='',m
 
 function taskyRenderProjectsV230(){
   if(!taskyModuleEnabledForWorkspaceV217('tasks'))return '';
-  const projectColors=['var(--blue)','var(--teal)','var(--green)','var(--blue-deep)','var(--violet)','var(--amber)'];
-  const projectRows=(projects||[]).map((p,i)=>`
-    <a class="project-item ${activeProjectId===p.id?'active':''}" data-v230-action="project" data-v230-key="${p.id}">
-      <span class="dot" style="background:${projectColors[i%projectColors.length]}"></span>
+  const colors=['var(--blue)','var(--teal)','var(--green)','var(--blue-deep)','var(--violet)','var(--amber)'];
+  const rows=(projects||[]).map((p,i)=>`
+    <button type="button" class="project-item ${activeProjectId===p.id?'active':''}" data-v230-action="project" data-v230-key="${p.id}">
+      <span class="dot" style="background:${colors[i%colors.length]}"></span>
       <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</span>
-    </a>`).join('');
-  const addProjectLabel=lang==='ar'?'مشروع جديد':'New project';
-  const noProjectsLabel=lang==='ar'?'لا توجد مشاريع بعد':'No projects yet';
-  return `<div class="projects-inline-wrap">
-    <div class="projects-inline-head">
-      <span>${t('projectsLabel')}</span>
-      <button type="button" class="projects-inline-plus" data-v230-action="new-project" title="${addProjectLabel}">
-        <svg><use href="#i-plus"/></svg>
-      </button>
-    </div>
-    <div class="projects-list projects-inline-list">
-      ${projectRows||`<div class="projects-empty">${noProjectsLabel}</div>`}
-      <a class="project-item create-project-item" data-v230-action="new-project">
-        <svg style="width:15px;height:15px;flex:none"><use href="#i-plus"/></svg>${addProjectLabel}
-      </a>
-    </div>
+    </button>`).join('');
+  const add=taskyL230('مشروع جديد','New project');
+  return `<div class="tasky-suite-projects-v230">
+    ${rows||`<div class="tasky-suite-empty-v230">${taskyL230('لا توجد مشاريع بعد','No projects yet')}</div>`}
+    <button type="button" class="project-item create-project-item" data-v230-action="new-project">
+      ${taskyNavIconV230('i-plus')}${add}
+    </button>
   </div>`;
 }
 
@@ -17438,10 +17473,10 @@ function taskyWorkNavV230(){
   });
   if(taskyModuleEnabledForWorkspaceV217('tasks')){
     out+=taskyNavButtonV230({
-      label:t('nav_tasks'),icon:'i-check',
+      label:taskyL230('المهام والمشاريع','Tasks & Projects'),icon:'i-check',
       active:activeNav==='tasks',action:'module',module:'tasks'
     });
-    out+=taskyRenderProjectsV230();
+    if(activeNav==='tasks'||taskyCurrentAppV217==='work')out+=taskyRenderProjectsV230();
   }
   return out;
 }
@@ -17533,7 +17568,7 @@ function taskyRenderAppSwitcherV217(){
     ${available.map(id=>{
       const a=TASKY_APPS_V217[id];
       const active=id===taskyCurrentAppV217;
-      return `<button type="button" class="tasky-app-option-v217 ${active?'active':''}" data-tasky-app-id="${id}" onclick="taskySelectAppV217('${id}',event)">
+      return `<button type="button" class="tasky-app-option-v217 ${active?'active':''}" onclick="taskySelectAppV217('${id}',event)">
         <span class="tasky-app-option-icon-v217" style="background:${a.color}">${a.short}</span>
         <span class="tasky-app-option-copy-v217">
           <b>${lang==='ar'?a.ar:a.en}</b>
@@ -17754,60 +17789,15 @@ async function taskyHandleSuiteActionV230(btn,event){
   },0);
 }
 
-let taskyPointerHandledV231=false;
-
-function taskyRouteInteractiveClickV231(event){
-  const appOption=event.target.closest?.('.tasky-app-option-v217[data-tasky-app-id]');
-  if(appOption){
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation?.();
-    const appId=appOption.dataset.taskyAppId;
-    Promise.resolve(taskySelectAppV217(appId,event)).catch(err=>console.warn('V231 app select',appId,err));
-    return true;
-  }
-
-  const nav=document.getElementById('mainNav');
-  const btn=event.target.closest?.('#mainNav [data-v230-action]');
-  if(btn&&nav?.contains(btn)){
-    event.preventDefault();
-    event.stopPropagation();
-    event.stopImmediatePropagation?.();
-    Promise.resolve(taskyHandleSuiteActionV230(btn,event)).catch(err=>console.warn('V231 nav action',err));
-    return true;
-  }
-  return false;
-}
-
 function taskyInstallNavEventsV230(){
-  if(document.documentElement.dataset.taskyV231Events==='1')return;
-  document.documentElement.dataset.taskyV231Events='1';
-
-  /* Touch/pen: pointerup is more reliable than waiting for synthetic click
-     after drawer scrolling. */
-  document.addEventListener('pointerup',event=>{
-    if(event.pointerType!=='touch'&&event.pointerType!=='pen')return;
-    const handled=taskyRouteInteractiveClickV231(event);
-    if(!handled)return;
-    taskyPointerHandledV231=true;
-    setTimeout(()=>{taskyPointerHandledV231=false},420);
-  },true);
-
-  /* Mouse/keyboard-generated click. Capture phase means older sidebar handlers
-     cannot swallow the event before Tasky routes it. */
-  document.addEventListener('click',event=>{
-    if(taskyPointerHandledV231){
-      const app=event.target.closest?.('.tasky-app-option-v217[data-tasky-app-id]');
-      const nav=event.target.closest?.('#mainNav [data-v230-action]');
-      if(app||nav){
-        event.preventDefault();
-        event.stopPropagation();
-        event.stopImmediatePropagation?.();
-      }
-      return;
-    }
-    taskyRouteInteractiveClickV231(event);
-  },true);
+  const nav=document.getElementById('mainNav');if(!nav||nav.dataset.taskyV230Events==='1')return;
+  nav.dataset.taskyV230Events='1';
+  nav.addEventListener('click',event=>{
+    const btn=event.target.closest?.('[data-v230-action]');
+    if(!btn||!nav.contains(btn))return;
+    event.preventDefault();event.stopPropagation();
+    taskyHandleSuiteActionV230(btn,event).catch(err=>console.warn('V230 nav action',err));
+  });
 }
 
 function taskyRenderMissingChunkV230(name,error){
@@ -17921,18 +17911,463 @@ console.info('Tasky build V230 — audited modular navigation');
 
 
 
-<script id="tasky-v231-build-marker">
-window.TASKY_BUILD='V231';
-window.taskyV231Diagnostics=function(){
-  return {
-    appOptions:document.querySelectorAll('.tasky-app-option-v217[data-tasky-app-id]').length,
-    suiteActions:document.querySelectorAll('#mainNav [data-v230-action]').length,
-    eventRouter:document.documentElement.dataset.taskyV231Events==='1',
-    currentApp:typeof taskyCurrentAppV217!=='undefined'?taskyCurrentAppV217:null,
-    activeNav:typeof activeNav!=='undefined'?activeNav:null
+<script id="tasky-v232-navigation-runtime-js">
+(function(){
+  /* ------------------------------------------------------------
+     1. Direct click model
+     ------------------------------------------------------------ */
+  window.taskySuiteDispatchV232=function(btn,event){
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    const p=Promise.resolve(taskyHandleSuiteActionV230(btn,event));
+    p.catch(err=>console.warn('Tasky V232 sidebar action',err));
+    return false;
   };
-};
-console.info('Tasky build V231 — click routing + classic project sidebar');
+
+  /* Every generated navigation button gets a direct onclick.
+     No document-level/capture router is required. */
+  taskyNavButtonV230=function({label,icon='i-file',active=false,action='',key='',module='',extra='',primary=true,expanded=false}){
+    const cls=primary?'tasky-suite-item-v230':'tasky-suite-child-v230';
+    const chev=expanded!==false&&primary?`<svg class="chev"><use href="#i-chevron"/></svg>`:'';
+    return `<button type="button"
+      class="${cls} ${active?'active':''} ${expanded===true?'expanded':''}"
+      data-v230-action="${action}"
+      data-v230-key="${key||''}"
+      data-v230-module="${module||''}"
+      ${extra||''}
+      onclick="return taskySuiteDispatchV232(this,event)">
+      ${taskyNavIconV230(icon)}
+      <span class="txt">${escapeHtml(String(label||''))}</span>
+      ${chev}
+    </button>`;
+  };
+
+  /* Old V230 delegated nav listener is not needed anymore.
+     Existing listener, if already installed during V230 bootstrap, cannot
+     receive these clicks because the direct handler stops propagation. */
+  taskyInstallNavEventsV230=function(){};
+
+  /* ------------------------------------------------------------
+     2. Old compact Tasks/Projects design
+     ------------------------------------------------------------ */
+  taskyRenderProjectsV230=function(){
+    if(!taskyModuleEnabledForWorkspaceV217('tasks'))return '';
+    const projectColors=['var(--blue)','var(--teal)','var(--green)','var(--blue-deep)','var(--violet)','var(--amber)'];
+    const projectRows=(projects||[]).map((p,i)=>`
+      <a class="project-item ${activeProjectId===p.id?'active':''}"
+         data-v230-action="project"
+         data-v230-key="${p.id}"
+         onclick="return taskySuiteDispatchV232(this,event)">
+        <span class="dot" style="background:${projectColors[i%projectColors.length]}"></span>
+        <span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${escapeHtml(p.name)}</span>
+      </a>`).join('');
+
+    const addProjectLabel=lang==='ar'?'مشروع جديد':'New project';
+    const noProjectsLabel=lang==='ar'?'لا توجد مشاريع بعد':'No projects yet';
+
+    return `<div class="projects-inline-wrap">
+      <div class="projects-inline-head">
+        <span>${t('projectsLabel')}</span>
+        <button type="button"
+                class="projects-inline-plus"
+                data-v230-action="new-project"
+                title="${addProjectLabel}"
+                onclick="return taskySuiteDispatchV232(this,event)">
+          <svg><use href="#i-plus"/></svg>
+        </button>
+      </div>
+      <div class="projects-list projects-inline-list">
+        ${projectRows||`<div class="projects-empty">${noProjectsLabel}</div>`}
+        <a class="project-item create-project-item"
+           data-v230-action="new-project"
+           onclick="return taskySuiteDispatchV232(this,event)">
+          <svg style="width:15px;height:15px;flex:none"><use href="#i-plus"/></svg>${addProjectLabel}
+        </a>
+      </div>
+    </div>`;
+  };
+
+  taskyWorkNavV230=function(){
+    let out=taskyNavButtonV230({
+      label:taskyL230('الرئيسية','Home'),icon:'i-home',
+      active:activeNav==='home',action:'app-home',key:'work'
+    });
+    if(taskyModuleEnabledForWorkspaceV217('tasks')){
+      out+=taskyNavButtonV230({
+        label:t('nav_tasks'),icon:'i-check',
+        active:activeNav==='tasks',action:'module',module:'tasks'
+      });
+      out+=taskyRenderProjectsV230();
+    }
+    return out;
+  };
+
+  /* ------------------------------------------------------------
+     3. Source-tab promotion helpers
+     ------------------------------------------------------------ */
+  function normV232(s){
+    return String(s||'').replace(/\s+/g,' ').trim();
+  }
+  function lowerV232(s){return normV232(s).toLocaleLowerCase()}
+  function waitV232(selector,timeout=3000){
+    return new Promise(resolve=>{
+      const started=Date.now();
+      const tick=()=>{
+        const el=document.querySelector(selector);
+        if(el)return resolve(el);
+        if(Date.now()-started>=timeout)return resolve(null);
+        setTimeout(tick,40);
+      };
+      tick();
+    });
+  }
+  function markPromotedV232(source){
+    if(!source)return;
+    source.classList.remove('tasky-tabs-promoted-v230');
+    source.classList.add('tasky-tabs-promoted-v232');
+  }
+
+  const HOME_ALIASES_V232={
+    bookings:['الحجوزات','bookings','الرئيسية','home','نظرة عامة','overview'],
+    meetings:['الاجتماعات','meetings','الرئيسية','home','نظرة عامة','overview']
+  };
+
+  function isHomeAliasV232(appId,label,index){
+    const n=lowerV232(label);
+    const list=(HOME_ALIASES_V232[appId]||[]).map(lowerV232);
+    return list.includes(n)||index===0;
+  }
+
+  function dynamicSourceV232(selector){
+    return document.querySelector(`#moduleArea ${selector}`);
+  }
+
+  async function clickDynamicV232(appId,selector,label,index){
+    let source=dynamicSourceV232(selector);
+    if(!source)source=await waitV232(`#moduleArea ${selector}`,3000);
+    if(!source)return false;
+
+    markPromotedV232(source);
+    const buttons=[...source.querySelectorAll(':scope > button')];
+    let target=null;
+
+    if(label){
+      const wanted=normV232(label);
+      target=buttons.find(b=>normV232(b.textContent)===wanted)||null;
+    }
+    if(!target && Number.isFinite(index))target=buttons[index]||null;
+    if(!target)return false;
+
+    target.click();
+    setTimeout(taskyRefreshAppChromeV217,20);
+    return true;
+  }
+
+  async function openDynamicHomeV232(appId,moduleId,selector){
+    await setActiveNav(moduleId);
+    let source=dynamicSourceV232(selector);
+    if(!source)source=await waitV232(`#moduleArea ${selector}`,3000);
+    if(!source)return true; // module opened; no secondary strip available
+
+    markPromotedV232(source);
+    const buttons=[...source.querySelectorAll(':scope > button')];
+    if(!buttons.length)return true;
+
+    const home=buttons.find((b,i)=>isHomeAliasV232(appId,b.textContent,i))||buttons[0];
+    home?.click?.();
+    setTimeout(taskyRefreshAppChromeV217,20);
+    return true;
+  }
+
+  function dynamicAppNavV232(appId,moduleId,selector){
+    const source=dynamicSourceV232(selector);
+    let activeIndex=-1;
+    let buttons=[];
+
+    if(source){
+      markPromotedV232(source);
+      buttons=[...source.querySelectorAll(':scope > button')];
+      activeIndex=buttons.findIndex(b=>
+        b.classList.contains('active')||
+        b.getAttribute('aria-selected')==='true'||
+        b.getAttribute('data-active')==='true'
+      );
+    }
+
+    const homeActive=activeNav===moduleId && (activeIndex<0 || isHomeAliasV232(appId,buttons[activeIndex]?.textContent||'',activeIndex));
+    let out=taskyNavButtonV230({
+      label:taskyL230('الرئيسية','Home'),
+      icon:'i-home',
+      active:homeActive,
+      action:'dynamic-home',
+      key:appId,
+      module:moduleId,
+      extra:`data-v232-selector="${selector}"`
+    });
+
+    if(!source)return out;
+
+    buttons.forEach((b,index)=>{
+      const label=normV232(b.textContent);
+      if(!label||isHomeAliasV232(appId,label,index))return; // removes duplicate app name/home
+      out+=taskyNavButtonV230({
+        label,
+        icon:taskyIconForTextV230(label),
+        active:activeNav===moduleId&&index===activeIndex,
+        action:'dynamic-tab-v232',
+        key:appId,
+        module:moduleId,
+        extra:`data-v232-selector="${selector}" data-v232-index="${index}" data-v232-label="${escapeHtml(label)}"`
+      });
+    });
+    return out;
+  }
+
+  /* ------------------------------------------------------------
+     4. Explicit app subsection audits
+     ------------------------------------------------------------ */
+
+  const baseHrNavV232=taskyHrNavV230;
+  taskyHrNavV230=function(){
+    const source=document.querySelector('#moduleArea .hr72-tabs');
+    if(source&&activeNav==='hr')markPromotedV232(source);
+    return baseHrNavV232();
+  };
+
+  const baseCrmNavV232=taskyCrmNavV230;
+  taskyCrmNavV230=function(){
+    const source=document.querySelector('#moduleArea .crm-tabs');
+    if(source&&activeNav==='crm')markPromotedV232(source);
+    return baseCrmNavV232();
+  };
+
+  const baseRequestsNavV232=taskyRequestsNavV230;
+  taskyRequestsNavV230=function(){
+    const source=document.querySelector('#moduleArea .req150-tabs');
+    if(source&&activeNav==='requests')markPromotedV232(source);
+    return baseRequestsNavV232();
+  };
+
+  taskyExperienceChildrenV230=function(){
+    if(activeNav!=='experience'||typeof exp160Tabs==='undefined')return '';
+    const source=document.querySelector('#moduleArea .exp160-tabs');
+    if(source)markPromotedV232(source);
+
+    const children=exp160Tabs.filter(t=>t[0]!=='overview');
+    if(!children.length)return '';
+    return `<div class="tasky-suite-children-v230">${children.map(t=>
+      taskyNavButtonV230({
+        label:lang==='ar'?t[1]:t[2],
+        icon:taskyIconForTextV230(lang==='ar'?t[1]:t[2]),
+        active:typeof exp160Tab!=='undefined'&&exp160Tab===t[0],
+        action:'experience-tab',key:t[0],primary:false
+      })
+    ).join('')}</div>`;
+  };
+
+  const baseSurveyNavV232=taskySurveyNavV230;
+  taskySurveyNavV230=function(){
+    const source=document.querySelector('#moduleArea .surv-tabs');
+    if(source&&typeof surveyBuilderId!=='undefined'&&surveyBuilderId)markPromotedV232(source);
+    return baseSurveyNavV232();
+  };
+
+  /* ------------------------------------------------------------
+     5. App-specific navigation.
+     Bookings / Meetings get Home + real subsections with duplicate
+     app-name labels filtered out.
+     ------------------------------------------------------------ */
+  taskyAppSpecificNavV230=function(){
+    switch(taskyCurrentAppV217){
+      case 'work':return taskyWorkNavV230();
+      case 'marketing':return taskyMarketingNavV230();
+      case 'hr':return taskyHrNavV230();
+      case 'sales':return taskyCrmNavV230();
+      case 'requests':return taskyRequestsNavV230();
+      case 'bookings':return dynamicAppNavV232('bookings','bookings','.book140-tabs');
+      case 'inventory':return taskySimpleAppNavV230('inventory','inventory');
+      case 'procurement':return taskySimpleAppNavV230('procurement','vendors');
+      case 'events':return taskySimpleAppNavV230('events','events');
+      case 'finance':return taskySimpleAppNavV230('finance','budgets');
+      case 'meetings':return dynamicAppNavV232('meetings','meetings','.meet10622-tabs');
+      case 'connect':return taskySimpleAppNavV230('connect','connect');
+      case 'analytics':return taskySimpleAppNavV230('analytics','analytics');
+      case 'reports':return taskySimpleAppNavV230('reports','reports');
+      case 'surveys':return taskySurveyNavV230();
+      case 'integrations':return taskySimpleAppNavV230('integrations','integrations');
+    }
+    return '';
+  };
+
+  /* ------------------------------------------------------------
+     6. App Switcher — direct onclick + immediate visual response
+     ------------------------------------------------------------ */
+  taskyRenderAppSwitcherV217=function(){
+    const wrap=document.getElementById('taskyAppSwitcherV217');
+    const menu=document.getElementById('taskyAppMenuV217');
+    const name=document.getElementById('taskyAppNameV217');
+    const dot=document.getElementById('taskyAppDotV217');
+    if(!wrap||!menu||!name||!dot)return;
+
+    taskyResolveCurrentAppV217();
+    const app=TASKY_APPS_V217[taskyCurrentAppV217]||TASKY_APPS_V217.work;
+    name.textContent=taskyAppLabelV217(taskyCurrentAppV217);
+    dot.style.background=app.color;
+    dot.textContent=app.short;
+    dot.style.display='grid';
+    dot.style.placeItems='center';
+    dot.style.fontSize=app.short.length>2?'7px':'9px';
+    dot.style.fontWeight='900';
+    dot.style.color='#102719';
+
+    const available=taskyAvailableAppsV217();
+    menu.innerHTML=`
+      <div class="tasky-app-menu-head-v217">
+        <b>${taskyL230('تطبيقات مساحة العمل','Workspace apps')}</b>
+        <span>${taskyL230('تظهر فقط التطبيقات المفعلة لهذه الشركة أو الفريق.','Only apps enabled for this company or team are shown.')}</span>
+      </div>
+      ${available.map(id=>{
+        const a=TASKY_APPS_V217[id];
+        const active=id===taskyCurrentAppV217;
+        return `<button type="button"
+          class="tasky-app-option-v217 ${active?'active':''}"
+          data-tasky-app-id-v232="${id}"
+          onclick="return taskyOpenAppV232('${id}',event)">
+          <span class="tasky-app-option-icon-v217" style="background:${a.color}">${a.short}</span>
+          <span class="tasky-app-option-copy-v217">
+            <b>${lang==='ar'?a.ar:a.en}</b>
+            <span>${taskyL230('مشترك في مساحة العمل','Enabled for this workspace')}</span>
+          </span>
+          ${active?`<svg class="tasky-app-option-check-v217"><use href="#i-check"/></svg>`:''}
+        </button>`;
+      }).join('')}
+      <div class="tasky-app-shared-label-v217">${taskyL230('الخدمات المشتركة متاحة داخل جميع التطبيقات','Shared services remain available across apps')}</div>`;
+  };
+
+  async function openAppHomeV232(appId){
+    if(appId==='bookings')return openDynamicHomeV232('bookings','bookings','.book140-tabs');
+    if(appId==='meetings')return openDynamicHomeV232('meetings','meetings','.meet10622-tabs');
+    return taskyOpenAppHomeV230(appId);
+  }
+
+  window.taskyOpenAppV232=async function(id,event){
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if(!taskyAppAvailableV217(id))return false;
+
+    const menu=document.getElementById('taskyAppMenuV217');
+    const btn=document.getElementById('taskyAppSwitcherBtnV217');
+    const option=event?.currentTarget||null;
+
+    menu?.classList.add('hidden');
+    btn?.setAttribute('aria-expanded','false');
+    option?.classList.add('tasky-app-opening-v232');
+
+    taskyCurrentAppV217=id;
+    taskySaveCurrentAppV217();
+    taskyRenderAppSwitcherV217(); // visible response before lazy work
+
+    try{
+      await openAppHomeV232(id);
+      taskyRefreshAppChromeV217();
+      return false;
+    }catch(err){
+      console.warn('Tasky V232 app open',id,err);
+      if(['hr','bookings','meetings'].includes(id)){
+        try{taskyRenderMissingChunkV230(id,err)}catch(_){}
+      }
+      return false;
+    }finally{
+      option?.classList.remove('tasky-app-opening-v232');
+    }
+  };
+
+  /* Keep old callers compatible. */
+  window.taskySelectAppV217=window.taskyOpenAppV232;
+
+  /* ------------------------------------------------------------
+     7. Direct action dispatcher additions
+     ------------------------------------------------------------ */
+  const baseHandleV232=taskyHandleSuiteActionV230;
+  taskyHandleSuiteActionV230=async function(btn,event){
+    const action=btn.dataset.v230Action||'';
+
+    if(action==='dynamic-home'){
+      const appId=btn.dataset.v230Key||'';
+      const moduleId=btn.dataset.v230Module||'';
+      const selector=btn.dataset.v232Selector||'';
+      await openDynamicHomeV232(appId,moduleId,selector);
+      setTimeout(taskyRefreshAppChromeV217,0);
+      try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
+      return;
+    }
+
+    if(action==='dynamic-tab-v232'){
+      const appId=btn.dataset.v230Key||'';
+      const selector=btn.dataset.v232Selector||'';
+      const label=btn.dataset.v232Label||'';
+      const index=Number(btn.dataset.v232Index);
+      await clickDynamicV232(appId,selector,label,index);
+      try{taskyCloseDrawerAfterNavV1682()}catch(_){try{closeMobileSidebar()}catch(__){}}
+      return;
+    }
+
+    return baseHandleV232(btn,event);
+  };
+
+  /* ------------------------------------------------------------
+     8. Breadcrumb and app-home naming audit
+     ------------------------------------------------------------ */
+  const baseCurrentSectionV232=taskyCurrentSectionLabelV230;
+  taskyCurrentSectionLabelV230=function(){
+    if(taskyCurrentAppV217==='bookings'&&activeNav==='bookings'){
+      const source=dynamicSourceV232('.book140-tabs');
+      const active=source?[...source.querySelectorAll(':scope > button')].find(b=>b.classList.contains('active')||b.getAttribute('aria-selected')==='true'):null;
+      const label=normV232(active?.textContent);
+      if(!label||isHomeAliasV232('bookings',label,[...source?.querySelectorAll(':scope > button')||[]].indexOf(active))){
+        return taskyL230('الرئيسية','Home');
+      }
+      return label;
+    }
+    if(taskyCurrentAppV217==='meetings'&&activeNav==='meetings'){
+      const source=dynamicSourceV232('.meet10622-tabs');
+      const active=source?[...source.querySelectorAll(':scope > button')].find(b=>b.classList.contains('active')||b.getAttribute('aria-selected')==='true'):null;
+      const label=normV232(active?.textContent);
+      if(!label)return taskyL230('الرئيسية','Home');
+      return isHomeAliasV232('meetings',label,0)?taskyL230('الرئيسية','Home'):label;
+    }
+    return baseCurrentSectionV232();
+  };
+
+  /* ------------------------------------------------------------
+     9. Re-render now using the audited V232 functions.
+     ------------------------------------------------------------ */
+  taskyRefreshAppChromeV217();
+  window.TASKY_BUILD='V232';
+
+  window.taskyV232Audit=function(){
+    const nav=document.getElementById('mainNav');
+    return {
+      build:window.TASKY_BUILD,
+      app:taskyCurrentAppV217,
+      activeNav,
+      appOptions:[...document.querySelectorAll('.tasky-app-option-v217')].map(x=>normV232(x.textContent)),
+      sidebar:[...(nav?.querySelectorAll('[data-v230-action]')||[])].map(x=>({
+        label:normV232(x.textContent),
+        action:x.dataset.v230Action,
+        directClick:!!x.getAttribute('onclick')
+      })),
+      bookingSource:!!document.querySelector('#moduleArea .book140-tabs'),
+      meetingSource:!!document.querySelector('#moduleArea .meet10622-tabs'),
+      hrApi:typeof setHrTabV72==='function',
+      crmApi:typeof setCrmView==='function',
+      requestsApi:typeof req150SetTab==='function'
+    };
+  };
+
+  console.info('Tasky build V232 — direct app/section navigation + duplicate-name cleanup');
+})();
 </script>
 
 </body>
