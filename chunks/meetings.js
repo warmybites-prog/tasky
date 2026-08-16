@@ -4593,3 +4593,17 @@ if(typeof setMeetingsSectionV10622==='function' && !window.__taskyBrainstormLazy
   };
   window.setMeetingsSectionV10622=_wrapper;
 }
+
+/* ============================================================
+   TASKY V250 — MEETINGS CHUNK COMPATIBILITY EXPORT
+   Keeps both the canonical and the legacy V249 handler names available.
+   ============================================================ */
+try{
+  window.taskyMeetingHandleDeepLinkV101=taskyMeetingHandleDeepLinkV101;
+  window.handleMeetingDeepLinkV101=taskyMeetingHandleDeepLinkV101;
+  window.TASKY_MEETINGS_CHUNK_READY_V250=true;
+  console.info('Tasky Meetings V250 compatibility export ready');
+}catch(err){
+  console.error('Tasky Meetings V250 compatibility export failed',err);
+}
+
