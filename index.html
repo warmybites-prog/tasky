@@ -16024,9 +16024,9 @@ async function taskyLazyLoadChunkV1681(name){
     try{
       await taskyLazyLoadScriptV1681(c.url);
       if(name==='hr'){
-        await taskyLazyLoadScriptV1681('chunks/hr-leave-v256.js?v=256');
+        await taskyLazyLoadScriptV1681('chunks/hr-leave-v257.js?v=257');
         if(typeof setHrTabV72!=='function')throw new Error('HR chunk loaded without HR API');
-        if(window.TASKY_HR_LEAVE_V256!==true)throw new Error('HR V256 leave addon loaded without API');
+        if(window.TASKY_HR_LEAVE_V257!==true)throw new Error('HR V257 leave addon loaded without API');
       }
       if(name==='meetings' && (typeof fetchMeetingsV101!=='function' || typeof meetingsTemplateV101!=='function')){
         throw new Error('Meetings chunk loaded without Meetings API');
@@ -19155,8 +19155,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
 <script id="tasky-v256-leave-feature-marker-js" type="text/tasky-deferred-v247">
 (function(){
-  window.TASKY_BUILD='V256';
-  console.info('Tasky V256 — half-day + study + other leave');
+  window.TASKY_BUILD='V257';
+  console.info('Tasky V257 — leave button routing fix');
 })();
 </script>
 
