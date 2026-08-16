@@ -3139,13 +3139,12 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV243" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V243</div>
   </div>
 </div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.112.2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.111.0"></script>
 <script>
 if(!window.supabase){
-  document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.112.2/dist/umd/supabase.js"><\/script>');
+  document.write('<script src="https://unpkg.com/@supabase/supabase-js@2.111.0/dist/umd/supabase.js"><\/script>');
 }
 </script>
 
@@ -3470,120 +3469,68 @@ if(!window.supabase){
   document.addEventListener('DOMContentLoaded',()=>{const s=document.getElementById('authSubtitle');if(s)s.textContent=lang==='ar'?'تعذّر تحميل الاتصال. حدّث الصفحة أو جرّب شبكة أخرى.':'Connection library failed to load. Refresh or try another network.';});
   throw new Error('Supabase client library failed to load');
 }
-let sb = window.supabase.createClient(
+const sb = window.supabase.createClient(
   TASKY_SUPABASE_URL,
   TASKY_SUPABASE_PUBLISHABLE_KEY,
   {
     auth:{
       persistSession:true,
       autoRefreshToken:true,
-      detectSessionInUrl:true,
-      skipAutoInitialize:true
+      detectSessionInUrl:true
     }
   }
 );
 
-const TASKY_SUPABASE_SDK_V242='2.112.2';
-const TASKY_SUPABASE_SDK_V243='2.112.2';
+const TASKY_SUPABASE_SDK_V242='2.111.0';
 
-let taskySupabaseInitPromiseV243=null;
-let taskySupabaseInitDoneV243=false;
-let taskySupabaseRecoveryUsedV243=false;
-let taskyAuthListenersRegisteredV243=false;
-
-function taskyTimeoutV243(promise,ms,label='operation'){
+function taskyTimeoutV242(promise,ms,label='operation'){
   let timer=null;
   const timeout=new Promise((_,reject)=>{
     timer=setTimeout(()=>{
       const err=new Error(`${label} timed out after ${ms}ms`);
-      err.code='TASKY_TIMEOUT_V243';
+      err.code='TASKY_TIMEOUT_V242';
       reject(err);
     },ms);
   });
   return Promise.race([Promise.resolve(promise),timeout]).finally(()=>clearTimeout(timer));
 }
 
-/* The auth listener functions are declared later in this same script.
-   Function declarations are hoisted, so we can attach them only AFTER
-   Supabase Auth initialization has completed. */
-function taskyRegisterAuthListenersV243(){
-  if(taskyAuthListenersRegisteredV243)return;
-  taskyAuthListenersRegisteredV243=true;
-  try{sb.auth.onAuthStateChange(taskyMainAuthStateListenerV243)}catch(err){console.warn('V243 main auth listener',err)}
-  try{sb.auth.onAuthStateChange(taskyRecoveryAuthStateListenerV243)}catch(err){console.warn('V243 recovery auth listener',err)}
-}
+async function taskyGetSessionSafeV242(){
+  let firstError=null;
+  try{
+    return await taskyTimeoutV242(sb.auth.getSession(),7000,'auth.getSession');
+  }catch(err){
+    firstError=err;
+    console.warn('Tasky V242 first session check did not finish',err);
+    taskyBootSetV83?.(10,'إعادة التحقق من الجلسة…','Retrying session check…');
+  }
 
-function taskyCreateRecoveryClientV243(){
-  try{sb?.auth?.dispose?.()}catch(_){}
-  sb = window.supabase.createClient(
-    TASKY_SUPABASE_URL,
-    TASKY_SUPABASE_PUBLISHABLE_KEY,
-    {
-      auth:{
-        persistSession:true,
-        autoRefreshToken:true,
-        detectSessionInUrl:true,
-        skipAutoInitialize:true,
-        /* Recovery only: explicitly bypass any legacy browser lock path.
-           The current SDK is lockless by default; this exists solely so a
-           poisoned older-tab/client state cannot keep Tasky on the splash. */
-        lock:async(_name,_timeout,fn)=>await fn()
-      }
-    }
-  );
-}
-
-async function taskyInitializeSupabaseV243(){
-  if(taskySupabaseInitDoneV243)return true;
-  if(taskySupabaseInitPromiseV243)return taskySupabaseInitPromiseV243;
-
-  taskySupabaseInitPromiseV243=(async()=>{
-    taskyBootSetV83?.(9,'جارٍ تهيئة جلسة الدخول…','Initializing sign-in session…');
-
-    try{
-      const init=await taskyTimeoutV243(sb.auth.initialize(),5500,'auth.initialize');
-      if(init?.error)throw init.error;
-    }catch(firstErr){
-      console.warn('Tasky V243 primary auth initialization did not finish',firstErr);
-      taskyBootSetV83?.(11,'إصلاح جلسة المتصفح…','Repairing browser session…');
-
-      taskySupabaseRecoveryUsedV243=true;
-      taskyCreateRecoveryClientV243();
-
-      const retry=await taskyTimeoutV243(sb.auth.initialize(),5500,'auth.initialize recovery');
-      if(retry?.error)throw retry.error;
-    }
-
-    taskySupabaseInitDoneV243=true;
-    taskyRegisterAuthListenersV243();
-    taskyBootSetV83?.(13,'جارٍ قراءة الجلسة…','Reading session…');
-    return true;
-  })();
-
-  try{return await taskySupabaseInitPromiseV243;}
-  catch(err){
-    taskySupabaseInitPromiseV243=null;
-    throw err;
+  /* A very short retry after the SDK initialization queue has had a chance
+     to settle. The exact SDK version is pinned above so a future CDN major-tag
+     change cannot silently alter the startup path. */
+  await new Promise(r=>setTimeout(r,180));
+  try{
+    return await taskyTimeoutV242(sb.auth.getSession(),7000,'auth.getSession retry');
+  }catch(err){
+    const finalErr=new Error(
+      taskyBootLangV83(
+        'تعذّر التحقق من جلسة تاسكي. أغلق أي تبويبات تاسكي القديمة ثم حدّث الصفحة.',
+        'Tasky could not verify the session. Close any old Tasky tabs and refresh.'
+      )
+    );
+    finalErr.code='TASKY_AUTH_STARTUP_V242';
+    finalErr.cause=err||firstError;
+    throw finalErr;
   }
 }
 
-async function taskyGetSessionSafeV243(){
-  await taskyInitializeSupabaseV243();
-  return await taskyTimeoutV243(sb.auth.getSession(),4000,'auth.getSession');
-}
-
-/* Compatibility aliases for historical V242 code paths. */
-async function taskyGetSessionSafeV242(){
-  return taskyGetSessionSafeV243();
-}
 async function taskyGetUserSafeV242(session){
   if(session?.user)return session.user;
   try{
-    await taskyInitializeSupabaseV243();
-    const result=await taskyTimeoutV243(sb.auth.getUser(),4500,'auth.getUser');
+    const result=await taskyTimeoutV242(sb.auth.getUser(),5000,'auth.getUser');
     if(!result?.error&&result?.data?.user)return result.data.user;
   }catch(err){
-    console.warn('Tasky V243 getUser fallback',err);
+    console.warn('Tasky V242 getUser fallback',err);
   }
   return null;
 }
@@ -3617,7 +3564,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V243',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V242',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3701,9 +3648,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V243',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V242',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V243'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V242'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10757,7 +10704,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V243',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V242',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -10776,13 +10723,13 @@ function renderAll(){
 /* ================= INIT ================= */
 // Auth invitation links can establish the session after the page starts loading.
 // Re-check the app state when Supabase reports a signed-in session.
-function taskyMainAuthStateListenerV243(event,session){
+sb.auth.onAuthStateChange((event, session) => {
   const qs=new URLSearchParams(window.location.search);const publicInviteToken=qs.get('invite');const publicQuoteToken=qs.get('quote');const publicSurveyToken=qs.get('survey');const publicSalesQuoteToken=qs.get('salesquote');const publicInvoiceToken=qs.get('invoice');const publicMeetingGuestToken=qs.get('guest');const publicMeetingCode=qs.get('meeting');
   if(event==='PASSWORD_RECOVERY'){window.__taskyV97RecoverySession=session||null;window.__taskyV97PendingBoot=false;}
   if(!(publicMeetingGuestToken&&publicMeetingCode) && !publicInviteToken && !publicQuoteToken && !publicSurveyToken && !publicSalesQuoteToken && !publicInvoiceToken && event === 'SIGNED_IN' && session){
     setTimeout(()=>{if(window.__taskyV97AuthReady)checkSession().catch(err=>console.error('Tasky V97 auth state refresh',err));else window.__taskyV97PendingBoot=true;},0);
   }
-}
+});
 
 initResponsiveSidebar();
 applyChrome();
@@ -12057,7 +12004,7 @@ handleAuthSubmit=async function(){
       if(data?.session?.user){await taskyBootstrapFirstWorkspaceV97(data.session.user);await checkSession();return}
       authMode='signin';document.getElementById('signupOnlyFields').style.display='none';document.getElementById('authSubmitBtn').textContent=auth97L('تسجيل الدخول','Sign in');document.getElementById('authToggleText').textContent=auth97L('ما عندك حساب؟','No account?');document.getElementById('authToggleBtn').textContent=auth97L('إنشاء حساب جديد','Create account');document.getElementById('authForgotBtnV97').style.display='block';document.getElementById('authPassword').value='';taskyAuthMessageV97(auth97L('تم إنشاء الحساب. إذا كان تأكيد البريد مفعّلًا، افتح رسالة التحقق ثم عد إلى تاسكي؛ سيتم إنشاء مساحة العمل بعد أول دخول موثّق.','Account created. If email confirmation is enabled, open the verification email and return to Tasky; the workspace will be created after the first verified sign-in.'),'success');return;
     }
-    const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;if(!data?.session?.user){const {data:s,error:se}=await taskyGetSessionSafeV243();if(se)throw se;if(!s?.session?.user)throw new Error(auth97L('تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة. حدّث الصفحة وحاول مرة أخرى.','Credentials were accepted but no session was created. Refresh and try again.'))}
+    const {data,error}=await sb.auth.signInWithPassword({email,password});if(error)throw error;if(!data?.session?.user){const {data:s,error:se}=await sb.auth.getSession();if(se)throw se;if(!s?.session?.user)throw new Error(auth97L('تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة. حدّث الصفحة وحاول مرة أخرى.','Credentials were accepted but no session was created. Refresh and try again.'))}
     await taskyBootstrapFirstWorkspaceV97(data?.session?.user||null);await checkSession()
   }catch(ex){console.error('Tasky V97 auth flow',ex);taskyAuthMessageV97(ex?.message||String(ex));const auth=document.getElementById('authScreen');if(auth)auth.style.display='flex';document.querySelector('.app')?.style.setProperty('display','none')}
   finally{taskyAuthSetBusyV751(false)}
@@ -12069,13 +12016,13 @@ toggleAuthMode=function(){toggleAuthModeBaseV97();const forgot=document.getEleme
 setTimeout(()=>{['authEmail','authPassword','authFullName','authCompany'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();handleAuthSubmit()}}));['inviteNewPassword','inviteConfirmPassword'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finishInviteSetup()}}));['authRecoveryPasswordV97','authRecoveryConfirmV97'].forEach(id=>document.getElementById(id)?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();finishPasswordRecoveryV97()}}));document.getElementById('authRecoveryEmailV97')?.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();requestPasswordResetV97()}})},0);
 
 // Supabase documents PASSWORD_RECOVERY as the event to prompt for a new password.
-function taskyRecoveryAuthStateListenerV243(event,session){if(event==='PASSWORD_RECOVERY'){window.__taskyV97RecoverySession=session||null;setTimeout(()=>openPasswordRecoveryUpdateV97(!!session?.user),0)}}
+sb.auth.onAuthStateChange((event,session)=>{if(event==='PASSWORD_RECOVERY'){window.__taskyV97RecoverySession=session||null;setTimeout(()=>openPasswordRecoveryUpdateV97(!!session?.user),0)}});
 async function auth97VerifyRecoveryRedirectV97(){
   if(window.__taskyV97RecoverySession?.user){openPasswordRecoveryUpdateV97(true);return}
   if(!auth97RecoveryMarker())return;openPasswordRecoveryUpdateV97(false);
   await new Promise(r=>setTimeout(r,700));
   if(auth97RecoveryReady)return;
-  try{const {data}=await taskyGetSessionSafeV243();if(data?.session?.user){auth97RecoveryReady=true;auth97RecoveryCanClose=true;openPasswordRecoveryUpdateV97(true);return}}catch(err){console.warn('V97 recovery session verification',err)}
+  try{const {data}=await sb.auth.getSession();if(data?.session?.user){auth97RecoveryReady=true;auth97RecoveryCanClose=true;openPasswordRecoveryUpdateV97(true);return}}catch(err){console.warn('V97 recovery session verification',err)}
   auth97RecoveryCanClose=true;document.getElementById('authRecoveryCopyV97').textContent=auth97L('تعذر التحقق من رابط الاستعادة. قد يكون منتهيًا أو مستخدمًا؛ اطلب رابطًا جديدًا.','The recovery link could not be verified. It may be expired or already used; request a new link.');auth97ShowRecoveryMessage(auth97L('يمكنك إغلاق هذه النافذة وطلب رابط استعادة جديد.','You can close this window and request a new recovery link.'),'error')
 }
 setTimeout(()=>auth97VerifyRecoveryRedirectV97(),0);
@@ -16811,7 +16758,7 @@ window.addEventListener('orientationchange',()=>setTimeout(taskyNormalizeSidebar
 
       if(!force && appReadyV196()){
         try{
-          const {data,error}=await taskyGetSessionSafeV243();
+          const {data,error}=await sb.auth.getSession();
           if(!error && data?.session?.user){
             return true;
           }
@@ -18273,7 +18220,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyConnectedHealthV235=function(){
     return {
-      build:'V243',
+      build:'V242',
       contract:'CP1',
       workspace_id:currentWorkspaceId||null,
       active_nav:activeNav||null,
@@ -18394,7 +18341,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   clearInterval(docsRefreshTimerV237);docsRefreshTimerV237=setInterval(()=>{if(activeNav==='documents'&&docsBackendV237==='db'&&document.visibilityState==='visible'&&navigator.onLine)load237({force:true})},25000);
 
   try{taskyRenderAppSwitcherV233();taskyRenderNavV233()}catch(_){}
-  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V243',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
+  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V242',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
   window.TASKY_BUILD='V237';console.info('Tasky build V237 — Tasky Documents');
 })();
 </script>
@@ -18489,7 +18436,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const rows=[...document.querySelectorAll('#mainNav button')].map(x=>String(x.textContent||'').replace(/\s+/g,' ').trim());
     const accountLabel=lang==='ar'?'الإعدادات':'Settings';
     return {
-      build:'V243',
+      build:'V242',
       app,
       expected_app_settings:taskyAppSettingsLabelV238(app),
       app_settings_rows:rows.filter(x=>/إعدادات|settings/i.test(x)),
@@ -18522,7 +18469,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         :null;
     }catch(_){}
     return {
-      build:'V243',
+      build:'V242',
       activeNav,
       explicit_route:hasExplicitRouteV239(),
       stale_v196_context:!!stale,
@@ -18550,7 +18497,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 </script>
 
 
-<script id="tasky-v243-auth-watchdog-js">
+<script id="tasky-v242-auth-watchdog-js">
 (function(){
   const started=Date.now();
   const timer=setInterval(()=>{
@@ -18558,16 +18505,13 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       const boot=document.getElementById('taskyBootV83');
       const app=document.querySelector('.app');
       const auth=document.getElementById('authScreen');
-
       if(!boot||boot.classList.contains('hidden')||boot.style.display==='none'){
         clearInterval(timer);return;
       }
       if(app&&app.style.display!=='none'){
         taskyBootHideV83();clearInterval(timer);return;
       }
-
-      /* Never leave the user on a decorative splash forever. */
-      if(Date.now()-started>13500){
+      if(Date.now()-started>18000){
         clearInterval(timer);
         taskyBootHideV83();
         if(auth){
@@ -18577,21 +18521,18 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         try{
           taskyAuthShowErrorV751(
             lang==='ar'
-              ?'تعذّرت تهيئة جلسة الدخول تلقائيًا. هذه النسخة V243 أوقفت شاشة التحميل بدل تعليقها؛ جرّب تسجيل الدخول من الشاشة الحالية.'
-              :'The sign-in session could not initialize automatically. V243 stopped the loading screen instead of hanging; sign in from this screen.'
+              ?'استغرق التحقق من الجلسة وقتًا أطول من المتوقع. حدّث الصفحة، وإذا كانت هناك تبويبات قديمة لتاسكي أغلقها أولًا.'
+              :'Session verification took longer than expected. Refresh the page, and close any old Tasky tabs first.'
           );
         }catch(_){}
       }
     }catch(_){}
-  },500);
+  },750);
 
-  window.taskyAuthStartupAuditV243=function(){
+  window.taskyAuthStartupAuditV242=function(){
     return {
-      build:'V243',
-      supabase_sdk:TASKY_SUPABASE_SDK_V243,
-      auth_initialized:taskySupabaseInitDoneV243,
-      recovery_client_used:taskySupabaseRecoveryUsedV243,
-      auth_listeners_registered:taskyAuthListenersRegisteredV243,
+      build:'V242',
+      supabase_sdk:TASKY_SUPABASE_SDK_V242,
       boot_visible:!document.getElementById('taskyBootV83')?.classList.contains('hidden'),
       workspace_id:typeof currentWorkspaceId!=='undefined'?currentWorkspaceId:null,
       user_id:typeof currentUserId!=='undefined'?currentUserId:null,
@@ -18599,8 +18540,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
 
-  window.TASKY_BUILD='V243';
-  console.info('Tasky build V243 — controlled Supabase Auth initialization');
+  window.TASKY_BUILD='V242';
+  console.info('Tasky build V242 — auth startup hardening / Supabase 2.111.0');
 })();
 </script>
 
