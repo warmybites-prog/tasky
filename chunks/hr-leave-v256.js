@@ -9,7 +9,7 @@
 (function(){
   if(window.TASKY_HR_LEAVE_V256===true)return;
 
-  const HR256_VERSION='V256';
+  const HR256_VERSION='V257';
   let hr256TypesEnsuredWorkspace=null;
   let hr256TypesEnsurePromise=null;
 
@@ -181,7 +181,15 @@
 
   async function hr256OpenLeaveForm(){
     if(!window.currentWorkspaceId)return;
-    if(typeof hrCanManage72==='function'&&!hrCanManage72()&&!hrContextV72?.employee_id)return;
+    const ctx=window.hrContextV72||{};
+    if(typeof hrCanManage72==='function'&&!hrCanManage72()&&!ctx.employee_id){
+      showTaskyDialog({
+        title:hr256L('تعذّر فتح طلب الإجازة','Could not open leave request'),
+        message:hr256L('لا يوجد ملف موظف مرتبط بهذا المستخدم بعد.','No employee profile is linked to this user yet.'),
+        tone:'warning'
+      });
+      return;
+    }
 
     try{
       await hr256EnsureTypes();
@@ -198,7 +206,7 @@
       return;
     }
 
-    const selectedEmp=typeof hrCanManage72==='function'&&hrCanManage72()?'':(hrContextV72?.employee_id||'');
+    const selectedEmp=typeof hrCanManage72==='function'&&hrCanManage72()?'':((window.hrContextV72||{}).employee_id||'');
     const empOpts=typeof hrOptions72==='function'?hrOptions72(hrV72.employees,'id',hrName72):'';
     const typeOpts=hr256SelectOptions(hrV72.leaveTypes||[]);
 
@@ -295,15 +303,57 @@
   }
 
   const hrOpenFormV72BaseV256=window.hrOpenFormV72;
-  window.hrOpenFormV72=function(type,id=null,parent=null){
-    if(type==='leave'){
-      hr256OpenLeaveForm().catch(err=>{
-        showTaskyDialog({title:'HR',message:err?.message||String(err),tone:'error'});
+
+  window.taskyHrOpenLeaveV257=function(event){
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    hr256OpenLeaveForm().catch(err=>{
+      showTaskyDialog({
+        title:hr256L('تعذّر فتح طلب الإجازة','Could not open leave request'),
+        message:err?.message||String(err),
+        tone:'error'
       });
+    });
+    return false;
+  };
+
+  /* Keep compatibility with every old HR button that calls
+     hrOpenFormV72('leave'). Assign both the global property and the
+     legacy global binding where the browser exposes it. */
+  const hrOpenFormV257=function(type,id=null,parent=null){
+    if(type==='leave'){
+      window.taskyHrOpenLeaveV257();
       return;
     }
     return hrOpenFormV72BaseV256(type,id,parent);
   };
+  window.hrOpenFormV72=hrOpenFormV257;
+  try{hrOpenFormV72=hrOpenFormV257}catch(_){}
+
+  /* Capture-phase fallback:
+     Some historical HR builds render an inline onclick that can keep a
+     reference to the original function. Intercept the actual Leave Request
+     button before that old handler executes. */
+  document.addEventListener('click',event=>{
+    const btn=event.target?.closest?.('button');
+    if(!btn)return;
+
+    const inline=btn.getAttribute('onclick')||'';
+    const text=String(btn.textContent||'').replace(/\s+/g,' ').trim();
+
+    const isLeaveButton=
+      /hrOpenFormV72\(['"]leave['"]\)/.test(inline) ||
+      /طلب إجازة|Leave request/i.test(text);
+
+    if(!isLeaveButton)return;
+
+    const leavesPanel=btn.closest('.hr72-panel');
+    if(!leavesPanel)return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    window.taskyHrOpenLeaveV257(event);
+  },true);
 
   const hrSubmitFormV72BaseV256=window.hrSubmitFormV72;
   window.hrSubmitFormV72=async function(e,type,id=null,parent=null){
@@ -401,5 +451,6 @@
   };
 
   window.TASKY_HR_LEAVE_V256=true;
-  console.info('Tasky HR Leave V256 — half-day + study + other ready');
+  window.TASKY_HR_LEAVE_V257=true;
+  console.info('Tasky HR Leave V257 — leave button routing + half-day/study/other ready');
 })();
