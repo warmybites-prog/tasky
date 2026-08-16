@@ -15985,7 +15985,7 @@ function taskyIntlFormatterV167(locale,options){
 <script id="tasky-v1681-lazy-loader-js" type="text/tasky-deferred-v247">
 
 const TASKY_LAZY_CHUNKS_V1681={
-  hr:{url:'chunks/hr.js?v=248',loaded:false,promise:null},
+  hr:{url:'chunks/hr.js?v=259',loaded:false,promise:null},
   meetings:{url:'chunks/meetings.js?v=252',loaded:false,promise:null},
   brainstorm:{url:'chunks/brainstorm.js?v=234',loaded:false,promise:null},
   bookings:{url:'chunks/bookings.js?v=234',loaded:false,promise:null}
@@ -16023,14 +16023,29 @@ async function taskyLazyLoadChunkV1681(name){
   c.promise=(async()=>{
     try{
       await taskyLazyLoadScriptV1681(c.url);
+
       if(name==='hr'){
-        await taskyLazyLoadScriptV1681('chunks/hr-leave-v257.js?v=257');
-        if(typeof setHrTabV72!=='function')throw new Error('HR chunk loaded without HR API');
-        if(window.TASKY_HR_LEAVE_V257!==true)throw new Error('HR V257 leave addon loaded without API');
+        if(typeof setHrTabV72!=='function' || typeof fetchHrDataV72!=='function'){
+          throw new Error('HR core chunk loaded without required HR API');
+        }
+
+        c.loaded=true;
+
+        try{
+          await taskyLazyLoadScriptV1681('chunks/hr-leave-v257.js?v=259');
+          if(window.TASKY_HR_LEAVE_V257!==true){
+            console.warn('Tasky V259: HR leave add-on loaded without readiness marker');
+          }
+        }catch(addonError){
+          window.TASKY_HR_LEAVE_ADDON_ERROR_V259=addonError?.message||String(addonError);
+          console.warn('Tasky V259: optional HR leave add-on unavailable; HR core remains usable',addonError);
+        }
       }
+
       if(name==='meetings' && (typeof fetchMeetingsV101!=='function' || typeof meetingsTemplateV101!=='function')){
         throw new Error('Meetings chunk loaded without Meetings API');
       }
+
       c.loaded=true;
       if(typeof renderNav==='function')renderNav();
       return true;
@@ -19541,7 +19556,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V258',
+      build:'V259',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19550,6 +19565,52 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_UI_ICON_NORMALIZATION_V258=true;
   window.TASKY_BUILD='V258';
   console.info('Tasky V258 — Employee 360 cleanup + oversized icon normalization ready');
+})();
+</script>
+
+
+<script id="tasky-v259-hr-loader-resilience-js" type="text/tasky-deferred-v247">
+(function(){
+  document.addEventListener('click',event=>{
+    if(!window.TASKY_HR_LEAVE_ADDON_ERROR_V259)return;
+
+    const btn=event.target?.closest?.('button');
+    if(!btn)return;
+
+    const inline=btn.getAttribute('onclick')||'';
+    const text=String(btn.textContent||'').replace(/\s+/g,' ').trim();
+    const leaveButton=
+      /hrOpenFormV72\(['"]leave['"]\)/.test(inline) ||
+      /طلب إجازة|Leave request/i.test(text);
+
+    if(!leaveButton)return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    showTaskyDialog({
+      title:lang==='ar'?'ميزة طلب الإجازة تحتاج ملفها الإضافي':'Leave Request add-on is missing',
+      message:lang==='ar'
+        ?'الموارد البشرية تعمل بشكل طبيعي، لكن ميزة نصف اليوم وإجازة الدراسة و«أخرى» تحتاج رفع الملف chunks/hr-leave-v257.js بجانب hr.js.'
+        :'Human Resources is working normally, but Half-day, Study Leave, and Other require chunks/hr-leave-v257.js to be deployed beside hr.js.',
+      tone:'warning'
+    });
+  },true);
+
+  window.taskyHrLoaderAuditV259=function(){
+    const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
+    return {
+      build:'V259',
+      hr_url:c?.url||null,
+      hr_loaded:!!c?.loaded,
+      leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
+      leave_addon_error:window.TASKY_HR_LEAVE_ADDON_ERROR_V259||null
+    };
+  };
+
+  window.TASKY_HR_LOADER_RESILIENCE_V259=true;
+  window.TASKY_BUILD='V259';
+  console.info('Tasky V259 — HR core/add-on isolation ready');
 })();
 </script>
 
