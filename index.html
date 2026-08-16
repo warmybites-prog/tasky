@@ -19160,5 +19160,398 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 })();
 </script>
 
+
+<script id="tasky-v258-ui-icon-normalization-js" type="text/tasky-deferred-v247">
+(function(){
+  if(document.getElementById('tasky-v258-ui-icon-normalization-css'))return;
+
+  const style=document.createElement('style');
+  style.id='tasky-v258-ui-icon-normalization-css';
+  style.textContent=`
+    /* ========================================================
+       V258 — Employee 360 visual cleanup
+       ======================================================== */
+    #addModalBody.tasky-employee360-v258{
+      width:min(920px,calc(100vw - 28px))!important;
+      max-width:920px!important;
+      padding:0!important;
+      overflow:hidden!important;
+      border-radius:22px!important;
+      background:var(--card)!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .modal-head{
+      padding:18px 20px 14px!important;
+      border-bottom:1px solid var(--border)!important;
+      align-items:center!important;
+      gap:12px!important;
+      background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 88%,var(--green-tint)))!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .modal-head h3{
+      font-size:17px!important;
+      margin:0 0 3px!important;
+      line-height:1.35!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .modal-head > div{
+      min-width:0!important;
+      flex:1!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .modal-head small,
+    #addModalBody.tasky-employee360-v258 .modal-head div[style*="font-size"]{
+      color:var(--muted)!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .modal-close{
+      width:36px!important;
+      height:36px!important;
+      border-radius:11px!important;
+      border:1px solid var(--border)!important;
+      background:var(--paper)!important;
+      display:grid!important;
+      place-items:center!important;
+      padding:0!important;
+      flex:0 0 36px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 > :not(.modal-head){
+      margin-inline:18px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-lock-hero{
+      display:flex!important;
+      align-items:flex-start!important;
+      gap:12px!important;
+      margin:16px 18px 10px!important;
+      padding:12px 14px!important;
+      border:1px solid color-mix(in srgb,var(--amber) 30%,var(--border))!important;
+      border-radius:14px!important;
+      background:color-mix(in srgb,var(--amber-tint) 65%,var(--card))!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-lock-badge{
+      width:38px!important;
+      height:38px!important;
+      flex:0 0 38px!important;
+      display:grid!important;
+      place-items:center!important;
+      border-radius:12px!important;
+      background:var(--card)!important;
+      border:1px solid var(--border)!important;
+      color:var(--amber)!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-lock-badge svg{
+      width:19px!important;
+      height:19px!important;
+      max-width:19px!important;
+      max-height:19px!important;
+      margin:0!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-lock-copy{
+      min-width:0!important;
+      flex:1!important;
+      font-size:10.5px!important;
+      line-height:1.75!important;
+      color:var(--ink-soft)!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-lock-copy b{
+      display:block!important;
+      font-size:11.5px!important;
+      color:var(--ink)!important;
+      margin-bottom:2px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .hr72-grid,
+    #addModalBody.tasky-employee360-v258 .hr72-info-grid,
+    #addModalBody.tasky-employee360-v258 .employee360-grid{
+      gap:10px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .hr72-card,
+    #addModalBody.tasky-employee360-v258 .hr72-panel,
+    #addModalBody.tasky-employee360-v258 .platform-panel{
+      border-radius:14px!important;
+      border:1px solid var(--border)!important;
+      background:var(--paper)!important;
+      box-shadow:none!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-detail-list{
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:8px 10px!important;
+      margin:10px 18px 14px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-detail-row{
+      border:1px solid var(--border)!important;
+      background:var(--paper)!important;
+      border-radius:12px!important;
+      padding:9px 11px!important;
+      min-width:0!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-detail-row span{
+      display:block!important;
+      font-size:8.5px!important;
+      color:var(--muted)!important;
+      margin-bottom:4px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .tasky-v258-detail-row b{
+      display:block!important;
+      font-size:10.5px!important;
+      color:var(--ink)!important;
+      overflow-wrap:anywhere!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .hr87-profile-photo,
+    #addModalBody.tasky-employee360-v258 .hr86-employee-head-photo{
+      width:52px!important;
+      height:52px!important;
+      flex-basis:52px!important;
+      border-radius:15px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 .timeline,
+    #addModalBody.tasky-employee360-v258 [class*="timeline"]{
+      border-radius:14px!important;
+    }
+
+    #addModalBody.tasky-employee360-v258 button{
+      min-height:34px!important;
+    }
+
+    /* ========================================================
+       V258 — icon normalization across Tasky application content.
+       Only icons that are clearly oversized get tagged by JS.
+       ======================================================== */
+    svg.tasky-auto-icon-v258{
+      width:20px!important;
+      height:20px!important;
+      max-width:20px!important;
+      max-height:20px!important;
+      min-width:20px!important;
+      min-height:20px!important;
+      margin:0!important;
+      flex:0 0 20px!important;
+      display:block!important;
+    }
+
+    .tasky-auto-icon-shell-v258{
+      width:38px!important;
+      height:38px!important;
+      border-radius:11px!important;
+      display:grid!important;
+      place-items:center!important;
+      background:var(--green-tint)!important;
+      color:var(--green)!important;
+      border:1px solid color-mix(in srgb,var(--green) 16%,var(--border))!important;
+      flex:0 0 38px!important;
+      overflow:hidden!important;
+    }
+
+    @media(max-width:700px){
+      #addModalBody.tasky-employee360-v258{
+        width:calc(100vw - 12px)!important;
+        max-height:calc(100dvh - 12px)!important;
+        border-radius:18px!important;
+      }
+
+      #addModalBody.tasky-employee360-v258 .modal-head{
+        padding:14px 14px 12px!important;
+      }
+
+      #addModalBody.tasky-employee360-v258 .tasky-v258-detail-list{
+        grid-template-columns:1fr!important;
+        margin-inline:12px!important;
+      }
+
+      #addModalBody.tasky-employee360-v258 .tasky-v258-lock-hero{
+        margin-inline:12px!important;
+      }
+
+      #addModalBody.tasky-employee360-v258 > :not(.modal-head){
+        margin-inline:12px!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  function normalizeEmployee360V258(){
+    const modal=document.getElementById('addModalBody');
+    if(!modal)return;
+
+    const text=String(modal.textContent||'');
+    const isEmployee360=
+      /Employee\s*360|ملف الموظف|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(text);
+
+    modal.classList.toggle('tasky-employee360-v258',isEmployee360);
+    if(!isEmployee360)return;
+
+    /* Convert any giant lock illustration into a compact Tasky security notice. */
+    const svgs=[...modal.querySelectorAll('svg')];
+    const lockSvg=svgs.find(svg=>{
+      if(svg.closest('.modal-close'))return false;
+      const use=svg.querySelector('use');
+      const href=use?.getAttribute('href')||use?.getAttribute('xlink:href')||'';
+      const box=svg.getBoundingClientRect();
+      return /lock/i.test(href)||box.width>70||box.height>70;
+    });
+
+    if(lockSvg&&!lockSvg.closest('.tasky-v258-lock-badge')){
+      const candidate=lockSvg.closest('div');
+      if(candidate){
+        const nextText=String(candidate.parentElement?.textContent||'').trim();
+        const hero=document.createElement('div');
+        hero.className='tasky-v258-lock-hero';
+
+        const badge=document.createElement('div');
+        badge.className='tasky-v258-lock-badge';
+        badge.appendChild(lockSvg);
+
+        const copy=document.createElement('div');
+        copy.className='tasky-v258-lock-copy';
+        copy.innerHTML=`<b>${window.lang==='en'?'Sensitive employee data':'بيانات موظف حساسة'}</b><span>${window.lang==='en'?'Access is limited according to your HR permissions.':'تظهر البيانات الحساسة حسب صلاحياتك في الموارد البشرية.'}</span>`;
+
+        hero.appendChild(badge);
+        hero.appendChild(copy);
+
+        const parent=candidate.parentElement;
+        if(parent){
+          parent.insertBefore(hero,candidate);
+          candidate.remove();
+
+          /* Remove the old verbose locked copy if it sits directly after the giant icon. */
+          const siblings=[...parent.children];
+          for(const child of siblings){
+            if(child===hero||child.classList.contains('modal-head'))continue;
+            const t=String(child.textContent||'').trim();
+            if(/أنت مخول لرؤية البيانات الحساسة|authorized to view sensitive|رؤية البيانات الخاصة/i.test(t)){
+              child.remove();
+              break;
+            }
+          }
+        }
+      }
+    }
+
+    /* Turn bare dash-separated employee facts into Tasky detail cards. */
+    const possible=[...modal.querySelectorAll('div,p')].filter(el=>{
+      if(el.children.length>2)return false;
+      const t=String(el.textContent||'').trim();
+      return /المدير المباشر|موقع العمل|الجنسية|آخر 4 من الهوية|جهة اتصال الطوارئ|HR\s*ملاحظات|Direct manager|Work location|Nationality|Emergency contact/i.test(t);
+    });
+
+    if(possible.length){
+      const source=possible.sort((a,b)=>(b.textContent||'').length-(a.textContent||'').length)[0];
+      const raw=String(source.textContent||'').split(/\n+/).map(x=>x.trim()).filter(Boolean);
+
+      const labels=[
+        ['المدير المباشر','Direct manager'],
+        ['موقع العمل','Work location'],
+        ['الجنسية','Nationality'],
+        ['آخر 4 من الهوية','Last 4 of ID'],
+        ['جهة اتصال الطوارئ','Emergency contact'],
+        ['ملاحظات HR','HR notes']
+      ];
+
+      const rows=[];
+      for(const [ar,en] of labels){
+        const line=raw.find(x=>x.includes(ar)||x.toLowerCase().includes(en.toLowerCase()));
+        if(!line)continue;
+        let value=line.replace(ar,'').replace(en,'').replace(/^[:\-\s]+|[:\-\s]+$/g,'').trim();
+        if(!value)value='—';
+        rows.push({label:window.lang==='en'?en:ar,value});
+      }
+
+      if(rows.length>=3&&!modal.querySelector('.tasky-v258-detail-list')){
+        const list=document.createElement('div');
+        list.className='tasky-v258-detail-list';
+        list.innerHTML=rows.map(row=>`<div class="tasky-v258-detail-row"><span>${row.label}</span><b>${row.value}</b></div>`).join('');
+        source.parentElement?.insertBefore(list,source);
+        source.style.display='none';
+      }
+    }
+  }
+
+  function shouldNormalizeSvgV258(svg){
+    if(!svg||svg.classList.contains('tasky-auto-icon-v258'))return false;
+    if(svg.closest('symbol,defs,svg')) {
+      /* The outer SVG is okay; nested SVGs are not normalized here. */
+      if(svg.parentElement?.closest('svg'))return false;
+    }
+
+    const excluded=svg.closest(
+      '.brain107-svg,.brain120-minimap,.public-event-invite-brand,.public-rfq-brand,'+
+      '.workspace-logo,.tasky-brand,.platform-gate-logo,.meet101-video-area,'+
+      '.meet101-video-tile,.chart,.recharts-wrapper,canvas,[class*="chart"],[class*="graph"],'+
+      '[class*="logo"],[class*="avatar"],.modal-close'
+    );
+    if(excluded)return false;
+
+    const box=svg.getBoundingClientRect();
+    if(!box.width&&!box.height)return false;
+
+    /* Only fix obviously oversized UI icons, not ordinary 16–32px icons. */
+    return box.width>=72||box.height>=72;
+  }
+
+  function normalizeOversizedIconsV258(root=document){
+    const svgs=[...root.querySelectorAll?.('svg')||[]];
+    for(const svg of svgs){
+      if(!shouldNormalizeSvgV258(svg))continue;
+
+      svg.classList.add('tasky-auto-icon-v258');
+
+      const parent=svg.parentElement;
+      if(
+        parent &&
+        parent.children.length===1 &&
+        !parent.classList.contains('tasky-auto-icon-shell-v258') &&
+        !parent.closest('.tasky-employee360-v258 .tasky-v258-lock-badge')
+      ){
+        parent.classList.add('tasky-auto-icon-shell-v258');
+      }
+    }
+  }
+
+  let scheduled=false;
+  function scheduleV258(){
+    if(scheduled)return;
+    scheduled=true;
+    requestAnimationFrame(()=>{
+      scheduled=false;
+      normalizeEmployee360V258();
+      normalizeOversizedIconsV258(document);
+    });
+  }
+
+  const observer=new MutationObserver(scheduleV258);
+  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+
+  window.addEventListener('resize',scheduleV258,{passive:true});
+  document.addEventListener('DOMContentLoaded',scheduleV258,{once:true});
+  scheduleV258();
+
+  window.taskyUiAuditV258=function(){
+    return {
+      build:'V258',
+      employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
+      normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
+    };
+  };
+
+  window.TASKY_UI_ICON_NORMALIZATION_V258=true;
+  window.TASKY_BUILD='V258';
+  console.info('Tasky V258 — Employee 360 cleanup + oversized icon normalization ready');
+})();
+</script>
+
 </body>
 </html>
