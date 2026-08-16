@@ -1338,3 +1338,156 @@ function hr85Template(){
 
 window.TASKY_HR_CHUNK_V230=true;
 console.info('Tasky HR chunk V230 — HR V72–V85 loaded');
+
+/* ============================================================
+   TASKY HR V86 / CUSTOMER V240 — EMPLOYEE PROFILE PHOTO
+   ============================================================ */
+let hr86PhotoDraft={file:null,remove:false,previewUrl:null,currentUrl:null,currentPath:null};
+const hr86SignedPhotoCache=new Map();
+
+(function(){
+  if(document.getElementById('tasky-hr-v86-photo-css'))return;
+  const s=document.createElement('style');
+  s.id='tasky-hr-v86-photo-css';
+  s.textContent=`
+    .hr86-photo-field{grid-column:1/-1;border:1px solid var(--border);border-radius:14px;background:var(--paper);padding:12px;display:flex;align-items:center;gap:14px}
+    .hr86-photo-preview{width:92px;height:92px;flex:0 0 92px;border-radius:22px;overflow:hidden;background:var(--green-tint);border:1px solid var(--border);display:grid;place-items:center;color:var(--green);font-size:20px;font-weight:900}
+    .hr86-photo-preview img,.hr86-profile-photo img{width:100%;height:100%;object-fit:cover;display:block}
+    .hr86-photo-copy{min-width:0;flex:1}.hr86-photo-copy b{display:block;font-size:11px;margin-bottom:4px}.hr86-photo-copy small{display:block;color:var(--muted);font-size:8.5px;line-height:1.6;margin-bottom:8px}
+    .hr86-photo-actions{display:flex;gap:7px;flex-wrap:wrap;align-items:center}.hr86-photo-actions label{cursor:pointer}.hr86-photo-actions input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+    .hr86-photo-remove{color:var(--danger)!important}.hr86-photo-note{margin-top:6px;color:var(--muted);font-size:8px}
+    .hr86-profile-info{display:flex!important;align-items:center;gap:11px;min-width:0}.hr86-profile-text{min-width:0}
+    .hr86-profile-photo{width:58px;height:58px;flex:0 0 58px;border-radius:16px;overflow:hidden;background:var(--green-tint);border:1px solid var(--border);display:grid;place-items:center;color:var(--green);font-weight:900}
+    @media(max-width:650px){.hr86-photo-field{align-items:flex-start}.hr86-photo-preview{width:76px;height:76px;flex-basis:76px;border-radius:18px}.hr86-profile-photo{width:50px;height:50px;flex-basis:50px}}
+  `;
+  document.head.appendChild(s);
+})();
+
+function hr86ResetPhoto(emp=null){
+  try{if(hr86PhotoDraft.previewUrl?.startsWith('blob:'))URL.revokeObjectURL(hr86PhotoDraft.previewUrl)}catch(_){}
+  hr86PhotoDraft={file:null,remove:false,previewUrl:null,currentUrl:emp?.avatar_url||null,currentPath:emp?.avatar_storage_path||null};
+}
+function hr86PreviewContent(emp=null){
+  const src=hr86PhotoDraft.remove?null:(hr86PhotoDraft.previewUrl||hr86PhotoDraft.currentUrl||emp?.avatar_url||null);
+  return src?`<img src="${escapeHtml(src)}" alt="">`:escapeHtml(hrInitial72(emp||{}));
+}
+function hr86PhotoField(emp=null,isEdit=false){
+  const has=!!(hr86PhotoDraft.currentUrl||hr86PhotoDraft.currentPath||emp?.avatar_url||emp?.avatar_storage_path);
+  return `<div class="hr86-photo-field">
+    <div class="hr86-photo-preview" id="hr86PhotoPreview">${hr86PreviewContent(emp)}</div>
+    <div class="hr86-photo-copy">
+      <b>${hrL72('صورة الموظف','Employee photo')}</b>
+      <small>${hrL72('صورة اختيارية للملف الوظيفي. يتم قصها تلقائيًا إلى مربع وتحسين حجمها. PNG / JPG / WebP حتى 10MB.','Optional employee profile photo. It is center-cropped to a square and optimized automatically. PNG / JPG / WebP up to 10MB.')}</small>
+      <div class="hr86-photo-actions">
+        <label class="chip-btn"><svg style="width:14px;height:14px"><use href="#i-camera"/></svg>${has?hrL72('تغيير الصورة','Change photo'):hrL72('إرفاق صورة','Attach photo')}<input id="hr86PhotoInput" type="file" accept="image/png,image/jpeg,image/webp" onchange="hr86PhotoChanged(this)"></label>
+        ${(isEdit&&has)?`<button type="button" class="chip-btn hr86-photo-remove" onclick="hr86PhotoRemoveDraft()">${hrL72('إزالة الصورة','Remove photo')}</button>`:''}
+      </div>
+      <div class="hr86-photo-note" id="hr86PhotoNote">${hrL72('يمكن تغيير الصورة أو حذفها لاحقًا من تعديل ملف الموظف.','The photo can be changed or removed later from Edit employee.')}</div>
+    </div>
+  </div>`;
+}
+window.hr86PhotoChanged=function(input){
+  const file=input?.files?.[0];if(!file)return;
+  if(file.size>10*1024*1024){input.value='';showTaskyDialog({title:hrL72('الصورة كبيرة','Image too large'),message:hrL72('الحد الأقصى 10MB.','Maximum size is 10MB.'),tone:'warning'});return}
+  if(file.type&&!['image/jpeg','image/png','image/webp'].includes(file.type)){input.value='';showTaskyDialog({title:hrL72('صيغة غير مدعومة','Unsupported format'),message:hrL72('استخدم PNG أو JPG أو WebP.','Use PNG, JPG or WebP.'),tone:'warning'});return}
+  try{if(hr86PhotoDraft.previewUrl?.startsWith('blob:'))URL.revokeObjectURL(hr86PhotoDraft.previewUrl)}catch(_){}
+  hr86PhotoDraft.file=file;hr86PhotoDraft.remove=false;hr86PhotoDraft.previewUrl=URL.createObjectURL(file);
+  const p=document.getElementById('hr86PhotoPreview');if(p)p.innerHTML=`<img src="${escapeHtml(hr86PhotoDraft.previewUrl)}" alt="">`;
+  const n=document.getElementById('hr86PhotoNote');if(n)n.textContent=hrL72('الصورة جاهزة للحفظ.','Photo is ready to save.');
+};
+window.hr86PhotoRemoveDraft=function(){
+  try{if(hr86PhotoDraft.previewUrl?.startsWith('blob:'))URL.revokeObjectURL(hr86PhotoDraft.previewUrl)}catch(_){}
+  hr86PhotoDraft.file=null;hr86PhotoDraft.previewUrl=null;hr86PhotoDraft.remove=true;
+  const p=document.getElementById('hr86PhotoPreview');if(p)p.textContent='HR';
+  const i=document.getElementById('hr86PhotoInput');if(i)i.value='';
+  const n=document.getElementById('hr86PhotoNote');if(n)n.textContent=hrL72('سيتم حذف الصورة عند حفظ التغييرات.','The photo will be removed when changes are saved.');
+};
+
+async function hr86OptimizePhoto(file){
+  const src=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=()=>resolve(r.result);r.onerror=reject;r.readAsDataURL(file)});
+  const img=await new Promise((resolve,reject)=>{const x=new Image();x.onload=()=>resolve(x);x.onerror=reject;x.src=src});
+  const w=img.naturalWidth||img.width,h=img.naturalHeight||img.height,side=Math.min(w,h),sx=(w-side)/2,sy=(h-side)/2,size=512;
+  const c=document.createElement('canvas');c.width=size;c.height=size;
+  const ctx=c.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,size,size);ctx.drawImage(img,sx,sy,side,side,0,0,size,size);
+  return await new Promise((resolve,reject)=>c.toBlob(b=>b?resolve(b):reject(new Error('Image processing failed')),'image/jpeg',0.88));
+}
+async function hr86UploadPhoto(employeeId,file,oldPath){
+  const blob=await hr86OptimizePhoto(file);
+  const uid=crypto.randomUUID?crypto.randomUUID():`${Date.now()}_${Math.random().toString(36).slice(2)}`;
+  const path=`${currentWorkspaceId}/${employeeId}/${uid}.jpg`;
+  const up=await sb.storage.from('hr-employee-photos').upload(path,blob,{upsert:false,contentType:'image/jpeg',cacheControl:'3600'});
+  if(up.error)throw up.error;
+  const save=await sb.from(hrTablesV72.employees).update({avatar_storage_path:path,avatar_url:null}).eq('id',employeeId).eq('workspace_id',currentWorkspaceId);
+  if(save.error){await sb.storage.from('hr-employee-photos').remove([path]).catch(()=>{});throw save.error}
+  if(oldPath&&oldPath!==path)await sb.storage.from('hr-employee-photos').remove([oldPath]).catch(()=>{});
+}
+async function hr86RemovePhoto(employeeId,oldPath){
+  const save=await sb.from(hrTablesV72.employees).update({avatar_storage_path:null,avatar_url:null}).eq('id',employeeId).eq('workspace_id',currentWorkspaceId);
+  if(save.error)throw save.error;
+  if(oldPath)await sb.storage.from('hr-employee-photos').remove([oldPath]).catch(()=>{});
+}
+async function hr86HydratePhotos(){
+  const rows=(hrV72.employees||[]).filter(x=>x.avatar_storage_path);if(!rows.length)return;
+  const now=Date.now(),paths=[...new Set(rows.map(x=>x.avatar_storage_path))],need=paths.filter(p=>!hr86SignedPhotoCache.get(p)||hr86SignedPhotoCache.get(p).expires<now);
+  if(need.length){
+    const q=await sb.storage.from('hr-employee-photos').createSignedUrls(need,3600);
+    if(q.error)throw q.error;
+    (q.data||[]).forEach((x,i)=>{const path=x.path||need[i],url=x.signedUrl||x.signedURL;if(path&&url)hr86SignedPhotoCache.set(path,{url,expires:Date.now()+50*60*1000})});
+  }
+  rows.forEach(e=>{const c=hr86SignedPhotoCache.get(e.avatar_storage_path);if(c?.url)e.avatar_url=c.url});
+}
+
+const fetchHrDataV72BaseV86=fetchHrDataV72;
+fetchHrDataV72=async function(force=false){
+  await fetchHrDataV72BaseV86(force);
+  if(!currentWorkspaceId||hrMigrationMissingV72)return;
+  try{await hr86HydratePhotos()}catch(err){console.warn('HR V86 photo hydrate',err)}
+  if(activeNav==='hr')renderModule();
+};
+
+const hrOpenFormV72BaseV86=hrOpenFormV72;
+hrOpenFormV72=function(type,id=null,parent=null){
+  if(type!=='employee')return hrOpenFormV72BaseV86(type,id,parent);
+  hrOpenFormV72BaseV86(type,id,parent);
+  const emp=id?hrEmp72(id):null;hr86ResetPhoto(emp);
+  const form=document.querySelector('#addModalBody form .hr72-form');
+  if(form&&!form.querySelector('.hr86-photo-field'))form.insertAdjacentHTML('afterbegin',hr86PhotoField(emp,!!id));
+};
+
+const hrSubmitFormV72BaseV86=hrSubmitFormV72;
+hrSubmitFormV72=async function(e,type,id=null,parent=null){
+  if(type!=='employee')return hrSubmitFormV72BaseV86(e,type,id,parent);
+  e.preventDefault();if(!hrCanManage72())return;
+  const v=x=>document.getElementById(x)?.value||null;
+  const submit=e.submitter||e.currentTarget?.querySelector?.('[type="submit"]');if(submit)submit.disabled=true;
+  let employeeId=id||null,isNew=!id,photoError=null;
+  try{
+    const row={workspace_id:currentWorkspaceId,full_name_ar:v('hrNameAr'),full_name_en:v('hrNameEn'),employee_no:v('hrEmpNo'),email:v('hrEmail'),phone:v('hrPhone'),hire_date:v('hrHire'),department_id:v('hrDept')||null,position_id:v('hrPos')||null,manager_employee_id:v('hrManager')||null,status:v('hrStatus')||'active',employment_type:v('hrEmployment')||'full_time',work_location:v('hrLocation'),notes:v('hrNotes')};
+    if(!row.full_name_ar)throw new Error(hrL72('اسم الموظف مطلوب.','Employee name is required.'));
+    if(employeeId){
+      const q=await sb.from(hrTablesV72.employees).update(row).eq('id',employeeId).eq('workspace_id',currentWorkspaceId).select('*').single();if(q.error)throw q.error;
+    }else{
+      const q=await sb.from(hrTablesV72.employees).insert(row).select('*').single();if(q.error)throw q.error;employeeId=q.data.id;
+    }
+    try{
+      if(hr86PhotoDraft.file)await hr86UploadPhoto(employeeId,hr86PhotoDraft.file,hr86PhotoDraft.currentPath);
+      else if(hr86PhotoDraft.remove)await hr86RemovePhoto(employeeId,hr86PhotoDraft.currentPath);
+    }catch(err){photoError=err}
+    closeAddModal();hr86ResetPhoto();await fetchHrDataV72(true);
+    if(photoError)showTaskyDialog({title:isNew?hrL72('تمت إضافة الموظف','Employee added'):hrL72('تم حفظ التغييرات','Changes saved'),message:hrL72('تم حفظ بيانات الموظف، لكن تعذر حفظ الصورة. شغّل Migration V240 ثم حاول تحديث الصورة من ملف الموظف.','Employee details were saved, but the photo could not be saved. Run Migration V240, then update the photo from the employee profile.')+`\n\n${photoError.message||photoError}`,tone:'warning'});
+    else taskyToast(isNew?hrL72('تمت إضافة الموظف','Employee added'):hrL72('تم تحديث ملف الموظف','Employee profile updated'),{tone:'success'});
+  }catch(err){showTaskyDialog({title:hrL72('تعذّر حفظ الموظف','Could not save employee'),message:err?.message||String(err),tone:'error'})}
+  finally{if(submit)submit.disabled=false}
+};
+
+const hrOpenEmployeeV72BaseV86=hrOpenEmployeeV72;
+hrOpenEmployeeV72=function(id){
+  hrOpenEmployeeV72BaseV86(id);
+  const e=hrEmp72(id),head=document.querySelector('#addModalBody .modal-head'),info=head?.firstElementChild;if(!e||!info||info.classList.contains('hr86-profile-info'))return;
+  const previous=info.innerHTML;info.classList.add('hr86-profile-info');
+  info.innerHTML=`<div class="hr86-profile-photo">${e.avatar_url?`<img src="${escapeHtml(e.avatar_url)}" alt="">`:escapeHtml(hrInitial72(e))}</div><div class="hr86-profile-text">${previous}</div>`;
+};
+
+window.TASKY_HR_EMPLOYEE_PHOTO_V86=true;
+window.TASKY_HR_CHUNK_V240=true;
+console.info('Tasky HR V86 / V240 — employee profile photo ready');
