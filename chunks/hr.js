@@ -1474,7 +1474,7 @@ hrSubmitFormV72=async function(e,type,id=null,parent=null){
       else if(hr86PhotoDraft.remove)await hr86RemovePhoto(employeeId,hr86PhotoDraft.currentPath);
     }catch(err){photoError=err}
     closeAddModal();hr86ResetPhoto();await fetchHrDataV72(true);
-    if(photoError)showTaskyDialog({title:isNew?hrL72('تمت إضافة الموظف','Employee added'):hrL72('تم حفظ التغييرات','Changes saved'),message:hrL72('تم حفظ بيانات الموظف، لكن تعذر حفظ الصورة. شغّل Migration V240 ثم حاول تحديث الصورة من ملف الموظف.','Employee details were saved, but the photo could not be saved. Run Migration V240, then update the photo from the employee profile.')+`\n\n${photoError.message||photoError}`,tone:'warning'});
+    if(photoError)showTaskyDialog({title:isNew?hrL72('تمت إضافة الموظف','Employee added'):hrL72('تم حفظ التغييرات','Changes saved'),message:hrL72('تم حفظ بيانات الموظف، لكن تعذر حفظ الصورة. شغّل إصلاح صلاحيات صور الموظفين V241 في Supabase ثم حاول تحديث الصورة من ملف الموظف.','Employee details were saved, but the photo could not be saved. Run the V241 employee-photo permission fix in Supabase, then update the photo from the employee profile.')+`\n\n${photoError.message||photoError}`,tone:'warning'});
     else taskyToast(isNew?hrL72('تمت إضافة الموظف','Employee added'):hrL72('تم تحديث ملف الموظف','Employee profile updated'),{tone:'success'});
   }catch(err){showTaskyDialog({title:hrL72('تعذّر حفظ الموظف','Could not save employee'),message:err?.message||String(err),tone:'error'})}
   finally{if(submit)submit.disabled=false}
@@ -1490,4 +1490,5 @@ hrOpenEmployeeV72=function(id){
 
 window.TASKY_HR_EMPLOYEE_PHOTO_V86=true;
 window.TASKY_HR_CHUNK_V240=true;
-console.info('Tasky HR V86 / V240 — employee profile photo ready');
+window.TASKY_HR_CHUNK_V241=true;
+console.info('Tasky HR V86 / V241 — employee profile photo permission fix ready');
