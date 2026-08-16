@@ -4602,8 +4602,431 @@ try{
   window.taskyMeetingHandleDeepLinkV101=taskyMeetingHandleDeepLinkV101;
   window.handleMeetingDeepLinkV101=taskyMeetingHandleDeepLinkV101;
   window.TASKY_MEETINGS_CHUNK_READY_V250=true;
+  window.TASKY_MEETINGS_CHUNK_READY_V251=true;
   console.info('Tasky Meetings V250 compatibility export ready');
 }catch(err){
   console.error('Tasky Meetings V250 compatibility export failed',err);
 }
 
+
+
+/* ============================================================
+   TASKY MEETINGS V251 — GOOGLE-MEET-INSPIRED DYNAMIC LAYOUT
+   Research-aligned behavior:
+   - 1 visible tile: full stage.
+   - 2-person call: other participant is primary; local self-view floats.
+   - 3+ people: balanced dynamic grid; active speaker is highlighted only.
+   - Screen share: presentation dominates; participants become a side/bottom strip.
+   - Manual pin: pinned person dominates with participant strip.
+   ============================================================ */
+
+(function(){
+  if(document.getElementById('tasky-meet-v251-dynamic-layout-css'))return;
+  const s=document.createElement('style');
+  s.id='tasky-meet-v251-dynamic-layout-css';
+  s.textContent=`
+  /* Reset historical focus sizing. V251 owns meeting geometry. */
+  #meet101VideoGrid.meet251-auto{
+    position:relative!important;
+    min-width:0!important;
+    min-height:0!important;
+    height:100%!important;
+    max-height:100%!important;
+    overflow:hidden!important;
+    align-content:stretch!important;
+    justify-content:stretch!important;
+    grid-auto-flow:row!important;
+  }
+  #meet101VideoGrid.meet251-auto.meet1043-focus-mode{
+    grid-template-columns:inherit!important;
+    grid-template-rows:inherit!important;
+  }
+  #meet101VideoGrid.meet251-auto .meet1043-focus-main{
+    grid-column:auto!important;
+    grid-row:auto!important;
+    min-height:0!important;
+    height:auto!important;
+    max-height:none!important;
+  }
+  #meet101VideoGrid.meet251-auto .meet101-video-tile{
+    min-width:0!important;
+    min-height:0!important;
+    max-width:none!important;
+    width:auto!important;
+    height:auto!important;
+    margin:0!important;
+    aspect-ratio:auto!important;
+  }
+  #meet101VideoGrid.meet251-auto .meet101-video-tile:not(.screen) video{
+    object-fit:cover!important;
+    object-position:center!important;
+  }
+  #meet101VideoGrid.meet251-auto .meet101-video-tile.screen video{
+    object-fit:contain!important;
+    object-position:center!important;
+    transform:none!important;
+    background:#050a08!important;
+  }
+
+  /* One visible participant/tile: use the complete stage. */
+  #meet101VideoGrid.meet251-mode-solo{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr)!important;
+    grid-template-rows:minmax(0,1fr)!important;
+    padding:12px!important;
+    gap:0!important;
+  }
+  #meet101VideoGrid.meet251-mode-solo .meet251-solo-main{
+    grid-column:1!important;
+    grid-row:1!important;
+  }
+
+  /* Two-person Meet-like view: remote person is the stage, self-view floats. */
+  #meet101VideoGrid.meet251-mode-duo{
+    display:block!important;
+    padding:12px!important;
+  }
+  #meet101VideoGrid.meet251-mode-duo .meet251-duo-main{
+    position:absolute!important;
+    inset:12px!important;
+    z-index:1!important;
+  }
+  #meet101VideoGrid.meet251-mode-duo .meet251-self-float{
+    position:absolute!important;
+    inset-inline-end:26px!important;
+    bottom:26px!important;
+    z-index:12!important;
+    width:clamp(150px,18vw,250px)!important;
+    height:auto!important;
+    aspect-ratio:16/9!important;
+    border-radius:16px!important;
+    box-shadow:0 18px 50px rgba(0,0,0,.38)!important;
+    border:1px solid rgba(255,255,255,.22)!important;
+  }
+  #meet101VideoGrid.meet251-mode-duo .meet251-self-float video{
+    object-fit:cover!important;
+  }
+  #meet101VideoGrid.meet251-mode-duo .meet251-self-float .meet101-video-avatar{
+    width:54px!important;height:54px!important;font-size:15px!important
+  }
+  #meet101VideoGrid.meet251-mode-duo .meet251-self-float .meet101-video-label{
+    max-width:calc(100% - 12px)!important;
+    inset-inline-start:6px!important;
+    bottom:6px!important;
+    font-size:8px!important;
+    padding:4px 6px!important;
+  }
+
+  /* Auto dynamic grid: active speaker does not resize/reorder the call. */
+  #meet101VideoGrid.meet251-mode-grid{
+    display:grid!important;
+    padding:12px!important;
+    gap:10px!important;
+    overflow:auto!important;
+    align-content:center!important;
+  }
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-3,
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-4{
+    grid-template-columns:repeat(2,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  }
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-5,
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-6{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-rows:repeat(2,minmax(0,1fr))!important;
+  }
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-7,
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-8,
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-9{
+    grid-template-columns:repeat(3,minmax(0,1fr))!important;
+    grid-template-rows:repeat(3,minmax(0,1fr))!important;
+  }
+  #meet101VideoGrid.meet251-mode-grid.meet251-grid-many{
+    grid-template-columns:repeat(4,minmax(180px,1fr))!important;
+    grid-auto-rows:minmax(150px,1fr)!important;
+    align-content:start!important;
+  }
+
+  /* Presentation / pinned sidebar layout. */
+  #meet101VideoGrid.meet251-mode-present,
+  #meet101VideoGrid.meet251-mode-pin{
+    display:grid!important;
+    grid-template-columns:minmax(0,1fr) clamp(150px,19vw,260px)!important;
+    grid-template-rows:repeat(var(--meet251-thumb-count,1),minmax(84px,1fr))!important;
+    gap:9px!important;
+    padding:10px!important;
+    overflow:hidden!important;
+    align-content:stretch!important;
+  }
+  #meet101VideoGrid.meet251-mode-present .meet251-stage-main,
+  #meet101VideoGrid.meet251-mode-pin .meet251-stage-main{
+    grid-column:1!important;
+    grid-row:1/-1!important;
+    min-height:0!important;
+    height:100%!important;
+  }
+  #meet101VideoGrid.meet251-mode-present .meet251-stage-thumb,
+  #meet101VideoGrid.meet251-mode-pin .meet251-stage-thumb{
+    grid-column:2!important;
+    min-height:0!important;
+    height:auto!important;
+    border-radius:12px!important;
+  }
+  #meet101VideoGrid.meet251-mode-present .meet251-stage-thumb .meet101-video-avatar,
+  #meet101VideoGrid.meet251-mode-pin .meet251-stage-thumb .meet101-video-avatar{
+    width:46px!important;height:46px!important;font-size:13px!important
+  }
+  #meet101VideoGrid.meet251-mode-present .meet251-stage-thumb .meet101-video-label,
+  #meet101VideoGrid.meet251-mode-pin .meet251-stage-thumb .meet101-video-label{
+    inset-inline-start:6px!important;bottom:6px!important;
+    font-size:7.5px!important;padding:3px 5px!important;
+    max-width:calc(100% - 12px)!important
+  }
+
+  /* Speaking is a local visual cue, not a layout switch. */
+  #meet101VideoGrid.meet251-auto .meet101-video-tile.meet1042-speaking{
+    border-color:#66d5ad!important;
+    box-shadow:inset 0 0 0 2px rgba(102,213,173,.82),0 0 0 1px rgba(102,213,173,.22)!important;
+  }
+  #meet101VideoGrid.meet251-auto .meet101-video-tile.meet1042-speaking:after{
+    top:8px!important;inset-inline-end:8px!important;
+    padding:3px 7px!important;font-size:7.5px!important
+  }
+
+  /* Tablet / narrower desktop: keep presentation dominant, compact the strip. */
+  @media(max-width:980px){
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-5,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-6,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-7,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-8,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-9,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-many{
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      grid-auto-rows:minmax(130px,1fr)!important;
+    }
+    #meet101VideoGrid.meet251-mode-present,
+    #meet101VideoGrid.meet251-mode-pin{
+      grid-template-columns:minmax(0,1fr) minmax(130px,190px)!important;
+    }
+  }
+
+  /* Phone portrait: presentation/pin uses a main canvas with a bottom filmstrip.
+     3+ participants stay in a balanced 2-column grid. */
+  @media(max-width:700px) and (orientation:portrait){
+    #meet101VideoGrid.meet251-auto{padding:6px!important;gap:6px!important}
+
+    #meet101VideoGrid.meet251-mode-duo{
+      padding:6px!important;
+    }
+    #meet101VideoGrid.meet251-mode-duo .meet251-duo-main{
+      inset:6px!important;
+    }
+    #meet101VideoGrid.meet251-mode-duo .meet251-self-float{
+      width:clamp(110px,34vw,155px)!important;
+      inset-inline-end:14px!important;
+      bottom:14px!important;
+      border-radius:13px!important;
+    }
+
+    #meet101VideoGrid.meet251-mode-grid{
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      grid-template-rows:none!important;
+      grid-auto-rows:minmax(120px,1fr)!important;
+      align-content:start!important;
+      overflow:auto!important;
+    }
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-3,
+    #meet101VideoGrid.meet251-mode-grid.meet251-grid-4{
+      grid-template-rows:repeat(2,minmax(0,1fr))!important;
+    }
+
+    #meet101VideoGrid.meet251-mode-present,
+    #meet101VideoGrid.meet251-mode-pin{
+      grid-template-columns:repeat(var(--meet251-thumb-count,1),minmax(112px,1fr))!important;
+      grid-template-rows:minmax(0,1fr) 112px!important;
+      grid-auto-flow:column!important;
+      overflow-x:auto!important;
+      overflow-y:hidden!important;
+      align-content:stretch!important;
+    }
+    #meet101VideoGrid.meet251-mode-present .meet251-stage-main,
+    #meet101VideoGrid.meet251-mode-pin .meet251-stage-main{
+      grid-column:1/-1!important;
+      grid-row:1!important;
+      position:sticky!important;
+      inset-inline-start:0!important;
+      z-index:1!important;
+    }
+    #meet101VideoGrid.meet251-mode-present .meet251-stage-thumb,
+    #meet101VideoGrid.meet251-mode-pin .meet251-stage-thumb{
+      grid-row:2!important;
+      grid-column:auto!important;
+      min-width:112px!important;
+    }
+  }
+
+  /* Landscape phones: presentation uses right-side filmstrip like desktop. */
+  @media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+    #meet101VideoGrid.meet251-mode-grid{
+      padding:5px!important;gap:5px!important
+    }
+    #meet101VideoGrid.meet251-mode-present,
+    #meet101VideoGrid.meet251-mode-pin{
+      grid-template-columns:minmax(0,1fr) minmax(115px,175px)!important;
+      padding:5px!important;gap:5px!important
+    }
+    #meet101VideoGrid.meet251-mode-duo .meet251-self-float{
+      width:clamp(120px,20vw,190px)!important;
+      inset-inline-end:14px!important;bottom:14px!important
+    }
+  }
+  `;
+  document.head.appendChild(s);
+})();
+
+const MEET251_LAYOUT_CLASSES=[
+  'meet251-auto','meet251-mode-solo','meet251-mode-duo','meet251-mode-grid',
+  'meet251-mode-present','meet251-mode-pin',
+  'meet251-grid-3','meet251-grid-4','meet251-grid-5','meet251-grid-6',
+  'meet251-grid-7','meet251-grid-8','meet251-grid-9','meet251-grid-many'
+];
+const MEET251_TILE_CLASSES=[
+  'meet251-solo-main','meet251-duo-main','meet251-self-float',
+  'meet251-stage-main','meet251-stage-thumb'
+];
+
+let meetingV251LastMode='none';
+
+function meetingV251ResetClasses(grid,tiles){
+  grid.classList.remove(...MEET251_LAYOUT_CLASSES,'meet1043-focus-mode');
+  grid.style.removeProperty('--meet251-thumb-count');
+  for(const tile of tiles){
+    tile.classList.remove(...MEET251_TILE_CLASSES,'meet1043-focus-main');
+  }
+}
+
+function meetingV251ValidVisibleTiles(grid){
+  return [...grid.querySelectorAll('.meet101-video-tile')]
+    .filter(tile=>!tile.classList.contains('meet1043-self-hidden'));
+}
+
+function meetingV251ApplyLayout(){
+  const grid=document.getElementById('meet101VideoGrid');
+  if(!grid)return;
+
+  const all=[...grid.querySelectorAll('.meet101-video-tile')];
+  if(!all.length)return;
+
+  /* Keep the historical local self-hide state respected if it is ever
+     re-enabled, but V251 itself does not auto-hide self-view. */
+  const local=grid.querySelector('[data-peer="local"]');
+  if(local&&typeof meetingV1043SelfHidden!=='undefined'){
+    local.classList.toggle('meet1043-self-hidden',!!meetingV1043SelfHidden);
+  }
+
+  const visible=meetingV251ValidVisibleTiles(grid);
+  meetingV251ResetClasses(grid,all);
+  grid.classList.add('meet251-auto');
+
+  if(!visible.length){
+    meetingV251LastMode='empty';
+    return;
+  }
+
+  const screen=visible.find(tile=>tile.classList.contains('screen'));
+
+  /* Presentation is always the most important content in Auto layout. */
+  if(screen){
+    const thumbs=visible.filter(tile=>tile!==screen);
+    grid.classList.add('meet251-mode-present');
+    screen.classList.add('meet251-stage-main');
+    thumbs.forEach(tile=>tile.classList.add('meet251-stage-thumb'));
+    grid.style.setProperty('--meet251-thumb-count',String(Math.max(1,thumbs.length)));
+    meetingV251LastMode='presentation';
+    return;
+  }
+
+  /* Manual pin behaves like Meet's Spotlight/Sidebar combination. */
+  let pinned=null;
+  if(typeof meetingV1043PinnedPeer!=='undefined'&&meetingV1043PinnedPeer){
+    pinned=visible.find(tile=>String(tile.dataset.peer)===String(meetingV1043PinnedPeer))||null;
+    if(!pinned)meetingV1043PinnedPeer=null;
+  }
+  if(pinned&&visible.length>1){
+    const thumbs=visible.filter(tile=>tile!==pinned);
+    grid.classList.add('meet251-mode-pin');
+    pinned.classList.add('meet251-stage-main');
+    thumbs.forEach(tile=>tile.classList.add('meet251-stage-thumb'));
+    grid.style.setProperty('--meet251-thumb-count',String(Math.max(1,thumbs.length)));
+    meetingV251LastMode='pinned';
+    return;
+  }
+
+  /* One tile: complete stage. */
+  if(visible.length===1){
+    grid.classList.add('meet251-mode-solo');
+    visible[0].classList.add('meet251-solo-main');
+    meetingV251LastMode='solo';
+    return;
+  }
+
+  /* Exactly two participants, including local self-view:
+     remote person is primary and self-view floats in the corner. */
+  if(visible.length===2&&local&&visible.includes(local)){
+    const remote=visible.find(tile=>tile!==local);
+    if(remote){
+      grid.classList.add('meet251-mode-duo');
+      remote.classList.add('meet251-duo-main');
+      local.classList.add('meet251-self-float');
+      meetingV251LastMode='duo';
+      return;
+    }
+  }
+
+  /* 3+ participants: balanced dynamic grid.
+     The audio detector still marks the active speaker, but does not resize
+     or reorder the grid every few hundred milliseconds. */
+  const count=visible.length;
+  grid.classList.add('meet251-mode-grid');
+  if(count>=10)grid.classList.add('meet251-grid-many');
+  else grid.classList.add(`meet251-grid-${Math.max(3,count)}`);
+  meetingV251LastMode=`grid-${count}`;
+}
+
+/* Replace the old V1043 auto-focus geometry. Existing pin controls continue
+   to call this function, but active-speaker changes no longer create a giant tile. */
+meetingV1043ApplyLayout=meetingV251ApplyLayout;
+
+/* Apply after the complete modern room renderer as well, so SFU/P2P,
+   camera toggles, screen sharing and presence updates converge on one layout. */
+const meetingRenderRoomBaseV251=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  const result=meetingRenderRoomBaseV251();
+  if(meetingRoomV101)meetingV251ApplyLayout();
+  return result;
+};
+
+/* Resize only recomputes classes; CSS handles actual responsive geometry. */
+let meetingV251ResizeTimer=null;
+window.addEventListener('resize',()=>{
+  if(!meetingRoomV101)return;
+  clearTimeout(meetingV251ResizeTimer);
+  meetingV251ResizeTimer=setTimeout(meetingV251ApplyLayout,100);
+},{passive:true});
+
+window.taskyMeetingLayoutAuditV251=function(){
+  const grid=document.getElementById('meet101VideoGrid');
+  const visible=grid?meetingV251ValidVisibleTiles(grid):[];
+  return {
+    build:'V251',
+    mode:meetingV251LastMode,
+    visible_tiles:visible.length,
+    presentation:!!grid?.querySelector('.screen'),
+    pinned_peer:typeof meetingV1043PinnedPeer!=='undefined'?meetingV1043PinnedPeer:null,
+    active_speakers:visible.filter(x=>x.classList.contains('meet1042-speaking')).map(x=>x.dataset.peer)
+  };
+};
+
+window.TASKY_MEETINGS_LAYOUT_V251=true;
+window.TASKY_MEETINGS_CHUNK_READY_V251=true;
+console.info('Tasky Meetings V251 — Google-Meet-inspired dynamic layout ready');
