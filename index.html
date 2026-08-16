@@ -19556,7 +19556,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V259',
+      build:'V260',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19600,7 +19600,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V259',
+      build:'V260',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -19611,6 +19611,342 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_HR_LOADER_RESILIENCE_V259=true;
   window.TASKY_BUILD='V259';
   console.info('Tasky V259 — HR core/add-on isolation ready');
+})();
+</script>
+
+
+<script id="tasky-v260-employee-edit-ui-js" type="text/tasky-deferred-v247">
+(function(){
+  if(document.getElementById('tasky-v260-employee-edit-ui-css'))return;
+
+  const style=document.createElement('style');
+  style.id='tasky-v260-employee-edit-ui-css';
+  style.textContent=`
+    /* ========================================================
+       V260 — Employee edit modal cleanup
+       ======================================================== */
+    #addModalBody.tasky-employee-edit-v260{
+      width:min(900px,calc(100vw - 24px))!important;
+      max-width:900px!important;
+      max-height:calc(100dvh - 24px)!important;
+      overflow:auto!important;
+      border-radius:20px!important;
+      background:var(--card)!important;
+      padding:0!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .modal-head{
+      position:sticky!important;
+      top:0!important;
+      z-index:20!important;
+      display:flex!important;
+      align-items:center!important;
+      justify-content:space-between!important;
+      gap:12px!important;
+      padding:15px 18px!important;
+      background:color-mix(in srgb,var(--card) 96%,var(--green-tint))!important;
+      border-bottom:1px solid var(--border)!important;
+      backdrop-filter:blur(10px)!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .modal-head h3{
+      margin:0!important;
+      font-size:16px!important;
+      line-height:1.35!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .modal-close{
+      width:34px!important;
+      height:34px!important;
+      min-width:34px!important;
+      border-radius:10px!important;
+      border:1px solid var(--border)!important;
+      background:var(--paper)!important;
+      display:grid!important;
+      place-items:center!important;
+      padding:0!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 form{
+      padding:14px 18px 18px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr72-form{
+      display:grid!important;
+      grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      gap:12px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .field{
+      margin:0!important;
+      min-width:0!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .field.full,
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-field{
+      grid-column:1/-1!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .field label,
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-copy b{
+      display:block!important;
+      margin:0 0 5px!important;
+      font-size:9.5px!important;
+      font-weight:800!important;
+      color:var(--ink-soft)!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 input,
+    #addModalBody.tasky-employee-edit-v260 select,
+    #addModalBody.tasky-employee-edit-v260 textarea{
+      width:100%!important;
+      min-height:42px!important;
+      border-radius:11px!important;
+      border:1px solid var(--border)!important;
+      background:var(--paper)!important;
+      color:var(--ink)!important;
+      padding:9px 11px!important;
+      font-size:10.5px!important;
+      box-shadow:none!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 textarea{
+      min-height:88px!important;
+      resize:vertical!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-field{
+      display:grid!important;
+      grid-template-columns:92px minmax(0,1fr)!important;
+      gap:14px!important;
+      padding:12px!important;
+      border-radius:14px!important;
+      border:1px solid var(--border)!important;
+      background:color-mix(in srgb,var(--green-tint) 30%,var(--paper))!important;
+      align-items:center!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-preview{
+      width:82px!important;
+      height:82px!important;
+      border-radius:18px!important;
+      overflow:hidden!important;
+      border:1px solid var(--border)!important;
+      background:var(--card)!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-preview img{
+      width:100%!important;
+      height:100%!important;
+      object-fit:cover!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-copy small{
+      display:block!important;
+      font-size:8.5px!important;
+      line-height:1.55!important;
+      color:var(--muted)!important;
+      margin-bottom:7px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .hr87-photo-actions{
+      display:flex!important;
+      flex-wrap:wrap!important;
+      gap:7px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .chip-btn,
+    #addModalBody.tasky-employee-edit-v260 .submit-btn{
+      min-height:34px!important;
+      border-radius:10px!important;
+      font-size:9.5px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .submit-btn{
+      margin-top:14px!important;
+      padding-inline:18px!important;
+    }
+
+    #addModalBody.tasky-employee-edit-v260 .tasky-v260-section-label{
+      grid-column:1/-1!important;
+      margin:2px 0 -2px!important;
+      padding-top:6px!important;
+      border-top:1px solid var(--border)!important;
+      font-size:9px!important;
+      font-weight:900!important;
+      color:var(--muted)!important;
+    }
+
+    @media(max-width:700px){
+      #addModalBody.tasky-employee-edit-v260{
+        width:calc(100vw - 10px)!important;
+        max-height:calc(100dvh - 10px)!important;
+        border-radius:16px!important;
+      }
+
+      #addModalBody.tasky-employee-edit-v260 form{
+        padding:12px!important;
+      }
+
+      #addModalBody.tasky-employee-edit-v260 .hr72-form{
+        grid-template-columns:1fr!important;
+      }
+
+      #addModalBody.tasky-employee-edit-v260 .field,
+      #addModalBody.tasky-employee-edit-v260 .field.full,
+      #addModalBody.tasky-employee-edit-v260 .hr87-photo-field{
+        grid-column:1!important;
+      }
+
+      #addModalBody.tasky-employee-edit-v260 .hr87-photo-field{
+        grid-template-columns:72px minmax(0,1fr)!important;
+      }
+
+      #addModalBody.tasky-employee-edit-v260 .hr87-photo-preview{
+        width:68px!important;
+        height:68px!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const AR_LABELS={
+    'English name':'الاسم بالإنجليزي',
+    'Email':'البريد الإلكتروني',
+    'Phone':'الجوال',
+    'Hire date':'تاريخ الانضمام',
+    'Department':'الإدارة',
+    'Position':'المسمى الوظيفي',
+    'Manager':'المدير المباشر',
+    'Status':'الحالة',
+    'Employment type':'نوع التوظيف',
+    'Work location':'موقع العمل',
+    'Notes':'ملاحظات'
+  };
+
+  const EN_LABELS={
+    'الاسم':'Arabic name',
+    'البريد':'Email',
+    'الجوال':'Phone',
+    'تاريخ الانضمام':'Hire date',
+    'الإدارة':'Department',
+    'المسمى':'Job title',
+    'المدير المباشر':'Direct manager',
+    'الحالة':'Status',
+    'نوع التوظيف':'Employment type',
+    'موقع العمل':'Work location',
+    'ملاحظات':'Notes'
+  };
+
+  const STATUS_LABELS={
+    active:['نشط','Active'],
+    inactive:['غير نشط','Inactive'],
+    terminated:['منتهي','Terminated'],
+    on_leave:['في إجازة','On leave'],
+    suspended:['موقوف','Suspended']
+  };
+
+  const EMPLOYMENT_LABELS={
+    full_time:['دوام كامل','Full time'],
+    part_time:['دوام جزئي','Part time'],
+    contract:['عقد','Contract'],
+    temporary:['مؤقت','Temporary'],
+    intern:['متدرب','Intern']
+  };
+
+  function isArabicV260(){
+    return (window.lang||document.documentElement.lang||'ar')!=='en';
+  }
+
+  function cleanSelectLabelsV260(select,map){
+    if(!select)return;
+    for(const option of [...select.options]){
+      const key=String(option.value||'').trim().toLowerCase();
+      const labels=map[key];
+      if(labels)option.textContent=isArabicV260()?labels[0]:labels[1];
+    }
+  }
+
+  function normalizeLabelsV260(modal){
+    for(const label of modal.querySelectorAll('.field label')){
+      const txt=String(label.textContent||'').trim();
+      if(isArabicV260()&&AR_LABELS[txt])label.textContent=AR_LABELS[txt];
+      if(!isArabicV260()&&EN_LABELS[txt])label.textContent=EN_LABELS[txt];
+    }
+
+    cleanSelectLabelsV260(document.getElementById('hrStatus'),STATUS_LABELS);
+    cleanSelectLabelsV260(document.getElementById('hrEmployment'),EMPLOYMENT_LABELS);
+  }
+
+  function addSectionsV260(form){
+    if(form.querySelector('.tasky-v260-section-label'))return;
+
+    const fields=[...form.children].filter(x=>x.classList?.contains('field'));
+    if(!fields.length)return;
+
+    const first=fields[0];
+    const divider=document.createElement('div');
+    divider.className='tasky-v260-section-label';
+    divider.textContent=isArabicV260()?'بيانات الموظف':'Employee details';
+    form.insertBefore(divider,first);
+
+    const notes=document.getElementById('hrNotes')?.closest('.field');
+    if(notes){
+      const divider2=document.createElement('div');
+      divider2.className='tasky-v260-section-label';
+      divider2.textContent=isArabicV260()?'معلومات إضافية':'Additional information';
+      form.insertBefore(divider2,notes);
+    }
+  }
+
+  function normalizeEmployeeEditV260(){
+    const modal=document.getElementById('addModalBody');
+    if(!modal)return;
+
+    const title=String(modal.querySelector('.modal-head h3')?.textContent||'').trim();
+    const employeeEdit=/تعديل موظف|Edit employee/i.test(title);
+
+    modal.classList.toggle('tasky-employee-edit-v260',employeeEdit);
+    if(!employeeEdit)return;
+
+    normalizeLabelsV260(modal);
+
+    const form=modal.querySelector('form .hr72-form');
+    if(form)addSectionsV260(form);
+  }
+
+  let scheduled=false;
+  function scheduleV260(){
+    if(scheduled)return;
+    scheduled=true;
+    requestAnimationFrame(()=>{
+      scheduled=false;
+      normalizeEmployeeEditV260();
+    });
+  }
+
+  const observer=new MutationObserver(scheduleV260);
+  observer.observe(document.body,{childList:true,subtree:true});
+
+  document.addEventListener('change',event=>{
+    if(event.target?.matches?.('#hrStatus,#hrEmployment'))scheduleV260();
+  });
+
+  scheduleV260();
+
+  window.taskyEmployeeEditUiAuditV260=function(){
+    const modal=document.getElementById('addModalBody');
+    return {
+      build:'V260',
+      active:modal?.classList.contains('tasky-employee-edit-v260')||false,
+      status_value:document.getElementById('hrStatus')?.value||null,
+      employment_value:document.getElementById('hrEmployment')?.value||null
+    };
+  };
+
+  window.TASKY_EMPLOYEE_EDIT_UI_V260=true;
+  window.TASKY_BUILD='V260';
+  console.info('Tasky V260 — employee edit UI normalized');
 })();
 </script>
 
