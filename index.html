@@ -3260,12 +3260,11 @@ html body .sidebar .main-nav,
         <svg><use href="#i-x"/></svg>
       </button>
     </div>
-    <div class="workspace" onclick="openWorkspaceBrandingModal()" id="workspaceSwitcher" title="إعدادات مساحة العمل">
+    <div class="workspace workspace-display-only-v255" id="workspaceSwitcher" title="مساحة العمل">
       <div class="workspace-main">
         <div class="workspace-logo" id="workspaceLogoMark"></div>
         <span id="workspaceLabel">مساحة عمل — شركة نماء</span>
       </div>
-      <span class="workspace-action" id="workspaceBrandAction"><svg><use href="#i-camera"/></svg></span>
     </div>
 
     <div class="tasky-app-switcher-v217" id="taskyAppSwitcherV217">
@@ -5695,24 +5694,14 @@ function workspaceInitials(name){
 function isPaidPlan(){ return currentPlan !== 'free'; }
 function renderWorkspaceBrand(){
   const mark = document.getElementById('workspaceLogoMark');
-  const action = document.getElementById('workspaceBrandAction');
   const switcher = document.getElementById('workspaceSwitcher');
   if(mark){
     mark.innerHTML = currentWorkspaceLogoUrl
       ? `<img src="${escapeHtml(currentWorkspaceLogoUrl)}" alt="">`
       : `<span>${escapeHtml(workspaceInitials(currentWorkspaceName || t('workspace')))}</span>`;
   }
-  if(action){
-    const canEdit = currentUserRole === 'admin';
-    action.style.display = canEdit ? 'flex' : 'none';
-    action.innerHTML = isPaidPlan()
-      ? `<svg><use href="#i-camera"/></svg>`
-      : `<svg><use href="#i-lock"/></svg>`;
-  }
   if(switcher){
-    switcher.title = currentUserRole === 'admin'
-      ? (isPaidPlan() ? (lang==='ar'?'تغيير شعار مساحة العمل':'Change workspace logo') : (lang==='ar'?'متاح في الباقات المدفوعة':'Available on paid plans'))
-      : (lang==='ar'?'مساحة العمل':'Workspace');
+    switcher.title = lang==='ar'?'مساحة العمل':'Workspace';
   }
 }
 function openWorkspaceBrandingModal(){
@@ -19133,6 +19122,29 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_POPOVER_DISMISS_V254=true;
   window.TASKY_BUILD='V254';
   console.info('Tasky V254 — outside dismiss for theme + notifications ready');
+})();
+</script>
+
+
+<script id="tasky-v255-sidebar-logo-cleanup-js" type="text/tasky-deferred-v247">
+(function(){
+  if(!document.getElementById('tasky-v255-sidebar-logo-cleanup-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v255-sidebar-logo-cleanup-css';
+    style.textContent=`
+      .workspace.workspace-display-only-v255{
+        cursor:default!important;
+      }
+      .workspace.workspace-display-only-v255:hover{
+        transform:none!important;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.TASKY_SIDEBAR_LOGO_CLEANUP_V255=true;
+  window.TASKY_BUILD='V255';
+  console.info('Tasky V255 — sidebar logo action removed; settings remains authoritative');
 })();
 </script>
 
