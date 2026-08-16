@@ -5030,3 +5030,374 @@ window.taskyMeetingLayoutAuditV251=function(){
 window.TASKY_MEETINGS_LAYOUT_V251=true;
 window.TASKY_MEETINGS_CHUNK_READY_V251=true;
 console.info('Tasky Meetings V251 — Google-Meet-inspired dynamic layout ready');
+
+
+/* ============================================================
+   TASKY MEETINGS V252 — MOBILE ORIENTATION / IOS SAFARI RECOVERY
+   Fixes layout/media state after portrait <-> landscape rotation.
+   ============================================================ */
+
+(function(){
+  if(document.getElementById('tasky-meet-v252-orientation-css'))return;
+  const s=document.createElement('style');
+  s.id='tasky-meet-v252-orientation-css';
+  s.textContent=`
+    /* iOS Safari can report stale 100dvh while its browser chrome animates.
+       V252 writes the actual visualViewport height into this variable. */
+    #taskyMeetingRoomV101.meet252-viewport{
+      height:var(--meet252-room-height,100dvh)!important;
+      max-height:var(--meet252-room-height,100dvh)!important;
+      min-height:var(--meet252-room-height,100dvh)!important;
+      overflow:hidden!important;
+    }
+    #taskyMeetingRoomV101.meet252-viewport .meet101-room-main,
+    #taskyMeetingRoomV101.meet252-viewport .meet101-video-area,
+    #taskyMeetingRoomV101.meet252-viewport #meet101VideoGrid{
+      min-height:0!important;
+    }
+
+    /* When orientation changes, never let an old mobile two-row rule win
+       over the V251 duo floating-self layout. */
+    #meet101VideoGrid.meet251-mode-duo.meet252-layout-ready{
+      display:block!important;
+      grid-template-columns:none!important;
+      grid-template-rows:none!important;
+      grid-auto-rows:auto!important;
+      overflow:hidden!important;
+      align-content:normal!important;
+    }
+    #meet101VideoGrid.meet251-mode-duo.meet252-layout-ready .meet251-duo-main{
+      position:absolute!important;
+      inset:var(--meet252-stage-inset,6px)!important;
+      width:auto!important;
+      height:auto!important;
+      max-height:none!important;
+      aspect-ratio:auto!important;
+    }
+
+    /* A presentation with one thumbnail should always stay within the
+       current visual viewport after returning to portrait. */
+    @media(max-width:700px) and (orientation:portrait){
+      #meet101VideoGrid.meet251-mode-present.meet252-layout-ready,
+      #meet101VideoGrid.meet251-mode-pin.meet252-layout-ready{
+        height:100%!important;
+        min-height:0!important;
+        max-height:100%!important;
+        grid-template-rows:minmax(0,1fr) 108px!important;
+        overscroll-behavior:contain!important;
+      }
+      #meet101VideoGrid.meet251-mode-present.meet252-layout-ready .meet251-stage-main,
+      #meet101VideoGrid.meet251-mode-pin.meet252-layout-ready .meet251-stage-main{
+        min-height:0!important;
+        max-height:100%!important;
+        height:100%!important;
+      }
+      #meet101VideoGrid.meet251-mode-present.meet252-layout-ready .meet251-stage-thumb,
+      #meet101VideoGrid.meet251-mode-pin.meet252-layout-ready .meet251-stage-thumb{
+        min-height:0!important;
+        height:108px!important;
+      }
+    }
+
+    @media(orientation:landscape) and (max-height:650px) and (max-width:1100px){
+      #meet101VideoGrid.meet251-mode-present.meet252-layout-ready,
+      #meet101VideoGrid.meet251-mode-pin.meet252-layout-ready{
+        height:100%!important;
+        min-height:0!important;
+        max-height:100%!important;
+      }
+    }
+  `;
+  document.head.appendChild(s);
+})();
+
+let meetingV252RecoveryTimers=[];
+let meetingV252RecoverySeq=0;
+let meetingV252LastViewport={width:0,height:0,orientation:''};
+
+function meetingV252ViewportInfo(){
+  const vv=window.visualViewport;
+  const width=Math.round(vv?.width||window.innerWidth||document.documentElement.clientWidth||0);
+  const height=Math.round(vv?.height||window.innerHeight||document.documentElement.clientHeight||0);
+  const orientation=width>height?'landscape':'portrait';
+  return {width,height,orientation};
+}
+
+function meetingV252SyncViewport(){
+  const root=document.getElementById('taskyMeetingRoomV101');
+  if(!root||!meetingRoomV101)return meetingV252ViewportInfo();
+
+  const info=meetingV252ViewportInfo();
+  root.classList.add('meet252-viewport');
+  root.style.setProperty('--meet252-room-height',`${Math.max(1,info.height)}px`);
+  root.style.setProperty('--meet252-room-width',`${Math.max(1,info.width)}px`);
+
+  meetingV252LastViewport=info;
+  return info;
+}
+
+function meetingV252RemoteScreenIsLive(tile){
+  const peerId=String(tile?.dataset?.peer||'');
+  if(!peerId)return false;
+
+  if(peerId==='local'){
+    return !!(
+      meetingLocalStateV101?.screen &&
+      meetingScreenTrackV101 &&
+      meetingScreenTrackV101.readyState==='live'
+    );
+  }
+
+  const meta=meetingRemoteMetaV101.get(peerId)||{};
+  if(meta.screen!==true)return false;
+
+  const stream=meetingRemoteStreamsV101.get(peerId);
+  return !!stream?.getVideoTracks?.().some(track=>track.readyState==='live');
+}
+
+function meetingV252SanitizeScreenState(grid){
+  for(const tile of [...grid.querySelectorAll('.meet101-video-tile.screen')]){
+    if(meetingV252RemoteScreenIsLive(tile))continue;
+
+    /* A stale screen=true flag can survive a media interruption/rotation.
+       Do not let that stale flag create a giant empty presentation tile. */
+    tile.classList.remove('screen');
+
+    const peerId=String(tile.dataset.peer||'');
+    if(peerId==='local'){
+      if(!meetingScreenTrackV101||meetingScreenTrackV101.readyState!=='live'){
+        meetingLocalStateV101.screen=false;
+      }
+    }else{
+      const meta=meetingRemoteMetaV101.get(peerId);
+      if(meta&&meta.screen===true){
+        const stream=meetingRemoteStreamsV101.get(peerId);
+        const live=!!stream?.getVideoTracks?.().some(track=>track.readyState==='live');
+        if(!live)meta.screen=false;
+      }
+    }
+  }
+}
+
+function meetingV252ApplyLayout(){
+  const grid=document.getElementById('meet101VideoGrid');
+  if(!grid)return;
+
+  meetingV252SyncViewport();
+  meetingV252SanitizeScreenState(grid);
+
+  const all=[...grid.querySelectorAll('.meet101-video-tile')];
+  if(!all.length)return;
+
+  const local=grid.querySelector('[data-peer="local"]');
+  if(local&&typeof meetingV1043SelfHidden!=='undefined'){
+    local.classList.toggle('meet1043-self-hidden',!!meetingV1043SelfHidden);
+  }
+
+  const visible=meetingV251ValidVisibleTiles(grid);
+  meetingV251ResetClasses(grid,all);
+  grid.classList.add('meet251-auto','meet252-layout-ready');
+
+  if(!visible.length){
+    meetingV251LastMode='empty';
+    return;
+  }
+
+  const screen=visible.find(tile=>tile.classList.contains('screen')&&meetingV252RemoteScreenIsLive(tile));
+  if(screen){
+    const thumbs=visible.filter(tile=>tile!==screen);
+    grid.classList.add('meet251-mode-present');
+    screen.classList.add('meet251-stage-main');
+    thumbs.forEach(tile=>tile.classList.add('meet251-stage-thumb'));
+    grid.style.setProperty('--meet251-thumb-count',String(Math.max(1,thumbs.length)));
+    meetingV251LastMode='presentation';
+    return;
+  }
+
+  let pinned=null;
+  if(typeof meetingV1043PinnedPeer!=='undefined'&&meetingV1043PinnedPeer){
+    pinned=visible.find(tile=>String(tile.dataset.peer)===String(meetingV1043PinnedPeer))||null;
+    if(!pinned)meetingV1043PinnedPeer=null;
+  }
+
+  if(pinned&&visible.length>1){
+    const thumbs=visible.filter(tile=>tile!==pinned);
+    grid.classList.add('meet251-mode-pin');
+    pinned.classList.add('meet251-stage-main');
+    thumbs.forEach(tile=>tile.classList.add('meet251-stage-thumb'));
+    grid.style.setProperty('--meet251-thumb-count',String(Math.max(1,thumbs.length)));
+    meetingV251LastMode='pinned';
+    return;
+  }
+
+  if(visible.length===1){
+    grid.classList.add('meet251-mode-solo');
+    visible[0].classList.add('meet251-solo-main');
+    meetingV251LastMode='solo';
+    return;
+  }
+
+  if(visible.length===2&&local&&visible.includes(local)){
+    const remote=visible.find(tile=>tile!==local);
+    if(remote){
+      grid.classList.add('meet251-mode-duo');
+      remote.classList.add('meet251-duo-main');
+      local.classList.add('meet251-self-float');
+      meetingV251LastMode='duo';
+      return;
+    }
+  }
+
+  const count=visible.length;
+  grid.classList.add('meet251-mode-grid');
+  if(count>=10)grid.classList.add('meet251-grid-many');
+  else grid.classList.add(`meet251-grid-${Math.max(3,count)}`);
+  meetingV251LastMode=`grid-${count}`;
+}
+
+function meetingV252RestoreVideoElement(video,stream){
+  if(!video||!stream)return;
+
+  try{
+    video.playsInline=true;
+    video.setAttribute('playsinline','');
+    video.autoplay=true;
+
+    /* iOS can keep the element visually blank after rotation even while
+       the MediaStream is alive. Reassigning srcObject makes WebKit rebuild
+       the rendering layer without renegotiating the call. */
+    if(video.srcObject!==stream){
+      video.srcObject=stream;
+    }else{
+      const same=video.srcObject;
+      video.srcObject=null;
+      video.srcObject=same;
+    }
+
+    if(typeof meetingFitVideoTileV1025==='function'){
+      meetingFitVideoTileV1025(video);
+    }
+
+    const play=video.play?.();
+    if(play?.catch)play.catch(()=>{});
+  }catch(err){
+    console.warn('Tasky V252 video restore',err);
+  }
+}
+
+function meetingV252RestoreMedia(){
+  if(!meetingRoomV101)return;
+
+  const local=document.getElementById('meet101LocalVideo');
+  if(local){
+    const localStream=
+      meetingScreenTrackV101&&meetingScreenTrackV101.readyState==='live'
+        ?new MediaStream([meetingScreenTrackV101])
+        :meetingLocalStreamV101;
+    meetingV252RestoreVideoElement(local,localStream);
+    local.muted=true;
+  }
+
+  for(const [peerId,stream] of meetingRemoteStreamsV101.entries()){
+    const video=document.getElementById(meetingPeerDomIdV101(peerId));
+    if(video)meetingV252RestoreVideoElement(video,stream);
+  }
+
+  if(typeof meetingV10513SyncAllAudio==='function'){
+    try{meetingV10513SyncAllAudio()}catch(_){}
+  }
+}
+
+function meetingV252RecoveryPass(seq){
+  if(seq!==meetingV252RecoverySeq||!meetingRoomV101)return;
+
+  meetingV252SyncViewport();
+  meetingV252RestoreMedia();
+  meetingV252ApplyLayout();
+
+  /* Force WebKit to commit the newly calculated box tree. */
+  const grid=document.getElementById('meet101VideoGrid');
+  if(grid){
+    void grid.offsetHeight;
+    requestAnimationFrame(()=>{
+      if(seq!==meetingV252RecoverySeq)return;
+      meetingV252ApplyLayout();
+    });
+  }
+}
+
+function meetingV252ScheduleRecovery(reason='viewport'){
+  if(!meetingRoomV101)return;
+
+  meetingV252RecoverySeq++;
+  const seq=meetingV252RecoverySeq;
+
+  for(const timer of meetingV252RecoveryTimers)clearTimeout(timer);
+  meetingV252RecoveryTimers=[];
+
+  /* iOS changes visualViewport several times while rotating and while
+     Safari's address/tool bars animate. Re-check after each settle point. */
+  [0,90,240,520,900].forEach(delay=>{
+    meetingV252RecoveryTimers.push(
+      setTimeout(()=>meetingV252RecoveryPass(seq),delay)
+    );
+  });
+
+  console.debug?.('Tasky V252 recovery scheduled',reason,meetingV252ViewportInfo());
+}
+
+/* V252 becomes the authoritative layout function. */
+meetingV1043ApplyLayout=meetingV252ApplyLayout;
+
+/* The final room renderer must converge to V252 even if an older wrapper
+   rebuilt the DOM or changed count/screen classes. */
+const meetingRenderRoomBaseV252=meetingRenderRoomV101;
+meetingRenderRoomV101=function(){
+  const result=meetingRenderRoomBaseV252();
+  if(meetingRoomV101){
+    meetingV252SyncViewport();
+    meetingV252ApplyLayout();
+    requestAnimationFrame(meetingV252RestoreMedia);
+  }
+  return result;
+};
+
+window.addEventListener('orientationchange',()=>meetingV252ScheduleRecovery('orientationchange'),{passive:true});
+window.addEventListener('resize',()=>meetingV252ScheduleRecovery('window-resize'),{passive:true});
+window.addEventListener('pageshow',()=>meetingV252ScheduleRecovery('pageshow'),{passive:true});
+
+if(window.visualViewport){
+  window.visualViewport.addEventListener('resize',()=>meetingV252ScheduleRecovery('visualViewport-resize'),{passive:true});
+}
+
+try{
+  window.screen?.orientation?.addEventListener?.('change',()=>meetingV252ScheduleRecovery('screen-orientation'),{passive:true});
+}catch(_){}
+
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='visible'&&meetingRoomV101){
+    meetingV252ScheduleRecovery('visibility');
+  }
+},{passive:true});
+
+window.taskyMeetingOrientationAuditV252=function(){
+  const grid=document.getElementById('meet101VideoGrid');
+  const tiles=grid?[...grid.querySelectorAll('.meet101-video-tile')]:[];
+
+  return {
+    build:'V252',
+    viewport:meetingV252ViewportInfo(),
+    last_viewport:meetingV252LastViewport,
+    mode:meetingV251LastMode,
+    tiles:tiles.map(tile=>({
+      peer:tile.dataset.peer||null,
+      screen:tile.classList.contains('screen'),
+      live_screen:meetingV252RemoteScreenIsLive(tile),
+      classes:[...tile.classList]
+    }))
+  };
+};
+
+window.TASKY_MEETINGS_ORIENTATION_V252=true;
+window.TASKY_MEETINGS_CHUNK_READY_V252=true;
+console.info('Tasky Meetings V252 — mobile orientation recovery ready');
