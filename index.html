@@ -3273,7 +3273,7 @@ html body .sidebar .main-nav,
           <span class="tasky-app-dot-v217" id="taskyAppDotV217"></span>
           <span class="tasky-app-name-v217" id="taskyAppNameV217">Tasky</span>
         </span>
-        <svg class="tasky-app-chevron-v217"><use href="#i-chevron-down"/></svg>
+        <svg class="tasky-app-chevron-v217"><use href="#i-chevron"/></svg>
       </button>
       <div class="tasky-app-menu-v217 hidden" id="taskyAppMenuV217"></div>
     </div>
@@ -16084,6 +16084,10 @@ async function taskyLazyLoadChunkV1681(name){
           window.TASKY_HR_LEAVE_ADDON_ERROR_V259=addonError?.message||String(addonError);
           console.warn('Tasky V259: optional HR leave add-on unavailable; HR core remains usable',addonError);
         }
+
+        try{window.taskyInstallHrFetchGuardV264?.()}catch(guardError){
+          console.warn('Tasky V264 HR fetch guard install',guardError);
+        }
       }
 
       if(name==='meetings' && (typeof fetchMeetingsV101!=='function' || typeof meetingsTemplateV101!=='function')){
@@ -16091,7 +16095,7 @@ async function taskyLazyLoadChunkV1681(name){
       }
 
       c.loaded=true;
-      if(typeof renderNav==='function')renderNav();
+      if(name!=='hr'&&typeof renderNav==='function')renderNav();
       return true;
     }
     catch(e){
@@ -19613,7 +19617,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V263',
+      build:'V264',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19657,7 +19661,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V263',
+      build:'V264',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -20007,7 +20011,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V263',
+      build:'V264',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20151,7 +20155,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V263',
+      build:'V264',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20516,7 +20520,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V263',
+      build:'V264',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -21061,7 +21065,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const modal=document.getElementById('addModalBody');
     const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V263',
+      build:'V264',
       hr_transaction:window.__taskyHrRenderTxnV263===true,
       hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
       hr_commit_count:hrCommitCountV263,
@@ -21077,6 +21081,687 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_HR_ROOT_STABILITY_V263=true;
   window.TASKY_BUILD='V263';
   console.info('Tasky V263 — transactional HR render + Employee 360 authoritative redesign ready');
+})();
+</script>
+
+
+<script id="tasky-v264-platform-qa-hardening-js" type="text/tasky-deferred-v247">
+(function(){
+  if(!document.getElementById('tasky-v264-platform-qa-hardening-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v264-platform-qa-hardening-css';
+    style.textContent=`
+      :root{
+        --tasky-modal-layer-v264:120000;
+        --tasky-portal-layer-v264:160000;
+        --tasky-toast-layer-v264:180000;
+      }
+
+      body.tasky-hr-hydrating-v261 #moduleContent{
+        opacity:1!important;
+        pointer-events:auto!important;
+      }
+      body.tasky-hr-hydrating-v261 #moduleContent::after{display:none!important}
+      #moduleArea.tasky-hr-stable-v263,
+      #moduleArea.tasky-hr-stable-v263.tasky-hr-visible-v263{
+        opacity:1!important;
+        transition:none!important;
+      }
+
+      html.tasky-modal-lock-v264,
+      body.tasky-modal-lock-v264{
+        overflow:hidden!important;
+        overscroll-behavior:none!important;
+      }
+
+      .overlay.tasky-modal-root-v264{
+        box-sizing:border-box!important;
+        padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
+                max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;
+        overflow:hidden!important;
+        isolation:isolate!important;
+      }
+
+      .overlay.tasky-modal-root-v264>.modal{
+        box-sizing:border-box!important;
+        max-width:calc(100vw - 24px)!important;
+        max-height:calc(100dvh - 24px)!important;
+        overscroll-behavior:contain!important;
+        scrollbar-gutter:stable!important;
+      }
+
+      .overlay.tasky-modal-root-v264>.modal img{max-width:100%!important}
+      .overlay.tasky-modal-root-v264>.modal *{min-width:0}
+
+      .overlay.tasky-modal-root-v264 .modal-head{
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+        gap:12px!important;
+        position:relative!important;
+      }
+
+      .overlay.tasky-modal-root-v264 .modal-head>.modal-close{
+        position:static!important;
+        inset:auto!important;
+        top:auto!important;
+        right:auto!important;
+        left:auto!important;
+        transform:none!important;
+        margin:0!important;
+        width:36px!important;
+        height:36px!important;
+        min-width:36px!important;
+        min-height:36px!important;
+        flex:0 0 36px!important;
+        padding:0!important;
+        display:grid!important;
+        place-items:center!important;
+        border-radius:11px!important;
+        border:1px solid var(--border)!important;
+        background:var(--paper)!important;
+        color:var(--ink)!important;
+      }
+
+      .overlay.tasky-modal-root-v264 .modal-head>.modal-close svg{
+        width:17px!important;
+        height:17px!important;
+        min-width:17px!important;
+        min-height:17px!important;
+      }
+
+      .tasky-modal-under-v264{
+        pointer-events:none!important;
+        user-select:none!important;
+      }
+      .tasky-modal-top-v264{pointer-events:auto!important}
+
+      .tasky-select-menu,
+      .mention-menu,
+      [role="listbox"].tasky-select-menu{
+        z-index:var(--tasky-portal-layer-v264)!important;
+      }
+
+      .tasky-toast-stack{z-index:var(--tasky-toast-layer-v264)!important}
+
+      .tasky-dialog-backdrop.tasky-modal-root-v264{
+        padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right))
+                max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;
+      }
+
+      #notifDropdown,#themeDropdown,.topbar .dropdown{
+        max-width:min(420px,calc(100vw - 16px))!important;
+        box-sizing:border-box!important;
+      }
+
+      .modal input,.modal select,.modal textarea,.modal button{box-sizing:border-box!important}
+
+      @media(max-width:700px){
+        .overlay.tasky-modal-root-v264{
+          padding:6px!important;
+          align-items:flex-end;
+        }
+        .overlay.tasky-modal-root-v264>.modal{
+          max-width:calc(100vw - 12px)!important;
+          max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+        }
+        .tasky-dialog{
+          max-height:calc(100dvh - 24px)!important;
+          overflow:auto!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /* ================= HR ROOT FIX ================= */
+
+  let hrTxnDepthV264=0;
+  let hrRenderDeferredV264=false;
+  let hrRenderBypassV264=false;
+  let hrSuppressUntilV264=0;
+  let hrLoadingTimerV264=null;
+  let hrCommitCountV264=0;
+  let hrRenderAttemptCountV264=0;
+
+  const renderModuleBeforeV264=renderModule;
+
+  renderModule=function(){
+    if(activeNav==='hr'){
+      hrRenderAttemptCountV264++;
+      const blocked=
+        !hrRenderBypassV264 &&
+        (hrTxnDepthV264>0 || performance.now()<hrSuppressUntilV264);
+
+      if(blocked){
+        hrRenderDeferredV264=true;
+        return;
+      }
+    }
+    return renderModuleBeforeV264();
+  };
+
+  function taskyHrCommitNowV264(reason='unknown'){
+    if(activeNav!=='hr')return;
+
+    clearTimeout(hrLoadingTimerV264);
+    hrSuppressUntilV264=performance.now()+700;
+
+    window.__taskyHrRenderTxnV263=false;
+    window.__taskyHrRenderDeferredV263=false;
+    window.__taskyHrSuppressUntilV263=0;
+
+    hrRenderBypassV264=true;
+    try{
+      renderModuleBeforeV264();
+
+      try{
+        const area=document.getElementById('moduleArea');
+        if(typeof normalizeOversizedIconsV258==='function'&&area){
+          normalizeOversizedIconsV258(area);
+        }
+      }catch(_){}
+
+      hrCommitCountV264++;
+    }finally{
+      hrRenderBypassV264=false;
+      hrRenderDeferredV264=false;
+    }
+
+    console.debug?.('Tasky V264 HR single commit',reason,hrCommitCountV264);
+  }
+
+  window.taskyHrTxnBeginV264=function(reason='unknown'){
+    if(hrTxnDepthV264===0){
+      hrRenderDeferredV264=false;
+      clearTimeout(hrLoadingTimerV264);
+    }
+    hrTxnDepthV264++;
+    console.debug?.('Tasky V264 HR txn begin',reason,hrTxnDepthV264);
+  };
+
+  window.taskyHrTxnEndV264=function(reason='unknown',{commit=true}={}){
+    hrTxnDepthV264=Math.max(0,hrTxnDepthV264-1);
+    console.debug?.('Tasky V264 HR txn end',reason,hrTxnDepthV264);
+
+    if(hrTxnDepthV264===0){
+      clearTimeout(hrLoadingTimerV264);
+      if(commit&&activeNav==='hr')taskyHrCommitNowV264(reason);
+    }
+  };
+
+  window.__taskyCommitHrRenderV263=function(reason='legacy-v263'){
+    window.__taskyHrRenderTxnV263=false;
+    window.__taskyHrRenderDeferredV263=false;
+    window.__taskyHrSuppressUntilV263=0;
+
+    if(hrTxnDepthV264>0){
+      hrRenderDeferredV264=true;
+      return;
+    }
+    taskyHrCommitNowV264(reason);
+  };
+
+  const moduleLoadingBeforeV264=taskyRenderModuleLoadingV83;
+  taskyRenderModuleLoadingV83=function(){
+    if(activeNav!=='hr')return moduleLoadingBeforeV264();
+
+    clearTimeout(hrLoadingTimerV264);
+    hrLoadingTimerV264=setTimeout(()=>{
+      if(activeNav==='hr'&&hrTxnDepthV264>0){
+        moduleLoadingBeforeV264();
+      }
+    },160);
+  };
+
+  const ensureModuleBeforeV264=taskyEnsureModuleLoadedV83;
+  taskyEnsureModuleLoadedV83=async function(id,opts={}){
+    if(id!=='hr')return ensureModuleBeforeV264(id,opts);
+
+    taskyHrTxnBeginV264('module-load');
+    try{
+      return await ensureModuleBeforeV264(id,opts);
+    }finally{
+      taskyHrTxnEndV264('module-load',{commit:activeNav==='hr'});
+    }
+  };
+
+  const hrFetchGuardStateV264={
+    base:null,
+    wrapped:null,
+    inflight:null,
+    inflightWorkspace:null,
+    lastWorkspace:null,
+    lastSuccess:0,
+    calls:0,
+    coalesced:0
+  };
+
+  window.taskyInstallHrFetchGuardV264=function(){
+    const current=(typeof fetchHrDataV72==='function')?fetchHrDataV72:null;
+    if(!current)return false;
+    if(current===hrFetchGuardStateV264.wrapped)return true;
+
+    hrFetchGuardStateV264.base=current;
+
+    const wrapped=async function(...args){
+      const ws=String(currentWorkspaceId||'none');
+      const force=args[0]===true;
+      hrFetchGuardStateV264.calls++;
+
+      if(
+        hrFetchGuardStateV264.inflight &&
+        hrFetchGuardStateV264.inflightWorkspace===ws
+      ){
+        hrFetchGuardStateV264.coalesced++;
+        return hrFetchGuardStateV264.inflight;
+      }
+
+      if(
+        !force &&
+        hrFetchGuardStateV264.lastWorkspace===ws &&
+        Date.now()-hrFetchGuardStateV264.lastSuccess<900
+      ){
+        hrFetchGuardStateV264.coalesced++;
+        return true;
+      }
+
+      const ownsTxn=hrTxnDepthV264===0;
+      if(ownsTxn)taskyHrTxnBeginV264('fetch');
+
+      const p=Promise.resolve()
+        .then(()=>hrFetchGuardStateV264.base(...args))
+        .then(result=>{
+          hrFetchGuardStateV264.lastWorkspace=ws;
+          hrFetchGuardStateV264.lastSuccess=Date.now();
+          return result;
+        })
+        .finally(()=>{
+          if(hrFetchGuardStateV264.inflight===p){
+            hrFetchGuardStateV264.inflight=null;
+            hrFetchGuardStateV264.inflightWorkspace=null;
+          }
+          if(ownsTxn)taskyHrTxnEndV264('fetch',{commit:activeNav==='hr'});
+        });
+
+      hrFetchGuardStateV264.inflight=p;
+      hrFetchGuardStateV264.inflightWorkspace=ws;
+      return p;
+    };
+
+    hrFetchGuardStateV264.wrapped=wrapped;
+    window.fetchHrDataV72=wrapped;
+    try{fetchHrDataV72=wrapped}catch(_){}
+    return true;
+  };
+
+  try{window.taskyInstallHrFetchGuardV264()}catch(_){}
+
+  /* ================= MODAL STACK MANAGER ================= */
+
+  const modalStateV264={
+    seq:0,
+    states:new WeakMap(),
+    roots:new Set(),
+    lastTop:null
+  };
+
+  const closeActionsV264={
+    addModalOverlay:()=>closeAddModal?.(),
+    eventTaskModalOverlay:()=>closeEventTaskModal?.(),
+    detailModalOverlay:()=>closeDetailModal?.(),
+    aiModalOverlay:()=>closeAiModal?.(),
+    eventModalOverlay:()=>closeEventModal?.(),
+    budgetModalOverlay:()=>closeBudgetModal?.(),
+    budgetEntryModalOverlay:()=>closeBudgetActionModal?.(),
+    procurementModalOverlay:()=>closeProcurementModal?.(),
+    taskyDialogBackdrop:()=>closeTaskyDialog?.(false),
+    authRecoveryV97:()=>closeAuthRecoveryV97?.()
+  };
+
+  function modalRootCandidateV264(el){
+    if(!(el instanceof Element))return false;
+    if(el.matches('.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay'))return true;
+
+    if(
+      (el.className&&/backdrop/i.test(String(el.className))) &&
+      el.querySelector?.('[role="dialog"][aria-modal="true"]')
+    )return true;
+
+    return false;
+  }
+
+  function modalVisibleV264(root){
+    if(!root?.isConnected)return false;
+    if(root.classList.contains('hidden'))return false;
+    if(root.id==='taskyDialogBackdrop'&&!root.classList.contains('show'))return false;
+
+    const cs=getComputedStyle(root);
+    return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0;
+  }
+
+  function modalDialogV264(root){
+    if(root.id==='taskyDialogBackdrop')return document.getElementById('taskyDialog');
+    if(root.matches('[role="dialog"][aria-modal="true"]'))return root;
+    return root.querySelector('.modal,[role="dialog"][aria-modal="true"]');
+  }
+
+  function closeTransientUiV264(){
+    try{closeThemePanel?.()}catch(_){}
+    try{closeNotificationPanel?.()}catch(_){}
+    try{closeMenu?.()}catch(_){}
+
+    const appMenu=document.getElementById('taskyAppMenuV217');
+    const appBtn=document.getElementById('taskyAppSwitcherBtnV217');
+    appMenu?.classList.add('hidden');
+    appBtn?.setAttribute('aria-expanded','false');
+
+    document.getElementById('filterDropdown')?.classList.add('hidden');
+  }
+
+  function focusablesV264(root){
+    return [...root.querySelectorAll(
+      'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
+    )].filter(el=>{
+      const cs=getComputedStyle(el);
+      return cs.display!=='none'&&cs.visibility!=='hidden'&&el.getClientRects().length>0;
+    });
+  }
+
+  function openStateV264(root){
+    let st=modalStateV264.states.get(root);
+    if(!st){
+      st={visible:false,seq:0,lastFocused:null,observer:null};
+      modalStateV264.states.set(root,st);
+    }
+    return st;
+  }
+
+  function discoverRootV264(root){
+    if(!root||modalStateV264.roots.has(root))return;
+    modalStateV264.roots.add(root);
+    root.classList.add('tasky-modal-root-v264');
+
+    const st=openStateV264(root);
+    st.observer=new MutationObserver(()=>syncModalStackV264());
+    st.observer.observe(root,{attributes:true,attributeFilter:['class','style','aria-hidden']});
+
+    const dialog=modalDialogV264(root);
+    if(dialog){
+      if(!dialog.hasAttribute('role'))dialog.setAttribute('role','dialog');
+      dialog.setAttribute('aria-modal','true');
+      if(!dialog.hasAttribute('tabindex'))dialog.setAttribute('tabindex','-1');
+    }
+  }
+
+  function scanModalRootsV264(scope=document){
+    if(scope instanceof Element&&modalRootCandidateV264(scope))discoverRootV264(scope);
+
+    scope.querySelectorAll?.(
+      '.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay,[class*="backdrop"]'
+    ).forEach(el=>{
+      if(modalRootCandidateV264(el))discoverRootV264(el);
+    });
+  }
+
+  function syncModalStackV264(){
+    const visible=[];
+
+    for(const root of [...modalStateV264.roots]){
+      if(!root.isConnected){
+        modalStateV264.roots.delete(root);
+        continue;
+      }
+
+      const st=openStateV264(root);
+      const isVisible=modalVisibleV264(root);
+
+      if(isVisible&&!st.visible){
+        st.visible=true;
+        st.seq=++modalStateV264.seq;
+        st.lastFocused=document.activeElement instanceof HTMLElement?document.activeElement:null;
+        closeTransientUiV264();
+      }else if(!isVisible&&st.visible){
+        st.visible=false;
+        root.classList.remove('tasky-modal-top-v264','tasky-modal-under-v264');
+        root.style.removeProperty('pointer-events');
+        root.removeAttribute('data-tasky-modal-order-v264');
+
+        if(st.lastFocused?.isConnected){
+          setTimeout(()=>st.lastFocused?.focus?.({preventScroll:true}),0);
+        }
+      }
+
+      if(isVisible)visible.push({root,st});
+    }
+
+    visible.sort((a,b)=>a.st.seq-b.st.seq);
+
+    visible.forEach(({root},index)=>{
+      const top=index===visible.length-1;
+      const z=120000+(index*24);
+
+      root.style.setProperty('z-index',String(z),'important');
+      root.style.setProperty('pointer-events',top?'auto':'none','important');
+      root.classList.toggle('tasky-modal-top-v264',top);
+      root.classList.toggle('tasky-modal-under-v264',!top);
+      root.setAttribute('data-tasky-modal-order-v264',String(index+1));
+      root.setAttribute('aria-hidden',top?'false':'true');
+
+      const dialog=modalDialogV264(root);
+      if(dialog){
+        dialog.setAttribute('aria-modal',top?'true':'false');
+        const title=dialog.querySelector('.modal-head h3,.tasky-dialog-title,h2,h3');
+        if(title&&!dialog.hasAttribute('aria-label')){
+          const text=String(title.textContent||'').trim();
+          if(text)dialog.setAttribute('aria-label',text);
+        }
+      }
+    });
+
+    modalStateV264.lastTop=visible.at(-1)?.root||null;
+
+    document.documentElement.classList.toggle('tasky-modal-lock-v264',visible.length>0);
+    document.body.classList.toggle('tasky-modal-lock-v264',visible.length>0);
+
+    if(!visible.length){
+      for(const root of modalStateV264.roots){
+        if(!modalVisibleV264(root)){
+          root.style.removeProperty('z-index');
+          root.style.removeProperty('pointer-events');
+          root.removeAttribute('data-tasky-modal-order-v264');
+        }
+      }
+    }
+  }
+
+  function closeTopModalV264(){
+    const root=modalStateV264.lastTop;
+    if(!root)return false;
+
+    const action=closeActionsV264[root.id];
+    if(typeof action==='function'){
+      action();
+      return true;
+    }
+
+    const closeBtn=modalDialogV264(root)?.querySelector(
+      '.modal-close,[data-close],[aria-label*="close" i],[aria-label*="إغلاق"]'
+    );
+
+    if(closeBtn){
+      closeBtn.click();
+      return true;
+    }
+
+    return false;
+  }
+
+  document.addEventListener('keydown',event=>{
+    const root=modalStateV264.lastTop;
+    if(!root)return;
+
+    if(event.key==='Escape'){
+      if(closeTopModalV264()){
+        event.preventDefault();
+        event.stopImmediatePropagation();
+      }
+      return;
+    }
+
+    if(event.key!=='Tab')return;
+
+    const dialog=modalDialogV264(root);
+    if(!dialog)return;
+
+    const items=focusablesV264(dialog);
+    if(!items.length){
+      event.preventDefault();
+      dialog.focus({preventScroll:true});
+      return;
+    }
+
+    const first=items[0],last=items[items.length-1];
+    if(event.shiftKey&&document.activeElement===first){
+      event.preventDefault();
+      last.focus();
+    }else if(!event.shiftKey&&document.activeElement===last){
+      event.preventDefault();
+      first.focus();
+    }
+  },true);
+
+  const modalDiscoveryObserverV264=new MutationObserver(mutations=>{
+    let found=false;
+
+    for(const m of mutations){
+      for(const node of m.addedNodes){
+        if(!(node instanceof Element))continue;
+        scanModalRootsV264(node);
+        found=true;
+      }
+    }
+
+    if(found)queueMicrotask(syncModalStackV264);
+  });
+
+  modalDiscoveryObserverV264.observe(document.body,{childList:true,subtree:true});
+  scanModalRootsV264(document);
+  syncModalStackV264();
+
+  function normalizeVisibleModalGeometryV264(){
+    for(const root of modalStateV264.roots){
+      if(!modalVisibleV264(root))continue;
+
+      const modal=modalDialogV264(root);
+      if(!modal)continue;
+
+      const head=modal.querySelector(':scope>.modal-head,.modal-head');
+      const close=head?.querySelector('.modal-close');
+
+      if(head&&close){
+        const mr=modal.getBoundingClientRect();
+        const cr=close.getBoundingClientRect();
+
+        const outside=
+          cr.left<mr.left-2 ||
+          cr.right>mr.right+2 ||
+          cr.top<mr.top-2 ||
+          cr.bottom>mr.bottom+2;
+
+        modal.classList.toggle('tasky-close-geometry-fixed-v264',outside);
+      }
+    }
+  }
+
+  window.addEventListener('resize',()=>{
+    syncModalStackV264();
+    normalizeVisibleModalGeometryV264();
+  },{passive:true});
+
+  window.addEventListener('orientationchange',()=>{
+    setTimeout(()=>{
+      syncModalStackV264();
+      normalizeVisibleModalGeometryV264();
+    },120);
+  },{passive:true});
+
+  /* ================= RUNTIME QA AUDIT ================= */
+
+  function duplicateIdsV264(){
+    const counts=new Map();
+    document.querySelectorAll('[id]').forEach(el=>{
+      counts.set(el.id,(counts.get(el.id)||0)+1);
+    });
+    return [...counts].filter(([,count])=>count>1).map(([id,count])=>({id,count}));
+  }
+
+  function viewportOverflowV264(){
+    const vw=document.documentElement.clientWidth;
+    const bad=[];
+
+    document.querySelectorAll('body *').forEach(el=>{
+      if(!(el instanceof HTMLElement||el instanceof SVGElement))return;
+      if(el.closest('.meet101-room,#taskyV106Brainstorm,.brain130-present,.public-event-invite-screen,.public-rfq-screen,.public-salesquote-screen'))return;
+
+      const cs=getComputedStyle(el);
+      if(cs.display==='none'||cs.visibility==='hidden'||cs.position==='fixed')return;
+
+      const r=el.getBoundingClientRect();
+      if(r.width>0&&(r.left<-24||r.right>vw+24)){
+        bad.push({
+          tag:el.tagName,
+          id:el.id||null,
+          class:String(el.className||'').slice(0,120),
+          left:Math.round(r.left),
+          right:Math.round(r.right),
+          width:Math.round(r.width)
+        });
+      }
+    });
+
+    return bad.slice(0,80);
+  }
+
+  window.taskyPlatformQaAuditV264=function(){
+    const activeModals=[...modalStateV264.roots]
+      .filter(modalVisibleV264)
+      .map(root=>({
+        id:root.id||null,
+        order:Number(root.getAttribute('data-tasky-modal-order-v264')||0),
+        z:getComputedStyle(root).zIndex,
+        top:root.classList.contains('tasky-modal-top-v264')
+      }));
+
+    return {
+      build:'V264',
+      active_nav:activeNav,
+      modal_stack:activeModals,
+      duplicate_ids:duplicateIdsV264(),
+      viewport_overflow:viewportOverflowV264(),
+      hr:{
+        txn_depth:hrTxnDepthV264,
+        commits:hrCommitCountV264,
+        render_attempts:hrRenderAttemptCountV264,
+        fetch_calls:hrFetchGuardStateV264.calls,
+        coalesced_fetches:hrFetchGuardStateV264.coalesced,
+        fetch_inflight:!!hrFetchGuardStateV264.inflight
+      },
+      checks:{
+        modal_stack_manager:true,
+        modal_focus_trap:true,
+        escape_top_modal_only:true,
+        body_scroll_lock:true,
+        hr_single_render_transaction:true,
+        hr_lazy_fetch_guard:true,
+        missing_chevron_icon_fixed:true
+      }
+    };
+  };
+
+  window.TASKY_PLATFORM_QA_V264=true;
+  window.TASKY_BUILD='V264';
+  console.info('Tasky V264 — platform QA hardening ready');
 })();
 </script>
 
