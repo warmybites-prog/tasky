@@ -3139,7 +3139,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV248" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V248</div>
+    <div id="taskyBootBuildV249" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V249</div>
   </div>
 </div>
 
@@ -3614,7 +3614,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V248',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V249',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3698,9 +3698,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V248',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V249',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V248'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V249'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10754,7 +10754,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V248',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V249',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -15961,7 +15961,7 @@ function taskyIntlFormatterV167(locale,options){
 
 const TASKY_LAZY_CHUNKS_V1681={
   hr:{url:'chunks/hr.js?v=248',loaded:false,promise:null},
-  meetings:{url:'chunks/meetings.js?v=234',loaded:false,promise:null},
+  meetings:{url:'chunks/meetings.js?v=249',loaded:false,promise:null},
   brainstorm:{url:'chunks/brainstorm.js?v=234',loaded:false,promise:null},
   bookings:{url:'chunks/bookings.js?v=234',loaded:false,promise:null}
 };
@@ -15969,7 +15969,25 @@ function taskyLazyChunkLoadedV1681(name){return !!TASKY_LAZY_CHUNKS_V1681[name]?
 function taskyLazyLoadScriptV1681(url){
   return new Promise((resolve,reject)=>{
     const s=document.createElement('script');s.src=url;s.async=false;
-    s.onload=()=>resolve(true);s.onerror=()=>reject(new Error(`Failed to load ${url}`));
+    let settled=false;
+    const timer=setTimeout(()=>{
+      if(settled)return;
+      settled=true;
+      try{s.remove()}catch(_){}
+      reject(new Error(`Timed out loading ${url}`));
+    },12000);
+    s.onload=()=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      resolve(true);
+    };
+    s.onerror=()=>{
+      if(settled)return;
+      settled=true;
+      clearTimeout(timer);
+      reject(new Error(`Failed to load ${url}`));
+    };
     document.head.appendChild(s);
   });
 }
@@ -16015,11 +16033,78 @@ setActiveNav=async function(id,...args){
   return setActiveNavBeforeLazyV1681(id,...args);
 };
 
+function taskyRawQueryParamV249(name){
+  try{
+    const escaped=String(name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+    const m=location.search.match(new RegExp(`(?:^|[?&])${escaped}=([^&#]*)`));
+    if(!m)return '';
+    /* decodeURIComponent intentionally does NOT convert + to a space. */
+    return decodeURIComponent(m[1]);
+  }catch(_){return ''}
+}
+
+function taskyMeetingGuestFatalV249(message){
+  try{taskyBootHideV83?.()}catch(_){}
+  let screen=document.getElementById('taskyMeetingGuestFatalV249');
+  if(!screen){
+    screen=document.createElement('div');
+    screen.id='taskyMeetingGuestFatalV249';
+    screen.style.cssText='position:fixed;inset:0;z-index:50000;background:#0d3529;display:grid;place-items:center;padding:20px;font-family:IBM Plex Sans Arabic,Inter,sans-serif';
+    document.body.appendChild(screen);
+  }
+  const ar=(localStorage.getItem('tasky_lang')||document.documentElement.lang||'ar')!=='en';
+  screen.innerHTML=`<div style="width:min(520px,100%);background:white;border-radius:22px;padding:26px;color:#172018;text-align:${ar?'right':'left'};box-shadow:0 24px 70px rgba(0,0,0,.28)">
+    <div style="font-size:19px;font-weight:900;margin-bottom:8px">${ar?'تعذّر فتح رابط الاجتماع':'Could not open meeting link'}</div>
+    <div style="font-size:12px;line-height:1.8;color:#626b63">${escapeHtml(String(message||''))}</div>
+    <button style="margin-top:18px;border:0;border-radius:10px;background:#2A6C2E;color:white;padding:10px 18px;font:inherit;font-weight:800" onclick="location.reload()">${ar?'إعادة المحاولة':'Retry'}</button>
+  </div>`;
+}
+
+async function taskyOpenMeetingDeepLinkV249(){
+  const normal=new URL(location.href).searchParams;
+  const room=taskyRawQueryParamV249('meeting')||normal.get('meeting')||'';
+  const rawGuest=taskyRawQueryParamV249('guest')||normal.get('guest')||'';
+  if(!room)return false;
+
+  /* Correct the V102 public context before meetings.js reads it.
+     This specifically repairs guest tokens where '+' was parsed as a space. */
+  if(rawGuest){
+    window.__taskyV102PublicMeeting={roomCode:room,guestToken:rawGuest};
+    try{taskyBootHideV83?.()}catch(_){}
+  }
+
+  try{
+    await taskyLazyLoadChunkV1681('meetings');
+
+    if(typeof handleMeetingDeepLinkV101!=='function'){
+      throw new Error(lang==='ar'?'ملف الاجتماعات تم تحميله بدون معالج رابط الاجتماع.':'Meetings loaded without the meeting-link handler.');
+    }
+
+    const result=handleMeetingDeepLinkV101();
+    if(result&&typeof result.then==='function')await result;
+    return true;
+  }catch(err){
+    console.error('Tasky V249 meeting deep link',err);
+    if(rawGuest){
+      taskyMeetingGuestFatalV249(err?.message||String(err));
+    }else if(typeof showTaskyDialog==='function'){
+      showTaskyDialog({
+        title:lang==='ar'?'تعذّر فتح الاجتماع':'Could not open meeting',
+        message:err?.message||String(err),
+        tone:'error'
+      });
+    }
+    return false;
+  }
+}
+
 (function(){
   try{
-    const code=new URL(location.href).searchParams.get('meeting');
-    if(code)taskyLazyLoadChunkV1681('meetings').then(()=>{if(typeof handleMeetingDeepLinkV101==='function')handleMeetingDeepLinkV101()}).catch(()=>{});
-  }catch(_){}
+    const code=taskyRawQueryParamV249('meeting')||new URL(location.href).searchParams.get('meeting');
+    if(code)taskyOpenMeetingDeepLinkV249();
+  }catch(err){
+    console.error('Tasky V249 meeting bootstrap',err);
+  }
 })();
 if(typeof renderNav==='function')renderNav();
 </script>
@@ -18278,7 +18363,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyConnectedHealthV235=function(){
     return {
-      build:'V248',
+      build:'V249',
       contract:'CP1',
       workspace_id:currentWorkspaceId||null,
       active_nav:activeNav||null,
@@ -18399,7 +18484,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   clearInterval(docsRefreshTimerV237);docsRefreshTimerV237=setInterval(()=>{if(activeNav==='documents'&&docsBackendV237==='db'&&document.visibilityState==='visible'&&navigator.onLine)load237({force:true})},25000);
 
   try{taskyRenderAppSwitcherV233();taskyRenderNavV233()}catch(_){}
-  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V248',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
+  try{const oldHealth=window.taskyConnectedHealthV235;if(typeof oldHealth==='function')window.taskyConnectedHealthV237=function(){return{...oldHealth(),build:'V249',documents_backend:docsBackendV237,documents_loaded_workspace:docsLoadedWorkspaceV237}}}catch(_){}
   window.TASKY_BUILD='V237';console.info('Tasky build V237 — Tasky Documents');
 })();
 </script>
@@ -18494,7 +18579,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const rows=[...document.querySelectorAll('#mainNav button')].map(x=>String(x.textContent||'').replace(/\s+/g,' ').trim());
     const accountLabel=lang==='ar'?'الإعدادات':'Settings';
     return {
-      build:'V248',
+      build:'V249',
       app,
       expected_app_settings:taskyAppSettingsLabelV238(app),
       app_settings_rows:rows.filter(x=>/إعدادات|settings/i.test(x)),
@@ -18527,7 +18612,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         :null;
     }catch(_){}
     return {
-      build:'V248',
+      build:'V249',
       activeNav,
       explicit_route:hasExplicitRouteV239(),
       stale_v196_context:!!stale,
@@ -18562,7 +18647,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyAuthStartupAuditV244=function(){
     return {
-      build:'V248',
+      build:'V249',
       supabase_sdk:TASKY_SUPABASE_SDK_V244,
       immediate_boot_started:taskyAuthBootStartedV244,
       auth_repair_used:taskyAuthRepairUsedV244,
@@ -18729,11 +18814,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V248';
+    window.TASKY_BUILD='V249';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
-        build:'V248',
+        build:'V249',
         architecture:'single-file-deferred-scripts',
         sdk_source:window.__taskySupabaseSdkSourceV247||null,
         sdk_ready:!!window.supabase?.createClient,
@@ -18778,6 +18863,167 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       );
     }
   })();
+})();
+</script>
+
+
+<script id="tasky-v249-meeting-link-runtime-js" type="text/tasky-deferred-v247">
+(function(){
+  function safeDecodeV249(v){
+    try{return decodeURIComponent(String(v||''))}catch(_){return String(v||'')}
+  }
+
+  function rawParamFromUrlTextV249(text,name){
+    try{
+      const escaped=String(name).replace(/[.*+?^${}()|[\]\\]/g,'\\$&');
+      const m=String(text||'').match(new RegExp(`(?:[?&])${escaped}=([^&#]*)`,'i'));
+      return m?safeDecodeV249(m[1]):'';
+    }catch(_){return ''}
+  }
+
+  window.taskyCanonicalMeetingGuestUrlV249=function(value){
+    const text=String(value||'').trim();
+    if(!text||!/[?&]meeting=/i.test(text)||!/[?&]guest=/i.test(text))return value;
+
+    try{
+      /* Read the raw query text before URLSearchParams can translate + to space. */
+      const room=rawParamFromUrlTextV249(text,'meeting');
+      const guest=rawParamFromUrlTextV249(text,'guest');
+      if(!room||!guest)return value;
+
+      const base=new URL(location.origin+location.pathname);
+      base.searchParams.set('meeting',room);
+      base.searchParams.set('guest',guest);
+
+      const original=new URL(text,location.href);
+      const langValue=original.searchParams.get('lang');
+      if(langValue)base.searchParams.set('lang',langValue);
+
+      return base.toString();
+    }catch(_){
+      return value;
+    }
+  };
+
+  window.taskyNormalizeMeetingInviteTextV249=function(value){
+    const text=String(value??'');
+    return text.replace(/https?:\/\/[^\s<>"']+[?&]meeting=[^\s<>"']+[&]guest=[^\s<>"']+/gi,m=>taskyCanonicalMeetingGuestUrlV249(m));
+  };
+
+  function normalizeMailtoV249(value){
+    const text=String(value||'');
+    if(!/^mailto:/i.test(text))return taskyCanonicalMeetingGuestUrlV249(value);
+    try{
+      const q=text.indexOf('?');
+      if(q<0)return text;
+      const address=text.slice(0,q);
+      const params=new URLSearchParams(text.slice(q+1));
+      for(const key of ['body','subject']){
+        const v=params.get(key);
+        if(v)params.set(key,taskyNormalizeMeetingInviteTextV249(v));
+      }
+      return address+'?'+params.toString();
+    }catch(_){return text}
+  }
+
+  /* Clipboard — covers Copy guest link / Copy invitation. */
+  try{
+    if(navigator.clipboard?.writeText&&!navigator.clipboard.__taskyV249){
+      const original=navigator.clipboard.writeText.bind(navigator.clipboard);
+      navigator.clipboard.writeText=async function(text){
+        return original(taskyNormalizeMeetingInviteTextV249(text));
+      };
+      navigator.clipboard.__taskyV249=true;
+    }
+  }catch(err){console.warn('V249 clipboard patch',err)}
+
+  /* Web Share API. */
+  try{
+    if(navigator.share&&!navigator.share.__taskyV249){
+      const original=navigator.share.bind(navigator);
+      const wrapped=async function(data){
+        if(data&&typeof data==='object'){
+          data={...data};
+          if(data.url)data.url=taskyCanonicalMeetingGuestUrlV249(data.url);
+          if(data.text)data.text=taskyNormalizeMeetingInviteTextV249(data.text);
+        }
+        return original(data);
+      };
+      wrapped.__taskyV249=true;
+      navigator.share=wrapped;
+    }
+  }catch(err){console.warn('V249 share patch',err)}
+
+  /* Window.open — covers WhatsApp/mailto/external invite buttons. */
+  try{
+    const originalOpen=window.open.bind(window);
+    window.open=function(url,...args){
+      return originalOpen(normalizeMailtoV249(url),...args);
+    };
+  }catch(err){console.warn('V249 window.open patch',err)}
+
+  /* Prompt fallback used when Clipboard API is unavailable. */
+  try{
+    const originalPrompt=window.prompt.bind(window);
+    window.prompt=function(message,defaultValue){
+      return originalPrompt(message,taskyNormalizeMeetingInviteTextV249(defaultValue));
+    };
+  }catch(_){}
+
+  /* Anchor/email links are normalized immediately before navigation. */
+  document.addEventListener('click',event=>{
+    const a=event.target?.closest?.('a[href]');
+    if(!a)return;
+    const fixed=normalizeMailtoV249(a.getAttribute('href')||a.href);
+    if(fixed&&fixed!==a.getAttribute('href'))a.setAttribute('href',fixed);
+  },true);
+
+  /* If an invite is sent through a Supabase Edge Function, normalize any
+     meeting links inside the request body without knowing the function name. */
+  try{
+    if(typeof sb!=='undefined'&&sb?.functions?.invoke&&!sb.functions.__taskyV249){
+      const originalInvoke=sb.functions.invoke.bind(sb.functions);
+      const deep=value=>{
+        if(typeof value==='string')return taskyNormalizeMeetingInviteTextV249(value);
+        if(Array.isArray(value))return value.map(deep);
+        if(value&&typeof value==='object'){
+          const out={};
+          for(const [k,v] of Object.entries(value))out[k]=deep(v);
+          return out;
+        }
+        return value;
+      };
+      sb.functions.invoke=function(name,options){
+        if(options&&Object.prototype.hasOwnProperty.call(options,'body')){
+          options={...options,body:deep(options.body)};
+        }
+        return originalInvoke(name,options);
+      };
+      sb.functions.__taskyV249=true;
+    }
+  }catch(err){console.warn('V249 functions patch',err)}
+
+  /* Public guest context gets one final raw-token correction after all patches. */
+  try{
+    const room=typeof taskyRawQueryParamV249==='function'?taskyRawQueryParamV249('meeting'):'';
+    const guest=typeof taskyRawQueryParamV249==='function'?taskyRawQueryParamV249('guest'):'';
+    if(room&&guest)window.__taskyV102PublicMeeting={roomCode:room,guestToken:guest};
+  }catch(_){}
+
+  window.taskyMeetingLinkAuditV249=function(sample=''){
+    const candidate=sample||location.href;
+    return {
+      build:'V249',
+      meetings_chunk:TASKY_LAZY_CHUNKS_V1681?.meetings?.url||null,
+      is_public_guest:!!(taskyRawQueryParamV249?.('meeting')&&taskyRawQueryParamV249?.('guest')),
+      raw_meeting:taskyRawQueryParamV249?.('meeting')||null,
+      raw_guest_length:(taskyRawQueryParamV249?.('guest')||'').length,
+      canonical:taskyCanonicalMeetingGuestUrlV249(candidate)
+    };
+  };
+
+  window.TASKY_BUILD='V249';
+  console.info('Tasky build V249 — external meeting guest-link hardening');
 })();
 </script>
 
