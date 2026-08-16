@@ -19190,7 +19190,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       width:min(920px,calc(100vw - 28px))!important;
       max-width:920px!important;
       padding:0!important;
-      overflow:hidden!important;
+      overflow-x:hidden!important;
+      overflow-y:auto!important;
+      overscroll-behavior:contain!important;
+      -webkit-overflow-scrolling:touch!important;
+      scrollbar-gutter:stable!important;
       border-radius:22px!important;
       background:var(--card)!important;
     }
@@ -19564,7 +19568,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V261',
+      build:'V262',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19608,7 +19612,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V261',
+      build:'V262',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -19958,7 +19962,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V261',
+      build:'V262',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20102,7 +20106,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V261',
+      build:'V262',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20111,6 +20115,373 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_HR_STABILITY_UI_V261=true;
   window.TASKY_BUILD='V261';
   console.info('Tasky V261 — HR flash suppression + employee edit final UI ready');
+})();
+</script>
+
+
+<script id="tasky-v262-employee360-scroll-redesign-js" type="text/tasky-deferred-v247">
+(function(){
+  if(document.getElementById('tasky-v262-employee360-scroll-redesign-css'))return;
+
+  const style=document.createElement('style');
+  style.id='tasky-v262-employee360-scroll-redesign-css';
+  style.textContent=`
+    /* ========================================================
+       V262 — Employee 360: actual scroll container + Tasky layout
+       ======================================================== */
+    #addModalOverlay:has(#addModalBody.tasky-employee360-v262){
+      align-items:center!important;
+      padding:16px!important;
+      overflow:hidden!important;
+    }
+
+    #addModalBody.tasky-employee360-v262{
+      width:min(940px,calc(100vw - 32px))!important;
+      max-width:940px!important;
+      height:auto!important;
+      max-height:calc(100dvh - 32px)!important;
+      min-height:0!important;
+      overflow-x:hidden!important;
+      overflow-y:auto!important;
+      overscroll-behavior:contain!important;
+      -webkit-overflow-scrolling:touch!important;
+      scrollbar-gutter:stable!important;
+      padding:0 0 18px!important;
+      border-radius:20px!important;
+      background:var(--card)!important;
+      box-shadow:0 24px 70px rgba(0,0,0,.22)!important;
+      touch-action:pan-y!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .modal-head{
+      position:sticky!important;
+      top:0!important;
+      z-index:40!important;
+      margin:0!important;
+      padding:14px 18px!important;
+      border-bottom:1px solid var(--border)!important;
+      background:color-mix(in srgb,var(--card) 96%,var(--green-tint))!important;
+      backdrop-filter:blur(14px)!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .modal-head h3{
+      font-size:17px!important;
+      line-height:1.35!important;
+      margin:0 0 3px!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .modal-close{
+      top:14px!important;
+      width:36px!important;
+      height:36px!important;
+      min-width:36px!important;
+      border-radius:11px!important;
+      background:var(--paper)!important;
+      border:1px solid var(--border)!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v258-lock-hero{
+      margin:14px 18px 10px!important;
+      padding:11px 12px!important;
+      min-height:0!important;
+      align-items:center!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v258-lock-badge{
+      width:36px!important;
+      height:36px!important;
+      flex-basis:36px!important;
+      border-radius:11px!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v258-lock-copy{
+      line-height:1.55!important;
+      font-size:9.5px!important;
+    }
+
+    /* Existing summary cards — keep compact and aligned. */
+    #addModalBody.tasky-employee360-v262 .hr72-grid,
+    #addModalBody.tasky-employee360-v262 .hr72-info-grid,
+    #addModalBody.tasky-employee360-v262 .employee360-grid{
+      margin:0 18px 10px!important;
+      gap:9px!important;
+      align-items:stretch!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .hr72-card,
+    #addModalBody.tasky-employee360-v262 .hr72-panel,
+    #addModalBody.tasky-employee360-v262 .platform-panel{
+      padding:11px 12px!important;
+      min-height:82px!important;
+      border-radius:13px!important;
+      box-shadow:none!important;
+    }
+
+    /* V262 authoritative sensitive-details cards. */
+    #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-grid{
+      display:grid!important;
+      grid-template-columns:repeat(3,minmax(0,1fr))!important;
+      gap:8px!important;
+      margin:10px 18px 14px!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-card{
+      min-width:0!important;
+      padding:10px 11px!important;
+      border:1px solid var(--border)!important;
+      border-radius:12px!important;
+      background:var(--paper)!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-card span{
+      display:block!important;
+      margin-bottom:4px!important;
+      font-size:8px!important;
+      font-weight:700!important;
+      color:var(--muted)!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-card b{
+      display:block!important;
+      font-size:10.5px!important;
+      font-weight:800!important;
+      line-height:1.55!important;
+      color:var(--ink)!important;
+      overflow-wrap:anywhere!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-card.is-empty b{
+      color:var(--muted)!important;
+      font-weight:600!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-original-sensitive{
+      display:none!important;
+    }
+
+    /* Timeline must grow naturally inside the modal scroll container. */
+    #addModalBody.tasky-employee360-v262 .timeline,
+    #addModalBody.tasky-employee360-v262 [class*="timeline"]{
+      max-height:none!important;
+      height:auto!important;
+      overflow:visible!important;
+    }
+
+    #addModalBody.tasky-employee360-v262 .tasky-v262-timeline-shell{
+      margin:0 18px 0!important;
+      border:1px solid var(--border)!important;
+      border-radius:14px!important;
+      background:var(--paper)!important;
+      overflow:visible!important;
+    }
+
+    /* Visible bottom breathing room proves there is more content to scroll to. */
+    #addModalBody.tasky-employee360-v262::after{
+      content:'';
+      display:block;
+      height:10px;
+    }
+
+    @media(max-width:820px){
+      #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-grid{
+        grid-template-columns:repeat(2,minmax(0,1fr))!important;
+      }
+    }
+
+    @media(max-width:700px){
+      #addModalOverlay:has(#addModalBody.tasky-employee360-v262){
+        padding:6px!important;
+        align-items:flex-end!important;
+      }
+
+      #addModalBody.tasky-employee360-v262{
+        width:calc(100vw - 12px)!important;
+        max-width:calc(100vw - 12px)!important;
+        max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+        border-radius:18px 18px 12px 12px!important;
+        padding-bottom:calc(14px + env(safe-area-inset-bottom))!important;
+      }
+
+      #addModalBody.tasky-employee360-v262 .modal-head{
+        padding:12px 14px!important;
+      }
+
+      #addModalBody.tasky-employee360-v262 .tasky-v258-lock-hero,
+      #addModalBody.tasky-employee360-v262 .hr72-grid,
+      #addModalBody.tasky-employee360-v262 .hr72-info-grid,
+      #addModalBody.tasky-employee360-v262 .employee360-grid,
+      #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-grid,
+      #addModalBody.tasky-employee360-v262 .tasky-v262-timeline-shell{
+        margin-inline:12px!important;
+      }
+
+      #addModalBody.tasky-employee360-v262 .tasky-v262-sensitive-grid{
+        grid-template-columns:1fr!important;
+      }
+    }
+  `;
+  document.head.appendChild(style);
+
+  const SENSITIVE_FIELDS_V262=[
+    {ar:'المدير المباشر',en:'Direct manager'},
+    {ar:'موقع العمل',en:'Work location'},
+    {ar:'الجنسية',en:'Nationality'},
+    {ar:'آخر 4 من الهوية',en:'Last 4 of ID'},
+    {ar:'جهة اتصال الطوارئ',en:'Emergency contact'},
+    {ar:'ملاحظات HR',en:'HR notes'}
+  ];
+
+  function employee360ActiveV262(modal){
+    const text=String(modal?.textContent||'');
+    return /Employee\s*360|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ|بيانات موظف حساسة/i.test(text);
+  }
+
+  function directishTextV262(el){
+    if(!el)return '';
+    const own=[...el.childNodes]
+      .filter(n=>n.nodeType===Node.TEXT_NODE)
+      .map(n=>n.textContent||'')
+      .join(' ')
+      .replace(/\s+/g,' ')
+      .trim();
+    return own||String(el.textContent||'').replace(/\s+/g,' ').trim();
+  }
+
+  function findSensitiveLeafV262(modal,field){
+    const all=[...modal.querySelectorAll('div,p,span,li,b,strong')];
+    const matches=all.filter(el=>{
+      if(el.closest('.tasky-v262-sensitive-grid'))return false;
+      if(el.closest('.modal-head'))return false;
+      const t=directishTextV262(el);
+      return t.includes(field.ar)||t.toLowerCase().includes(field.en.toLowerCase());
+    });
+
+    if(!matches.length)return null;
+
+    /* Prefer the smallest textual leaf so we do not hide a whole section. */
+    matches.sort((a,b)=>{
+      const ach=a.querySelectorAll('*').length;
+      const bch=b.querySelectorAll('*').length;
+      if(ach!==bch)return ach-bch;
+      return (a.textContent||'').length-(b.textContent||'').length;
+    });
+    return matches[0];
+  }
+
+  function extractValueV262(el,field){
+    if(!el)return '—';
+    let text=String(el.textContent||'').replace(/\s+/g,' ').trim();
+
+    text=text
+      .replace(field.ar,'')
+      .replace(new RegExp(field.en,'ig'),'')
+      .replace(/^[\s:：\-–—|]+|[\s:：\-–—|]+$/g,'')
+      .trim();
+
+    return text||'—';
+  }
+
+  function normalizeSensitiveDetailsV262(modal){
+    if(modal.querySelector('.tasky-v262-sensitive-grid'))return;
+
+    const rows=[];
+    const originals=[];
+
+    for(const field of SENSITIVE_FIELDS_V262){
+      const el=findSensitiveLeafV262(modal,field);
+      if(!el)continue;
+      rows.push({
+        label:(window.lang==='en'?field.en:field.ar),
+        value:extractValueV262(el,field)
+      });
+      originals.push(el);
+    }
+
+    if(rows.length<3)return;
+
+    const grid=document.createElement('div');
+    grid.className='tasky-v262-sensitive-grid';
+    grid.innerHTML=rows.map(row=>{
+      const empty=row.value==='—';
+      return `<div class="tasky-v262-sensitive-card${empty?' is-empty':''}"><span>${escapeHtml(row.label)}</span><b>${escapeHtml(row.value)}</b></div>`;
+    }).join('');
+
+    const timelineCandidates=[...modal.querySelectorAll('div,section')].filter(el=>{
+      const t=String(el.textContent||'');
+      return /Employee\s*360°?\s*Timeline/i.test(t);
+    });
+
+    const timeline=timelineCandidates.sort((a,b)=>
+      a.querySelectorAll('*').length-b.querySelectorAll('*').length
+    )[0]||null;
+
+    if(timeline){
+      timeline.classList.add('tasky-v262-timeline-shell');
+      timeline.parentElement?.insertBefore(grid,timeline);
+    }else{
+      modal.appendChild(grid);
+    }
+
+    for(const el of originals){
+      el.classList.add('tasky-v262-original-sensitive');
+    }
+  }
+
+  function normalizeEmployee360V262(){
+    const modal=document.getElementById('addModalBody');
+    if(!modal)return;
+
+    const active=employee360ActiveV262(modal);
+    modal.classList.toggle('tasky-employee360-v262',active);
+    if(!active)return;
+
+    /* V258's hidden overflow was the actual no-scroll bug. */
+    modal.style.setProperty('overflow-y','auto','important');
+    modal.style.setProperty('overflow-x','hidden','important');
+    modal.style.setProperty('max-height','calc(100dvh - 32px)','important');
+
+    normalizeSensitiveDetailsV262(modal);
+  }
+
+  let timerV262=null;
+  function scheduleV262(){
+    clearTimeout(timerV262);
+    timerV262=setTimeout(()=>requestAnimationFrame(normalizeEmployee360V262),80);
+  }
+
+  const modal=document.getElementById('addModalBody');
+  if(modal){
+    new MutationObserver(mutations=>{
+      if(mutations.some(m=>m.addedNodes?.length||m.removedNodes?.length))scheduleV262();
+    }).observe(modal,{childList:true,subtree:true});
+  }
+
+  document.addEventListener('click',event=>{
+    const btn=event.target?.closest?.('button');
+    if(!btn)return;
+    const txt=String(btn.textContent||'').trim();
+    if(/تعديل|Edit|الموظف|Employee/i.test(txt))scheduleV262();
+  },true);
+
+  window.addEventListener('resize',scheduleV262,{passive:true});
+  window.addEventListener('orientationchange',scheduleV262,{passive:true});
+  scheduleV262();
+
+  window.taskyEmployee360AuditV262=function(){
+    const modal=document.getElementById('addModalBody');
+    return {
+      build:'V262',
+      active:modal?.classList.contains('tasky-employee360-v262')||false,
+      scroll_height:modal?.scrollHeight||0,
+      client_height:modal?.clientHeight||0,
+      can_scroll:!!modal&&(modal.scrollHeight>modal.clientHeight),
+      sensitive_cards:modal?.querySelectorAll('.tasky-v262-sensitive-card').length||0
+    };
+  };
+
+  window.TASKY_EMPLOYEE360_SCROLL_V262=true;
+  window.TASKY_BUILD='V262';
+  console.info('Tasky V262 — Employee 360 scrolling + layout redesign ready');
 })();
 </script>
 
