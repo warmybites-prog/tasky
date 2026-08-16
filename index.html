@@ -19547,16 +19547,24 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
   }
 
-  const observer=new MutationObserver(scheduleV258);
-  observer.observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+  let taskyV261UiSettleTimer=null;
+  const observer=new MutationObserver(mutations=>{
+    if(!mutations.some(m=>m.type==='childList'&&m.addedNodes?.length))return;
+    clearTimeout(taskyV261UiSettleTimer);
+    taskyV261UiSettleTimer=setTimeout(scheduleV258,140);
+  });
+  observer.observe(document.body,{childList:true,subtree:true});
 
-  window.addEventListener('resize',scheduleV258,{passive:true});
+  window.addEventListener('resize',()=>{
+    clearTimeout(taskyV261UiSettleTimer);
+    taskyV261UiSettleTimer=setTimeout(scheduleV258,140);
+  },{passive:true});
   document.addEventListener('DOMContentLoaded',scheduleV258,{once:true});
   scheduleV258();
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V260',
+      build:'V261',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19600,7 +19608,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V260',
+      build:'V261',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -19925,19 +19933,32 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
   }
 
-  const observer=new MutationObserver(scheduleV260);
-  observer.observe(document.body,{childList:true,subtree:true});
+  let taskyV261EmployeeUiTimer=null;
+  function scheduleEmployeeUiV261(){
+    clearTimeout(taskyV261EmployeeUiTimer);
+    taskyV261EmployeeUiTimer=setTimeout(scheduleV260,90);
+  }
+
+  const modalRoot=document.getElementById('addModalBody');
+  if(modalRoot){
+    const observer=new MutationObserver(mutations=>{
+      if(mutations.some(m=>m.type==='childList'&&m.addedNodes?.length)){
+        scheduleEmployeeUiV261();
+      }
+    });
+    observer.observe(modalRoot,{childList:true,subtree:true});
+  }
 
   document.addEventListener('change',event=>{
-    if(event.target?.matches?.('#hrStatus,#hrEmployment'))scheduleV260();
+    if(event.target?.matches?.('#hrStatus,#hrEmployment'))scheduleEmployeeUiV261();
   });
 
-  scheduleV260();
+  scheduleEmployeeUiV261();
 
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V260',
+      build:'V261',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -19947,6 +19968,149 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_EMPLOYEE_EDIT_UI_V260=true;
   window.TASKY_BUILD='V260';
   console.info('Tasky V260 — employee edit UI normalized');
+})();
+</script>
+
+
+<script id="tasky-v261-hr-stability-ui-js" type="text/tasky-deferred-v247">
+(function(){
+  if(document.getElementById('tasky-v261-hr-stability-ui-css'))return;
+
+  const style=document.createElement('style');
+  style.id='tasky-v261-hr-stability-ui-css';
+  style.textContent=`
+    body.tasky-hr-hydrating-v261 #moduleContent{opacity:.001!important;pointer-events:none!important}
+    body.tasky-hr-hydrating-v261 #moduleContent::after{content:'';position:absolute;inset:0;background:var(--bg);z-index:50}
+
+    #addModalBody.tasky-employee-edit-v261{
+      width:min(860px,calc(100vw - 24px))!important;
+      max-width:860px!important;
+      max-height:calc(100dvh - 24px)!important;
+      overflow:auto!important;
+      border-radius:20px!important;
+      background:var(--card)!important;
+      box-shadow:0 24px 70px rgba(0,0,0,.18)!important;
+    }
+    #addModalBody.tasky-employee-edit-v261 .modal-head{
+      position:sticky!important;top:0!important;z-index:30!important;
+      padding:14px 16px!important;border-bottom:1px solid var(--border)!important;
+      background:color-mix(in srgb,var(--card) 96%,var(--green-tint))!important
+    }
+    #addModalBody.tasky-employee-edit-v261 form{padding:14px 16px 18px!important}
+    #addModalBody.tasky-employee-edit-v261 .hr72-form{
+      display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:10px 12px!important
+    }
+    #addModalBody.tasky-employee-edit-v261 .hr87-photo-field{
+      grid-column:1/-1!important;display:grid!important;grid-template-columns:78px minmax(0,1fr)!important;
+      align-items:center!important;gap:12px!important;padding:10px 12px!important;
+      border:1px solid var(--border)!important;border-radius:14px!important;
+      background:color-mix(in srgb,var(--green-tint) 24%,var(--paper))!important
+    }
+    #addModalBody.tasky-employee-edit-v261 .hr87-photo-preview{width:68px!important;height:68px!important;border-radius:16px!important;margin:0!important}
+    #addModalBody.tasky-employee-edit-v261 .field{min-width:0!important;margin:0!important}
+    #addModalBody.tasky-employee-edit-v261 .field.full,
+    #addModalBody.tasky-employee-edit-v261 .tasky-v260-section-label{grid-column:1/-1!important}
+    #addModalBody.tasky-employee-edit-v261 input,
+    #addModalBody.tasky-employee-edit-v261 select,
+    #addModalBody.tasky-employee-edit-v261 textarea{
+      min-height:40px!important;border-radius:10px!important;background:var(--paper)!important;
+      border:1px solid var(--border)!important;padding:8px 10px!important;font-size:10px!important
+    }
+    #addModalBody.tasky-employee-edit-v261 textarea{min-height:76px!important}
+    #addModalBody.tasky-employee-edit-v261 .submit-btn{margin-top:12px!important;min-height:38px!important;border-radius:11px!important;padding-inline:18px!important}
+
+    @media(max-width:700px){
+      #addModalBody.tasky-employee-edit-v261{width:calc(100vw - 10px)!important;max-height:calc(100dvh - 10px)!important;border-radius:16px!important}
+      #addModalBody.tasky-employee-edit-v261 .hr72-form{grid-template-columns:1fr!important}
+      #addModalBody.tasky-employee-edit-v261 .field,
+      #addModalBody.tasky-employee-edit-v261 .field.full,
+      #addModalBody.tasky-employee-edit-v261 .hr87-photo-field,
+      #addModalBody.tasky-employee-edit-v261 .tasky-v260-section-label{grid-column:1!important}
+      #addModalBody.tasky-employee-edit-v261 .hr87-photo-field{grid-template-columns:60px minmax(0,1fr)!important}
+      #addModalBody.tasky-employee-edit-v261 .hr87-photo-preview{width:54px!important;height:54px!important}
+    }
+  `;
+  document.head.appendChild(style);
+
+  let hrHydrationSeqV261=0;
+  let hrHydrationTimerV261=null;
+
+  function beginHrHydrationV261(){
+    hrHydrationSeqV261++;
+    const seq=hrHydrationSeqV261;
+    clearTimeout(hrHydrationTimerV261);
+    document.body.classList.add('tasky-hr-hydrating-v261');
+    hrHydrationTimerV261=setTimeout(()=>{
+      if(seq!==hrHydrationSeqV261)return;
+      requestAnimationFrame(()=>requestAnimationFrame(()=>{
+        if(seq===hrHydrationSeqV261)document.body.classList.remove('tasky-hr-hydrating-v261');
+      }));
+    },220);
+  }
+
+  function endHrHydrationV261(){
+    clearTimeout(hrHydrationTimerV261);
+    const seq=hrHydrationSeqV261;
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{
+      if(seq===hrHydrationSeqV261)document.body.classList.remove('tasky-hr-hydrating-v261');
+    }));
+  }
+
+  const ensureBaseV261=window.taskyEnsureLazyAppV1681;
+  if(typeof ensureBaseV261==='function'){
+    window.taskyEnsureLazyAppV1681=async function(name){
+      if(name!=='hr')return ensureBaseV261(name);
+      beginHrHydrationV261();
+      try{
+        const result=await ensureBaseV261(name);
+        endHrHydrationV261();
+        return result;
+      }catch(err){
+        endHrHydrationV261();
+        throw err;
+      }
+    };
+  }
+
+  function normalizeEmployeeEditV261(){
+    const modal=document.getElementById('addModalBody');
+    if(!modal)return;
+    const title=String(modal.querySelector('.modal-head h3')?.textContent||'').trim();
+    const active=/تعديل موظف|Edit employee/i.test(title);
+    modal.classList.toggle('tasky-employee-edit-v261',active);
+    if(!active)return;
+    try{normalizeEmployeeEditV260?.()}catch(_){}
+  }
+
+  let modalTimerV261=null;
+  const modal=document.getElementById('addModalBody');
+  if(modal){
+    new MutationObserver(mutations=>{
+      if(!mutations.some(m=>m.addedNodes?.length))return;
+      clearTimeout(modalTimerV261);
+      modalTimerV261=setTimeout(normalizeEmployeeEditV261,70);
+    }).observe(modal,{childList:true,subtree:true});
+  }
+
+  document.addEventListener('click',event=>{
+    const text=String(event.target?.closest?.('button')?.textContent||'').trim();
+    if(/تعديل|Edit/i.test(text)){
+      clearTimeout(modalTimerV261);
+      modalTimerV261=setTimeout(normalizeEmployeeEditV261,80);
+    }
+  },true);
+
+  window.taskyHrStabilityAuditV261=function(){
+    return {
+      build:'V261',
+      hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
+      employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
+    };
+  };
+
+  window.TASKY_HR_STABILITY_UI_V261=true;
+  window.TASKY_BUILD='V261';
+  console.info('Tasky V261 — HR flash suppression + employee edit final UI ready');
 })();
 </script>
 
