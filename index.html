@@ -6390,7 +6390,9 @@ function eventInvitationCreditSummaryHtml(){
 function openEventInvitationCreditModal(){
   const canBuy=currentUserRole==='admin';
   document.getElementById('addModalBody').innerHTML=`<div class="modal-head"><div><h3>${lang==='ar'?'رصيد دعوات الحضور':'Guest invitation credits'}</h3><div style="font-size:11px;color:var(--muted);margin-top:3px">${lang==='ar'?'حزم إضافية غير منتهية الصلاحية':'Non-expiring add-on credits'}</div></div><button class="modal-close" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button></div>${eventInvitationCreditSummaryHtml()}<div class="event-credit-pack-grid"><div class="event-credit-pack"><div><b>${lang==='ar'?'500 دعوة':'500 invitations'}</b><br><span>${lang==='ar'?'رصيد إضافي لمساحة العمل':'Workspace add-on credit'}</span></div><strong>49 ${lang==='ar'?'ريال':'SAR'}</strong><button type="button" class="primary-btn" ${canBuy?'':'disabled'} onclick="requestEventInvitationCreditPack(500)">${lang==='ar'?'طلب الحزمة':'Request pack'}</button></div><div class="event-credit-pack"><div><b>${lang==='ar'?'1000 دعوة':'1,000 invitations'}</b><br><span>${lang==='ar'?'أفضل قيمة للفعاليات الكبيرة':'Best value for larger events'}</span></div><strong>89 ${lang==='ar'?'ريال':'SAR'}</strong><button type="button" class="primary-btn" ${canBuy?'':'disabled'} onclick="requestEventInvitationCreditPack(1000)">${lang==='ar'?'طلب الحزمة':'Request pack'}</button></div></div>${!canBuy?`<div class="event-capacity-note" style="margin-top:12px">${lang==='ar'?'شراء الرصيد متاح لمدير مساحة العمل فقط.':'Only workspace admins can purchase invitation credits.'}</div>`:''}<div class="event-capacity-note" style="margin-top:12px">${lang==='ar'?'بوابة الدفع غير مربوطة بعد؛ يسجل تاسكي الطلب كمعلق، ويضاف الرصيد بعد تأكيد الدفع.':'The payment gateway is not connected yet. Tasky records the order as pending and credits are added after payment is confirmed.'}</div>`;
-  document.getElementById('addModalOverlay').classList.remove('hidden');
+  const creditOverlay=document.getElementById('addModalOverlay');
+  creditOverlay.classList.remove('hidden');
+  window.taskyBringModalToFrontV265?.(creditOverlay);
 }
 async function requestEventInvitationCreditPack(size){
   if(currentUserRole!=='admin'||!currentWorkspaceId)return;
@@ -19617,7 +19619,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V264',
+      build:'V265',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19661,7 +19663,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V264',
+      build:'V265',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -20011,7 +20013,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V264',
+      build:'V265',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20155,7 +20157,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V264',
+      build:'V265',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20520,7 +20522,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V264',
+      build:'V265',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -21065,7 +21067,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const modal=document.getElementById('addModalBody');
     const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V264',
+      build:'V265',
       hr_transaction:window.__taskyHrRenderTxnV263===true,
       hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
       hr_commit_count:hrCommitCountV263,
@@ -21085,55 +21087,40 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 </script>
 
 
-<script id="tasky-v264-platform-qa-hardening-js" type="text/tasky-deferred-v247">
+
+
+
+<script id="tasky-v265-stability-modal-stack-fix-js" type="text/tasky-deferred-v247">
 (function(){
-  if(!document.getElementById('tasky-v264-platform-qa-hardening-css')){
+  if(!document.getElementById('tasky-v265-stability-modal-stack-fix-css')){
     const style=document.createElement('style');
-    style.id='tasky-v264-platform-qa-hardening-css';
+    style.id='tasky-v265-stability-modal-stack-fix-css';
     style.textContent=`
       :root{
-        --tasky-modal-layer-v264:120000;
-        --tasky-portal-layer-v264:160000;
-        --tasky-toast-layer-v264:180000;
+        --tasky-modal-base-v265:120000;
+        --tasky-portal-v265:180000;
+        --tasky-toast-v265:190000;
       }
 
-      body.tasky-hr-hydrating-v261 #moduleContent{
-        opacity:1!important;
-        pointer-events:auto!important;
-      }
-      body.tasky-hr-hydrating-v261 #moduleContent::after{display:none!important}
-      #moduleArea.tasky-hr-stable-v263,
-      #moduleArea.tasky-hr-stable-v263.tasky-hr-visible-v263{
-        opacity:1!important;
-        transition:none!important;
-      }
-
-      html.tasky-modal-lock-v264,
-      body.tasky-modal-lock-v264{
+      html.tasky-modal-lock-v265,
+      body.tasky-modal-lock-v265{
         overflow:hidden!important;
         overscroll-behavior:none!important;
       }
 
-      .overlay.tasky-modal-root-v264{
-        box-sizing:border-box!important;
-        padding:max(12px,env(safe-area-inset-top)) max(12px,env(safe-area-inset-right))
-                max(12px,env(safe-area-inset-bottom)) max(12px,env(safe-area-inset-left))!important;
-        overflow:hidden!important;
-        isolation:isolate!important;
+      .tasky-modal-root-v265{isolation:isolate!important}
+      .tasky-modal-under-v265{pointer-events:none!important;user-select:none!important}
+      .tasky-modal-top-v265{pointer-events:auto!important}
+
+      .tasky-select-menu,
+      .mention-menu,
+      [role="listbox"].tasky-select-menu{
+        z-index:var(--tasky-portal-v265)!important;
       }
 
-      .overlay.tasky-modal-root-v264>.modal{
-        box-sizing:border-box!important;
-        max-width:calc(100vw - 24px)!important;
-        max-height:calc(100dvh - 24px)!important;
-        overscroll-behavior:contain!important;
-        scrollbar-gutter:stable!important;
-      }
+      .tasky-toast-stack{z-index:var(--tasky-toast-v265)!important}
 
-      .overlay.tasky-modal-root-v264>.modal img{max-width:100%!important}
-      .overlay.tasky-modal-root-v264>.modal *{min-width:0}
-
-      .overlay.tasky-modal-root-v264 .modal-head{
+      .overlay.tasky-modal-root-v265 .modal-head{
         display:flex!important;
         align-items:center!important;
         justify-content:space-between!important;
@@ -21141,7 +21128,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         position:relative!important;
       }
 
-      .overlay.tasky-modal-root-v264 .modal-head>.modal-close{
+      .overlay.tasky-modal-root-v265 .modal-head>.modal-close{
         position:static!important;
         inset:auto!important;
         top:auto!important;
@@ -21163,30 +21150,27 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         color:var(--ink)!important;
       }
 
-      .overlay.tasky-modal-root-v264 .modal-head>.modal-close svg{
+      .overlay.tasky-modal-root-v265 .modal-head>.modal-close svg{
         width:17px!important;
         height:17px!important;
         min-width:17px!important;
         min-height:17px!important;
       }
 
-      .tasky-modal-under-v264{
-        pointer-events:none!important;
-        user-select:none!important;
-      }
-      .tasky-modal-top-v264{pointer-events:auto!important}
-
-      .tasky-select-menu,
-      .mention-menu,
-      [role="listbox"].tasky-select-menu{
-        z-index:var(--tasky-portal-layer-v264)!important;
+      .overlay.tasky-modal-root-v265{
+        box-sizing:border-box!important;
+        padding:max(10px,env(safe-area-inset-top))
+                max(10px,env(safe-area-inset-right))
+                max(10px,env(safe-area-inset-bottom))
+                max(10px,env(safe-area-inset-left))!important;
+        overflow:hidden!important;
       }
 
-      .tasky-toast-stack{z-index:var(--tasky-toast-layer-v264)!important}
-
-      .tasky-dialog-backdrop.tasky-modal-root-v264{
-        padding:max(14px,env(safe-area-inset-top)) max(14px,env(safe-area-inset-right))
-                max(14px,env(safe-area-inset-bottom)) max(14px,env(safe-area-inset-left))!important;
+      .overlay.tasky-modal-root-v265>.modal{
+        max-width:calc(100vw - 20px)!important;
+        max-height:calc(100dvh - 20px)!important;
+        box-sizing:border-box!important;
+        overscroll-behavior:contain!important;
       }
 
       #notifDropdown,#themeDropdown,.topbar .dropdown{
@@ -21194,219 +21178,244 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         box-sizing:border-box!important;
       }
 
-      .modal input,.modal select,.modal textarea,.modal button{box-sizing:border-box!important}
+      body.tasky-hr-hydrating-v261 #moduleContent{
+        opacity:1!important;
+        pointer-events:auto!important;
+      }
+      body.tasky-hr-hydrating-v261 #moduleContent::after{display:none!important}
+      #moduleArea.tasky-hr-stable-v263,
+      #moduleArea.tasky-hr-stable-v263.tasky-hr-visible-v263{
+        opacity:1!important;
+        transition:none!important;
+      }
 
       @media(max-width:700px){
-        .overlay.tasky-modal-root-v264{
-          padding:6px!important;
-          align-items:flex-end;
-        }
-        .overlay.tasky-modal-root-v264>.modal{
+        .overlay.tasky-modal-root-v265{padding:6px!important}
+        .overlay.tasky-modal-root-v265>.modal{
           max-width:calc(100vw - 12px)!important;
           max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
-        }
-        .tasky-dialog{
-          max-height:calc(100dvh - 24px)!important;
-          overflow:auto!important;
         }
       }
     `;
     document.head.appendChild(style);
   }
 
-  /* ================= HR ROOT FIX ================= */
-
-  let hrTxnDepthV264=0;
-  let hrRenderDeferredV264=false;
-  let hrRenderBypassV264=false;
-  let hrSuppressUntilV264=0;
-  let hrLoadingTimerV264=null;
-  let hrCommitCountV264=0;
-  let hrRenderAttemptCountV264=0;
-
-  const renderModuleBeforeV264=renderModule;
-
-  renderModule=function(){
-    if(activeNav==='hr'){
-      hrRenderAttemptCountV264++;
-      const blocked=
-        !hrRenderBypassV264 &&
-        (hrTxnDepthV264>0 || performance.now()<hrSuppressUntilV264);
-
-      if(blocked){
-        hrRenderDeferredV264=true;
-        return;
-      }
-    }
-    return renderModuleBeforeV264();
+  const modalManagerV265={
+    seq:0,
+    roots:new Set(),
+    state:new WeakMap(),
+    top:null,
+    syncQueued:false,
+    syncCount:0,
+    visibilityEvents:0
   };
 
-  function taskyHrCommitNowV264(reason='unknown'){
-    if(activeNav!=='hr')return;
-
-    clearTimeout(hrLoadingTimerV264);
-    hrSuppressUntilV264=performance.now()+700;
-
-    window.__taskyHrRenderTxnV263=false;
-    window.__taskyHrRenderDeferredV263=false;
-    window.__taskyHrSuppressUntilV263=0;
-
-    hrRenderBypassV264=true;
-    try{
-      renderModuleBeforeV264();
-
-      try{
-        const area=document.getElementById('moduleArea');
-        if(typeof normalizeOversizedIconsV258==='function'&&area){
-          normalizeOversizedIconsV258(area);
-        }
-      }catch(_){}
-
-      hrCommitCountV264++;
-    }finally{
-      hrRenderBypassV264=false;
-      hrRenderDeferredV264=false;
+  function stateV265(root){
+    let st=modalManagerV265.state.get(root);
+    if(!st){
+      st={visible:false,seq:0,lastFocused:null,observer:null};
+      modalManagerV265.state.set(root,st);
     }
-
-    console.debug?.('Tasky V264 HR single commit',reason,hrCommitCountV264);
+    return st;
   }
 
-  window.taskyHrTxnBeginV264=function(reason='unknown'){
-    if(hrTxnDepthV264===0){
-      hrRenderDeferredV264=false;
-      clearTimeout(hrLoadingTimerV264);
-    }
-    hrTxnDepthV264++;
-    console.debug?.('Tasky V264 HR txn begin',reason,hrTxnDepthV264);
-  };
+  function rootCandidateV265(el){
+    if(!(el instanceof Element))return false;
+    if(el.matches('.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay'))return true;
+    if(
+      el.className &&
+      /backdrop/i.test(String(el.className)) &&
+      el.querySelector?.('[role="dialog"][aria-modal="true"]')
+    )return true;
+    return false;
+  }
 
-  window.taskyHrTxnEndV264=function(reason='unknown',{commit=true}={}){
-    hrTxnDepthV264=Math.max(0,hrTxnDepthV264-1);
-    console.debug?.('Tasky V264 HR txn end',reason,hrTxnDepthV264);
+  function visibleFromClassV265(root,classText){
+    const classes=new Set(String(classText||'').split(/\s+/).filter(Boolean));
+    if(root.id==='taskyDialogBackdrop')return classes.has('show');
+    return !classes.has('hidden');
+  }
 
-    if(hrTxnDepthV264===0){
-      clearTimeout(hrLoadingTimerV264);
-      if(commit&&activeNav==='hr')taskyHrCommitNowV264(reason);
-    }
-  };
+  function visibleV265(root){
+    if(!root?.isConnected)return false;
+    if(!visibleFromClassV265(root,root.className))return false;
+    const cs=getComputedStyle(root);
+    return cs.display!=='none' && cs.visibility!=='hidden' && Number(cs.opacity||1)!==0;
+  }
 
-  window.__taskyCommitHrRenderV263=function(reason='legacy-v263'){
-    window.__taskyHrRenderTxnV263=false;
-    window.__taskyHrRenderDeferredV263=false;
-    window.__taskyHrSuppressUntilV263=0;
+  function dialogV265(root){
+    if(root.id==='taskyDialogBackdrop')return document.getElementById('taskyDialog');
+    if(root.matches('[role="dialog"][aria-modal="true"]'))return root;
+    return root.querySelector('.modal,[role="dialog"][aria-modal="true"]');
+  }
 
-    if(hrTxnDepthV264>0){
-      hrRenderDeferredV264=true;
-      return;
-    }
-    taskyHrCommitNowV264(reason);
-  };
+  function closeTransientV265(){
+    try{closeThemePanel?.()}catch(_){}
+    try{closeNotificationPanel?.()}catch(_){}
+    try{closeMenu?.()}catch(_){}
+    document.getElementById('taskyAppMenuV217')?.classList.add('hidden');
+    document.getElementById('taskyAppSwitcherBtnV217')?.setAttribute('aria-expanded','false');
+    document.getElementById('filterDropdown')?.classList.add('hidden');
+  }
 
-  const moduleLoadingBeforeV264=taskyRenderModuleLoadingV83;
-  taskyRenderModuleLoadingV83=function(){
-    if(activeNav!=='hr')return moduleLoadingBeforeV264();
+  function queueSyncV265(){
+    if(modalManagerV265.syncQueued)return;
+    modalManagerV265.syncQueued=true;
+    queueMicrotask(()=>{
+      modalManagerV265.syncQueued=false;
+      syncV265();
+    });
+  }
 
-    clearTimeout(hrLoadingTimerV264);
-    hrLoadingTimerV264=setTimeout(()=>{
-      if(activeNav==='hr'&&hrTxnDepthV264>0){
-        moduleLoadingBeforeV264();
+  function discoverV265(root){
+    if(!root||modalManagerV265.roots.has(root))return;
+    modalManagerV265.roots.add(root);
+    root.classList.add('tasky-modal-root-v265');
+
+    const st=stateV265(root);
+
+    /* Loop-safe: observe only class and react only to visibility transitions.
+       We never observe style or aria-hidden because stack sync writes them. */
+    st.observer=new MutationObserver(mutations=>{
+      for(const mutation of mutations){
+        if(mutation.type!=='attributes'||mutation.attributeName!=='class')continue;
+
+        const oldVisible=visibleFromClassV265(root,mutation.oldValue||'');
+        const newVisible=visibleFromClassV265(root,root.className);
+
+        if(oldVisible!==newVisible){
+          modalManagerV265.visibilityEvents++;
+          queueSyncV265();
+          break;
+        }
       }
-    },160);
-  };
+    });
 
-  const ensureModuleBeforeV264=taskyEnsureModuleLoadedV83;
-  taskyEnsureModuleLoadedV83=async function(id,opts={}){
-    if(id!=='hr')return ensureModuleBeforeV264(id,opts);
+    st.observer.observe(root,{
+      attributes:true,
+      attributeFilter:['class'],
+      attributeOldValue:true
+    });
 
-    taskyHrTxnBeginV264('module-load');
-    try{
-      return await ensureModuleBeforeV264(id,opts);
-    }finally{
-      taskyHrTxnEndV264('module-load',{commit:activeNav==='hr'});
+    const dialog=dialogV265(root);
+    if(dialog){
+      if(!dialog.hasAttribute('role'))dialog.setAttribute('role','dialog');
+      if(!dialog.hasAttribute('tabindex'))dialog.setAttribute('tabindex','-1');
     }
-  };
+  }
 
-  const hrFetchGuardStateV264={
-    base:null,
-    wrapped:null,
-    inflight:null,
-    inflightWorkspace:null,
-    lastWorkspace:null,
-    lastSuccess:0,
-    calls:0,
-    coalesced:0
-  };
+  function scanV265(scope=document){
+    if(scope instanceof Element&&rootCandidateV265(scope))discoverV265(scope);
+    scope.querySelectorAll?.(
+      '.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay,[class*="backdrop"]'
+    ).forEach(el=>{
+      if(rootCandidateV265(el))discoverV265(el);
+    });
+  }
 
-  window.taskyInstallHrFetchGuardV264=function(){
-    const current=(typeof fetchHrDataV72==='function')?fetchHrDataV72:null;
-    if(!current)return false;
-    if(current===hrFetchGuardStateV264.wrapped)return true;
+  function syncV265(){
+    modalManagerV265.syncCount++;
 
-    hrFetchGuardStateV264.base=current;
+    const visible=[];
 
-    const wrapped=async function(...args){
-      const ws=String(currentWorkspaceId||'none');
-      const force=args[0]===true;
-      hrFetchGuardStateV264.calls++;
-
-      if(
-        hrFetchGuardStateV264.inflight &&
-        hrFetchGuardStateV264.inflightWorkspace===ws
-      ){
-        hrFetchGuardStateV264.coalesced++;
-        return hrFetchGuardStateV264.inflight;
+    for(const root of [...modalManagerV265.roots]){
+      if(!root.isConnected){
+        modalManagerV265.roots.delete(root);
+        continue;
       }
 
-      if(
-        !force &&
-        hrFetchGuardStateV264.lastWorkspace===ws &&
-        Date.now()-hrFetchGuardStateV264.lastSuccess<900
-      ){
-        hrFetchGuardStateV264.coalesced++;
-        return true;
+      const st=stateV265(root);
+      const now=visibleV265(root);
+
+      if(now&&!st.visible){
+        st.visible=true;
+        st.seq=++modalManagerV265.seq;
+        st.lastFocused=document.activeElement instanceof HTMLElement?document.activeElement:null;
+        closeTransientV265();
+      }else if(!now&&st.visible){
+        st.visible=false;
+        root.classList.remove('tasky-modal-top-v265','tasky-modal-under-v265');
+        root.style.removeProperty('z-index');
+        root.style.removeProperty('pointer-events');
+        root.removeAttribute('data-tasky-modal-order-v265');
+
+        if(st.lastFocused?.isConnected){
+          setTimeout(()=>st.lastFocused?.focus?.({preventScroll:true}),0);
+        }
       }
 
-      const ownsTxn=hrTxnDepthV264===0;
-      if(ownsTxn)taskyHrTxnBeginV264('fetch');
+      if(now)visible.push({root,st});
+    }
 
-      const p=Promise.resolve()
-        .then(()=>hrFetchGuardStateV264.base(...args))
-        .then(result=>{
-          hrFetchGuardStateV264.lastWorkspace=ws;
-          hrFetchGuardStateV264.lastSuccess=Date.now();
-          return result;
-        })
-        .finally(()=>{
-          if(hrFetchGuardStateV264.inflight===p){
-            hrFetchGuardStateV264.inflight=null;
-            hrFetchGuardStateV264.inflightWorkspace=null;
-          }
-          if(ownsTxn)taskyHrTxnEndV264('fetch',{commit:activeNav==='hr'});
-        });
+    visible.sort((a,b)=>a.st.seq-b.st.seq);
 
-      hrFetchGuardStateV264.inflight=p;
-      hrFetchGuardStateV264.inflightWorkspace=ws;
-      return p;
-    };
+    visible.forEach(({root},index)=>{
+      const isTop=index===visible.length-1;
+      const z=120000+(index*32);
 
-    hrFetchGuardStateV264.wrapped=wrapped;
-    window.fetchHrDataV72=wrapped;
-    try{fetchHrDataV72=wrapped}catch(_){}
+      if(root.style.getPropertyValue('z-index')!==String(z)){
+        root.style.setProperty('z-index',String(z),'important');
+      }
+
+      const pointer=isTop?'auto':'none';
+      if(root.style.getPropertyValue('pointer-events')!==pointer){
+        root.style.setProperty('pointer-events',pointer,'important');
+      }
+
+      root.classList.toggle('tasky-modal-top-v265',isTop);
+      root.classList.toggle('tasky-modal-under-v265',!isTop);
+
+      if(root.getAttribute('data-tasky-modal-order-v265')!==String(index+1)){
+        root.setAttribute('data-tasky-modal-order-v265',String(index+1));
+      }
+
+      dialogV265(root)?.setAttribute('aria-modal',isTop?'true':'false');
+    });
+
+    modalManagerV265.top=visible.at(-1)?.root||null;
+
+    document.documentElement.classList.toggle('tasky-modal-lock-v265',visible.length>0);
+    document.body.classList.toggle('tasky-modal-lock-v265',visible.length>0);
+  }
+
+  function bringV265(root){
+    if(!root)return false;
+    discoverV265(root);
+
+    const st=stateV265(root);
+
+    if(!visibleV265(root))return false;
+
+    if(!st.visible){
+      st.visible=true;
+      st.lastFocused=document.activeElement instanceof HTMLElement?document.activeElement:null;
+    }
+
+    st.seq=++modalManagerV265.seq;
+    closeTransientV265();
+    syncV265();
     return true;
-  };
+  }
 
-  try{window.taskyInstallHrFetchGuardV264()}catch(_){}
+  window.taskyBringModalToFrontV265=bringV265;
 
-  /* ================= MODAL STACK MANAGER ================= */
+  const discoveryObserverV265=new MutationObserver(mutations=>{
+    let found=false;
+    for(const mutation of mutations){
+      for(const node of mutation.addedNodes){
+        if(!(node instanceof Element))continue;
+        scanV265(node);
+        found=true;
+      }
+    }
+    if(found)queueSyncV265();
+  });
 
-  const modalStateV264={
-    seq:0,
-    states:new WeakMap(),
-    roots:new Set(),
-    lastTop:null
-  };
+  discoveryObserverV265.observe(document.body,{childList:true,subtree:true});
+  scanV265(document);
+  syncV265();
 
-  const closeActionsV264={
+  const closeActionsV265={
     addModalOverlay:()=>closeAddModal?.(),
     eventTaskModalOverlay:()=>closeEventTaskModal?.(),
     detailModalOverlay:()=>closeDetailModal?.(),
@@ -21419,47 +21428,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     authRecoveryV97:()=>closeAuthRecoveryV97?.()
   };
 
-  function modalRootCandidateV264(el){
-    if(!(el instanceof Element))return false;
-    if(el.matches('.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay'))return true;
-
-    if(
-      (el.className&&/backdrop/i.test(String(el.className))) &&
-      el.querySelector?.('[role="dialog"][aria-modal="true"]')
-    )return true;
-
-    return false;
-  }
-
-  function modalVisibleV264(root){
-    if(!root?.isConnected)return false;
-    if(root.classList.contains('hidden'))return false;
-    if(root.id==='taskyDialogBackdrop'&&!root.classList.contains('show'))return false;
-
-    const cs=getComputedStyle(root);
-    return cs.display!=='none'&&cs.visibility!=='hidden'&&Number(cs.opacity||1)!==0;
-  }
-
-  function modalDialogV264(root){
-    if(root.id==='taskyDialogBackdrop')return document.getElementById('taskyDialog');
-    if(root.matches('[role="dialog"][aria-modal="true"]'))return root;
-    return root.querySelector('.modal,[role="dialog"][aria-modal="true"]');
-  }
-
-  function closeTransientUiV264(){
-    try{closeThemePanel?.()}catch(_){}
-    try{closeNotificationPanel?.()}catch(_){}
-    try{closeMenu?.()}catch(_){}
-
-    const appMenu=document.getElementById('taskyAppMenuV217');
-    const appBtn=document.getElementById('taskyAppSwitcherBtnV217');
-    appMenu?.classList.add('hidden');
-    appBtn?.setAttribute('aria-expanded','false');
-
-    document.getElementById('filterDropdown')?.classList.add('hidden');
-  }
-
-  function focusablesV264(root){
+  function focusablesV265(root){
     return [...root.querySelectorAll(
       'button:not([disabled]),a[href],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])'
     )].filter(el=>{
@@ -21468,129 +21437,22 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
   }
 
-  function openStateV264(root){
-    let st=modalStateV264.states.get(root);
-    if(!st){
-      st={visible:false,seq:0,lastFocused:null,observer:null};
-      modalStateV264.states.set(root,st);
-    }
-    return st;
-  }
-
-  function discoverRootV264(root){
-    if(!root||modalStateV264.roots.has(root))return;
-    modalStateV264.roots.add(root);
-    root.classList.add('tasky-modal-root-v264');
-
-    const st=openStateV264(root);
-    st.observer=new MutationObserver(()=>syncModalStackV264());
-    st.observer.observe(root,{attributes:true,attributeFilter:['class','style','aria-hidden']});
-
-    const dialog=modalDialogV264(root);
-    if(dialog){
-      if(!dialog.hasAttribute('role'))dialog.setAttribute('role','dialog');
-      dialog.setAttribute('aria-modal','true');
-      if(!dialog.hasAttribute('tabindex'))dialog.setAttribute('tabindex','-1');
-    }
-  }
-
-  function scanModalRootsV264(scope=document){
-    if(scope instanceof Element&&modalRootCandidateV264(scope))discoverRootV264(scope);
-
-    scope.querySelectorAll?.(
-      '.overlay,.tasky-dialog-backdrop,.auth97-recovery-overlay,[class*="backdrop"]'
-    ).forEach(el=>{
-      if(modalRootCandidateV264(el))discoverRootV264(el);
-    });
-  }
-
-  function syncModalStackV264(){
-    const visible=[];
-
-    for(const root of [...modalStateV264.roots]){
-      if(!root.isConnected){
-        modalStateV264.roots.delete(root);
-        continue;
-      }
-
-      const st=openStateV264(root);
-      const isVisible=modalVisibleV264(root);
-
-      if(isVisible&&!st.visible){
-        st.visible=true;
-        st.seq=++modalStateV264.seq;
-        st.lastFocused=document.activeElement instanceof HTMLElement?document.activeElement:null;
-        closeTransientUiV264();
-      }else if(!isVisible&&st.visible){
-        st.visible=false;
-        root.classList.remove('tasky-modal-top-v264','tasky-modal-under-v264');
-        root.style.removeProperty('pointer-events');
-        root.removeAttribute('data-tasky-modal-order-v264');
-
-        if(st.lastFocused?.isConnected){
-          setTimeout(()=>st.lastFocused?.focus?.({preventScroll:true}),0);
-        }
-      }
-
-      if(isVisible)visible.push({root,st});
-    }
-
-    visible.sort((a,b)=>a.st.seq-b.st.seq);
-
-    visible.forEach(({root},index)=>{
-      const top=index===visible.length-1;
-      const z=120000+(index*24);
-
-      root.style.setProperty('z-index',String(z),'important');
-      root.style.setProperty('pointer-events',top?'auto':'none','important');
-      root.classList.toggle('tasky-modal-top-v264',top);
-      root.classList.toggle('tasky-modal-under-v264',!top);
-      root.setAttribute('data-tasky-modal-order-v264',String(index+1));
-      root.setAttribute('aria-hidden',top?'false':'true');
-
-      const dialog=modalDialogV264(root);
-      if(dialog){
-        dialog.setAttribute('aria-modal',top?'true':'false');
-        const title=dialog.querySelector('.modal-head h3,.tasky-dialog-title,h2,h3');
-        if(title&&!dialog.hasAttribute('aria-label')){
-          const text=String(title.textContent||'').trim();
-          if(text)dialog.setAttribute('aria-label',text);
-        }
-      }
-    });
-
-    modalStateV264.lastTop=visible.at(-1)?.root||null;
-
-    document.documentElement.classList.toggle('tasky-modal-lock-v264',visible.length>0);
-    document.body.classList.toggle('tasky-modal-lock-v264',visible.length>0);
-
-    if(!visible.length){
-      for(const root of modalStateV264.roots){
-        if(!modalVisibleV264(root)){
-          root.style.removeProperty('z-index');
-          root.style.removeProperty('pointer-events');
-          root.removeAttribute('data-tasky-modal-order-v264');
-        }
-      }
-    }
-  }
-
-  function closeTopModalV264(){
-    const root=modalStateV264.lastTop;
+  function closeTopV265(){
+    const root=modalManagerV265.top;
     if(!root)return false;
 
-    const action=closeActionsV264[root.id];
+    const action=closeActionsV265[root.id];
     if(typeof action==='function'){
       action();
       return true;
     }
 
-    const closeBtn=modalDialogV264(root)?.querySelector(
+    const close=dialogV265(root)?.querySelector(
       '.modal-close,[data-close],[aria-label*="close" i],[aria-label*="إغلاق"]'
     );
 
-    if(closeBtn){
-      closeBtn.click();
+    if(close){
+      close.click();
       return true;
     }
 
@@ -21598,11 +21460,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   document.addEventListener('keydown',event=>{
-    const root=modalStateV264.lastTop;
+    const root=modalManagerV265.top;
     if(!root)return;
 
     if(event.key==='Escape'){
-      if(closeTopModalV264()){
+      if(closeTopV265()){
         event.preventDefault();
         event.stopImmediatePropagation();
       }
@@ -21611,17 +21473,20 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     if(event.key!=='Tab')return;
 
-    const dialog=modalDialogV264(root);
+    const dialog=dialogV265(root);
     if(!dialog)return;
 
-    const items=focusablesV264(dialog);
+    const items=focusablesV265(dialog);
+
     if(!items.length){
       event.preventDefault();
-      dialog.focus({preventScroll:true});
+      dialog.focus?.({preventScroll:true});
       return;
     }
 
-    const first=items[0],last=items[items.length-1];
+    const first=items[0];
+    const last=items[items.length-1];
+
     if(event.shiftKey&&document.activeElement===first){
       event.preventDefault();
       last.focus();
@@ -21631,64 +21496,70 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     }
   },true);
 
-  const modalDiscoveryObserverV264=new MutationObserver(mutations=>{
-    let found=false;
+  /* HR guard installed after lazy hr.js via taskyEnsureLazyAppV1681. */
+  const hrFetchV265={
+    base:null,
+    wrapped:null,
+    inflight:null,
+    workspace:null,
+    calls:0,
+    coalesced:0,
+    lastSuccessWorkspace:null,
+    lastSuccessAt:0
+  };
 
-    for(const m of mutations){
-      for(const node of m.addedNodes){
-        if(!(node instanceof Element))continue;
-        scanModalRootsV264(node);
-        found=true;
+  window.taskyInstallHrFetchGuardV264=function(){
+    const current=(typeof fetchHrDataV72==='function')?fetchHrDataV72:null;
+    if(!current)return false;
+    if(current===hrFetchV265.wrapped)return true;
+
+    hrFetchV265.base=current;
+
+    const wrapped=async function(...args){
+      const ws=String(currentWorkspaceId||'none');
+      const force=args[0]===true;
+      hrFetchV265.calls++;
+
+      if(hrFetchV265.inflight&&hrFetchV265.workspace===ws){
+        hrFetchV265.coalesced++;
+        return hrFetchV265.inflight;
       }
-    }
 
-    if(found)queueMicrotask(syncModalStackV264);
-  });
-
-  modalDiscoveryObserverV264.observe(document.body,{childList:true,subtree:true});
-  scanModalRootsV264(document);
-  syncModalStackV264();
-
-  function normalizeVisibleModalGeometryV264(){
-    for(const root of modalStateV264.roots){
-      if(!modalVisibleV264(root))continue;
-
-      const modal=modalDialogV264(root);
-      if(!modal)continue;
-
-      const head=modal.querySelector(':scope>.modal-head,.modal-head');
-      const close=head?.querySelector('.modal-close');
-
-      if(head&&close){
-        const mr=modal.getBoundingClientRect();
-        const cr=close.getBoundingClientRect();
-
-        const outside=
-          cr.left<mr.left-2 ||
-          cr.right>mr.right+2 ||
-          cr.top<mr.top-2 ||
-          cr.bottom>mr.bottom+2;
-
-        modal.classList.toggle('tasky-close-geometry-fixed-v264',outside);
+      if(
+        !force &&
+        hrFetchV265.lastSuccessWorkspace===ws &&
+        Date.now()-hrFetchV265.lastSuccessAt<700
+      ){
+        hrFetchV265.coalesced++;
+        return true;
       }
-    }
-  }
 
-  window.addEventListener('resize',()=>{
-    syncModalStackV264();
-    normalizeVisibleModalGeometryV264();
-  },{passive:true});
+      const p=Promise.resolve()
+        .then(()=>hrFetchV265.base(...args))
+        .then(result=>{
+          hrFetchV265.lastSuccessWorkspace=ws;
+          hrFetchV265.lastSuccessAt=Date.now();
+          return result;
+        })
+        .finally(()=>{
+          if(hrFetchV265.inflight===p){
+            hrFetchV265.inflight=null;
+            hrFetchV265.workspace=null;
+          }
+        });
 
-  window.addEventListener('orientationchange',()=>{
-    setTimeout(()=>{
-      syncModalStackV264();
-      normalizeVisibleModalGeometryV264();
-    },120);
-  },{passive:true});
+      hrFetchV265.inflight=p;
+      hrFetchV265.workspace=ws;
+      return p;
+    };
 
-  /* ================= RUNTIME QA AUDIT ================= */
+    hrFetchV265.wrapped=wrapped;
+    window.fetchHrDataV72=wrapped;
+    try{fetchHrDataV72=wrapped}catch(_){}
+    return true;
+  };
 
-  function duplicateIdsV264(){
+  function duplicateIdsV265(){
     const counts=new Map();
     document.querySelectorAll('[id]').forEach(el=>{
       counts.set(el.id,(counts.get(el.id)||0)+1);
@@ -21696,72 +21567,42 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return [...counts].filter(([,count])=>count>1).map(([id,count])=>({id,count}));
   }
 
-  function viewportOverflowV264(){
-    const vw=document.documentElement.clientWidth;
-    const bad=[];
-
-    document.querySelectorAll('body *').forEach(el=>{
-      if(!(el instanceof HTMLElement||el instanceof SVGElement))return;
-      if(el.closest('.meet101-room,#taskyV106Brainstorm,.brain130-present,.public-event-invite-screen,.public-rfq-screen,.public-salesquote-screen'))return;
-
-      const cs=getComputedStyle(el);
-      if(cs.display==='none'||cs.visibility==='hidden'||cs.position==='fixed')return;
-
-      const r=el.getBoundingClientRect();
-      if(r.width>0&&(r.left<-24||r.right>vw+24)){
-        bad.push({
-          tag:el.tagName,
-          id:el.id||null,
-          class:String(el.className||'').slice(0,120),
-          left:Math.round(r.left),
-          right:Math.round(r.right),
-          width:Math.round(r.width)
-        });
-      }
-    });
-
-    return bad.slice(0,80);
-  }
-
-  window.taskyPlatformQaAuditV264=function(){
-    const activeModals=[...modalStateV264.roots]
-      .filter(modalVisibleV264)
+  window.taskyPlatformQaAuditV265=function(){
+    const stack=[...modalManagerV265.roots]
+      .filter(visibleV265)
       .map(root=>({
         id:root.id||null,
-        order:Number(root.getAttribute('data-tasky-modal-order-v264')||0),
+        order:Number(root.getAttribute('data-tasky-modal-order-v265')||0),
         z:getComputedStyle(root).zIndex,
-        top:root.classList.contains('tasky-modal-top-v264')
-      }));
+        top:root===modalManagerV265.top
+      }))
+      .sort((a,b)=>a.order-b.order);
 
     return {
-      build:'V264',
-      active_nav:activeNav,
-      modal_stack:activeModals,
-      duplicate_ids:duplicateIdsV264(),
-      viewport_overflow:viewportOverflowV264(),
-      hr:{
-        txn_depth:hrTxnDepthV264,
-        commits:hrCommitCountV264,
-        render_attempts:hrRenderAttemptCountV264,
-        fetch_calls:hrFetchGuardStateV264.calls,
-        coalesced_fetches:hrFetchGuardStateV264.coalesced,
-        fetch_inflight:!!hrFetchGuardStateV264.inflight
+      build:'V265',
+      modal:{
+        stack,
+        sync_count:modalManagerV265.syncCount,
+        visibility_events:modalManagerV265.visibilityEvents,
+        root_count:modalManagerV265.roots.size
       },
-      checks:{
-        modal_stack_manager:true,
-        modal_focus_trap:true,
-        escape_top_modal_only:true,
-        body_scroll_lock:true,
-        hr_single_render_transaction:true,
-        hr_lazy_fetch_guard:true,
-        missing_chevron_icon_fixed:true
+      hr:{
+        fetch_calls:hrFetchV265.calls,
+        coalesced_fetches:hrFetchV265.coalesced,
+        inflight:!!hrFetchV265.inflight
+      },
+      duplicate_ids:duplicateIdsV265(),
+      responsiveness_guard:{
+        modal_style_observation:false,
+        modal_aria_hidden_observation:false,
+        modal_visibility_class_only:true
       }
     };
   };
 
-  window.TASKY_PLATFORM_QA_V264=true;
-  window.TASKY_BUILD='V264';
-  console.info('Tasky V264 — platform QA hardening ready');
+  window.TASKY_PLATFORM_QA_V265=true;
+  window.TASKY_BUILD='V265';
+  console.info('Tasky V265 — stable modal stack + Page Unresponsive fix ready');
 })();
 </script>
 
