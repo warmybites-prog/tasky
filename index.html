@@ -3312,8 +3312,8 @@ html body .sidebar .main-nav,
           <button id="themePopoverBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" onclick="toggleThemePanel(event)"><svg><use href="#i-palette"/></svg></button>
           <div id="themeDropdown" class="dropdown hidden theme-panel" role="dialog" aria-label="Theme settings" style="left:0;top:44px;"></div>
         </div>
-        <div style="position:relative">
-          <button class="icon-btn" onclick="toggleNotif()"><svg><use href="#i-bell"/></svg><span class="badge" id="notifBadge" style="display:none">0</span></button>
+        <div id="notifPopoverWrap" style="position:relative">
+          <button id="notifPopoverBtn" class="icon-btn" type="button" aria-haspopup="true" aria-expanded="false" onclick="toggleNotif(event)"><svg><use href="#i-bell"/></svg><span class="badge" id="notifBadge" style="display:none">0</span></button>
           <div id="notifDropdown" class="dropdown hidden" style="left:0;top:44px;width:280px;"></div>
         </div>
         <button id="topNewTaskBtn" class="primary-btn" onclick="openAddModal()"><svg><use href="#i-plus"/></svg> <span id="newTaskBtnLabel2"></span></button>
@@ -5954,7 +5954,7 @@ function toggleThemePanel(event){
 
   /* Keep top-bar popovers mutually exclusive. */
   if(opening){
-    document.getElementById('notifDropdown')?.classList.add('hidden');
+    closeNotificationPanel();
     renderThemePanel();
     dd.classList.remove('hidden');
     if(btn)btn.setAttribute('aria-expanded','true');
@@ -8906,15 +8906,27 @@ function renderNotificationDropdown(){
   const rows=userNotifications.map(n=>{ const actor=taskMemberById(n.actor_id); const preview=notificationPreview(n); return `<div class="notif-item ${n.is_read?'':'unread'}" onclick="openNotification('${n.id}')"><div class="notif-row">${memberAvatarHtml(actor,30)}<div class="notif-copy"><div class="txt">${escapeHtml(notificationText(n))}</div>${preview?`<div style="font-size:10.5px;color:var(--muted);margin-top:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${escapeHtml(preview)}</div>`:''}<div class="time">${escapeHtml(formatDateTime(n.created_at))}</div></div></div></div>`; }).join('');
   dd.innerHTML=head+(rows||`<div class="notif-empty">${lang==='ar'?'لا توجد إشعارات جديدة':'No notifications yet'}</div>`);
 }
-async function toggleNotif(){
+function closeNotificationPanel(){
+  const dd=document.getElementById('notifDropdown');
+  const btn=document.getElementById('notifPopoverBtn');
+  if(dd)dd.classList.add('hidden');
+  if(btn)btn.setAttribute('aria-expanded','false');
+}
+async function toggleNotif(event){
+  event?.stopPropagation?.();
   const dd=document.getElementById('notifDropdown'); if(!dd)return;
+  const btn=document.getElementById('notifPopoverBtn');
   const opening=dd.classList.contains('hidden');
+
   if(opening){
     closeThemePanel();
     await fetchNotifications();
     renderNotificationDropdown();
+    dd.classList.remove('hidden');
+    if(btn)btn.setAttribute('aria-expanded','true');
+  }else{
+    closeNotificationPanel();
   }
-  dd.classList.toggle('hidden');
 }
 async function openNotification(id){
   const n=userNotifications.find(x=>x.id===id); if(!n)return;
@@ -19058,40 +19070,69 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 </script>
 
 
-<script id="tasky-v253-theme-popover-dismiss-js" type="text/tasky-deferred-v247">
+<script id="tasky-v254-popover-dismiss-js" type="text/tasky-deferred-v247">
 (function(){
-  function themePanelIsOpenV253(){
+  function themePanelIsOpenV254(){
     const dd=document.getElementById('themeDropdown');
     return !!dd&&!dd.classList.contains('hidden');
   }
 
-  document.addEventListener('pointerdown',event=>{
-    if(!themePanelIsOpenV253())return;
-    const wrap=document.getElementById('themePopoverWrap');
+  function notificationPanelIsOpenV254(){
+    const dd=document.getElementById('notifDropdown');
+    return !!dd&&!dd.classList.contains('hidden');
+  }
 
-    /* Any click/tap outside the palette popover closes it. */
-    if(wrap&&!wrap.contains(event.target)){
+  document.addEventListener('pointerdown',event=>{
+    const themeWrap=document.getElementById('themePopoverWrap');
+    const notifWrap=document.getElementById('notifPopoverWrap');
+
+    if(themePanelIsOpenV254() && themeWrap && !themeWrap.contains(event.target)){
       closeThemePanel();
+    }
+
+    if(notificationPanelIsOpenV254() && notifWrap && !notifWrap.contains(event.target)){
+      closeNotificationPanel();
     }
   },true);
 
   document.addEventListener('keydown',event=>{
-    if(event.key==='Escape'&&themePanelIsOpenV253()){
+    if(event.key!=='Escape')return;
+
+    let closed=false;
+
+    if(themePanelIsOpenV254()){
       closeThemePanel();
-      document.getElementById('themePopoverBtn')?.focus?.();
+      closed=true;
+    }
+
+    if(notificationPanelIsOpenV254()){
+      closeNotificationPanel();
+      closed=true;
+    }
+
+    if(closed){
+      const active=document.activeElement;
+      if(!active||active===document.body){
+        document.getElementById('notifPopoverBtn')?.focus?.();
+      }
     }
   });
 
-  /* Navigation/viewport changes should never leave a detached popover open. */
-  window.addEventListener('resize',closeThemePanel,{passive:true});
-  window.addEventListener('orientationchange',closeThemePanel,{passive:true});
+  function closeTopbarPopoversV254(){
+    closeThemePanel();
+    closeNotificationPanel();
+  }
+
+  window.addEventListener('resize',closeTopbarPopoversV254,{passive:true});
+  window.addEventListener('orientationchange',closeTopbarPopoversV254,{passive:true});
+
   document.addEventListener('visibilitychange',()=>{
-    if(document.visibilityState!=='visible')closeThemePanel();
+    if(document.visibilityState!=='visible')closeTopbarPopoversV254();
   });
 
-  window.TASKY_THEME_POPOVER_V253=true;
-  window.TASKY_BUILD='V253';
-  console.info('Tasky V253 — theme popover outside-dismiss behavior ready');
+  window.TASKY_POPOVER_DISMISS_V254=true;
+  window.TASKY_BUILD='V254';
+  console.info('Tasky V254 — outside dismiss for theme + notifications ready');
 })();
 </script>
 
