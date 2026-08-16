@@ -3469,14 +3469,58 @@ function taskyModuleDescriptorV83(id){
   return map[id]||null;
 }
 async function taskyEnsureModuleLoadedV83(id,{force=false}={}){
-  const d=taskyModuleDescriptorV83(id);if(!d){if(activeNav===id)renderModule();return true;}
+  const d=taskyModuleDescriptorV83(id);
+  if(!d){
+    if(activeNav===id)renderModule();
+    return true;
+  }
+
+  const isHr=id==='hr';
   taskyResetLazyModulesV83(currentWorkspaceId);
   if(force)taskyModuleLoadStateV83.loaded.delete(d.key);
-  if(taskyModuleLoadStateV83.loaded.has(d.key)){if(activeNav===id)renderModule();return true;}
+
+  if(taskyModuleLoadStateV83.loaded.has(d.key)){
+    if(activeNav===id){
+      if(isHr&&typeof window.__taskyCommitHrRenderV263==='function')window.__taskyCommitHrRenderV263('cached');
+      else renderModule();
+    }
+    return true;
+  }
+
   if(taskyModuleLoadStateV83.loading.has(d.key))return taskyModuleLoadStateV83.loading.get(d.key);
+
+  if(isHr){
+    window.__taskyHrRenderTxnV263=true;
+    window.__taskyHrRenderDeferredV263=false;
+  }
+
   if(activeNav===id)taskyRenderModuleLoadingV83();
-  const p=(async()=>{try{await d.load();taskyModuleLoadStateV83.loaded.add(d.key);if(activeNav===id)renderModule();return true;}catch(err){console.warn('Tasky V83 lazy module load',id,err);if(activeNav===id)taskyRenderModuleErrorV83(id,err);return false;}finally{taskyModuleLoadStateV83.loading.delete(d.key);}})();
-  taskyModuleLoadStateV83.loading.set(d.key,p);return p;
+
+  const p=(async()=>{
+    try{
+      await d.load();
+      taskyModuleLoadStateV83.loaded.add(d.key);
+
+      if(activeNav===id){
+        if(isHr&&typeof window.__taskyCommitHrRenderV263==='function')window.__taskyCommitHrRenderV263('loaded');
+        else renderModule();
+      }
+      return true;
+    }catch(err){
+      if(isHr){
+        window.__taskyHrRenderTxnV263=false;
+        window.__taskyHrSuppressUntilV263=0;
+      }
+      console.warn('Tasky V83 lazy module load',id,err);
+      if(activeNav===id)taskyRenderModuleErrorV83(id,err);
+      return false;
+    }finally{
+      taskyModuleLoadStateV83.loading.delete(d.key);
+    }
+  })();
+
+  taskyModuleLoadStateV83.loading.set(d.key,p);
+  return p;
 }
 function taskyRetryModuleV83(id){return taskyEnsureModuleLoadedV83(id,{force:true});}
 function taskyIdleV83(fn,timeout=1800){if('requestIdleCallback' in window)return requestIdleCallback(()=>Promise.resolve().then(fn).catch(err=>console.warn('Tasky V83 idle load',err)),{timeout});return setTimeout(()=>Promise.resolve().then(fn).catch(err=>console.warn('Tasky V83 idle load',err)),220);}
@@ -19403,6 +19447,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   document.head.appendChild(style);
 
   function normalizeEmployee360V258(){
+    if(window.TASKY_EMPLOYEE360_AUTHORITATIVE_V263===true)return;
     const modal=document.getElementById('addModalBody');
     if(!modal)return;
 
@@ -19568,7 +19613,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V262',
+      build:'V263',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19612,7 +19657,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V262',
+      build:'V263',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -19962,7 +20007,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V262',
+      build:'V263',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20106,7 +20151,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V262',
+      build:'V263',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20428,6 +20473,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function normalizeEmployee360V262(){
+    if(window.TASKY_EMPLOYEE360_AUTHORITATIVE_V263===true)return;
     const modal=document.getElementById('addModalBody');
     if(!modal)return;
 
@@ -20470,7 +20516,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V262',
+      build:'V263',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -20482,6 +20528,555 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_EMPLOYEE360_SCROLL_V262=true;
   window.TASKY_BUILD='V262';
   console.info('Tasky V262 — Employee 360 scrolling + layout redesign ready');
+})();
+</script>
+
+
+<script id="tasky-v263-hr-root-stability-redesign-js" type="text/tasky-deferred-v247">
+(function(){
+  window.TASKY_EMPLOYEE360_AUTHORITATIVE_V263=true;
+
+  /* ----------------------------------------------------------
+     HR RENDER TRANSACTION
+     ---------------------------------------------------------- */
+  const renderModuleBaseV263=renderModule;
+  let hrCommitTimerV263=null;
+  let hrCommitCountV263=0;
+
+  renderModule=function(){
+    const now=performance.now();
+
+    if(
+      activeNav==='hr' &&
+      (
+        window.__taskyHrRenderTxnV263===true ||
+        now < Number(window.__taskyHrSuppressUntilV263||0)
+      )
+    ){
+      window.__taskyHrRenderDeferredV263=true;
+      return;
+    }
+
+    return renderModuleBaseV263();
+  };
+
+  window.__taskyCommitHrRenderV263=function(reason='unknown'){
+    window.__taskyHrRenderTxnV263=false;
+    window.__taskyHrRenderDeferredV263=false;
+
+    /* Suppress stale RAF/setTimeout renders scheduled by HR photo/add-on
+       wrappers after their data has already been included in this commit. */
+    window.__taskyHrSuppressUntilV263=performance.now()+650;
+
+    clearTimeout(hrCommitTimerV263);
+
+    if(activeNav==='hr'){
+      renderModuleBaseV263();
+      hrCommitCountV263++;
+
+      const area=document.getElementById('moduleArea');
+      if(area){
+        area.classList.add('tasky-hr-stable-v263');
+        requestAnimationFrame(()=>requestAnimationFrame(()=>{
+          area.classList.add('tasky-hr-visible-v263');
+        }));
+      }
+    }
+
+    hrCommitTimerV263=setTimeout(()=>{
+      window.__taskyHrSuppressUntilV263=0;
+      window.__taskyHrRenderDeferredV263=false;
+    },680);
+
+    console.debug?.('Tasky V263 HR committed once',reason,hrCommitCountV263);
+  };
+
+  /* ----------------------------------------------------------
+     CSS
+     ---------------------------------------------------------- */
+  if(!document.getElementById('tasky-v263-hr-root-stability-redesign-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v263-hr-root-stability-redesign-css';
+    style.textContent=`
+      /* Stable HR first paint. */
+      #moduleArea.tasky-hr-stable-v263{
+        opacity:0!important;
+        transition:opacity .12s ease!important;
+      }
+      #moduleArea.tasky-hr-stable-v263.tasky-hr-visible-v263{
+        opacity:1!important;
+      }
+
+      /* Employee 360 overlay owns the full viewport.
+         Hide the application sidebar underneath so it never appears beside
+         the modal as a detached dark strip. */
+      body.tasky-employee360-open-v263 .sidebar{
+        visibility:hidden!important;
+      }
+
+      #addModalOverlay.tasky-employee360-overlay-v263{
+        position:fixed!important;
+        inset:0!important;
+        width:100vw!important;
+        height:100dvh!important;
+        z-index:34000!important;
+        padding:16px!important;
+        box-sizing:border-box!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        overflow:hidden!important;
+        background:rgba(14,28,18,.44)!important;
+        backdrop-filter:blur(2px)!important;
+      }
+
+      /* Modal itself does NOT scroll. It is a bounded shell. */
+      #addModalBody.tasky-employee360-v263{
+        position:relative!important;
+        display:flex!important;
+        flex-direction:column!important;
+        width:min(980px,calc(100vw - 32px))!important;
+        max-width:980px!important;
+        height:min(860px,calc(100dvh - 32px))!important;
+        max-height:calc(100dvh - 32px)!important;
+        min-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:hidden!important;
+        border-radius:20px!important;
+        background:var(--card)!important;
+        box-shadow:0 28px 80px rgba(0,0,0,.25)!important;
+      }
+
+      /* Header is a real fixed row inside the modal, not absolutely positioned.
+         This corrects the X button that previous global modal CSS pushed outside. */
+      #addModalBody.tasky-employee360-v263 .modal-head{
+        position:relative!important;
+        inset:auto!important;
+        top:auto!important;
+        left:auto!important;
+        right:auto!important;
+        flex:0 0 auto!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:space-between!important;
+        gap:14px!important;
+        min-height:74px!important;
+        margin:0!important;
+        padding:12px 16px!important;
+        border-bottom:1px solid var(--border)!important;
+        background:color-mix(in srgb,var(--card) 97%,var(--green-tint))!important;
+        z-index:5!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .modal-head>div{
+        flex:1!important;
+        min-width:0!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .modal-head h3{
+        margin:0 0 3px!important;
+        font-size:17px!important;
+        line-height:1.35!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .modal-close{
+        position:static!important;
+        inset:auto!important;
+        top:auto!important;
+        left:auto!important;
+        right:auto!important;
+        transform:none!important;
+        margin:0!important;
+        order:initial!important;
+        width:36px!important;
+        height:36px!important;
+        min-width:36px!important;
+        min-height:36px!important;
+        flex:0 0 36px!important;
+        padding:0!important;
+        border:1px solid var(--border)!important;
+        border-radius:11px!important;
+        background:var(--paper)!important;
+        color:var(--ink)!important;
+        display:grid!important;
+        place-items:center!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .modal-close svg{
+        width:17px!important;
+        height:17px!important;
+        min-width:17px!important;
+        min-height:17px!important;
+      }
+
+      /* This is the ONLY Employee 360 scroll container.
+         The scrollbar therefore stays inside the rounded modal shell. */
+      #addModalBody.tasky-employee360-v263 .tasky-v263-employee360-scroll{
+        flex:1 1 auto!important;
+        min-height:0!important;
+        width:100%!important;
+        overflow-x:hidden!important;
+        overflow-y:auto!important;
+        overscroll-behavior:contain!important;
+        -webkit-overflow-scrolling:touch!important;
+        touch-action:pan-y!important;
+        scrollbar-width:thin!important;
+        scrollbar-color:color-mix(in srgb,var(--muted) 55%,transparent) transparent!important;
+        padding:14px 16px 20px!important;
+        box-sizing:border-box!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-employee360-scroll::-webkit-scrollbar{
+        width:8px!important;
+      }
+      #addModalBody.tasky-employee360-v263 .tasky-v263-employee360-scroll::-webkit-scrollbar-track{
+        background:transparent!important;
+      }
+      #addModalBody.tasky-employee360-v263 .tasky-v263-employee360-scroll::-webkit-scrollbar-thumb{
+        background:color-mix(in srgb,var(--muted) 45%,transparent)!important;
+        border-radius:999px!important;
+        border:2px solid transparent!important;
+        background-clip:padding-box!important;
+      }
+
+      /* Neutralize old V258/V262 modal margins now that V263 has one body wrapper. */
+      #addModalBody.tasky-employee360-v263 > :not(.modal-head){
+        margin:0!important;
+      }
+      #addModalBody.tasky-employee360-v263 .tasky-v258-lock-hero{
+        margin:0 0 10px!important;
+        padding:10px 12px!important;
+        border-radius:13px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .hr72-grid,
+      #addModalBody.tasky-employee360-v263 .hr72-info-grid,
+      #addModalBody.tasky-employee360-v263 .employee360-grid{
+        margin:0 0 10px!important;
+        gap:9px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .hr72-card,
+      #addModalBody.tasky-employee360-v263 .hr72-panel,
+      #addModalBody.tasky-employee360-v263 .platform-panel{
+        min-height:0!important;
+        padding:11px 12px!important;
+        border-radius:13px!important;
+        box-shadow:none!important;
+      }
+
+      /* Authoritative detail grid. */
+      #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid{
+        display:grid!important;
+        grid-template-columns:repeat(3,minmax(0,1fr))!important;
+        gap:8px!important;
+        margin:0 0 12px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-detail-card{
+        min-width:0!important;
+        padding:10px 11px!important;
+        border:1px solid var(--border)!important;
+        border-radius:12px!important;
+        background:var(--paper)!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-detail-card span{
+        display:block!important;
+        margin-bottom:4px!important;
+        font-size:8px!important;
+        font-weight:750!important;
+        color:var(--muted)!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-detail-card b{
+        display:block!important;
+        font-size:10.5px!important;
+        line-height:1.5!important;
+        color:var(--ink)!important;
+        overflow-wrap:anywhere!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-detail-card.is-empty b{
+        color:var(--muted)!important;
+        font-weight:650!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-loose-details-source{
+        display:none!important;
+      }
+
+      /* Timeline is ordinary content inside the single body scroller. */
+      #addModalBody.tasky-employee360-v263 .tasky-v263-timeline{
+        height:auto!important;
+        max-height:none!important;
+        min-height:0!important;
+        overflow:visible!important;
+        margin:0!important;
+        border-radius:13px!important;
+      }
+
+      @media(max-width:820px){
+        #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid{
+          grid-template-columns:repeat(2,minmax(0,1fr))!important;
+        }
+      }
+
+      @media(max-width:700px){
+        #addModalOverlay.tasky-employee360-overlay-v263{
+          padding:6px!important;
+          align-items:flex-end!important;
+        }
+
+        #addModalBody.tasky-employee360-v263{
+          width:calc(100vw - 12px)!important;
+          max-width:calc(100vw - 12px)!important;
+          height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+          max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+          border-radius:18px 18px 12px 12px!important;
+        }
+
+        #addModalBody.tasky-employee360-v263 .modal-head{
+          min-height:66px!important;
+          padding:10px 12px!important;
+        }
+
+        #addModalBody.tasky-employee360-v263 .tasky-v263-employee360-scroll{
+          padding:10px 10px calc(16px + env(safe-area-inset-bottom))!important;
+        }
+
+        #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid{
+          grid-template-columns:1fr!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /* ----------------------------------------------------------
+     EMPLOYEE 360 DOM NORMALIZATION
+     ---------------------------------------------------------- */
+  const DETAIL_FIELDS_V263=[
+    {ar:'المدير المباشر',en:'Direct manager'},
+    {ar:'موقع العمل',en:'Work location'},
+    {ar:'الجنسية',en:'Nationality'},
+    {ar:'آخر 4 من الهوية',en:'Last 4 of ID'},
+    {ar:'جهة اتصال الطوارئ',en:'Emergency contact'},
+    {ar:'ملاحظات HR',en:'HR notes'}
+  ];
+
+  function isEmployee360V263(modal){
+    const text=String(modal?.textContent||'');
+    return /Employee\s*360|بيانات موظف حساسة|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(text);
+  }
+
+  function countDetailLabelsV263(text){
+    const low=String(text||'').toLowerCase();
+    return DETAIL_FIELDS_V263.reduce((n,f)=>{
+      return n + ((low.includes(f.ar.toLowerCase())||low.includes(f.en.toLowerCase()))?1:0);
+    },0);
+  }
+
+  function findLooseDetailSourceV263(modal){
+    const candidates=[...modal.querySelectorAll('div,p,section')].filter(el=>{
+      if(el.closest('.tasky-v263-details-grid'))return false;
+      if(el.closest('.modal-head'))return false;
+      if(el.classList.contains('tasky-v263-employee360-scroll'))return false;
+      return countDetailLabelsV263(el.textContent)>=4;
+    });
+
+    if(!candidates.length)return null;
+
+    candidates.sort((a,b)=>{
+      const ac=countDetailLabelsV263(a.textContent);
+      const bc=countDetailLabelsV263(b.textContent);
+      if(ac!==bc)return bc-ac;
+
+      const ad=a.querySelectorAll('*').length;
+      const bd=b.querySelectorAll('*').length;
+      if(ad!==bd)return ad-bd;
+
+      return String(a.textContent||'').length-String(b.textContent||'').length;
+    });
+
+    return candidates[0];
+  }
+
+  function extractDetailValueV263(source,field){
+    const text=String(source?.innerText||source?.textContent||'')
+      .replace(/\r/g,'')
+      .replace(/\u00a0/g,' ');
+
+    const lines=text.split(/\n+/).map(x=>x.replace(/\s+/g,' ').trim()).filter(Boolean);
+    const labels=DETAIL_FIELDS_V263.flatMap(x=>[x.ar,x.en]);
+
+    for(let i=0;i<lines.length;i++){
+      const line=lines[i];
+      const lower=line.toLowerCase();
+      const matched=
+        lower.includes(field.ar.toLowerCase()) ||
+        lower.includes(field.en.toLowerCase());
+
+      if(!matched)continue;
+
+      let value=line
+        .replace(field.ar,'')
+        .replace(new RegExp(field.en,'ig'),'')
+        .replace(/^[\s:：\-–—|]+|[\s:：\-–—|]+$/g,'')
+        .trim();
+
+      if(!value && lines[i+1]){
+        const next=lines[i+1];
+        const isAnotherLabel=labels.some(label=>next.toLowerCase().includes(label.toLowerCase()));
+        if(!isAnotherLabel)value=next.replace(/^[\s:：\-–—|]+|[\s:：\-–—|]+$/g,'').trim();
+      }
+
+      return value||'—';
+    }
+
+    return '—';
+  }
+
+  function buildDetailsGridV263(modal,scroll){
+    if(scroll.querySelector('.tasky-v263-details-grid'))return;
+
+    const source=findLooseDetailSourceV263(modal);
+    if(!source)return;
+
+    const grid=document.createElement('div');
+    grid.className='tasky-v263-details-grid';
+    grid.innerHTML=DETAIL_FIELDS_V263.map(field=>{
+      const value=extractDetailValueV263(source,field);
+      const label=(window.lang==='en'?field.en:field.ar);
+      return `<div class="tasky-v263-detail-card${value==='—'?' is-empty':''}"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`;
+    }).join('');
+
+    const timeline=[...scroll.querySelectorAll('div,section')].find(el=>
+      /Employee\s*360°?\s*Timeline/i.test(String(el.textContent||''))
+    );
+
+    if(timeline){
+      timeline.classList.add('tasky-v263-timeline');
+      timeline.parentElement?.insertBefore(grid,timeline);
+    }else{
+      scroll.appendChild(grid);
+    }
+
+    source.classList.add('tasky-v263-loose-details-source');
+  }
+
+  function wrapScrollableBodyV263(modal){
+    let scroll=modal.querySelector(':scope > .tasky-v263-employee360-scroll');
+    if(scroll)return scroll;
+
+    const head=modal.querySelector(':scope > .modal-head');
+    if(!head)return null;
+
+    scroll=document.createElement('div');
+    scroll.className='tasky-v263-employee360-scroll';
+
+    const movable=[...modal.children].filter(el=>el!==head);
+    movable.forEach(el=>scroll.appendChild(el));
+    modal.appendChild(scroll);
+
+    return scroll;
+  }
+
+  function cleanupEmployee360V263(){
+    document.body.classList.remove('tasky-employee360-open-v263');
+    document.getElementById('addModalOverlay')?.classList.remove('tasky-employee360-overlay-v263');
+  }
+
+  function normalizeEmployee360V263(){
+    const modal=document.getElementById('addModalBody');
+    const overlay=document.getElementById('addModalOverlay');
+    if(!modal||!overlay)return;
+
+    const active=isEmployee360V263(modal);
+    modal.classList.toggle('tasky-employee360-v263',active);
+
+    if(!active){
+      cleanupEmployee360V263();
+      return;
+    }
+
+    document.body.classList.add('tasky-employee360-open-v263');
+    overlay.classList.add('tasky-employee360-overlay-v263');
+
+    const scroll=wrapScrollableBodyV263(modal);
+    if(!scroll)return;
+
+    buildDetailsGridV263(modal,scroll);
+
+    /* Old transformed detail grids are hidden; V263 owns this layout. */
+    scroll.querySelectorAll('.tasky-v258-detail-list,.tasky-v262-sensitive-grid').forEach(el=>{
+      el.style.display='none';
+    });
+
+    /* Keep timeline fully expandable inside the single scroller. */
+    [...scroll.querySelectorAll('div,section')].forEach(el=>{
+      if(/Employee\s*360°?\s*Timeline/i.test(String(el.textContent||''))){
+        el.classList.add('tasky-v263-timeline');
+      }
+    });
+  }
+
+  /* ----------------------------------------------------------
+     Modal lifecycle: one scoped observer, one settled normalization.
+     ---------------------------------------------------------- */
+  let employee360TimerV263=null;
+  function scheduleEmployee360V263(){
+    clearTimeout(employee360TimerV263);
+    employee360TimerV263=setTimeout(()=>{
+      requestAnimationFrame(normalizeEmployee360V263);
+    },70);
+  }
+
+  const modalV263=document.getElementById('addModalBody');
+  if(modalV263){
+    new MutationObserver(mutations=>{
+      if(!mutations.some(m=>m.addedNodes?.length||m.removedNodes?.length))return;
+      scheduleEmployee360V263();
+    }).observe(modalV263,{childList:true,subtree:true});
+  }
+
+  const overlayV263=document.getElementById('addModalOverlay');
+  if(overlayV263){
+    new MutationObserver(()=>{
+      if(overlayV263.classList.contains('hidden'))cleanupEmployee360V263();
+    }).observe(overlayV263,{attributes:true,attributeFilter:['class']});
+  }
+
+  const closeAddModalBaseV263=closeAddModal;
+  closeAddModal=function(...args){
+    cleanupEmployee360V263();
+    return closeAddModalBaseV263(...args);
+  };
+
+  window.addEventListener('resize',scheduleEmployee360V263,{passive:true});
+  window.addEventListener('orientationchange',scheduleEmployee360V263,{passive:true});
+
+  window.taskyHrRootAuditV263=function(){
+    const modal=document.getElementById('addModalBody');
+    const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
+    return {
+      build:'V263',
+      hr_transaction:window.__taskyHrRenderTxnV263===true,
+      hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
+      hr_commit_count:hrCommitCountV263,
+      employee360:modal?.classList.contains('tasky-employee360-v263')||false,
+      scroll_client_height:scroll?.clientHeight||0,
+      scroll_height:scroll?.scrollHeight||0,
+      can_scroll:!!scroll&&scroll.scrollHeight>scroll.clientHeight,
+      close_position:modal?.querySelector('.modal-close')?getComputedStyle(modal.querySelector('.modal-close')).position:null,
+      details_cards:modal?.querySelectorAll('.tasky-v263-detail-card').length||0
+    };
+  };
+
+  window.TASKY_HR_ROOT_STABILITY_V263=true;
+  window.TASKY_BUILD='V263';
+  console.info('Tasky V263 — transactional HR render + Employee 360 authoritative redesign ready');
 })();
 </script>
 
