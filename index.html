@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV269" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V269</div>
+    <div id="taskyBootBuildV270" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V270</div>
   </div>
 </div>
 
@@ -3658,7 +3658,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V269',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V270',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3742,9 +3742,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V269',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V270',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V269'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V270'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10825,7 +10825,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V269',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V270',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -18927,7 +18927,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V269';
+    window.TASKY_BUILD='V270';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -19632,7 +19632,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V269',
+      build:'V270',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19676,7 +19676,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V269',
+      build:'V270',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -20026,7 +20026,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V269',
+      build:'V270',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20170,7 +20170,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V269',
+      build:'V270',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20535,7 +20535,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V269',
+      build:'V270',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -20960,16 +20960,74 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   function buildDetailsGridV263(modal,scroll){
     if(scroll.querySelector('.tasky-v263-details-grid'))return;
 
-    const source=findLooseDetailSourceV263(modal);
-    if(!source)return;
+    /* If the HR chunk already provided a real private grid, keep it.
+       V270 only rebuilds the legacy loose-label form shown in production. */
+    const nativeGrid=scroll.querySelector('.hr721-private-grid');
+    if(nativeGrid&&nativeGrid.querySelectorAll('.hr721-private-cell').length){
+      return;
+    }
+
+    const normalizeText=value=>String(value||'')
+      .replace(/\u00a0/g,' ')
+      .replace(/\s+/g,' ')
+      .trim();
+
+    const leafForField=field=>{
+      const selectors='div,p,li,span,strong,b';
+      const candidates=[...scroll.querySelectorAll(selectors)].filter(el=>{
+        if(el.closest('.modal-head,.tasky-v263-details-grid,.hr721-private-grid'))return false;
+        if(el.closest('.tasky-v263-timeline,.hr72-timeline'))return false;
+
+        const text=normalizeText(el.textContent);
+        if(!text)return false;
+
+        return text.toLowerCase().includes(field.ar.toLowerCase()) ||
+          text.toLowerCase().includes(field.en.toLowerCase());
+      });
+
+      /* Prefer the smallest real row, not a large container that contains all data. */
+      candidates.sort((a,b)=>{
+        const ac=a.querySelectorAll('*').length;
+        const bc=b.querySelectorAll('*').length;
+        if(ac!==bc)return ac-bc;
+        return normalizeText(a.textContent).length-normalizeText(b.textContent).length;
+      });
+
+      return candidates[0]||null;
+    };
+
+    const rows=DETAIL_FIELDS_V263.map(field=>{
+      const el=leafForField(field);
+      let value='—';
+
+      if(el){
+        const text=normalizeText(el.textContent);
+        value=text
+          .replace(field.ar,'')
+          .replace(new RegExp(field.en,'ig'),'')
+          .replace(/^[\s:：\-–—|]+|[\s:：\-–—|]+$/g,'')
+          .trim() || '—';
+      }
+
+      return {
+        field,
+        el,
+        value,
+        label:(window.lang==='en'?field.en:field.ar)
+      };
+    });
+
+    /* Need at least three independently found rows to avoid touching unrelated modals. */
+    if(rows.filter(row=>row.el).length<3)return;
 
     const grid=document.createElement('div');
-    grid.className='tasky-v263-details-grid';
-    grid.innerHTML=DETAIL_FIELDS_V263.map(field=>{
-      const value=extractDetailValueV263(source,field);
-      const label=(window.lang==='en'?field.en:field.ar);
-      return `<div class="tasky-v263-detail-card${value==='—'?' is-empty':''}"><span>${escapeHtml(label)}</span><b>${escapeHtml(value)}</b></div>`;
-    }).join('');
+    grid.className='tasky-v263-details-grid tasky-v270-details-grid';
+    grid.innerHTML=rows.map(row=>
+      `<div class="tasky-v263-detail-card${row.value==='—'?' is-empty':''}">
+        <span>${escapeHtml(row.label)}</span>
+        <b>${escapeHtml(row.value)}</b>
+      </div>`
+    ).join('');
 
     const timeline=[...scroll.querySelectorAll('div,section')].find(el=>
       /Employee\s*360°?\s*Timeline/i.test(String(el.textContent||''))
@@ -20982,7 +21040,61 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       scroll.appendChild(grid);
     }
 
-    source.classList.add('tasky-v263-loose-details-source');
+    /* Hide ONLY the individual loose rows we actually consumed. */
+    rows.forEach(row=>{
+      if(row.el)row.el.classList.add('tasky-v270-loose-detail-row');
+    });
+  }
+
+  function normalizeEmployeePrivacyV270(scroll){
+    if(!scroll)return;
+
+    /* Find the actual permission sentence shown in the Employee 360 modal. */
+    const privacyCandidates=[...scroll.querySelectorAll('div,p,span')].filter(el=>{
+      if(el.closest('.modal-head,.tasky-v263-details-grid'))return false;
+      const text=String(el.textContent||'').replace(/\s+/g,' ').trim();
+      return /مخول لرؤية البيانات|البيانات الخاصة لهذا الملف|بيانات موظف حساسة|authorized to view|sensitive employee/i.test(text);
+    });
+
+    privacyCandidates.sort((a,b)=>{
+      const ac=a.querySelectorAll('*').length;
+      const bc=b.querySelectorAll('*').length;
+      if(ac!==bc)return ac-bc;
+      return String(a.textContent||'').length-String(b.textContent||'').length;
+    });
+
+    const privacy=privacyCandidates[0]||null;
+    if(privacy)privacy.classList.add('tasky-v270-privacy-note');
+
+    /* The production screenshot shows a large standalone lock above the text.
+       Hide only the standalone lock container; do not touch normal 16–24px icons. */
+    const svgCandidates=[...scroll.querySelectorAll('svg')].filter(svg=>{
+      if(svg.closest('.modal-head,.tasky-v263-details-grid,.hr72-card'))return false;
+
+      const use=svg.querySelector('use');
+      const href=use?.getAttribute('href')||use?.getAttribute('xlink:href')||'';
+      if(/lock/i.test(href))return true;
+
+      const rect=svg.getBoundingClientRect();
+      return rect.width>=64||rect.height>=64;
+    });
+
+    const lockSvg=svgCandidates[0]||null;
+    if(lockSvg){
+      let holder=lockSvg.parentElement;
+      while(
+        holder &&
+        holder!==scroll &&
+        holder.children.length===1 &&
+        !holder.classList.contains('hr72-card')
+      ){
+        const parent=holder.parentElement;
+        if(!parent||parent===scroll)break;
+        if(String(parent.textContent||'').trim())break;
+        holder=parent;
+      }
+      (holder||lockSvg).classList.add('tasky-v270-large-lock-hide');
+    }
   }
 
   function wrapScrollableBodyV263(modal){
@@ -21026,6 +21138,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const scroll=wrapScrollableBodyV263(modal);
     if(!scroll)return;
 
+    normalizeEmployeePrivacyV270(scroll);
     buildDetailsGridV263(modal,scroll);
 
     /* Old transformed detail grids are hidden; V263 owns this layout. */
@@ -21080,7 +21193,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const modal=document.getElementById('addModalBody');
     const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V269',
+      build:'V270',
       hr_transaction:window.__taskyHrRenderTxnV263===true,
       hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
       hr_commit_count:hrCommitCountV263,
@@ -21592,7 +21705,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       .sort((a,b)=>a.order-b.order);
 
     return {
-      build:'V269',
+      build:'V270',
       modal:{
         stack,
         sync_count:modalManagerV265.syncCount,
@@ -21614,7 +21727,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLATFORM_QA_V265=true;
-  window.TASKY_BUILD='V269';
+  window.TASKY_BUILD='V270';
   console.info('Tasky V265 — stable modal stack + Page Unresponsive fix ready');
 })();
 </script>
@@ -21624,7 +21737,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV266=function(){
     return {
-      build:'V269',
+      build:'V270',
       sdk_version:'2.111.0',
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
       sdk_ready:!!window.supabase?.createClient,
@@ -21632,7 +21745,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_BOOTSTRAP_SDK_FIX_V266=true;
-  window.TASKY_BUILD='V269';
+  window.TASKY_BUILD='V270';
   console.info('Tasky V266 — valid Supabase SDK bootstrap ready');
 })();
 </script>
@@ -22082,7 +22195,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const emp=document.getElementById('addModalBody');
     const credits=document.getElementById('eventCreditModalOverlayV269');
     return {
-      build:'V269',
+      build:'V270',
       base:'V266',
       employee360_v263_active:emp?.classList.contains('tasky-employee360-v263')||false,
       employee360_scroll_wrapper:!!emp?.querySelector('.tasky-v263-employee360-scroll'),
@@ -22095,8 +22208,136 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_V269_STABLE_EMPLOYEE_CREDIT=true;
-  window.TASKY_BUILD='V269';
+  window.TASKY_BUILD='V270';
   console.info('Tasky V269 — V266 stable base + Employee360 CSS + dedicated credit modal');
+})();
+</script>
+
+
+<script id="tasky-v270-employee360-direct-fix-js" type="text/tasky-deferred-v247">
+(function(){
+  if(!document.getElementById('tasky-v270-employee360-direct-fix-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v270-employee360-direct-fix-css';
+    style.textContent=`
+      /* V270 is deliberately scoped to the existing V263 Employee 360 DOM. */
+      #addModalBody.tasky-employee360-v263{
+        width:min(920px,calc(100vw - 28px))!important;
+        max-width:920px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263>.modal-head{
+        min-height:70px!important;
+        padding:9px 15px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263>.tasky-v263-employee360-scroll{
+        padding:12px 15px 18px!important;
+      }
+
+      /* Remove the giant standalone lock from the current production markup. */
+      #addModalBody.tasky-employee360-v263 .tasky-v270-large-lock-hide{
+        display:none!important;
+      }
+
+      /* Compact permission notice. */
+      #addModalBody.tasky-employee360-v263 .tasky-v270-privacy-note{
+        display:block!important;
+        margin:0 0 11px!important;
+        padding:9px 11px!important;
+        border:1px solid color-mix(in srgb,var(--amber,#b9851b) 27%,var(--border))!important;
+        border-radius:12px!important;
+        background:color-mix(in srgb,var(--amber-tint,#fff4dd) 60%,var(--card))!important;
+        color:var(--ink-soft)!important;
+        font-size:9.5px!important;
+        line-height:1.55!important;
+      }
+
+      /* Old loose text rows are replaced by the V270 cards. */
+      #addModalBody.tasky-employee360-v263 .tasky-v270-loose-detail-row{
+        display:none!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v270-details-grid,
+      #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid,
+      #addModalBody.tasky-employee360-v263 .hr721-private-grid{
+        display:grid!important;
+        grid-template-columns:repeat(3,minmax(0,1fr))!important;
+        gap:8px!important;
+        margin:0 0 11px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-detail-card,
+      #addModalBody.tasky-employee360-v263 .hr721-private-cell{
+        min-height:64px!important;
+        padding:9px 10px!important;
+        border-radius:11px!important;
+      }
+
+      /* Keep the three primary cards compact; remove the large vertical gap. */
+      #addModalBody.tasky-employee360-v263 .hr72-grid3,
+      #addModalBody.tasky-employee360-v263 .hr72-info-grid,
+      #addModalBody.tasky-employee360-v263 .employee360-grid{
+        gap:8px!important;
+        margin-bottom:9px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .hr72-card{
+        min-height:72px!important;
+        padding:10px 11px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .tasky-v263-timeline,
+      #addModalBody.tasky-employee360-v263 .hr72-panel{
+        margin-top:0!important;
+        padding:11px!important;
+      }
+
+      #addModalBody.tasky-employee360-v263 .hr72-panel-head{
+        margin-bottom:8px!important;
+      }
+
+      @media(max-width:820px){
+        #addModalBody.tasky-employee360-v263 .tasky-v270-details-grid,
+        #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid,
+        #addModalBody.tasky-employee360-v263 .hr721-private-grid{
+          grid-template-columns:repeat(2,minmax(0,1fr))!important;
+        }
+      }
+
+      @media(max-width:700px){
+        #addModalBody.tasky-employee360-v263{
+          width:calc(100vw - 12px)!important;
+          max-width:calc(100vw - 12px)!important;
+        }
+
+        #addModalBody.tasky-employee360-v263 .tasky-v270-details-grid,
+        #addModalBody.tasky-employee360-v263 .tasky-v263-details-grid,
+        #addModalBody.tasky-employee360-v263 .hr721-private-grid{
+          grid-template-columns:1fr!important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.taskyEmployee360AuditV270=function(){
+    const body=document.getElementById('addModalBody');
+    const scroll=body?.querySelector('.tasky-v263-employee360-scroll');
+    return {
+      build:'V270',
+      active:body?.classList.contains('tasky-employee360-v263')||false,
+      giant_lock_hidden:!!body?.querySelector('.tasky-v270-large-lock-hide'),
+      privacy_note:!!body?.querySelector('.tasky-v270-privacy-note'),
+      detail_cards:body?.querySelectorAll('.tasky-v270-details-grid .tasky-v263-detail-card').length||0,
+      loose_rows_hidden:body?.querySelectorAll('.tasky-v270-loose-detail-row').length||0,
+      can_scroll:!!scroll&&scroll.scrollHeight>scroll.clientHeight
+    };
+  };
+
+  window.TASKY_EMPLOYEE360_DIRECT_FIX_V270=true;
+  window.TASKY_BUILD='V270';
+  console.info('Tasky V270 — Employee 360 direct V263 fix ready');
 })();
 </script>
 
