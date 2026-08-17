@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV274" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V274</div>
+    <div id="taskyBootBuildV275" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V275</div>
   </div>
 </div>
 
@@ -3816,7 +3816,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V274',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V275',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3900,9 +3900,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V274',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V275',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V274'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V275'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10983,7 +10983,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V274',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V275',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -19012,6 +19012,981 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
   }
 
+
+  /* ==========================================================
+     V275 EMBEDDED SUPABASE COMPATIBILITY CLIENT
+     ----------------------------------------------------------
+     This is a browser-native fallback for environments where CDN
+     script delivery is blocked or too slow. It implements the
+     Supabase API surface Tasky actually uses:
+       auth, PostgREST queries, RPC, Storage, Functions, Channels.
+     It is used only if the official SDK does not become ready quickly.
+     ========================================================== */
+
+  function taskyCreateSupabaseCompatV275(supabaseUrl,publishableKey,clientOptions={}){
+    const base=String(supabaseUrl||'').replace(/\/+$/,'');
+    const nativeFetch=
+      clientOptions?.global?.fetch ||
+      (typeof TASKY_NATIVE_FETCH_V273==='function'
+        ? TASKY_NATIVE_FETCH_V273
+        : window.fetch.bind(window));
+
+    const projectRef=(()=>{
+      try{return new URL(base).hostname.split('.')[0]||'tasky'}catch(_){return 'tasky'}
+    })();
+
+    const storageKey=`sb-${projectRef}-auth-token`;
+    const listeners=new Set();
+    const channels=new Set();
+
+    const compatError=(message,status=0,extra={})=>{
+      const err=new Error(message||'Supabase request failed');
+      err.status=status;
+      Object.assign(err,extra||{});
+      return err;
+    };
+
+    const parseStored=()=>{
+      try{
+        const raw=localStorage.getItem(storageKey);
+        if(!raw)return null;
+        const parsed=JSON.parse(raw);
+        if(parsed?.currentSession)return parsed.currentSession;
+        return parsed?.access_token?parsed:null;
+      }catch(_){
+        return null;
+      }
+    };
+
+    let session=parseStored();
+
+    const storeSession=(next)=>{
+      session=next||null;
+      try{
+        if(session)localStorage.setItem(storageKey,JSON.stringify(session));
+        else localStorage.removeItem(storageKey);
+      }catch(_){}
+    };
+
+    const notify=(event,nextSession=session)=>{
+      for(const cb of [...listeners]){
+        try{cb(event,nextSession)}catch(err){console.warn('Tasky V275 auth listener',err)}
+      }
+    };
+
+    const jsonOrText=async(response)=>{
+      const text=await response.text();
+      if(!text)return null;
+      try{return JSON.parse(text)}catch(_){return text}
+    };
+
+    const normalizeError=(response,payload)=>{
+      if(response?.ok)return null;
+      const obj=(payload&&typeof payload==='object')?payload:{};
+      return compatError(
+        obj.message||obj.msg||obj.error_description||obj.error||String(payload||response?.statusText||'Request failed'),
+        response?.status||0,
+        {
+          code:obj.code||obj.error_code||null,
+          details:obj.details||null,
+          hint:obj.hint||null
+        }
+      );
+    };
+
+    const sessionAuthHeader=()=>{
+      const token=session?.access_token;
+      return token?{'Authorization':`Bearer ${token}`}:{};
+    };
+
+    const baseHeaders=(extra={})=>({
+      'apikey':publishableKey,
+      ...sessionAuthHeader(),
+      ...extra
+    });
+
+    const authFetch=async(path,options={},retryRefresh=true)=>{
+      let response;
+      try{
+        response=await nativeFetch(`${base}/auth/v1${path}`,{
+          ...options,
+          headers:baseHeaders(options.headers||{}),
+          cache:'no-store'
+        });
+      }catch(err){
+        return {response:null,payload:null,error:compatError(err?.message||String(err),0,{cause:err})};
+      }
+
+      const payload=await jsonOrText(response);
+
+      if(response.status===401&&retryRefresh&&session?.refresh_token){
+        const refreshed=await refreshSession();
+        if(!refreshed.error){
+          return authFetch(path,options,false);
+        }
+      }
+
+      return {response,payload,error:normalizeError(response,payload)};
+    };
+
+    const normalizeSessionPayload=(payload)=>{
+      if(!payload||typeof payload!=='object')return null;
+
+      const now=Math.floor(Date.now()/1000);
+      const next={
+        ...payload,
+        access_token:payload.access_token,
+        refresh_token:payload.refresh_token||session?.refresh_token,
+        token_type:payload.token_type||'bearer',
+        expires_in:payload.expires_in,
+        expires_at:payload.expires_at ||
+          (payload.expires_in?now+Number(payload.expires_in):session?.expires_at),
+        user:payload.user||session?.user||null
+      };
+
+      if(!next.access_token)return null;
+      return next;
+    };
+
+    const refreshSession=async()=>{
+      if(!session?.refresh_token){
+        return {data:{session:null,user:null},error:compatError('No refresh token',401)};
+      }
+
+      let response;
+      try{
+        response=await nativeFetch(`${base}/auth/v1/token?grant_type=refresh_token`,{
+          method:'POST',
+          headers:{
+            'apikey':publishableKey,
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({refresh_token:session.refresh_token}),
+          cache:'no-store'
+        });
+      }catch(err){
+        return {data:{session},error:compatError(err?.message||String(err),0,{cause:err})};
+      }
+
+      const payload=await jsonOrText(response);
+      const error=normalizeError(response,payload);
+
+      if(error){
+        return {data:{session},error};
+      }
+
+      const next=normalizeSessionPayload(payload);
+      if(next){
+        storeSession(next);
+        notify('TOKEN_REFRESHED',next);
+      }
+
+      return {data:{session:next,user:next?.user||null},error:null};
+    };
+
+    const ensureFreshSession=async()=>{
+      if(!session)return null;
+
+      const expiresAt=Number(session.expires_at||0);
+      if(expiresAt&&expiresAt-Math.floor(Date.now()/1000)<30&&session.refresh_token){
+        const refreshed=await refreshSession();
+        if(!refreshed.error)return refreshed.data.session;
+      }
+
+      return session;
+    };
+
+    const auth={
+      async getSession(){
+        await ensureFreshSession();
+        return {data:{session},error:null};
+      },
+
+      async getUser(jwt){
+        const token=jwt||session?.access_token;
+        if(!token)return {data:{user:null},error:compatError('Auth session missing',401)};
+
+        let response;
+        try{
+          response=await nativeFetch(`${base}/auth/v1/user`,{
+            method:'GET',
+            headers:{
+              'apikey':publishableKey,
+              'Authorization':`Bearer ${token}`
+            },
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:{user:null},error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const payload=await jsonOrText(response);
+        const error=normalizeError(response,payload);
+        if(error)return {data:{user:null},error};
+
+        if(session&&payload){
+          session={...session,user:payload};
+          storeSession(session);
+        }
+
+        return {data:{user:payload||null},error:null};
+      },
+
+      async signInWithPassword({email,password}={}){
+        let response;
+        try{
+          response=await nativeFetch(`${base}/auth/v1/token?grant_type=password`,{
+            method:'POST',
+            headers:{
+              'apikey':publishableKey,
+              'Content-Type':'application/json'
+            },
+            body:JSON.stringify({email,password}),
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:{session:null,user:null},error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const payload=await jsonOrText(response);
+        const error=normalizeError(response,payload);
+        if(error)return {data:{session:null,user:null},error};
+
+        const next=normalizeSessionPayload(payload);
+        if(next){
+          storeSession(next);
+          notify('SIGNED_IN',next);
+        }
+
+        return {
+          data:{session:next,user:next?.user||payload?.user||null},
+          error:null
+        };
+      },
+
+      async signUp({email,password,options={}}={}){
+        const query=new URLSearchParams();
+        if(options?.emailRedirectTo)query.set('redirect_to',options.emailRedirectTo);
+
+        const body={email,password};
+        if(options?.data)body.data=options.data;
+        if(options?.captchaToken)body.gotrue_meta_security={captcha_token:options.captchaToken};
+
+        let response;
+        try{
+          response=await nativeFetch(`${base}/auth/v1/signup${query.toString()?`?${query}`:''}`,{
+            method:'POST',
+            headers:{
+              'apikey':publishableKey,
+              'Content-Type':'application/json'
+            },
+            body:JSON.stringify(body),
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:{session:null,user:null},error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const payload=await jsonOrText(response);
+        const error=normalizeError(response,payload);
+        if(error)return {data:{session:null,user:null},error};
+
+        const next=normalizeSessionPayload(payload);
+        if(next){
+          storeSession(next);
+          notify('SIGNED_IN',next);
+        }
+
+        return {
+          data:{
+            session:next,
+            user:payload?.user||next?.user||payload||null
+          },
+          error:null
+        };
+      },
+
+      async setSession(tokens={}){
+        if(!tokens?.access_token||!tokens?.refresh_token){
+          return {data:{session:null,user:null},error:compatError('Invalid session tokens',400)};
+        }
+
+        let next=normalizeSessionPayload(tokens)||{
+          ...tokens,
+          user:session?.user||null
+        };
+
+        storeSession(next);
+
+        if(!next.user){
+          const userResult=await auth.getUser(next.access_token);
+          if(!userResult.error&&userResult.data.user){
+            next={...next,user:userResult.data.user};
+            storeSession(next);
+          }
+        }
+
+        notify('SIGNED_IN',next);
+        return {data:{session:next,user:next.user||null},error:null};
+      },
+
+      async updateUser(attributes={},options={}){
+        if(!session?.access_token){
+          return {data:{user:null},error:compatError('Auth session missing',401)};
+        }
+
+        const query=new URLSearchParams();
+        if(options?.emailRedirectTo)query.set('redirect_to',options.emailRedirectTo);
+
+        let response;
+        try{
+          response=await nativeFetch(`${base}/auth/v1/user${query.toString()?`?${query}`:''}`,{
+            method:'PUT',
+            headers:{
+              'apikey':publishableKey,
+              'Authorization':`Bearer ${session.access_token}`,
+              'Content-Type':'application/json'
+            },
+            body:JSON.stringify(attributes||{}),
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:{user:null},error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const payload=await jsonOrText(response);
+        const error=normalizeError(response,payload);
+        if(error)return {data:{user:null},error};
+
+        session={...session,user:payload||session.user};
+        storeSession(session);
+        notify('USER_UPDATED',session);
+
+        return {data:{user:payload||null},error:null};
+      },
+
+      async resetPasswordForEmail(email,options={}){
+        const query=new URLSearchParams();
+        if(options?.redirectTo)query.set('redirect_to',options.redirectTo);
+
+        let response;
+        try{
+          response=await nativeFetch(`${base}/auth/v1/recover${query.toString()?`?${query}`:''}`,{
+            method:'POST',
+            headers:{
+              'apikey':publishableKey,
+              'Content-Type':'application/json'
+            },
+            body:JSON.stringify({email}),
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const payload=await jsonOrText(response);
+        return {
+          data:response.ok?payload:null,
+          error:normalizeError(response,payload)
+        };
+      },
+
+      async signOut(){
+        const token=session?.access_token;
+
+        if(token){
+          try{
+            await nativeFetch(`${base}/auth/v1/logout`,{
+              method:'POST',
+              headers:{
+                'apikey':publishableKey,
+                'Authorization':`Bearer ${token}`
+              },
+              cache:'no-store'
+            });
+          }catch(_){}
+        }
+
+        storeSession(null);
+        notify('SIGNED_OUT',null);
+        return {error:null};
+      },
+
+      onAuthStateChange(callback){
+        listeners.add(callback);
+
+        queueMicrotask(()=>{
+          try{callback('INITIAL_SESSION',session)}catch(_){}
+        });
+
+        return {
+          data:{
+            subscription:{
+              unsubscribe(){listeners.delete(callback)}
+            }
+          }
+        };
+      },
+
+      refreshSession,
+      dispose(){}
+    };
+
+    const encodeFilterValue=(value)=>{
+      if(value===null)return 'null';
+      if(value===true)return 'true';
+      if(value===false)return 'false';
+      if(Array.isArray(value))return `(${value.map(v=>String(v).replace(/,/g,'\\,')).join(',')})`;
+      return String(value);
+    };
+
+    class QueryBuilder{
+      constructor(table){
+        this.table=table;
+        this.method='GET';
+        this.params=new URLSearchParams();
+        this.body=undefined;
+        this.prefer=[];
+        this.singleMode=null;
+        this.orderParts=[];
+        this.returnRepresentation=false;
+      }
+
+      cloneHeaders(){
+        const headers=baseHeaders({
+          'Accept':'application/json'
+        });
+
+        if(this.body!==undefined)headers['Content-Type']='application/json';
+
+        if(this.returnRepresentation&&!this.prefer.includes('return=representation')){
+          this.prefer.push('return=representation');
+        }
+
+        if(this.prefer.length)headers['Prefer']=this.prefer.join(',');
+
+        return headers;
+      }
+
+      select(columns='*'){
+        this.params.set('select',columns||'*');
+
+        if(this.method!=='GET'&&this.method!=='HEAD'){
+          this.returnRepresentation=true;
+        }
+
+        return this;
+      }
+
+      insert(values,options={}){
+        this.method='POST';
+        this.body=values;
+        this.returnRepresentation=false;
+
+        if(options?.defaultToNull===false){
+          this.prefer.push('missing=default');
+        }
+
+        return this;
+      }
+
+      upsert(values,options={}){
+        this.method='POST';
+        this.body=values;
+        this.returnRepresentation=false;
+        this.prefer.push(options?.ignoreDuplicates?'resolution=ignore-duplicates':'resolution=merge-duplicates');
+
+        if(options?.onConflict)this.params.set('on_conflict',options.onConflict);
+        if(options?.defaultToNull===false)this.prefer.push('missing=default');
+
+        return this;
+      }
+
+      update(values){
+        this.method='PATCH';
+        this.body=values;
+        this.returnRepresentation=false;
+        return this;
+      }
+
+      delete(){
+        this.method='DELETE';
+        this.body=undefined;
+        this.returnRepresentation=false;
+        return this;
+      }
+
+      eq(column,value){
+        this.params.append(column,`eq.${encodeFilterValue(value)}`);
+        return this;
+      }
+
+      filter(column,operator,value){
+        this.params.append(column,`${operator}.${encodeFilterValue(value)}`);
+        return this;
+      }
+
+      is(column,value){
+        this.params.append(column,`is.${encodeFilterValue(value)}`);
+        return this;
+      }
+
+      in(column,values){
+        const list=(values||[]).map(v=>{
+          const s=String(v);
+          return /[,"()]/.test(s)?`"${s.replace(/"/g,'\\"')}"`:s;
+        }).join(',');
+        this.params.append(column,`in.(${list})`);
+        return this;
+      }
+
+      contains(column,value){
+        let encoded;
+        if(Array.isArray(value)){
+          encoded=`{${value.map(v=>String(v).replace(/,/g,'\\,')).join(',')}}`;
+        }else if(value&&typeof value==='object'){
+          encoded=JSON.stringify(value);
+        }else{
+          encoded=String(value);
+        }
+        this.params.append(column,`cs.${encoded}`);
+        return this;
+      }
+
+      match(values={}){
+        Object.entries(values||{}).forEach(([key,value])=>this.eq(key,value));
+        return this;
+      }
+
+      order(column,options={}){
+        const direction=options?.ascending===false?'desc':'asc';
+        let part=`${column}.${direction}`;
+        if(options?.nullsFirst===true)part+='.nullsfirst';
+        if(options?.nullsFirst===false)part+='.nullslast';
+        this.orderParts.push(part);
+        return this;
+      }
+
+      limit(value){
+        this.params.set('limit',String(value));
+        return this;
+      }
+
+      single(){
+        this.singleMode='single';
+        return this;
+      }
+
+      maybeSingle(){
+        this.singleMode='maybe';
+        return this;
+      }
+
+      async execute(){
+        await ensureFreshSession();
+
+        const params=new URLSearchParams(this.params);
+        if(this.orderParts.length)params.set('order',this.orderParts.join(','));
+
+        const url=`${base}/rest/v1/${encodeURIComponent(this.table)}${params.toString()?`?${params}`:''}`;
+        const headers=this.cloneHeaders();
+
+        if(this.singleMode==='single'){
+          headers['Accept']='application/vnd.pgrst.object+json';
+        }
+
+        const run=async(retry=true)=>{
+          let response;
+          try{
+            response=await nativeFetch(url,{
+              method:this.method,
+              headers,
+              body:this.body===undefined?undefined:JSON.stringify(this.body),
+              cache:'no-store'
+            });
+          }catch(err){
+            return {
+              data:null,
+              error:compatError(err?.message||String(err),0,{cause:err}),
+              status:0,
+              statusText:''
+            };
+          }
+
+          if(response.status===401&&retry&&session?.refresh_token){
+            const refreshed=await refreshSession();
+            if(!refreshed.error){
+              const freshHeaders=this.cloneHeaders();
+              Object.assign(headers,freshHeaders);
+              return run(false);
+            }
+          }
+
+          let payload=await jsonOrText(response);
+
+          if(this.singleMode==='maybe'&&response.ok){
+            if(Array.isArray(payload)){
+              if(payload.length===0)payload=null;
+              else if(payload.length===1)payload=payload[0];
+              else{
+                return {
+                  data:null,
+                  error:compatError('JSON object requested, multiple rows returned',406),
+                  status:406,
+                  statusText:'Not Acceptable'
+                };
+              }
+            }
+          }
+
+          const error=normalizeError(response,payload);
+          return {
+            data:error?null:payload,
+            error,
+            status:response.status,
+            statusText:response.statusText
+          };
+        };
+
+        return run(true);
+      }
+
+      then(resolve,reject){return this.execute().then(resolve,reject)}
+      catch(reject){return this.execute().catch(reject)}
+      finally(callback){return this.execute().finally(callback)}
+    }
+
+    const rpc=async(name,args={})=>{
+      await ensureFreshSession();
+
+      let response;
+      try{
+        response=await nativeFetch(`${base}/rest/v1/rpc/${encodeURIComponent(name)}`,{
+          method:'POST',
+          headers:baseHeaders({
+            'Content-Type':'application/json',
+            'Accept':'application/json'
+          }),
+          body:JSON.stringify(args||{}),
+          cache:'no-store'
+        });
+      }catch(err){
+        return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+      }
+
+      const payload=await jsonOrText(response);
+      return {
+        data:response.ok?payload:null,
+        error:normalizeError(response,payload)
+      };
+    };
+
+    const storage={
+      from(bucket){
+        const bucketName=String(bucket);
+
+        const objectUrl=(path,kind='object')=>{
+          const safePath=String(path||'')
+            .split('/')
+            .map(part=>encodeURIComponent(part))
+            .join('/');
+          return `${base}/storage/v1/${kind}/${encodeURIComponent(bucketName)}/${safePath}`;
+        };
+
+        return {
+          async upload(path,file,options={}){
+            await ensureFreshSession();
+
+            const headers=baseHeaders({
+              'Content-Type':options?.contentType||file?.type||'application/octet-stream',
+              'x-upsert':options?.upsert?'true':'false'
+            });
+
+            let response;
+            try{
+              response=await nativeFetch(objectUrl(path),{
+                method:'POST',
+                headers,
+                body:file,
+                cache:'no-store'
+              });
+            }catch(err){
+              return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+            }
+
+            const payload=await jsonOrText(response);
+            return {
+              data:response.ok?payload:null,
+              error:normalizeError(response,payload)
+            };
+          },
+
+          async remove(paths=[]){
+            await ensureFreshSession();
+
+            let response;
+            try{
+              response=await nativeFetch(`${base}/storage/v1/object/${encodeURIComponent(bucketName)}`,{
+                method:'DELETE',
+                headers:baseHeaders({'Content-Type':'application/json'}),
+                body:JSON.stringify({prefixes:paths||[]}),
+                cache:'no-store'
+              });
+            }catch(err){
+              return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+            }
+
+            const payload=await jsonOrText(response);
+            return {
+              data:response.ok?payload:null,
+              error:normalizeError(response,payload)
+            };
+          },
+
+          async download(path){
+            await ensureFreshSession();
+
+            let response;
+            try{
+              response=await nativeFetch(objectUrl(path),{
+                method:'GET',
+                headers:baseHeaders(),
+                cache:'no-store'
+              });
+            }catch(err){
+              return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+            }
+
+            if(!response.ok){
+              const payload=await jsonOrText(response);
+              return {data:null,error:normalizeError(response,payload)};
+            }
+
+            return {data:await response.blob(),error:null};
+          },
+
+          async createSignedUrl(path,expiresIn=60){
+            await ensureFreshSession();
+
+            let response;
+            try{
+              response=await nativeFetch(objectUrl(path,'object/sign'),{
+                method:'POST',
+                headers:baseHeaders({'Content-Type':'application/json'}),
+                body:JSON.stringify({expiresIn:Number(expiresIn||60)}),
+                cache:'no-store'
+              });
+            }catch(err){
+              return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+            }
+
+            const payload=await jsonOrText(response);
+            const error=normalizeError(response,payload);
+
+            if(error)return {data:null,error};
+
+            const signed=
+              payload?.signedUrl ||
+              payload?.signedURL ||
+              payload?.signed_url ||
+              null;
+
+            return {
+              data:signed?{...payload,signedUrl:signed}:payload,
+              error:null
+            };
+          },
+
+          getPublicUrl(path){
+            const safePath=String(path||'')
+              .split('/')
+              .map(part=>encodeURIComponent(part))
+              .join('/');
+
+            return {
+              data:{
+                publicUrl:`${base}/storage/v1/object/public/${encodeURIComponent(bucketName)}/${safePath}`
+              }
+            };
+          }
+        };
+      }
+    };
+
+    const functions={
+      async invoke(name,options={}){
+        await ensureFreshSession();
+
+        const body=options?.body;
+        const headers=baseHeaders({
+          ...(options?.headers||{})
+        });
+
+        let requestBody=body;
+        if(body!==undefined &&
+           !(body instanceof Blob) &&
+           !(body instanceof ArrayBuffer) &&
+           !(body instanceof FormData) &&
+           typeof body!=='string'){
+          headers['Content-Type']='application/json';
+          requestBody=JSON.stringify(body);
+        }
+
+        let response;
+        try{
+          response=await nativeFetch(`${base}/functions/v1/${encodeURIComponent(name)}`,{
+            method:options?.method||'POST',
+            headers,
+            body:requestBody,
+            cache:'no-store'
+          });
+        }catch(err){
+          return {data:null,error:compatError(err?.message||String(err),0,{cause:err})};
+        }
+
+        const contentType=response.headers.get('content-type')||'';
+        let payload;
+
+        try{
+          if(contentType.includes('application/json'))payload=await response.json();
+          else payload=await response.text();
+        }catch(_){
+          payload=null;
+        }
+
+        return {
+          data:response.ok?payload:null,
+          error:normalizeError(response,payload)
+        };
+      }
+    };
+
+    class CompatChannel{
+      constructor(name,options={}){
+        this.name=name;
+        this.options=options;
+        this.bindings=[];
+        this.interval=null;
+        this.closed=false;
+        this.broadcast=null;
+      }
+
+      on(type,filter,callback){
+        this.bindings.push({type,filter:filter||{},callback});
+
+        if(type==='broadcast'&&typeof BroadcastChannel!=='undefined'&&!this.broadcast){
+          try{
+            this.broadcast=new BroadcastChannel(`tasky-v275-${this.name}`);
+            this.broadcast.onmessage=(event)=>{
+              const message=event?.data||{};
+              for(const binding of this.bindings){
+                if(binding.type!=='broadcast')continue;
+                if(binding.filter?.event&&binding.filter.event!==message.event)continue;
+                try{binding.callback({payload:message.payload||{}})}catch(_){}
+              }
+            };
+          }catch(_){}
+        }
+
+        return this;
+      }
+
+      subscribe(callback){
+        channels.add(this);
+        this.closed=false;
+
+        if(typeof callback==='function'){
+          queueMicrotask(()=>{try{callback('SUBSCRIBED')}catch(_){}});
+        }
+
+        const postgresBindings=this.bindings.filter(x=>x.type==='postgres_changes');
+
+        if(postgresBindings.length&&!this.interval){
+          /*
+            Degraded realtime fallback:
+            refresh callbacks every 12s so Tasky data still converges when
+            websocket SDK delivery is unavailable.
+          */
+          this.interval=setInterval(()=>{
+            if(this.closed)return;
+            for(const binding of postgresBindings){
+              try{
+                binding.callback({
+                  eventType:'UPDATE',
+                  schema:binding.filter?.schema||'public',
+                  table:binding.filter?.table||null,
+                  new:{},
+                  old:{}
+                });
+              }catch(_){}
+            }
+          },12000);
+        }
+
+        return this;
+      }
+
+      async send(message={}){
+        if(message?.type==='broadcast'&&this.broadcast){
+          try{
+            this.broadcast.postMessage({
+              event:message.event,
+              payload:message.payload||{}
+            });
+          }catch(_){}
+        }
+
+        return 'ok';
+      }
+
+      async unsubscribe(){
+        this.closed=true;
+        if(this.interval){
+          clearInterval(this.interval);
+          this.interval=null;
+        }
+        try{this.broadcast?.close?.()}catch(_){}
+        channels.delete(this);
+        return 'ok';
+      }
+    }
+
+    const client={
+      auth,
+      from(table){return new QueryBuilder(table)},
+      rpc,
+      storage,
+      functions,
+      channel(name,options={}){return new CompatChannel(name,options)},
+      async removeChannel(channel){
+        try{await channel?.unsubscribe?.()}catch(_){}
+        channels.delete(channel);
+        return 'ok';
+      },
+      async removeAllChannels(){
+        for(const channel of [...channels]){
+          try{await channel.unsubscribe()}catch(_){}
+        }
+        return [];
+      }
+    };
+
+    return client;
+  }
+
+  const taskyCompatNamespaceV275={
+    createClient:taskyCreateSupabaseCompatV275,
+    __taskyCompat:true
+  };
+
+  function taskyInstallSupabaseCompatV275(reason='sdk-unavailable'){
+    window.__taskySupabaseCompatActiveV275=true;
+    window.__taskySupabaseCompatReasonV275=reason;
+    window.supabase=taskyCompatNamespaceV275;
+    window.__taskySupabaseSdkSourceV247='embedded-compat-v275';
+    return true;
+  }
+
   function taskyLoadClassicSdkV274(url,sourceName,timeoutMs=12000){
     return new Promise((resolve)=>{
       const script=document.createElement('script');
@@ -19071,12 +20046,6 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       return true;
     }
 
-    /*
-      V274:
-      The previous loader tried CDN sources sequentially with 3.5s timeouts.
-      A slow/blocked first CDN could leave the customer staring at 9%.
-      Now three independent transports start together; first successful SDK wins.
-    */
     updateBoot(9,'جارٍ تحميل مكوّن الاتصال…','Loading connection component…');
 
     const jsdelivrUrl=
@@ -19085,47 +20054,50 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       `https://unpkg.com/@supabase/supabase-js@${SDK_VERSION}/dist/umd/supabase.js`;
 
     const attempts=[
-      taskyLoadClassicSdkV274(jsdelivrUrl,'jsdelivr-umd',12000),
-      taskyLoadClassicSdkV274(unpkgUrl,'unpkg-umd',12000),
-      taskyLoadEsmSdkV274(12000)
+      taskyLoadClassicSdkV274(jsdelivrUrl,'jsdelivr-umd',10000),
+      taskyLoadClassicSdkV274(unpkgUrl,'unpkg-umd',10000),
+      taskyLoadEsmSdkV274(10000)
     ];
 
-    const result=await new Promise(resolve=>{
+    const externalWinner=new Promise(resolve=>{
       let finished=0;
-      const failures=[];
 
       attempts.forEach(promise=>{
-        promise.then(item=>{
+        Promise.resolve(promise).then(item=>{
           if(item?.ok){
             resolve(item);
             return;
           }
 
-          failures.push(item);
           finished++;
-
-          if(finished===attempts.length){
-            resolve({ok:false,failures});
-          }
-        }).catch(err=>{
-          failures.push({ok:false,detail:err?.message||String(err)});
+          if(finished===attempts.length)resolve(null);
+        }).catch(()=>{
           finished++;
-
-          if(finished===attempts.length){
-            resolve({ok:false,failures});
-          }
+          if(finished===attempts.length)resolve(null);
         });
       });
     });
 
-    if(result?.ok&&window.supabase?.createClient){
+    /*
+      Critical V275 rule:
+      CDN delivery is an optimization, never a boot dependency.
+      If no official SDK source is ready in 2.5s, Tasky starts using
+      the embedded compatibility client instead of remaining at 9%.
+    */
+    const winner=await Promise.race([
+      externalWinner,
+      new Promise(resolve=>setTimeout(()=>resolve(null),2500))
+    ]);
+
+    if(winner?.ok&&window.supabase?.createClient){
+      window.__taskySupabaseCompatActiveV275=false;
       updateBoot(11,'تم تحميل الاتصال…','Connection component loaded…');
-      window.__taskySdkLoadFailuresV274=[];
       return true;
     }
 
-    window.__taskySdkLoadFailuresV274=result?.failures||[];
-    return false;
+    taskyInstallSupabaseCompatV275('external-sdk-not-ready-within-2500ms');
+    updateBoot(11,'تم تجهيز الاتصال المحلي…','Embedded connection ready…');
+    return true;
   }
 
   function activateApplicationScripts(){
@@ -19148,7 +20120,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V274';
+    window.TASKY_BUILD='V275';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -19171,11 +20143,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   */
   const watchdog=setTimeout(()=>{
     showFatal(
-      'تعذّر تحميل مكوّن الاتصال. جرّبت تاسكي ثلاثة مصادر اتصال بالتوازي ولم ينجح أي منها. حدّث الصفحة أو جرّب شبكة أخرى.',
-      'The connection component could not be loaded. Tasky tried three sources in parallel and none succeeded. Refresh or try another network.',
-      'V274 · SDK bootstrap'
+      'تعذّر تشغيل تاسكي بعد تجهيز الاتصال المحلي. حدّث الصفحة وأعد المحاولة.',
+      'Tasky could not start after preparing the embedded connection. Refresh and retry.',
+      'V275 · embedded bootstrap'
     );
-  },13500);
+  },9000);
 
   (async()=>{
     try{
@@ -19853,7 +20825,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V274',
+      build:'V275',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -19897,7 +20869,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V274',
+      build:'V275',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -20247,7 +21219,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V274',
+      build:'V275',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -20391,7 +21363,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V274',
+      build:'V275',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -20756,7 +21728,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V274',
+      build:'V275',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -21414,7 +22386,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const modal=document.getElementById('addModalBody');
     const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V274',
+      build:'V275',
       hr_transaction:window.__taskyHrRenderTxnV263===true,
       hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
       hr_commit_count:hrCommitCountV263,
@@ -21926,7 +22898,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       .sort((a,b)=>a.order-b.order);
 
     return {
-      build:'V274',
+      build:'V275',
       modal:{
         stack,
         sync_count:modalManagerV265.syncCount,
@@ -21948,7 +22920,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLATFORM_QA_V265=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
   console.info('Tasky V265 — stable modal stack + Page Unresponsive fix ready');
 })();
 </script>
@@ -21958,7 +22930,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV266=function(){
     return {
-      build:'V274',
+      build:'V275',
       sdk_version:'2.112.2',
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
       sdk_ready:!!window.supabase?.createClient,
@@ -21966,7 +22938,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_BOOTSTRAP_SDK_FIX_V266=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
   console.info('Tasky V266 — valid Supabase SDK bootstrap ready');
 })();
 </script>
@@ -22416,7 +23388,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const emp=document.getElementById('addModalBody');
     const credits=document.getElementById('eventCreditModalOverlayV269');
     return {
-      build:'V274',
+      build:'V275',
       base:'V266',
       employee360_v263_active:emp?.classList.contains('tasky-employee360-v263')||false,
       employee360_scroll_wrapper:!!emp?.querySelector('.tasky-v263-employee360-scroll'),
@@ -22429,7 +23401,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_V269_STABLE_EMPLOYEE_CREDIT=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
   console.info('Tasky V269 — V266 stable base + Employee360 CSS + dedicated credit modal');
 })();
 </script>
@@ -22546,7 +23518,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const body=document.getElementById('addModalBody');
     const scroll=body?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V274',
+      build:'V275',
       active:body?.classList.contains('tasky-employee360-v263')||false,
       giant_lock_hidden:!!body?.querySelector('.tasky-v270-large-lock-hide'),
       privacy_note:!!body?.querySelector('.tasky-v270-privacy-note'),
@@ -22557,7 +23529,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_EMPLOYEE360_DIRECT_FIX_V270=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
   console.info('Tasky V270 — Employee 360 direct V263 fix ready');
 })();
 </script>
@@ -22947,7 +23919,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const body=document.getElementById('addModalBody');
     const scroll=body?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V274',
+      build:'V275',
       active:body?.classList.contains('tasky-employee360-v263')||false,
       wide_modal:body?.getBoundingClientRect().width||0,
       close_inside:!!body?.querySelector(':scope>.modal-head .modal-close'),
@@ -22960,7 +23932,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_EMPLOYEE360_RESTORED_STYLE_V273=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
   console.info('Tasky V273 — restored wide Employee 360 style + V270 fixes');
 })();
 </script>
@@ -22969,7 +23941,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyStableAuditV273=async function(){
     return {
-      build:'V274',
+      build:'V275',
       sdk_version:TASKY_SUPABASE_SDK_V244,
       sdk_ready:!!window.supabase?.createClient,
       auth_connectivity:await taskyAuthConnectivityAuditV273(),
@@ -22979,7 +23951,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_AUTH_STABLE_V273=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
 })();
 </script>
 
@@ -22988,7 +23960,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV274=function(){
     return {
-      build:'V274',
+      build:'V275',
       sdk_version:'2.112.2',
       sdk_ready:!!window.supabase?.createClient,
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
@@ -22998,7 +23970,27 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_BOOTSTRAP_RACE_FIX_V274=true;
-  window.TASKY_BUILD='V274';
+  window.TASKY_BUILD='V275';
+})();
+</script>
+
+
+<script id="tasky-v275-sdk-independent-audit-js" type="text/tasky-deferred-v247">
+(function(){
+  window.taskyBootstrapAuditV275=function(){
+    return {
+      build:'V275',
+      sdk_version:'2.112.2',
+      sdk_ready:!!window.supabase?.createClient,
+      source:window.__taskySupabaseSdkSourceV247||null,
+      embedded_compat:!!window.__taskySupabaseCompatActiveV275,
+      compat_reason:window.__taskySupabaseCompatReasonV275||null,
+      boot_visible:!document.getElementById('taskyBootV83')?.classList.contains('hidden'),
+      auth_visible:getComputedStyle(document.getElementById('authScreen')).display!=='none'
+    };
+  };
+  window.TASKY_SDK_INDEPENDENT_BOOT_V275=true;
+  window.TASKY_BUILD='V275';
 })();
 </script>
 
