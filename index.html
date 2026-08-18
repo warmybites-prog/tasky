@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV302" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V302</div>
+    <div id="taskyBootBuildV303" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V303</div>
   </div>
 </div>
 
@@ -3499,29 +3499,58 @@ function taskyBootReopenV83(){
   root.classList.remove('hidden')
 }
 
-/* V244 EARLY STARTUP WATCHDOG
-   Defined in the core script so it still runs even if a later feature patch fails. */
+/* V303 — NON-DESTRUCTIVE STARTUP WATCHDOG
+   A slow workspace bootstrap is not an authentication failure.
+   The old V244 watchdog pushed valid sessions back to the login page after 12.5s. */
 (function taskyEarlyWatchdogV244(){
   const started=Date.now();
   const timer=setInterval(()=>{
     try{
       const boot=document.getElementById('taskyBootV83');
-      if(!boot||boot.classList.contains('hidden')||boot.style.display==='none'){clearInterval(timer);return}
+      if(!boot||boot.classList.contains('hidden')||boot.style.display==='none'){
+        clearInterval(timer);
+        return;
+      }
+
       const app=document.querySelector('.app');
-      if(app&&app.style.display!=='none'){taskyBootHideV83();clearInterval(timer);return}
+      if(app&&app.style.display!=='none'){
+        taskyBootHideV83();
+        clearInterval(timer);
+        return;
+      }
+
       if(Date.now()-started>12500){
+        /*
+          If a session exists, keep bootstrap ownership with checkSession().
+          Do not reinterpret a slow data request as a login failure.
+        */
+        let hasSessionHint=false;
+        try{
+          hasSessionHint=
+            !!currentUserId ||
+            !!window.taskyHasStoredSessionV284?.();
+        }catch(_){}
+
+        if(hasSessionHint){
+          taskyBootSetV83(
+            72,
+            'جارٍ استكمال تجهيز مساحة العمل…',
+            'Finishing workspace setup…'
+          );
+
+          /* Bound the watchdog itself; V303 stage timeouts own recovery. */
+          if(Date.now()-started>45000)clearInterval(timer);
+          return;
+        }
+
         clearInterval(timer);
         taskyBootHideV83();
+
         const auth=document.getElementById('authScreen');
-        if(auth){auth.style.display='flex';auth.style.visibility='visible'}
-        try{
-          taskyAuthShowErrorV751(
-            taskyBootLangV83(
-              'تعذّر إكمال بدء الجلسة. تم إيقاف شاشة التحميل تلقائيًا؛ سجّل الدخول من جديد.',
-              'Session startup could not complete. The loading screen was stopped automatically; sign in again.'
-            )
-          );
-        }catch(_){}
+        if(auth){
+          auth.style.display='flex';
+          auth.style.visibility='visible';
+        }
       }
     }catch(_){}
   },400);
@@ -4314,6 +4343,41 @@ async function startCommercialTrialV69(){
   taskyToast(lang==='ar'?`تم تفعيل التجربة المجانية لمدة ${days} يومًا`:`${days}-day free trial activated`,{tone:'success'});
 }
 
+
+/* ================= V303 BOUNDED WORKSPACE BOOTSTRAP ================= */
+async function taskyBootstrapStageV303(promise,ms,label,{optional=false,fallback=null}={}){
+  try{
+    return await taskyTimeoutV244(
+      Promise.resolve(promise),
+      ms,
+      `bootstrap:${label}`
+    );
+  }catch(err){
+    if(optional){
+      console.warn(`Tasky V303 optional bootstrap stage skipped: ${label}`,err);
+      return fallback;
+    }
+    const e=new Error(
+      lang==='ar'
+        ?`تعذّر إكمال مرحلة «${label}» أثناء فتح مساحة العمل. حاول مرة أخرى.`
+        :`Could not complete “${label}” while opening the workspace. Please try again.`
+    );
+    e.code='TASKY_BOOTSTRAP_STAGE_V303';
+    e.stage=label;
+    e.cause=err;
+    throw e;
+  }
+}
+
+async function taskyBootstrapOptionalV303(promise,ms,label,fallback=null){
+  return taskyBootstrapStageV303(
+    promise,
+    ms,
+    label,
+    {optional:true,fallback}
+  );
+}
+
 async function loadWorkspaceAndData(authoritativeUser = null){
   const user=authoritativeUser;
   if(!user)throw new Error('Authoritative authenticated user is required for workspace bootstrap');
@@ -4323,8 +4387,27 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   const membershipSelect='workspace_id, role, status, workspaces(name,logo_url,plan_id)';
   let membershipQuery=sb.from('workspace_members').select(membershipSelect).eq('user_id',user.id).eq('status','active');
   if(preferredWorkspaceId)membershipQuery=membershipQuery.eq('workspace_id',preferredWorkspaceId);
-  let {data:member,error}=await membershipQuery.limit(1).maybeSingle();
-  if(!member&&preferredWorkspaceId&&!error){const fallback=await sb.from('workspace_members').select(membershipSelect).eq('user_id',user.id).eq('status','active').limit(1).maybeSingle();member=fallback.data;error=fallback.error;}
+  let membershipResult=await taskyBootstrapStageV303(
+    membershipQuery.limit(1).maybeSingle(),
+    8000,
+    lang==='ar'?'التحقق من عضوية مساحة العمل':'Workspace membership'
+  );
+  let {data:member,error}=membershipResult||{};
+
+  if(!member&&preferredWorkspaceId&&!error){
+    const fallback=await taskyBootstrapStageV303(
+      sb.from('workspace_members')
+        .select(membershipSelect)
+        .eq('user_id',user.id)
+        .eq('status','active')
+        .limit(1)
+        .maybeSingle(),
+      8000,
+      lang==='ar'?'البحث عن مساحة عمل بديلة':'Workspace fallback'
+    );
+    member=fallback?.data;
+    error=fallback?.error;
+  }
   if(error||!member){console.error('تعذّر إيجاد عضوية نشطة لهذا الحساب',error);currentUserId=null;currentUserEmail=null;currentWorkspaceId=null;currentWorkspaceName=null;currentWorkspaceLogoUrl=null;currentUserRole=null;renderRoleToggle();renderNav();return false;}
 
   currentUserId=user.id;currentUserEmail=user.email||null;currentWorkspaceId=member.workspace_id;currentUserRole=member.role==='admin'?'admin':'member';
@@ -4351,15 +4434,43 @@ async function loadWorkspaceAndData(authoritativeUser = null){
 
   taskyBootSetV83(32,'جارٍ تحميل الصلاحيات وإعدادات الشركة…','Loading permissions and company settings…');
   const coreFirst=await Promise.allSettled([
-    syncLegalAcceptanceV70FromMetadata(currentWorkspaceId),
-    fetchCommercialRuntimeV69({render:false}),
-    fetchPlatformRuntime(),
-    fetchPlatformReleaseRuntimeV66(),
-    fetchProjects(),
-    fetchTeamMembers(),
-    (typeof taskyFetchEntitlementsV165==='function'
-      ? taskyFetchEntitlementsV165({render:false,force:true})
-      : Promise.resolve(null))
+    taskyBootstrapOptionalV303(
+      syncLegalAcceptanceV70FromMetadata(currentWorkspaceId),
+      5000,
+      lang==='ar'?'الموافقات القانونية':'Legal acceptance'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchCommercialRuntimeV69({render:false}),
+      6500,
+      lang==='ar'?'إعدادات الاشتراك':'Subscription runtime'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchPlatformRuntime(),
+      6500,
+      lang==='ar'?'إعدادات المنصة':'Platform runtime'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchPlatformReleaseRuntimeV66(),
+      6500,
+      lang==='ar'?'إصدار المنصة':'Platform release'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchProjects(),
+      7000,
+      lang==='ar'?'المشاريع':'Projects'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchTeamMembers(),
+      7000,
+      lang==='ar'?'أعضاء الفريق':'Team members'
+    ),
+    taskyBootstrapOptionalV303(
+      (typeof taskyFetchEntitlementsV165==='function'
+        ? taskyFetchEntitlementsV165({render:false,force:true})
+        : Promise.resolve(null)),
+      6000,
+      lang==='ar'?'صلاحيات الباقة':'Entitlements'
+    )
   ]);
   const criticalErrors=coreFirst.filter((x,i)=>x.status==='rejected'&&[1,2,3,4,5].includes(i));
   if(criticalErrors.length)console.warn('Tasky V83 core parallel load warnings',criticalErrors.map(x=>x.reason));
@@ -4368,7 +4479,20 @@ async function loadWorkspaceAndData(authoritativeUser = null){
   if(platformRuntimeBlocksApp()||platformReleaseRuntime?.hard_block)return true;
 
   taskyBootSetV83(67,'جارٍ تحميل الفريق والمشاريع…','Loading team and projects…');
-  await Promise.all([fetchProjectMemberships(),fetchTasks()]);
+
+  await Promise.allSettled([
+    taskyBootstrapOptionalV303(
+      fetchProjectMemberships(),
+      7000,
+      lang==='ar'?'صلاحيات المشاريع':'Project access'
+    ),
+    taskyBootstrapOptionalV303(
+      fetchTasks(),
+      8500,
+      lang==='ar'?'المهام':'Tasks'
+    )
+  ]);
+
   taskyBootSetV83(93,'جارٍ تجهيز المهام…','Preparing tasks…');
 
   initTaskRealtime();applyCurrentUserProfile();renderTeamAvatarStack();renderRoleToggle();renderNav();renderAll();
@@ -5037,7 +5161,11 @@ async function checkSession(){
       authScreen.style.display='none';
       appEl.style.display='none';
 
-      const inviteState=await getAuthoritativeInviteState(session);
+      const inviteState=await taskyBootstrapStageV303(
+        getAuthoritativeInviteState(session),
+        7000,
+        lang==='ar'?'التحقق من حالة الحساب':'Account state'
+      );
       if(inviteState.invited){
         showInviteSetup(true);
         taskyBootHideV83();
@@ -20192,7 +20320,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V302';
+    window.TASKY_BUILD='V303';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26500,7 +26628,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V302';
+  window.TASKY_BUILD='V303';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27076,7 +27204,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V302';
+    window.TASKY_BUILD='V303';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27191,6 +27319,17 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   async function nudgeSessionBoot(){
     if(recoveryStarted || !bootVisible())return;
+
+    /*
+      V303: never start a second recovery timer around an authoritative
+      checkSession() that is already in progress.
+    */
+    try{
+      if(typeof taskySessionCheckPromiseV751!=='undefined'&&taskySessionCheckPromiseV751){
+        return;
+      }
+    }catch(_){}
+
     recoveryStarted=true;
 
     try{
@@ -27279,7 +27418,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V302';
+  window.TASKY_BUILD='V303';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27299,7 +27438,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V302';
+    window.TASKY_BUILD='V303';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -30544,7 +30683,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.TASKY_HR_BATCH_V299=true;
   window.TASKY_EMPLOYEE360_SINGLE_PAINT_V300=true;
-  window.TASKY_BUILD='V302';
+  window.TASKY_BUILD='V303';
   console.info('Tasky V300 — Employee360 single-paint + V299 HR batch active');
 })();
 </script>
@@ -32097,6 +32236,270 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_BUILD=BUILD;
 
   console.info('Tasky V302 — explicit department head + department filter + PDF export active');
+})();
+</script>
+
+
+<script id="tasky-v303-login-bootstrap-js">
+(function(){
+  'use strict';
+
+  const BUILD='V303';
+  let submitting=false;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function clearError(){
+    const box=document.getElementById('authError');
+    if(box){
+      box.textContent='';
+      box.style.display='none';
+    }
+  }
+
+  function showError(message){
+    const boot=document.getElementById('taskyBootV83');
+    const auth=document.getElementById('authScreen');
+    const app=document.querySelector('.app');
+
+    if(boot){
+      boot.classList.add('hidden');
+      boot.style.display='none';
+    }
+    if(auth){
+      auth.style.display='flex';
+      auth.style.visibility='visible';
+    }
+    if(app)app.style.display='none';
+
+    try{
+      taskyAuthShowErrorV751(message);
+    }catch(_){
+      const box=document.getElementById('authError');
+      if(box){
+        box.textContent=message;
+        box.style.display='block';
+      }
+    }
+  }
+
+  function setBusy(busy,label=''){
+    submitting=!!busy;
+    const btn=document.getElementById('authSubmitBtn');
+    if(!btn)return;
+
+    btn.disabled=!!busy;
+    btn.style.pointerEvents=busy?'none':'auto';
+
+    if(busy){
+      if(!btn.dataset.v303Label)btn.dataset.v303Label=btn.textContent||'';
+      btn.textContent=label||L('جاري تسجيل الدخول...','Signing in...');
+    }else{
+      btn.textContent=btn.dataset.v303Label||L('تسجيل الدخول','Sign in');
+      delete btn.dataset.v303Label;
+    }
+  }
+
+  async function bootAfterLogin(session){
+    clearError();
+
+    /*
+      Synchronize the core auth client explicitly. No reload.
+      taskySignInReliableV273 normally already uses the core client, but this
+      keeps the transition deterministic even if a fallback transport was used.
+    */
+    if(session?.access_token&&session?.refresh_token){
+      const synced=await taskyTimeoutV244(
+        sb.auth.setSession({
+          access_token:session.access_token,
+          refresh_token:session.refresh_token
+        }),
+        6500,
+        'V303 auth.setSession'
+      );
+
+      if(synced?.error)throw synced.error;
+    }
+
+    /*
+      A previous failed boot promise must never be reused for the new login.
+    */
+    try{taskySessionCheckPromiseV751=null}catch(_){}
+
+    taskyBootReopenV83();
+    taskyBootSetV83(
+      12,
+      'تم تسجيل الدخول — جارٍ فتح مساحة العمل…',
+      'Signed in — opening workspace…'
+    );
+
+    const opened=await taskyBootstrapStageV303(
+      checkSession(),
+      26000,
+      L('فتح مساحة العمل','Opening workspace')
+    );
+
+    const app=document.querySelector('.app');
+    const appVisible=!!app&&getComputedStyle(app).display!=='none';
+
+    if(opened||appVisible){
+      clearError();
+      taskyBootHideV83();
+      return true;
+    }
+
+    throw new Error(L(
+      'تم تسجيل الدخول لكن لم يتم العثور على مساحة عمل نشطة لهذا الحساب.',
+      'You signed in, but no active workspace was found for this account.'
+    ));
+  }
+
+  async function submit(){
+    if(submitting)return false;
+
+    try{
+      if(typeof authMode!=='undefined'&&authMode==='signup'){
+        /*
+          Signup remains owned by the existing flow.
+          Only sign-in is replaced by V303.
+        */
+        const previous=window.__taskyV303PreviousAuthSubmit;
+        if(typeof previous==='function')return previous();
+      }
+    }catch(_){}
+
+    const email=String(document.getElementById('authEmail')?.value||'')
+      .trim()
+      .toLowerCase();
+    const password=String(document.getElementById('authPassword')?.value||'');
+
+    clearError();
+
+    if(!email||!password){
+      showError(L('عبّئ البريد وكلمة المرور','Enter your email and password'));
+      return false;
+    }
+
+    setBusy(true,L('جاري تسجيل الدخول...','Signing in...'));
+
+    try{
+      /*
+        Use the core reliable auth path; do not authenticate in a separate
+        client and reload the entire page.
+      */
+      const result=await taskySignInReliableV273(email,password);
+      if(result?.error)throw result.error;
+
+      let session=result?.data?.session||null;
+
+      if(!session?.user){
+        const verified=await taskyGetSessionSafeV244();
+        session=verified?.data?.session||null;
+      }
+
+      if(!session?.user){
+        throw new Error(L(
+          'تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة صالحة.',
+          'Credentials were accepted but no valid session was created.'
+        ));
+      }
+
+      setBusy(true,L('تم الدخول — جارٍ فتح تاسكي...','Signed in — opening Tasky...'));
+
+      await bootAfterLogin(session);
+
+      setBusy(false);
+      return true;
+    }catch(err){
+      console.error('Tasky V303 login/bootstrap',err);
+
+      const message=
+        err?.code==='TASKY_BOOTSTRAP_STAGE_V303'
+          ?L(
+              `تم تسجيل الدخول، لكن تعذّر فتح مساحة العمل في مرحلة: ${err.stage||'غير محددة'}. أعد المحاولة.`,
+              `Signed in, but workspace startup failed at: ${err.stage||'unknown stage'}. Please retry.`
+            )
+          :(err?.message||String(err));
+
+      showError(message);
+      setBusy(false);
+      return false;
+    }
+  }
+
+  function install(){
+    if(window.handleAuthSubmit?.__taskyV303)return;
+
+    window.__taskyV303PreviousAuthSubmit=window.handleAuthSubmit;
+
+    window.handleAuthSubmit=submit;
+    window.handleAuthSubmit.__taskyV303=true;
+
+    const btn=document.getElementById('authSubmitBtn');
+    if(btn){
+      btn.type='button';
+      btn.disabled=false;
+      btn.style.pointerEvents='auto';
+      btn.onclick=()=>window.handleAuthSubmit();
+      btn.textContent=L('تسجيل الدخول','Sign in');
+    }
+
+    ['authEmail','authPassword'].forEach(id=>{
+      const input=document.getElementById(id);
+      if(!input||input.dataset.taskyV303Enter==='1')return;
+
+      input.dataset.taskyV303Enter='1';
+      input.addEventListener('keydown',event=>{
+        if(event.key==='Enter'){
+          event.preventDefault();
+          event.stopImmediatePropagation();
+          window.handleAuthSubmit();
+        }
+      },true);
+    });
+
+    /*
+      If the old watchdog already returned a user with a valid stored session
+      to the login page, do not auto-loop. The user can press Sign in once and
+      V303 completes in the same context.
+    */
+    window.TASKY_SESSION_BOOTSTRAP_ROOT_FIX_V303=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V303 — non-destructive session bootstrap + no-reload login active');
+  }
+
+  window.taskyBootAuditV303=function(){
+    const boot=document.getElementById('taskyBootV83');
+    const auth=document.getElementById('authScreen');
+    const app=document.querySelector('.app');
+
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_SESSION_BOOTSTRAP_ROOT_FIX_V303,
+      handler_v303:!!window.handleAuthSubmit?.__taskyV303,
+      stored_session_hint:!!window.taskyHasStoredSessionV284?.(),
+      session_check_inflight:!!(
+        typeof taskySessionCheckPromiseV751!=='undefined'&&
+        taskySessionCheckPromiseV751
+      ),
+      current_user_id:typeof currentUserId!=='undefined'?currentUserId:null,
+      current_workspace_id:typeof currentWorkspaceId!=='undefined'?currentWorkspaceId:null,
+      boot_visible:!!boot&&getComputedStyle(boot).display!=='none'&&!boot.classList.contains('hidden'),
+      boot_percent:document.getElementById('taskyBootPctV83')?.textContent||null,
+      boot_label:document.getElementById('taskyBootLabelV83')?.textContent||null,
+      auth_visible:!!auth&&getComputedStyle(auth).display!=='none',
+      app_visible:!!app&&getComputedStyle(app).display!=='none'
+    };
+  };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});
+  }else{
+    setTimeout(install,0);
+  }
 })();
 </script>
 
