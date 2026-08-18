@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV291" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V291</div>
+    <div id="taskyBootBuildV292" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V292</div>
   </div>
 </div>
 
@@ -20144,80 +20144,31 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   async function loadSupabase(){
-    if(window.supabase?.createClient){
-      window.__taskySupabaseSdkSourceV247='already-loaded';
-      return true;
-    }
-
-    const storedSession=
-      typeof window.taskyHasStoredSessionV284==='function' &&
-      window.taskyHasStoredSessionV284();
-
     /*
-      V284 login-first path:
-      a logged-out visitor does not need an external SDK before the login form.
-      Use V275's embedded client immediately and start zero CDN script requests.
+      TASKY V292 — EMBEDDED CONNECTION IS THE PRIMARY RUNTIME
+
+      Tasky's single-file build already includes a Supabase-compatible client.
+      Initial platform startup therefore does not depend on any external SDK CDN.
     */
-    if(!storedSession){
-      taskyInstallSupabaseCompatV275('v284-logged-out-login-first');
-      window.__taskyLoggedOutFastPathV284=true;
-      window.__taskySupabaseSdkSourceV247='embedded-login-first-v284';
+    if(window.supabase?.createClient && window.supabase?.__taskyCompat){
+      window.__taskySupabaseSdkSourceV247='embedded-primary-v292';
+      window.__taskySupabaseCompatActiveV275=true;
+      updateBoot(11,'تم تجهيز الاتصال…','Connection ready…');
       return true;
     }
 
-    updateBoot(9,'جارٍ تحميل مكوّن الاتصال…','Loading connection component…');
+    taskyCancelClassicSdkV284?.();
+    taskyInstallSupabaseCompatV275('v292-embedded-primary');
 
-    const jsdelivrUrl=
-      `https://cdn.jsdelivr.net/npm/@supabase/supabase-js@${SDK_VERSION}/dist/umd/supabase.js`;
-    const unpkgUrl=
-      `https://unpkg.com/@supabase/supabase-js@${SDK_VERSION}/dist/umd/supabase.js`;
+    window.__taskyLoggedOutFastPathV284=
+      typeof window.taskyHasStoredSessionV284==='function'
+        ?!window.taskyHasStoredSessionV284()
+        :false;
 
-    const attempts=[
-      taskyLoadClassicSdkV274(jsdelivrUrl,'jsdelivr-umd',10000),
-      taskyLoadClassicSdkV274(unpkgUrl,'unpkg-umd',10000),
-      taskyLoadEsmSdkV274(10000)
-    ];
+    window.__taskySupabaseSdkSourceV247='embedded-primary-v292';
+    window.__taskySupabaseCompatActiveV275=true;
 
-    const externalWinner=new Promise(resolve=>{
-      let finished=0;
-
-      attempts.forEach(promise=>{
-        Promise.resolve(promise).then(item=>{
-          if(item?.ok){
-            resolve(item);
-            return;
-          }
-
-          finished++;
-          if(finished===attempts.length)resolve(null);
-        }).catch(()=>{
-          finished++;
-          if(finished===attempts.length)resolve(null);
-        });
-      });
-    });
-
-    /*
-      Critical V275 rule:
-      CDN delivery is an optimization, never a boot dependency.
-      If no official SDK source is ready in 2.5s, Tasky starts using
-      the embedded compatibility client instead of remaining at 9%.
-    */
-    const winner=await Promise.race([
-      externalWinner,
-      new Promise(resolve=>setTimeout(()=>resolve(null),2500))
-    ]);
-
-    if(winner?.ok&&window.supabase?.createClient){
-      taskyCancelClassicSdkV284();
-      window.__taskySupabaseCompatActiveV275=false;
-      updateBoot(11,'تم تحميل الاتصال…','Connection component loaded…');
-      return true;
-    }
-
-    taskyCancelClassicSdkV284();
-    taskyInstallSupabaseCompatV275('external-sdk-not-ready-within-2500ms');
-    updateBoot(11,'تم تجهيز الاتصال المحلي…','Embedded connection ready…');
+    updateBoot(11,'تم تجهيز الاتصال…','Connection ready…');
     return true;
   }
 
@@ -20241,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V291';
+    window.TASKY_BUILD='V292';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26547,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V291';
+  window.TASKY_BUILD='V292';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27123,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V291';
+    window.TASKY_BUILD='V292';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27316,6 +27267,85 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     document.addEventListener('DOMContentLoaded',()=>setTimeout(start,0),{once:true});
   }else{
     setTimeout(start,0);
+  }
+})();
+</script>
+
+
+<script id="tasky-v292-embedded-connection-js">
+(function(){
+  'use strict';
+
+  window.TASKY_EMBEDDED_CONNECTION_V292=true;
+  window.TASKY_BUILD='V292';
+
+  function bootVisible(){
+    const el=document.getElementById('taskyBootV83');
+    return !!el &&
+      getComputedStyle(el).display!=='none' &&
+      !el.classList.contains('hidden');
+  }
+
+  function authVisible(){
+    const el=document.getElementById('authScreen');
+    return !!el && getComputedStyle(el).display!=='none';
+  }
+
+  function appVisible(){
+    const el=document.querySelector('.app');
+    return !!el && getComputedStyle(el).display!=='none';
+  }
+
+  function finalize(){
+    window.TASKY_BUILD='V292';
+
+    const badge=document.getElementById('taskyBootBuildV292');
+    if(badge)badge.textContent='V292';
+
+    try{
+      const hasSession=window.taskyHasStoredSessionV284?.()||false;
+      if(!hasSession){
+        const boot=document.getElementById('taskyBootV83');
+        const auth=document.getElementById('authScreen');
+        if(boot){
+          boot.classList.add('hidden');
+          boot.style.display='none';
+        }
+        if(auth){
+          auth.style.display='flex';
+          auth.style.visibility='visible';
+        }
+      }
+    }catch(_){}
+
+    console.info('Tasky V292 — embedded connection is the primary boot runtime');
+  }
+
+  window.taskyBootAuditV292=function(){
+    return {
+      build:window.TASKY_BUILD||null,
+      patch:!!window.TASKY_EMBEDDED_CONNECTION_V292,
+      sdk_source:window.__taskySupabaseSdkSourceV247||null,
+      compat_active:!!window.__taskySupabaseCompatActiveV275,
+      compat_namespace:!!window.supabase?.__taskyCompat,
+      boot_visible:bootVisible(),
+      boot_percent:document.getElementById('taskyBootPctV83')?.textContent||null,
+      boot_label:document.getElementById('taskyBootLabelV83')?.textContent||null,
+      auth_visible:authVisible(),
+      app_visible:appVisible(),
+      deferred_remaining:document.querySelectorAll('script[type="text/tasky-deferred-v247"]').length,
+      v286:!!window.TASKY_COMMERCIAL_OFFER_FLOW_V286,
+      v287:!!window.TASKY_BREADCRUMB_REQUEST_FIX_V287,
+      v288:!!window.TASKY_APPS_SIDEBAR_CATALOG_V288,
+      v290:!!window.TASKY_SELF_CONTAINED_LOGIN_V290,
+      v291:!!window.TASKY_ROOT_BOOT_FIX_V291
+    };
+  };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(finalize,0),{once:true});
+  }else{
+    setTimeout(finalize,0);
   }
 })();
 </script>
