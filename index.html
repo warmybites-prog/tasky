@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV300" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V300</div>
+    <div id="taskyBootBuildV301" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V301</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V300';
+    window.TASKY_BUILD='V301';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -22151,6 +22151,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   ];
 
   function isEmployee360V263(modal){
+    /* V301 owns Employee File completely. Legacy V263 must never transform it. */
+    if(modal?.classList?.contains('tasky-employee360-v301'))return false;
     const text=String(modal?.textContent||'');
     return /Employee\s*360|بيانات موظف حساسة|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(text);
   }
@@ -26498,7 +26500,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V300';
+  window.TASKY_BUILD='V301';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27076,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V300';
+    window.TASKY_BUILD='V301';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27279,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V300';
+  window.TASKY_BUILD='V301';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27299,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V300';
+    window.TASKY_BUILD='V301';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -29809,6 +29811,9 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const id=String(employeeId||'');
     if(!root||!id)return false;
 
+    /* V301 is a native Employee File; V299/V300 augmentation is retired there. */
+    if(root.classList.contains('tasky-employee360-v301'))return false;
+
     const txt=String(root.textContent||'');
     if(!/Employee\s*360|ملف الموظف|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(txt)){
       return false;
@@ -30208,7 +30213,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     }
 
     const profileMatch=code.match(/hrOpenEmployeeV72\(['"]([^'"]+)['"]/);
-    if(profileMatch){
+    if(profileMatch && !window.TASKY_NATIVE_EMPLOYEE_FILE_V301){
       beginEmployee360Paint(profileMatch[1]);
       setTimeout(()=>enhanceEmployee360(profileMatch[1]),20);
       setTimeout(()=>enhanceEmployee360(profileMatch[1]),120);
@@ -30405,8 +30410,974 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.TASKY_HR_BATCH_V299=true;
   window.TASKY_EMPLOYEE360_SINGLE_PAINT_V300=true;
-  window.TASKY_BUILD='V300';
+  window.TASKY_BUILD='V301';
   console.info('Tasky V300 — Employee360 single-paint + V299 HR batch active');
+})();
+</script>
+
+
+<script id="tasky-v301-native-employee-file-js">
+(function(){
+  'use strict';
+
+  const BUILD='V301';
+  let installAttempts=0;
+  let installed=false;
+  let activeEmployeeId=null;
+  let renderToken=0;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function esc(v){
+    const s=String(v??'');
+    try{return typeof escapeHtml==='function'?escapeHtml(s):s}catch(_){return s}
+  }
+
+  function db(){
+    try{
+      if(typeof sb!=='undefined'&&sb)return sb;
+    }catch(_){}
+    return window.sb||null;
+  }
+
+  function hrState(){
+    try{
+      if(typeof hrV72!=='undefined'&&hrV72)return hrV72;
+    }catch(_){}
+    return window.hrV72||window.__taskyHrDataV295||{};
+  }
+
+  function collection(...keys){
+    const s=hrState();
+    for(const key of keys){
+      if(Array.isArray(s?.[key]))return s[key];
+    }
+    return [];
+  }
+
+  function employees(){
+    return collection('employees','employee_rows','employeeRows');
+  }
+
+  function departments(){
+    return collection('departments','department_rows','departmentRows');
+  }
+
+  function positions(){
+    return collection('positions','position_rows','positionRows');
+  }
+
+  function employeeById(id){
+    return employees().find(e=>String(e.id)===String(id))||null;
+  }
+
+  function deptId(e){
+    return e?.department_id??e?.departmentId??e?.dept_id??e?.department?.id??null;
+  }
+
+  function posId(e){
+    return e?.position_id??e?.positionId??e?.job_position_id??e?.position?.id??null;
+  }
+
+  function managerId(e){
+    return e?.manager_employee_id??
+      e?.direct_manager_employee_id??
+      e?.direct_manager_id??
+      e?.manager_id??
+      e?.managerEmployeeId??
+      e?.manager?.id??
+      null;
+  }
+
+  function departmentById(id){
+    return departments().find(d=>String(d.id)===String(id))||null;
+  }
+
+  function positionById(id){
+    return positions().find(p=>String(p.id)===String(id))||null;
+  }
+
+  function employeeName(e){
+    if(!e)return '—';
+    try{
+      if(typeof hrName72==='function')return hrName72(e);
+    }catch(_){}
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(e.full_name_en||e.full_name_ar||e.name||e.email||'—')
+      :(e.full_name_ar||e.full_name_en||e.name||e.email||'—');
+  }
+
+  function deptName(d){
+    if(!d)return '—';
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(d.name_en||d.name_ar||d.name||'—')
+      :(d.name_ar||d.name_en||d.name||'—');
+  }
+
+  function posName(p){
+    if(!p)return '—';
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(p.title_en||p.title_ar||p.title||p.name_en||p.name_ar||p.name||'—')
+      :(p.title_ar||p.title_en||p.title||p.name_ar||p.name_en||p.name||'—');
+  }
+
+  function initials(e){
+    const n=employeeName(e);
+    if(!n||n==='—')return 'HR';
+    return n.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  }
+
+  function avatar(e,cls=''){
+    const url=e?.avatar_url||e?.photo_url||e?.profile_photo_url||'';
+    return url
+      ?`<div class="v301-avatar ${cls}"><img src="${esc(url)}" alt=""></div>`
+      :`<div class="v301-avatar ${cls}"><span>${esc(initials(e))}</span></div>`;
+  }
+
+  function field(e,...keys){
+    for(const key of keys){
+      const v=e?.[key];
+      if(v!==undefined&&v!==null&&String(v).trim()!=='')return v;
+    }
+    return null;
+  }
+
+  function last4(e){
+    const direct=field(e,'national_id_last4','identity_last4','id_last4','nationalIdLast4');
+    if(direct)return String(direct).slice(-4);
+
+    const full=field(e,'national_id','identity_no','identity_number','nationalId');
+    if(full)return String(full).replace(/\s+/g,'').slice(-4);
+
+    return null;
+  }
+
+  function emergencyContact(e){
+    const nested=e?.emergency_contact||e?.emergencyContact;
+    const name=field(e,'emergency_contact_name','emergency_name')||nested?.name;
+    const phone=field(e,'emergency_contact_phone','emergency_phone')||nested?.phone;
+    return [name,phone].filter(Boolean).join(' · ')||null;
+  }
+
+  function canViewSensitive(e){
+    let manage=false;
+    let own=false;
+
+    try{manage=typeof hrCanManage72==='function'&&hrCanManage72()}catch(_){}
+    try{own=String(hrContextV72?.employee_id||'')===String(e?.id||'')}catch(_){}
+
+    return !!(manage||own);
+  }
+
+  function statusInfo(e){
+    const raw=String(e?.status||e?.employment_status||'active').toLowerCase();
+    const map={
+      active:[L('نشط','Active'),'green'],
+      probation:[L('فترة تجربة','Probation'),'amber'],
+      leave:[L('في إجازة','On leave'),'blue'],
+      suspended:[L('موقوف','Suspended'),'amber'],
+      terminated:[L('منتهي','Terminated'),'red'],
+      offboarded:[L('مغادر','Offboarded'),'red']
+    };
+    return map[raw]||[raw||L('غير محدد','Not set'),'muted'];
+  }
+
+  function dateValue(item){
+    const keys=[
+      'created_at','updated_at','requested_at','issued_at','approved_at',
+      'attendance_date','effective_from','start_date','date','joined_at'
+    ];
+    for(const key of keys){
+      if(item?.[key])return item[key];
+    }
+    return null;
+  }
+
+  function formatDate(v){
+    if(!v)return '—';
+    try{
+      return new Intl.DateTimeFormat(
+        typeof lang!=='undefined'&&lang==='en'?'en-GB':'ar-SA',
+        {year:'numeric',month:'short',day:'numeric'}
+      ).format(new Date(v));
+    }catch(_){
+      return String(v).slice(0,10)||'—';
+    }
+  }
+
+  const MATTER_RULES=[
+    [/attendance|حضور/i,'attendance','الحضور','Attendance','clock'],
+    [/leave|إجاز/i,'leaves','الإجازات','Leave','calendar'],
+    [/request|طلب/i,'requests','الطلبات','Requests','inbox'],
+    [/document|issuance|مستند|خطاب/i,'documents','المستندات والخطابات','Documents & letters','file'],
+    [/compensation|salary|payroll|تعويض|راتب/i,'compensation','الراتب والتعويضات','Compensation','wallet'],
+    [/performance|أداء/i,'performance','الأداء','Performance','chart'],
+    [/benefit|ميزة|مزايا/i,'benefits83','المزايا','Benefits','gift'],
+    [/expense|مصروف/i,'expenses84','المصروفات','Expenses','receipt'],
+    [/training|تدريب/i,'training','التدريب','Training','book'],
+    [/onboarding|تهيئة/i,'onboarding','التهيئة','Onboarding','user-plus'],
+    [/offboarding|مغادرة/i,'offboarding','المغادرة','Offboarding','log-out'],
+    [/change|تغيير/i,'changes','التغييرات الوظيفية','Employee changes','refresh'],
+    [/case|حالة/i,'cases','حالات الموظف','Cases','briefcase'],
+    [/asset|عهدة|أصل/i,'assets','العهد والأصول','Assets','box']
+  ];
+
+  function matchesEmployee(item,id){
+    if(!item||typeof item!=='object')return false;
+    const target=String(id||'');
+    const keys=[
+      'employee_id','employeeId','target_employee_id','targetEmployeeId',
+      'subject_employee_id','subjectEmployeeId','requested_for_employee_id',
+      'requestedForEmployeeId','owner_employee_id','ownerEmployeeId',
+      'assignee_employee_id','assigneeEmployeeId'
+    ];
+    return keys.some(key=>String(item?.[key]??'')===target);
+  }
+
+  function mattersFor(employeeId){
+    const buckets=new Map();
+    const timeline=[];
+
+    for(const [key,value] of Object.entries(hrState()||{})){
+      if(!Array.isArray(value)||!value.length)continue;
+
+      const rule=MATTER_RULES.find(([rx])=>rx.test(key));
+      if(!rule)continue;
+
+      const matched=value.filter(item=>matchesEmployee(item,employeeId));
+      if(!matched.length)continue;
+
+      const [,tab,ar,en,icon]=rule;
+      const current=buckets.get(tab)||{tab,ar,en,icon,count:0};
+      current.count+=matched.length;
+      buckets.set(tab,current);
+
+      for(const item of matched){
+        const title=
+          item?.title||
+          item?.subject||
+          item?.request_type||
+          item?.document_type||
+          item?.type||
+          item?.status||
+          L(ar,en);
+
+        timeline.push({
+          tab,ar,en,icon,
+          title:String(title||L(ar,en)),
+          date:dateValue(item),
+          status:item?.status||null
+        });
+      }
+    }
+
+    timeline.sort((a,b)=>{
+      const ad=a.date?new Date(a.date).getTime():0;
+      const bd=b.date?new Date(b.date).getTime():0;
+      return bd-ad;
+    });
+
+    return {
+      buckets:[...buckets.values()].sort((a,b)=>b.count-a.count),
+      timeline:timeline.slice(0,12)
+    };
+  }
+
+  async function currentCompensation(employeeId){
+    const client=db();
+    if(!client)return null;
+
+    try{
+      const {data,error}=await client
+        .from('tasky_hr_employee_compensation_v299')
+        .select('*')
+        .eq('workspace_id',currentWorkspaceId)
+        .eq('employee_id',employeeId)
+        .order('effective_from',{ascending:false})
+        .limit(1);
+
+      if(error)throw error;
+      return (data||[])[0]||null;
+    }catch(err){
+      console.warn('Tasky V301 compensation',err);
+      return null;
+    }
+  }
+
+  function money(v,c='SAR'){
+    return `${Number(v||0).toLocaleString(
+      typeof lang!=='undefined'&&lang==='en'?'en-US':'ar-SA',
+      {minimumFractionDigits:2,maximumFractionDigits:2}
+    )} ${esc(c||'SAR')}`;
+  }
+
+  function detailCard(label,value,icon='info',sensitive=false){
+    const shown=value!==null&&value!==undefined&&String(value).trim()!==''?String(value):'—';
+    return `
+      <div class="v301-detail-card${shown==='—'?' empty':''}${sensitive?' sensitive':''}">
+        <div class="v301-detail-icon"><svg><use href="#i-${icon}"/></svg></div>
+        <div><span>${esc(label)}</span><b>${esc(shown)}</b></div>
+      </div>`;
+  }
+
+  function compensationHtml(comp){
+    if(!comp){
+      return `
+        <div class="v301-empty-inline">
+          <div class="v301-empty-icon"><svg><use href="#i-wallet"/></svg></div>
+          <div>
+            <b>${L('لا توجد بيانات راتب مسجلة','No compensation recorded')}</b>
+            <span>${L('يمكن إضافتها من شاشة تعديل الموظف.','Add it from the employee edit screen.')}</span>
+          </div>
+        </div>`;
+    }
+
+    const c=comp.currency||'SAR';
+    const total=
+      Number(comp.base_salary||0)+
+      Number(comp.housing_allowance||0)+
+      Number(comp.transport_allowance||0)+
+      Number(comp.other_allowance||0);
+
+    return `
+      <div class="v301-comp-total">
+        <span>${L('إجمالي التعويض الشهري','Monthly compensation')}</span>
+        <b>${money(total,c)}</b>
+        <small>${L('ساري من','Effective from')} ${esc(comp.effective_from||'—')}</small>
+      </div>
+      <div class="v301-comp-grid">
+        <div><span>${L('الراتب الأساسي','Base salary')}</span><b>${money(comp.base_salary,c)}</b></div>
+        <div><span>${L('بدل السكن','Housing')}</span><b>${money(comp.housing_allowance,c)}</b></div>
+        <div><span>${L('بدل النقل','Transport')}</span><b>${money(comp.transport_allowance,c)}</b></div>
+        <div><span>${L('بدلات أخرى','Other allowances')}</span><b>${money(comp.other_allowance,c)}</b></div>
+      </div>`;
+  }
+
+  function mattersHtml(data){
+    if(!data.buckets.length){
+      return `<div class="v301-empty-inline compact">
+        <div class="v301-empty-icon"><svg><use href="#i-inbox"/></svg></div>
+        <div><b>${L('لا توجد أمور مرتبطة بالموظف','No linked employee activity')}</b><span>${L('ستظهر الطلبات والعمليات هنا تلقائيًا.','Requests and HR activity will appear here automatically.')}</span></div>
+      </div>`;
+    }
+
+    return `<div class="v301-matter-grid">${data.buckets.map(x=>`
+      <button type="button" onclick="closeAddModal();setHrTabV72('${esc(x.tab)}')">
+        <span class="v301-matter-icon"><svg><use href="#i-${esc(x.icon)}"/></svg></span>
+        <span class="v301-matter-copy"><b>${L(x.ar,x.en)}</b><small>${L('فتح القسم','Open section')}</small></span>
+        <em>${x.count}</em>
+      </button>`).join('')}</div>`;
+  }
+
+  function timelineHtml(data){
+    if(!data.timeline.length){
+      return `<div class="v301-empty-inline compact">
+        <div class="v301-empty-icon"><svg><use href="#i-clock"/></svg></div>
+        <div><b>${L('لا يوجد سجل زمني بعد','No timeline activity yet')}</b><span>${L('سيتم بناء السجل تلقائيًا مع استخدام الموارد البشرية.','The timeline will build automatically as HR activity is recorded.')}</span></div>
+      </div>`;
+    }
+
+    return `<div class="v301-timeline">${data.timeline.map(item=>`
+      <button type="button" onclick="closeAddModal();setHrTabV72('${esc(item.tab)}')">
+        <span class="v301-time-dot"><svg><use href="#i-${esc(item.icon)}"/></svg></span>
+        <span class="v301-time-copy">
+          <b>${esc(item.title)}</b>
+          <small>${L(item.ar,item.en)}${item.status?` · ${esc(item.status)}`:''}</small>
+        </span>
+        <time>${formatDate(item.date)}</time>
+      </button>`).join('')}</div>`;
+  }
+
+  function openOverlay(){
+    const overlay=document.getElementById('addModalOverlay');
+    const body=document.getElementById('addModalBody');
+    if(!overlay||!body)return null;
+
+    /*
+      Remove ALL legacy Employee360 classes/DOM ownership before rendering.
+      V301 does not enhance an old modal; it creates the only Employee File DOM.
+    */
+    body.className='modal tasky-employee360-v301';
+    body.removeAttribute('style');
+    body.innerHTML='';
+
+    overlay.classList.remove(
+      'tasky-employee360-overlay-v263'
+    );
+    overlay.classList.add('tasky-employee360-overlay-v301');
+    overlay.classList.remove('hidden');
+
+    document.body.classList.remove(
+      'tasky-employee360-open-v263',
+      'tasky-employee360-preparing-v300',
+      'tasky-employee360-ready-v300'
+    );
+    document.body.classList.add('tasky-employee360-open-v301');
+
+    return {overlay,body};
+  }
+
+  function renderShell(e){
+    const ui=openOverlay();
+    if(!ui)return null;
+
+    const dept=departmentById(deptId(e));
+    const pos=positionById(posId(e));
+    const manager=employeeById(managerId(e));
+    const [status,statusTone]=statusInfo(e);
+    const sensitive=canViewSensitive(e);
+    const matters=mattersFor(e.id);
+
+    const workLocation=field(e,'work_location','workLocation','location');
+    const nationality=field(e,'nationality','nationality_name');
+    const identityLast4=last4(e);
+    const emergency=emergencyContact(e);
+    const notes=field(e,'hr_notes','notes_hr','hrNotes');
+    const employeeCode=field(e,'employee_code','employee_no','employee_number','code');
+    const email=field(e,'email','work_email');
+    const phone=field(e,'mobile','phone','phone_number');
+    const joinDate=field(e,'join_date','hire_date','employment_start_date','start_date');
+
+    ui.body.innerHTML=`
+      <div class="v301-head">
+        <div class="v301-head-main">
+          ${avatar(e,'large')}
+          <div class="v301-identity">
+            <div class="v301-kicker">${L('ملف الموظف','EMPLOYEE FILE')}</div>
+            <h2>${esc(employeeName(e))}</h2>
+            <div class="v301-meta">
+              ${employeeCode?`<span>${esc(employeeCode)}</span>`:''}
+              ${email?`<span>${esc(email)}</span>`:''}
+              ${phone?`<span>${esc(phone)}</span>`:''}
+            </div>
+          </div>
+        </div>
+        <div class="v301-head-actions">
+          <span class="v301-status ${statusTone}">${esc(status)}</span>
+          ${(()=>{
+            try{return typeof hrCanManage72==='function'&&hrCanManage72()}catch(_){return false}
+          })()?`<button type="button" class="chip-btn" onclick="hrOpenFormV72('employee','${esc(e.id)}')"><svg><use href="#i-edit"/></svg>${L('تعديل','Edit')}</button>`:''}
+          <button type="button" class="v301-close" onclick="closeAddModal()" aria-label="${L('إغلاق','Close')}"><svg><use href="#i-x"/></svg></button>
+        </div>
+      </div>
+
+      <div class="v301-scroll">
+        <section class="v301-summary">
+          <div><span>${L('الإدارة','Department')}</span><b>${esc(deptName(dept))}</b></div>
+          <div><span>${L('المسمى الوظيفي','Position')}</span><b>${esc(posName(pos))}</b></div>
+          <div><span>${L('المدير المباشر','Direct manager')}</span><b>${esc(employeeName(manager))}</b></div>
+          <div><span>${L('تاريخ الانضمام','Join date')}</span><b>${joinDate?formatDate(joinDate):'—'}</b></div>
+        </section>
+
+        <section class="v301-section">
+          <div class="v301-section-head">
+            <div>
+              <span>${L('البيانات الوظيفية','EMPLOYMENT DETAILS')}</span>
+              <h3>${L('بيانات الموظف','Employee details')}</h3>
+            </div>
+          </div>
+          <div class="v301-detail-grid">
+            ${detailCard(L('موقع العمل','Work location'),workLocation,'map-pin')}
+            ${detailCard(L('الجنسية','Nationality'),sensitive?nationality:null,'globe',true)}
+            ${detailCard(L('آخر 4 من الهوية','Last 4 of ID'),sensitive?identityLast4:null,'shield',true)}
+            ${detailCard(L('جهة اتصال الطوارئ','Emergency contact'),sensitive?emergency:null,'phone',true)}
+            ${detailCard(L('ملاحظات HR','HR notes'),sensitive?notes:null,'file-text',true)}
+            ${detailCard(L('الحالة','Status'),status,'activity')}
+          </div>
+          ${!sensitive?`
+            <div class="v301-privacy">
+              <svg><use href="#i-lock"/></svg>
+              <div><b>${L('بيانات مقيدة حسب الصلاحية','Restricted employee data')}</b><span>${L('تم إخفاء البيانات الحساسة لأن حسابك لا يملك صلاحية عرضها.','Sensitive fields are hidden because your account does not have permission to view them.')}</span></div>
+            </div>`:''}
+        </section>
+
+        <section class="v301-section">
+          <div class="v301-section-head">
+            <div>
+              <span>${L('التعويضات','COMPENSATION')}</span>
+              <h3>${L('الراتب والبدلات','Salary & allowances')}</h3>
+            </div>
+            ${(()=>{
+              try{return typeof hrCanManage72==='function'&&hrCanManage72()}catch(_){return false}
+            })()?`<button type="button" class="chip-btn" onclick="hrOpenFormV72('employee','${esc(e.id)}')">${L('تعديل التعويض','Edit compensation')}</button>`:''}
+          </div>
+          <div id="v301Compensation" class="v301-comp-shell">
+            <div class="v301-skeleton-line wide"></div>
+            <div class="v301-skeleton-grid"><i></i><i></i><i></i><i></i></div>
+          </div>
+        </section>
+
+        <section class="v301-section">
+          <div class="v301-section-head">
+            <div>
+              <span>${L('EMPLOYEE HUB','EMPLOYEE HUB')}</span>
+              <h3>${L('أمور الموظف وطلباته','Employee matters & requests')}</h3>
+            </div>
+          </div>
+          ${mattersHtml(matters)}
+        </section>
+
+        <section class="v301-section">
+          <div class="v301-section-head">
+            <div>
+              <span>${L('TIMELINE','TIMELINE')}</span>
+              <h3>${L('السجل الزمني للموظف','Employee timeline')}</h3>
+              <p>${L('سجل موحد لأبرز العمليات المرتبطة بالموظف.','A unified history of notable HR activity linked to this employee.')}</p>
+            </div>
+          </div>
+          ${timelineHtml(matters)}
+        </section>
+      </div>`;
+
+    return ui;
+  }
+
+  async function openEmployeeV301(id){
+    const e=employeeById(id);
+
+    if(!e){
+      showTaskyDialog({
+        title:L('تعذّر فتح ملف الموظف','Could not open employee file'),
+        message:L('لم يتم العثور على بيانات الموظف في الموارد البشرية.','The employee record was not found in Human Resources.'),
+        tone:'error'
+      });
+      return false;
+    }
+
+    const token=++renderToken;
+    activeEmployeeId=String(e.id);
+
+    renderShell(e);
+
+    /*
+      Compensation is the only async section.
+      The legacy Employee360 renderer is never invoked.
+    */
+    const comp=await currentCompensation(e.id);
+
+    if(token!==renderToken||activeEmployeeId!==String(e.id))return false;
+
+    const host=document.getElementById('v301Compensation');
+    if(host)host.innerHTML=compensationHtml(comp);
+
+    return true;
+  }
+
+  function cleanup(){
+    renderToken++;
+    activeEmployeeId=null;
+
+    const body=document.getElementById('addModalBody');
+    const overlay=document.getElementById('addModalOverlay');
+
+    body?.classList.remove('tasky-employee360-v301');
+    overlay?.classList.remove('tasky-employee360-overlay-v301');
+    document.body.classList.remove('tasky-employee360-open-v301');
+  }
+
+  function install(){
+    installAttempts++;
+
+    let existing=null;
+    try{existing=typeof hrOpenEmployeeV72==='function'?hrOpenEmployeeV72:null}catch(_){}
+
+    if(!existing){
+      if(installAttempts<600)setTimeout(install,100);
+      return false;
+    }
+
+    /*
+      IMPORTANT:
+      We intentionally DO NOT capture or call `existing`.
+      V301 replaces the old Employee360 renderer rather than wrapping it.
+    */
+    const nativeOpen=function(id){
+      return openEmployeeV301(id);
+    };
+
+    nativeOpen.__taskyV301=true;
+
+    window.hrOpenEmployeeV72=nativeOpen;
+    try{hrOpenEmployeeV72=nativeOpen}catch(_){}
+
+    installed=true;
+    window.TASKY_NATIVE_EMPLOYEE_FILE_V301=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V301 — native Employee File installed; legacy Employee360 renderer is not called');
+    return true;
+  }
+
+  /*
+    HR is lazy-loaded. Install immediately after HR navigation completes.
+  */
+  if(typeof window.setActiveNav==='function'&&!window.setActiveNav.__taskyEmployeeFileV301){
+    const baseNav=window.setActiveNav;
+    const wrappedNav=async function(id,...args){
+      const result=await baseNav.call(this,id,...args);
+      if(id==='hr')setTimeout(install,0);
+      return result;
+    };
+    wrappedNav.__taskyEmployeeFileV301=true;
+    window.setActiveNav=wrappedNav;
+    try{setActiveNav=wrappedNav}catch(_){}
+  }
+
+  /*
+    Absolute interception for inline legacy buttons:
+    even if a late HR chunk temporarily restores its old function,
+    the click never reaches the legacy renderer.
+  */
+  document.addEventListener('click',event=>{
+    const el=event.target?.closest?.('[onclick]');
+    if(!el)return;
+
+    const code=String(el.getAttribute('onclick')||'');
+    const match=code.match(/hrOpenEmployeeV72\(['"]([^'"]+)['"]/);
+    if(!match)return;
+
+    if(!install())return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+    openEmployeeV301(match[1]);
+  },true);
+
+  if(typeof window.closeAddModal==='function'&&!window.closeAddModal.__taskyEmployeeFileV301){
+    const baseClose=window.closeAddModal;
+    const wrappedClose=function(...args){
+      cleanup();
+      return baseClose.apply(this,args);
+    };
+    wrappedClose.__taskyEmployeeFileV301=true;
+    window.closeAddModal=wrappedClose;
+    try{closeAddModal=wrappedClose}catch(_){}
+  }
+
+  if(!document.getElementById('tasky-v301-native-employee-file-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v301-native-employee-file-css';
+    style.textContent=`
+      body.tasky-employee360-open-v301 .sidebar{
+        visibility:hidden!important;
+      }
+
+      #addModalOverlay.tasky-employee360-overlay-v301{
+        position:fixed!important;
+        inset:0!important;
+        z-index:39000!important;
+        display:flex!important;
+        align-items:center!important;
+        justify-content:center!important;
+        padding:16px!important;
+        overflow:hidden!important;
+        background:rgba(15,28,19,.46)!important;
+        backdrop-filter:blur(3px)!important;
+      }
+
+      #addModalBody.tasky-employee360-v301{
+        position:relative!important;
+        display:flex!important;
+        flex-direction:column!important;
+        width:min(1080px,calc(100vw - 32px))!important;
+        max-width:1080px!important;
+        height:min(880px,calc(100dvh - 32px))!important;
+        max-height:calc(100dvh - 32px)!important;
+        min-height:0!important;
+        margin:0!important;
+        padding:0!important;
+        overflow:hidden!important;
+        border:1px solid var(--border)!important;
+        border-radius:22px!important;
+        background:var(--card)!important;
+        box-shadow:0 28px 80px rgba(0,0,0,.25)!important;
+      }
+
+      #addModalBody.tasky-employee360-v301 .v301-head{
+        flex:0 0 auto;
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:18px;
+        min-height:92px;
+        padding:14px 18px;
+        border-bottom:1px solid var(--border);
+        background:linear-gradient(180deg,var(--card),color-mix(in srgb,var(--card) 90%,var(--green-tint)));
+      }
+
+      .v301-head-main{display:flex;align-items:center;gap:12px;min-width:0}
+      .v301-avatar{display:grid;place-items:center;overflow:hidden;background:var(--green-tint);color:var(--green);font-weight:900}
+      .v301-avatar.large{width:62px;height:62px;flex:0 0 62px;border-radius:17px}
+      .v301-avatar img{width:100%;height:100%;object-fit:cover}
+      .v301-avatar span{font-size:14px}
+      .v301-identity{min-width:0}
+      .v301-kicker{font-size:7px;color:var(--green);font-weight:950;letter-spacing:.07em}
+      .v301-identity h2{margin:3px 0 5px;font-size:19px;line-height:1.25;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .v301-meta{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+      .v301-meta span{font-size:7.8px;color:var(--muted);padding:3px 7px;border:1px solid var(--border);border-radius:999px;background:var(--paper)}
+
+      .v301-head-actions{display:flex;align-items:center;justify-content:flex-end;gap:7px;flex-wrap:wrap}
+      .v301-head-actions .chip-btn{display:inline-flex;align-items:center;gap:5px}
+      .v301-head-actions .chip-btn svg{width:13px;height:13px}
+      .v301-close{
+        position:static!important;
+        width:38px;height:38px;min-width:38px;
+        display:grid;place-items:center;
+        border:1px solid var(--border);
+        border-radius:11px;
+        background:var(--paper);
+        color:var(--ink);
+        padding:0;
+      }
+      .v301-close svg{width:17px;height:17px}
+      .v301-status{display:inline-flex;align-items:center;min-height:28px;padding:4px 9px;border-radius:999px;font-size:7.5px;font-weight:900}
+      .v301-status.green{background:var(--green-tint);color:var(--green)}
+      .v301-status.amber{background:var(--amber-tint);color:var(--amber)}
+      .v301-status.blue{background:var(--blue-tint);color:var(--blue)}
+      .v301-status.red{background:var(--danger-tint);color:var(--danger)}
+      .v301-status.muted{background:var(--paper);color:var(--muted);border:1px solid var(--border)}
+
+      .v301-scroll{
+        flex:1 1 auto;
+        min-height:0;
+        overflow:auto;
+        overscroll-behavior:contain;
+        -webkit-overflow-scrolling:touch;
+        padding:14px 16px 20px;
+      }
+
+      .v301-summary{
+        display:grid;
+        grid-template-columns:repeat(4,minmax(0,1fr));
+        gap:8px;
+        margin-bottom:10px;
+      }
+      .v301-summary>div{
+        min-width:0;
+        padding:11px 12px;
+        border:1px solid var(--border);
+        border-radius:13px;
+        background:var(--paper);
+      }
+      .v301-summary span,.v301-comp-grid span,.v301-detail-card span{
+        display:block;
+        color:var(--muted);
+        font-size:7.5px;
+        margin-bottom:4px;
+      }
+      .v301-summary b,.v301-comp-grid b,.v301-detail-card b{
+        display:block;
+        color:var(--ink);
+        font-size:10px;
+        line-height:1.45;
+        overflow-wrap:anywhere;
+      }
+
+      .v301-section{
+        margin-top:10px;
+        padding:13px;
+        border:1px solid var(--border);
+        border-radius:16px;
+        background:var(--paper);
+      }
+      .v301-section-head{
+        display:flex;
+        align-items:flex-start;
+        justify-content:space-between;
+        gap:12px;
+        margin-bottom:10px;
+      }
+      .v301-section-head>div{min-width:0}
+      .v301-section-head>div>span{display:block;color:var(--green);font-size:6.8px;font-weight:950;letter-spacing:.06em}
+      .v301-section-head h3{margin:3px 0 0;font-size:12.5px;color:var(--ink)}
+      .v301-section-head p{margin:3px 0 0;font-size:7.8px;line-height:1.5;color:var(--muted)}
+
+      .v301-detail-grid{
+        display:grid;
+        grid-template-columns:repeat(3,minmax(0,1fr));
+        gap:8px;
+      }
+      .v301-detail-card{
+        display:flex;
+        align-items:flex-start;
+        gap:8px;
+        min-height:68px;
+        padding:9px 10px;
+        border:1px solid var(--border);
+        border-radius:12px;
+        background:var(--card);
+      }
+      .v301-detail-card>div:last-child{min-width:0}
+      .v301-detail-card.empty b{color:var(--muted);font-weight:650}
+      .v301-detail-icon{
+        width:31px;height:31px;flex:0 0 31px;
+        display:grid;place-items:center;
+        border-radius:9px;
+        background:var(--green-tint);
+        color:var(--green);
+      }
+      .v301-detail-icon svg{width:14px;height:14px}
+
+      .v301-privacy{
+        display:flex;align-items:flex-start;gap:8px;
+        margin-top:9px;padding:9px 10px;
+        border:1px solid color-mix(in srgb,var(--amber) 26%,var(--border));
+        border-radius:11px;
+        background:color-mix(in srgb,var(--amber-tint) 60%,var(--paper));
+      }
+      .v301-privacy>svg{width:16px;height:16px;flex:none;color:var(--amber)}
+      .v301-privacy b{display:block;font-size:8.5px}
+      .v301-privacy span{display:block;margin-top:2px;font-size:7.4px;color:var(--muted);line-height:1.5}
+
+      .v301-comp-total{
+        display:flex;align-items:baseline;gap:10px;flex-wrap:wrap;
+        padding:10px 11px;margin-bottom:8px;
+        border-radius:12px;
+        background:var(--green-tint);
+        border:1px solid color-mix(in srgb,var(--green) 20%,var(--border));
+      }
+      .v301-comp-total span{font-size:8px;color:var(--green);font-weight:850}
+      .v301-comp-total b{font-size:15px;color:var(--green)}
+      .v301-comp-total small{font-size:7px;color:var(--muted)}
+      .v301-comp-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+      .v301-comp-grid>div{padding:9px;border:1px solid var(--border);border-radius:11px;background:var(--card)}
+
+      .v301-empty-inline{
+        display:flex;align-items:center;gap:10px;
+        min-height:72px;padding:10px;
+        border:1px dashed var(--border);
+        border-radius:12px;
+        background:var(--card);
+      }
+      .v301-empty-inline.compact{min-height:58px}
+      .v301-empty-icon{width:36px;height:36px;flex:0 0 36px;display:grid;place-items:center;border-radius:10px;background:var(--green-tint);color:var(--green)}
+      .v301-empty-icon svg{width:16px;height:16px}
+      .v301-empty-inline b{display:block;font-size:9px}
+      .v301-empty-inline span{display:block;margin-top:2px;font-size:7.5px;color:var(--muted)}
+
+      .v301-matter-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px}
+      .v301-matter-grid button{
+        display:grid;grid-template-columns:32px minmax(0,1fr) auto;gap:8px;align-items:center;
+        min-width:0;padding:8px;
+        border:1px solid var(--border);border-radius:11px;
+        background:var(--card);color:var(--ink);text-align:start;
+      }
+      .v301-matter-grid button:hover{background:var(--green-tint)}
+      .v301-matter-icon{width:32px;height:32px;display:grid;place-items:center;border-radius:9px;background:var(--green-tint);color:var(--green)}
+      .v301-matter-icon svg{width:14px;height:14px}
+      .v301-matter-copy{min-width:0}
+      .v301-matter-copy b,.v301-matter-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .v301-matter-copy b{font-size:8px}
+      .v301-matter-copy small{margin-top:2px;font-size:6.8px;color:var(--muted)}
+      .v301-matter-grid em{min-width:23px;height:23px;display:grid;place-items:center;border-radius:999px;background:var(--green-tint);color:var(--green);font-style:normal;font-size:7px;font-weight:900}
+
+      .v301-timeline{position:relative}
+      .v301-timeline::before{
+        content:'';
+        position:absolute;
+        top:14px;bottom:14px;
+        inset-inline-start:16px;
+        width:1px;
+        background:var(--border);
+      }
+      .v301-timeline button{
+        position:relative;
+        width:100%;
+        display:grid;
+        grid-template-columns:34px minmax(0,1fr) auto;
+        gap:9px;
+        align-items:center;
+        padding:7px 0;
+        border:0;
+        background:transparent;
+        color:var(--ink);
+        text-align:start;
+      }
+      .v301-time-dot{
+        position:relative;z-index:1;
+        width:32px;height:32px;
+        display:grid;place-items:center;
+        border:4px solid var(--paper);
+        border-radius:999px;
+        background:var(--green-tint);
+        color:var(--green);
+      }
+      .v301-time-dot svg{width:12px;height:12px}
+      .v301-time-copy{min-width:0}
+      .v301-time-copy b{display:block;font-size:8.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+      .v301-time-copy small{display:block;margin-top:2px;font-size:7px;color:var(--muted)}
+      .v301-timeline time{font-size:7px;color:var(--muted);white-space:nowrap}
+
+      .v301-skeleton-line,.v301-skeleton-grid i{
+        display:block;
+        background:linear-gradient(90deg,var(--border),color-mix(in srgb,var(--paper) 60%,var(--border)),var(--border));
+        background-size:220% 100%;
+        animation:v301Skeleton 1.1s linear infinite;
+      }
+      .v301-skeleton-line.wide{height:42px;border-radius:11px;margin-bottom:8px}
+      .v301-skeleton-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+      .v301-skeleton-grid i{height:54px;border-radius:10px}
+      @keyframes v301Skeleton{to{background-position:-220% 0}}
+
+      @media(max-width:860px){
+        .v301-summary{grid-template-columns:1fr 1fr}
+        .v301-detail-grid{grid-template-columns:1fr 1fr}
+        .v301-matter-grid{grid-template-columns:1fr 1fr}
+        .v301-comp-grid{grid-template-columns:1fr 1fr}
+      }
+
+      @media(max-width:620px){
+        #addModalOverlay.tasky-employee360-overlay-v301{
+          align-items:flex-end!important;
+          padding:6px!important;
+        }
+        #addModalBody.tasky-employee360-v301{
+          width:calc(100vw - 12px)!important;
+          max-width:calc(100vw - 12px)!important;
+          height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+          max-height:calc(100dvh - 12px - env(safe-area-inset-top) - env(safe-area-inset-bottom))!important;
+          border-radius:18px 18px 12px 12px!important;
+        }
+        #addModalBody.tasky-employee360-v301 .v301-head{
+          align-items:flex-start;
+          min-height:0;
+          padding:11px 12px;
+        }
+        .v301-avatar.large{width:50px;height:50px;flex-basis:50px;border-radius:14px}
+        .v301-identity h2{font-size:15px}
+        .v301-head-actions{gap:5px}
+        .v301-head-actions .chip-btn{display:none}
+        .v301-scroll{padding:10px 9px calc(16px + env(safe-area-inset-bottom))}
+        .v301-summary,.v301-detail-grid,.v301-matter-grid,.v301-comp-grid{grid-template-columns:1fr}
+        .v301-section{padding:10px}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.taskyEmployeeFileAuditV301=function(){
+    const body=document.getElementById('addModalBody');
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_NATIVE_EMPLOYEE_FILE_V301,
+      installed,
+      active_employee_id:activeEmployeeId,
+      native_modal:!!body?.classList.contains('tasky-employee360-v301'),
+      legacy_v263_modal:!!body?.classList.contains('tasky-employee360-v263'),
+      legacy_v262_modal:!!body?.classList.contains('tasky-employee360-v262'),
+      legacy_v258_modal:!!body?.classList.contains('tasky-employee360-v258'),
+      legacy_scroll_nodes:body?.querySelectorAll('.tasky-v263-employee360-scroll,.tasky-v262-sensitive-grid,.tasky-v258-lock-hero').length||0,
+      native_sections:body?.querySelectorAll('.v301-section').length||0,
+      native_open_function:!!window.hrOpenEmployeeV72?.__taskyV301
+    };
+  };
+
+  window.TASKY_NATIVE_EMPLOYEE_FILE_V301=true;
+  window.TASKY_BUILD=BUILD;
+
+  setTimeout(install,0);
 })();
 </script>
 
