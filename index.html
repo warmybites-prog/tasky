@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV294" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V294</div>
+    <div id="taskyBootBuildV295" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V295</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V294';
+    window.TASKY_BUILD='V295';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V294';
+  window.TASKY_BUILD='V295';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V294';
+    window.TASKY_BUILD='V295';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V294';
+  window.TASKY_BUILD='V295';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V294';
+    window.TASKY_BUILD='V295';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27368,8 +27368,65 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     catch(_){return s}
   }
   function clean(v){return String(v||'').replace(/\s+/g,' ').trim()}
-  function deptName(d){return d?(typeof lang!=='undefined'&&lang==='en'?(d.name_en||d.name_ar):(d.name_ar||d.name_en)):'—'}
-  function posName(p){return p?(typeof lang!=='undefined'&&lang==='en'?(p.title_en||p.title_ar):(p.title_ar||p.title_en)):'—'}
+
+  /*
+    V295 DATA BRIDGE
+    hr.js declares its state as a global lexical binding (hrV72), not as
+    window.hrV72. Reading window.hrV72 therefore returns undefined even though
+    HR tables, employees and departments are already loaded.
+  */
+  function hrState(){
+    try{
+      if(typeof hrV72!=='undefined'&&hrV72)return hrV72;
+    }catch(_){}
+    return window.hrV72||window.__taskyHrDataV295||{};
+  }
+
+  function hrEmployees(){
+    const s=hrState();
+    return Array.isArray(s?.employees)?s.employees:
+      Array.isArray(s?.employee_rows)?s.employee_rows:
+      Array.isArray(s?.employeeRows)?s.employeeRows:[];
+  }
+
+  function hrDepartments(){
+    const s=hrState();
+    return Array.isArray(s?.departments)?s.departments:
+      Array.isArray(s?.department_rows)?s.department_rows:
+      Array.isArray(s?.departmentRows)?s.departmentRows:[];
+  }
+
+  function hrPositions(){
+    const s=hrState();
+    return Array.isArray(s?.positions)?s.positions:
+      Array.isArray(s?.position_rows)?s.position_rows:
+      Array.isArray(s?.positionRows)?s.positionRows:[];
+  }
+
+  function empDeptId(e){
+    return e?.department_id??e?.departmentId??e?.dept_id??e?.department?.id??null;
+  }
+
+  function empPositionId(e){
+    return e?.position_id??e?.positionId??e?.job_position_id??e?.position?.id??null;
+  }
+
+  function empManagerId(e){
+    return e?.manager_employee_id??
+      e?.direct_manager_employee_id??
+      e?.direct_manager_id??
+      e?.manager_id??
+      e?.managerEmployeeId??
+      e?.manager?.id??
+      null;
+  }
+
+  function positionDeptId(p){
+    return p?.department_id??p?.departmentId??p?.dept_id??p?.department?.id??null;
+  }
+
+  function deptName(d){return d?(typeof lang!=='undefined'&&lang==='en'?(d.name_en||d.name_ar||d.name):(d.name_ar||d.name_en||d.name)):'—'}
+  function posName(p){return p?(typeof lang!=='undefined'&&lang==='en'?(p.title_en||p.title_ar||p.title||p.name_en||p.name_ar||p.name):(p.title_ar||p.title_en||p.title||p.name_ar||p.name_en||p.name)):'—'}
 
   function employeeName(e){
     if(!e)return '—';
@@ -27390,15 +27447,18 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function activeEmployees(){
-    return (window.hrV72?.employees||[]).filter(e=>e.status!=='terminated');
+    return hrEmployees().filter(e=>{
+      const s=String(e?.status||e?.employment_status||'active').toLowerCase();
+      return !['terminated','offboarded','deleted'].includes(s);
+    });
   }
 
   function departmentById(id){
-    return (window.hrV72?.departments||[]).find(d=>String(d.id)===String(id));
+    return hrDepartments().find(d=>String(d.id)===String(id));
   }
 
   function positionById(id){
-    return (window.hrV72?.positions||[]).find(p=>String(p.id)===String(id));
+    return hrPositions().find(p=>String(p.id)===String(id));
   }
 
   function positionRank(p){
@@ -27423,7 +27483,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   function companyCard(){
     const name=clean(window.currentWorkspaceName||L('مساحة العمل','Workspace'));
     const employees=activeEmployees().length;
-    const depts=(window.hrV72?.departments||[]).length;
+    const depts=hrDepartments().length;
     return nodeShell(`
       <div class="org293-company-icon"><svg><use href="#i-building"/></svg></div>
       <div class="org293-node-copy">
@@ -27435,8 +27495,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function employeeCard(e,childrenCount=0){
-    const dept=departmentById(e.department_id);
-    const pos=positionById(e.position_id);
+    const dept=departmentById(empDeptId(e));
+    const pos=positionById(empPositionId(e));
     return nodeShell(`
       <button type="button" class="org293-person-btn" onclick="hrOpenEmployeeV72('${esc(e.id)}')">
         <div class="org293-person-avatar">
@@ -27502,7 +27562,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const children=new Map();
 
     employees.forEach(e=>{
-      const manager=String(e.manager_employee_id||'');
+      const manager=String(empManagerId(e)||'');
       if(manager && ids.has(manager)){
         if(!children.has(manager))children.set(manager,[]);
         children.get(manager).push(e);
@@ -27518,7 +27578,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     for(const arr of children.values())sortPeople(arr);
 
     let roots=employees.filter(e=>{
-      const manager=String(e.manager_employee_id||'');
+      const manager=String(empManagerId(e)||'');
       return !manager || !ids.has(manager) || manager===String(e.id);
     });
     sortPeople(roots);
@@ -27534,16 +27594,16 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function departmentPositionTree(){
-    const depts=[...(window.hrV72?.departments||[])];
-    const positions=[...(window.hrV72?.positions||[])];
+    const depts=[...hrDepartments()];
+    const positions=[...hrPositions()];
     const employees=activeEmployees();
 
     if(!depts.length)return '';
 
     const deptNodes=depts.map(d=>{
-      const de=employees.filter(e=>String(e.department_id||'')===String(d.id));
+      const de=employees.filter(e=>String(empDeptId(e)||'')===String(d.id));
       const dp=positions
-        .filter(p=>String(p.department_id||'')===String(d.id))
+        .filter(p=>String(positionDeptId(p)||'')===String(d.id))
         .sort((a,b)=>positionRank(a)-positionRank(b)||posName(a).localeCompare(posName(b)));
 
       let children='';
@@ -27552,25 +27612,25 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         const deIds=new Set(de.map(e=>String(e.id)));
         const childMap=new Map();
         de.forEach(e=>{
-          const mgr=String(e.manager_employee_id||'');
+          const mgr=String(empManagerId(e)||'');
           if(mgr&&deIds.has(mgr)){
             if(!childMap.has(mgr))childMap.set(mgr,[]);
             childMap.get(mgr).push(e);
           }
         });
         const roots=de.filter(e=>{
-          const mgr=String(e.manager_employee_id||'');
+          const mgr=String(empManagerId(e)||'');
           return !mgr||!deIds.has(mgr)||mgr===String(e.id);
         });
         const seen=new Set();
         children=treeList(roots.map(e=>renderEmployeeBranch(e,childMap,seen)));
       }else if(dp.length){
         const lead=dp[0];
-        const leadCount=employees.filter(e=>String(e.position_id||'')===String(lead.id)).length;
+        const leadCount=employees.filter(e=>String(empPositionId(e)||'')===String(lead.id)).length;
         const rest=dp.slice(1);
         children=treeList([
           `${positionCard(lead,leadCount,true)}${rest.length?treeList(rest.map(p=>{
-            const n=employees.filter(e=>String(e.position_id||'')===String(p.id)).length;
+            const n=employees.filter(e=>String(empPositionId(e)||'')===String(p.id)).length;
             return positionCard(p,n,false);
           })):''}`
         ]);
@@ -27584,11 +27644,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   function metrics(){
     const employees=activeEmployees();
-    const departments=window.hrV72?.departments||[];
-    const positions=window.hrV72?.positions||[];
+    const departments=hrDepartments();
+    const positions=hrPositions();
     const validIds=new Set(employees.map(e=>String(e.id)));
-    const linked=employees.filter(e=>e.manager_employee_id&&validIds.has(String(e.manager_employee_id))).length;
-    const occupied=new Set(employees.map(e=>String(e.position_id||'')).filter(Boolean));
+    const linked=employees.filter(e=>empManagerId(e)&&validIds.has(String(empManagerId(e)))).length;
+    const occupied=new Set(employees.map(e=>String(empPositionId(e)||'')).filter(Boolean));
     const vacant=positions.filter(p=>!occupied.has(String(p.id))).length;
     const completion=employees.length>1?Math.round((linked/(employees.length-1))*100):0;
 
@@ -27621,8 +27681,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   function template(){
     const employees=activeEmployees();
-    const departments=window.hrV72?.departments||[];
-    const positions=window.hrV72?.positions||[];
+    const departments=hrDepartments();
+    const positions=hrPositions();
     const hasAnything=employees.length||departments.length||positions.length;
     const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
 
@@ -28192,6 +28252,136 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.TASKY_BUILD=BUILD;
 
   console.info('Tasky V294 — HR single render authority + fetch coalescing active');
+})();
+</script>
+
+
+<script id="tasky-v295-org-data-bridge-js">
+(function(){
+  'use strict';
+
+  const BUILD='V295';
+  let attempts=0;
+  let wrappedFetch=null;
+
+  function readState(){
+    try{
+      if(typeof hrV72!=='undefined'&&hrV72)return hrV72;
+    }catch(_){}
+    return window.hrV72||{};
+  }
+
+  function snapshot(){
+    const s=readState()||{};
+    const employees=Array.isArray(s.employees)?s.employees:
+      Array.isArray(s.employee_rows)?s.employee_rows:
+      Array.isArray(s.employeeRows)?s.employeeRows:[];
+    const departments=Array.isArray(s.departments)?s.departments:
+      Array.isArray(s.department_rows)?s.department_rows:
+      Array.isArray(s.departmentRows)?s.departmentRows:[];
+    const positions=Array.isArray(s.positions)?s.positions:
+      Array.isArray(s.position_rows)?s.position_rows:
+      Array.isArray(s.positionRows)?s.positionRows:[];
+
+    window.__taskyHrDataV295=s;
+
+    return {employees,departments,positions,state:s};
+  }
+
+  function renderOrgOnce(reason){
+    try{
+      if(activeNav!=='hr')return;
+      if(typeof hrActiveTabV72!=='undefined'&&hrActiveTabV72!=='org')return;
+
+      /* V294 will dedupe this if the DOM is already identical. */
+      if(typeof renderModule==='function'){
+        renderModule();
+      }
+    }catch(err){
+      console.warn('Tasky V295 org render',reason,err);
+    }
+  }
+
+  function install(){
+    attempts++;
+
+    let current=null;
+    try{current=typeof fetchHrDataV72==='function'?fetchHrDataV72:null}catch(_){}
+    if(!current){
+      if(attempts<180)setTimeout(install,60);
+      return;
+    }
+
+    if(current.__taskyV295){
+      wrappedFetch=current;
+      return;
+    }
+
+    const base=current;
+    const wrapped=async function(...args){
+      const result=await base.apply(this,args);
+
+      const snap=snapshot();
+      window.__taskyHrDataCountsV295={
+        employees:snap.employees.length,
+        departments:snap.departments.length,
+        positions:snap.positions.length,
+        at:Date.now()
+      };
+
+      renderOrgOnce('after-fetch');
+      return result;
+    };
+
+    wrapped.__taskyV295=true;
+    wrappedFetch=wrapped;
+    window.fetchHrDataV72=wrapped;
+    try{fetchHrDataV72=wrapped}catch(_){}
+
+    /* HR may already be loaded before this bridge installs. */
+    const snap=snapshot();
+    window.__taskyHrDataCountsV295={
+      employees:snap.employees.length,
+      departments:snap.departments.length,
+      positions:snap.positions.length,
+      at:Date.now()
+    };
+    renderOrgOnce('install');
+
+    window.TASKY_HR_ORG_DATA_BRIDGE_V295=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V295 — HR org chart connected to lexical hrV72 state');
+  }
+
+  window.taskyOrgDataAuditV295=function(){
+    const snap=snapshot();
+    let lexicalAvailable=false;
+    try{lexicalAvailable=typeof hrV72!=='undefined'}catch(_){}
+
+    const sampleEmployee=snap.employees[0]||null;
+    const sampleDepartment=snap.departments[0]||null;
+    const samplePosition=snap.positions[0]||null;
+
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_HR_ORG_DATA_BRIDGE_V295,
+      lexical_hrV72:lexicalAvailable,
+      window_hrV72:!!window.hrV72,
+      employees:snap.employees.length,
+      departments:snap.departments.length,
+      positions:snap.positions.length,
+      sample_employee_keys:sampleEmployee?Object.keys(sampleEmployee).sort():[],
+      sample_department_keys:sampleDepartment?Object.keys(sampleDepartment).sort():[],
+      sample_position_keys:samplePosition?Object.keys(samplePosition).sort():[],
+      org_installed:!!window.TASKY_HR_ORG_CHART_V293,
+      hr_render_stability:!!window.TASKY_HR_RENDER_STABILITY_V294,
+      fetch_wrapped:!!wrappedFetch
+    };
+  };
+
+  /* HR is lazy-loaded; poll only until the real HR fetch API exists. */
+  setTimeout(install,0);
 })();
 </script>
 
