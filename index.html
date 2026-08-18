@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV284" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V284</div>
+    <div id="taskyBootBuildV285" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V285</div>
   </div>
 </div>
 
@@ -3892,7 +3892,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V284',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V285',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3976,9 +3976,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V284',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V285',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V284'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V285'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -11071,7 +11071,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V284',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V285',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -20241,7 +20241,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V284';
+    window.TASKY_BUILD='V285';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -25783,15 +25783,21 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             text.includes('Plans & Subscriptions') ||
             text.includes('Plans & Apps')
           ){
-            const labelNode=[...row.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);
-            if(labelNode){
-              labelNode.nodeValue=lang==='ar'?'الباقات والاشتراكات':'Plans & Subscriptions';
-            }else{
-              /* Preserve icon markup and replace only visible text if structure is simple. */
-              const svg=row.querySelector('svg');
-              row.innerHTML=(svg?svg.outerHTML:'')+
-                `<span>${lang==='ar'?'الباقات والاشتراكات':'Plans & Subscriptions'}</span>`;
+            /* V285: update the real V233 label span. Never convert whitespace
+               text nodes into visible labels, otherwise the row gets duplicated. */
+            [...row.childNodes]
+              .filter(n=>n.nodeType===Node.TEXT_NODE && String(n.nodeValue||'').trim())
+              .forEach(n=>n.remove());
+
+            let labelNode=row.querySelector('.txt');
+            if(!labelNode){
+              labelNode=document.createElement('span');
+              labelNode.className='txt';
+              row.appendChild(labelNode);
             }
+            labelNode.textContent=lang==='ar'
+              ?'الباقات والاشتراكات'
+              :'Plans & Subscriptions';
           }
         });
 
@@ -25845,7 +25851,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     taskyV281Applied=true;
     window.TASKY_MERGED_PLAN_APPS_V281=true;
-    window.TASKY_BUILD='V284';
+    window.TASKY_BUILD='V285';
 
     try{taskyRenderNavV233()}catch(_){}
     try{taskyRenderAppSwitcherV233?.()}catch(_){}
@@ -25984,11 +25990,20 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             text.includes('Plans & Apps') ||
             text.includes('Plan & Apps')
           ){
-            const svg=row.querySelector('svg');
-            row.innerHTML=(svg?svg.outerHTML:'')+
-              `<span>${typeof lang!=='undefined'&&lang==='en'
+            [...row.childNodes]
+              .filter(n=>n.nodeType===Node.TEXT_NODE && String(n.nodeValue||'').trim())
+              .forEach(n=>n.remove());
+
+            let labelNode=row.querySelector('.txt');
+            if(!labelNode){
+              labelNode=document.createElement('span');
+              labelNode.className='txt';
+              row.appendChild(labelNode);
+            }
+            labelNode.textContent=
+              typeof lang!=='undefined'&&lang==='en'
                 ?'Plans & Subscriptions'
-                :'الباقات والاشتراكات'}</span>`;
+                :'الباقات والاشتراكات';
           }
         });
       }
@@ -26016,7 +26031,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLANS_SUBSCRIPTIONS_V282=true;
-  window.TASKY_BUILD='V284';
+  window.TASKY_BUILD='V285';
 
   setTimeout(taskyV282ApplyLabels,0);
 })();
@@ -26039,7 +26054,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       return;
     }
 
-    window.TASKY_BUILD='V284';
+    window.TASKY_BUILD='V285';
     window.TASKY_LOGIN_FIRST_V284=true;
 
     try{
@@ -26078,6 +26093,157 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   setTimeout(finalize,0);
+})();
+</script>
+
+
+<script id="tasky-v285-sidebar-label-fix-js">
+(function(){
+  let applied=false;
+  let attempts=0;
+
+  function taskyV285Label(){
+    return typeof lang!=='undefined'&&lang==='en'
+      ?'Plans & Subscriptions'
+      :'الباقات والاشتراكات';
+  }
+
+  function taskyV285IsPlansRow(row){
+    if(!row)return false;
+    const onclick=String(row.getAttribute?.('onclick')||'');
+    const text=String(row.textContent||'').trim();
+    return onclick.includes("plans_apps") ||
+      text.includes('الباقات والاشتراكات') ||
+      text.includes('الباقات والتطبيقات') ||
+      text.includes('الباقة والتطبيقات') ||
+      text.includes('Plans & Subscriptions') ||
+      text.includes('Plans & Apps') ||
+      text.includes('Plan & Apps');
+  }
+
+  function taskyV285CleanRow(row){
+    if(!taskyV285IsPlansRow(row))return false;
+
+    row.classList.add('tasky-plans-subscriptions-row-v285');
+
+    /* Remove only accidental non-whitespace direct text nodes. */
+    [...row.childNodes]
+      .filter(n=>n.nodeType===Node.TEXT_NODE && String(n.nodeValue||'').trim())
+      .forEach(n=>n.remove());
+
+    let label=row.querySelector('.txt');
+    if(!label){
+      label=document.createElement('span');
+      label.className='txt';
+      row.appendChild(label);
+    }
+
+    label.textContent=taskyV285Label();
+
+    /* There must be exactly one visible label inside the row. */
+    [...row.querySelectorAll('span')]
+      .filter(span=>span!==label && !span.closest('.tasky-nav-badge-v233'))
+      .forEach(span=>{
+        const t=String(span.textContent||'').trim();
+        if(
+          t==='الباقات والاشتراكات' ||
+          t==='الباقات والتطبيقات' ||
+          t==='الباقة والتطبيقات' ||
+          t==='Plans & Subscriptions' ||
+          t==='Plans & Apps' ||
+          t==='Plan & Apps'
+        )span.remove();
+      });
+
+    return true;
+  }
+
+  function taskyV285NormalizeNav(){
+    const nav=document.getElementById('mainNav');
+    if(!nav)return false;
+
+    [...nav.querySelectorAll('button,a')].forEach(taskyV285CleanRow);
+    return true;
+  }
+
+  function taskyV285Apply(){
+    attempts++;
+
+    if(typeof taskyRenderNavV233!=='function'){
+      if(attempts<160)setTimeout(taskyV285Apply,50);
+      return;
+    }
+
+    if(!taskyRenderNavV233.__taskyV285){
+      const base=taskyRenderNavV233;
+      const wrapped=function(...args){
+        const result=base.apply(this,args);
+        taskyV285NormalizeNav();
+        return result;
+      };
+      wrapped.__taskyV285=true;
+      taskyRenderNavV233=wrapped;
+    }
+
+    taskyV285NormalizeNav();
+    applied=true;
+    window.TASKY_SIDEBAR_LABEL_FIX_V285=true;
+    window.TASKY_BUILD='V285';
+
+    console.info('Tasky V285 — Plans & Subscriptions sidebar label normalized');
+  }
+
+  window.taskySidebarLabelAuditV285=function(){
+    const nav=document.getElementById('mainNav');
+    const rows=[...nav?.querySelectorAll('button,a')||[]]
+      .filter(taskyV285IsPlansRow);
+
+    return {
+      build:window.TASKY_BUILD||null,
+      applied,
+      matching_rows:rows.length,
+      rows:rows.map(row=>({
+        text:String(row.textContent||'').replace(/\s+/g,' ').trim(),
+        direct_visible_text_nodes:[...row.childNodes]
+          .filter(n=>n.nodeType===Node.TEXT_NODE && String(n.nodeValue||'').trim())
+          .length,
+        txt_spans:row.querySelectorAll('.txt').length
+      }))
+    };
+  };
+
+  if(!document.getElementById('tasky-v285-sidebar-label-fix-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v285-sidebar-label-fix-css';
+    style.textContent=`
+      #mainNav .tasky-plans-subscriptions-row-v285{
+        gap:8px !important;
+        padding-inline:10px !important;
+      }
+      #mainNav .tasky-plans-subscriptions-row-v285 > .txt{
+        display:block !important;
+        flex:1 1 auto !important;
+        min-width:0 !important;
+        max-width:100% !important;
+        white-space:nowrap !important;
+        overflow:hidden !important;
+        text-overflow:ellipsis !important;
+        line-height:1.35 !important;
+        font-size:12px !important;
+      }
+      #mainNav .tasky-plans-subscriptions-row-v285 > svg{
+        flex:0 0 17px !important;
+      }
+      @media(max-width:820px){
+        #mainNav .tasky-plans-subscriptions-row-v285 > .txt{
+          font-size:12px !important;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  setTimeout(taskyV285Apply,0);
 })();
 </script>
 
