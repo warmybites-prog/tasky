@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV292" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V292</div>
+    <div id="taskyBootBuildV293" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V293</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V292';
+    window.TASKY_BUILD='V293';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V292';
+  window.TASKY_BUILD='V293';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V292';
+    window.TASKY_BUILD='V293';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V292';
+  window.TASKY_BUILD='V293';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V292';
+    window.TASKY_BUILD='V293';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27347,6 +27347,516 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }else{
     setTimeout(finalize,0);
   }
+})();
+</script>
+
+
+<script id="tasky-v293-org-chart-js">
+(function(){
+  'use strict';
+
+  const BUILD='V293';
+  let installed=false;
+  let zoom=1;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+  function esc(v){
+    const s=String(v??'');
+    try{return typeof escapeHtml==='function'?escapeHtml(s):s}
+    catch(_){return s}
+  }
+  function clean(v){return String(v||'').replace(/\s+/g,' ').trim()}
+  function deptName(d){return d?(typeof lang!=='undefined'&&lang==='en'?(d.name_en||d.name_ar):(d.name_ar||d.name_en)):'—'}
+  function posName(p){return p?(typeof lang!=='undefined'&&lang==='en'?(p.title_en||p.title_ar):(p.title_ar||p.title_en)):'—'}
+
+  function employeeName(e){
+    if(!e)return '—';
+    try{
+      if(typeof hrName72==='function')return hrName72(e);
+    }catch(_){}
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(e.full_name_en||e.full_name_ar||'—')
+      :(e.full_name_ar||e.full_name_en||'—');
+  }
+
+  function employeeInitial(e){
+    try{
+      if(typeof hrInitial72==='function')return hrInitial72(e);
+    }catch(_){}
+    const n=employeeName(e);
+    return n==='—'?'HR':n.split(/\s+/).filter(Boolean).slice(0,2).map(x=>x[0]).join('').toUpperCase();
+  }
+
+  function activeEmployees(){
+    return (window.hrV72?.employees||[]).filter(e=>e.status!=='terminated');
+  }
+
+  function departmentById(id){
+    return (window.hrV72?.departments||[]).find(d=>String(d.id)===String(id));
+  }
+
+  function positionById(id){
+    return (window.hrV72?.positions||[]).find(p=>String(p.id)===String(id));
+  }
+
+  function positionRank(p){
+    const grade=String(p?.grade||'').trim();
+    const numeric=Number(grade.replace(/[^\d.]/g,''));
+    if(grade && Number.isFinite(numeric) && numeric>0)return numeric;
+
+    const t=clean(`${p?.title_ar||''} ${p?.title_en||''}`).toLowerCase();
+    if(/رئيس|مدير عام|chief|ceo|president|director|head\b|vp\b/.test(t))return 1;
+    if(/مدير|manager|lead|قائد/.test(t))return 2;
+    if(/مشرف|supervisor|senior|أول/.test(t))return 3;
+    if(/أخصائي|specialist|مصمم|designer|محلل|analyst|مهندس|engineer/.test(t))return 4;
+    if(/منسق|coordinator|assistant|مساعد/.test(t))return 5;
+    if(/متدرب|intern|trainee/.test(t))return 6;
+    return 4;
+  }
+
+  function nodeShell(inner,cls=''){
+    return `<div class="org293-node ${cls}">${inner}</div>`;
+  }
+
+  function companyCard(){
+    const name=clean(window.currentWorkspaceName||L('مساحة العمل','Workspace'));
+    const employees=activeEmployees().length;
+    const depts=(window.hrV72?.departments||[]).length;
+    return nodeShell(`
+      <div class="org293-company-icon"><svg><use href="#i-building"/></svg></div>
+      <div class="org293-node-copy">
+        <span>${L('المنظمة','ORGANIZATION')}</span>
+        <b>${esc(name)}</b>
+        <small>${depts} ${L('إدارة','departments')} · ${employees} ${L('موظف','employees')}</small>
+      </div>
+    `,'company');
+  }
+
+  function employeeCard(e,childrenCount=0){
+    const dept=departmentById(e.department_id);
+    const pos=positionById(e.position_id);
+    return nodeShell(`
+      <button type="button" class="org293-person-btn" onclick="hrOpenEmployeeV72('${esc(e.id)}')">
+        <div class="org293-person-avatar">
+          ${e.avatar_url?`<img src="${esc(e.avatar_url)}" alt="">`:`<span>${esc(employeeInitial(e))}</span>`}
+        </div>
+        <div class="org293-node-copy">
+          <span>${esc(deptName(dept))}</span>
+          <b>${esc(employeeName(e))}</b>
+          <small>${esc(posName(pos))}</small>
+        </div>
+        ${childrenCount?`<div class="org293-report-count" title="${L('تقارير مباشرة','Direct reports')}">${childrenCount}</div>`:''}
+      </button>
+    `,'person');
+  }
+
+  function positionCard(p,employeeCount=0,isLead=false){
+    const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
+    return nodeShell(`
+      <button type="button" class="org293-position-btn" ${canManage?`onclick="hrOpenFormV72('position','${esc(p.id)}')"`:''}>
+        <div class="org293-position-mark">${isLead?'★':'P'}</div>
+        <div class="org293-node-copy">
+          <span>${esc(p.grade||L('مسمى وظيفي','POSITION'))}</span>
+          <b>${esc(posName(p))}</b>
+          <small>${employeeCount?`${employeeCount} ${L('موظف','employees')}`:L('شاغر / غير مشغول','Vacant / unfilled')}</small>
+        </div>
+      </button>
+    `,`position ${isLead?'lead':''}`);
+  }
+
+  function departmentCard(d,employeeCount,positionCount){
+    const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
+    return nodeShell(`
+      <button type="button" class="org293-dept-btn" ${canManage?`onclick="hrOpenFormV72('department','${esc(d.id)}')"`:''}>
+        <div class="org293-dept-icon"><svg><use href="#i-users"/></svg></div>
+        <div class="org293-node-copy">
+          <span>${L('إدارة','DEPARTMENT')}</span>
+          <b>${esc(deptName(d))}</b>
+          <small>${employeeCount} ${L('موظف','employees')} · ${positionCount} ${L('مسمى','positions')}</small>
+        </div>
+      </button>
+    `,'department');
+  }
+
+  function treeList(items){
+    if(!items?.length)return '';
+    return `<ul>${items.map(x=>`<li>${x}</li>`).join('')}</ul>`;
+  }
+
+  function renderEmployeeBranch(e,map,seen){
+    const id=String(e.id);
+    if(seen.has(id))return employeeCard(e,0);
+    seen.add(id);
+
+    const kids=(map.get(id)||[]).filter(x=>!seen.has(String(x.id)));
+    return `${employeeCard(e,kids.length)}${kids.length?treeList(kids.map(k=>renderEmployeeBranch(k,map,seen))):''}`;
+  }
+
+  function employeeReportingTree(){
+    const employees=activeEmployees();
+    if(!employees.length)return '';
+
+    const ids=new Set(employees.map(e=>String(e.id)));
+    const children=new Map();
+
+    employees.forEach(e=>{
+      const manager=String(e.manager_employee_id||'');
+      if(manager && ids.has(manager)){
+        if(!children.has(manager))children.set(manager,[]);
+        children.get(manager).push(e);
+      }
+    });
+
+    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
+    const sortPeople=arr=>arr.sort((a,b)=>{
+      const da=deptName(departmentById(a.department_id));
+      const db=deptName(departmentById(b.department_id));
+      return da.localeCompare(db,locale)||employeeName(a).localeCompare(employeeName(b),locale);
+    });
+    for(const arr of children.values())sortPeople(arr);
+
+    let roots=employees.filter(e=>{
+      const manager=String(e.manager_employee_id||'');
+      return !manager || !ids.has(manager) || manager===String(e.id);
+    });
+    sortPeople(roots);
+
+    const seen=new Set();
+    const nodes=roots.map(e=>renderEmployeeBranch(e,children,seen));
+
+    employees.filter(e=>!seen.has(String(e.id))).forEach(e=>{
+      nodes.push(renderEmployeeBranch(e,children,seen));
+    });
+
+    return treeList(nodes);
+  }
+
+  function departmentPositionTree(){
+    const depts=[...(window.hrV72?.departments||[])];
+    const positions=[...(window.hrV72?.positions||[])];
+    const employees=activeEmployees();
+
+    if(!depts.length)return '';
+
+    const deptNodes=depts.map(d=>{
+      const de=employees.filter(e=>String(e.department_id||'')===String(d.id));
+      const dp=positions
+        .filter(p=>String(p.department_id||'')===String(d.id))
+        .sort((a,b)=>positionRank(a)-positionRank(b)||posName(a).localeCompare(posName(b)));
+
+      let children='';
+
+      if(de.length){
+        const deIds=new Set(de.map(e=>String(e.id)));
+        const childMap=new Map();
+        de.forEach(e=>{
+          const mgr=String(e.manager_employee_id||'');
+          if(mgr&&deIds.has(mgr)){
+            if(!childMap.has(mgr))childMap.set(mgr,[]);
+            childMap.get(mgr).push(e);
+          }
+        });
+        const roots=de.filter(e=>{
+          const mgr=String(e.manager_employee_id||'');
+          return !mgr||!deIds.has(mgr)||mgr===String(e.id);
+        });
+        const seen=new Set();
+        children=treeList(roots.map(e=>renderEmployeeBranch(e,childMap,seen)));
+      }else if(dp.length){
+        const lead=dp[0];
+        const leadCount=employees.filter(e=>String(e.position_id||'')===String(lead.id)).length;
+        const rest=dp.slice(1);
+        children=treeList([
+          `${positionCard(lead,leadCount,true)}${rest.length?treeList(rest.map(p=>{
+            const n=employees.filter(e=>String(e.position_id||'')===String(p.id)).length;
+            return positionCard(p,n,false);
+          })):''}`
+        ]);
+      }
+
+      return `${departmentCard(d,de.length,dp.length)}${children}`;
+    });
+
+    return treeList(deptNodes);
+  }
+
+  function metrics(){
+    const employees=activeEmployees();
+    const departments=window.hrV72?.departments||[];
+    const positions=window.hrV72?.positions||[];
+    const validIds=new Set(employees.map(e=>String(e.id)));
+    const linked=employees.filter(e=>e.manager_employee_id&&validIds.has(String(e.manager_employee_id))).length;
+    const occupied=new Set(employees.map(e=>String(e.position_id||'')).filter(Boolean));
+    const vacant=positions.filter(p=>!occupied.has(String(p.id))).length;
+    const completion=employees.length>1?Math.round((linked/(employees.length-1))*100):0;
+
+    return `
+      <div class="org293-metrics">
+        <div><span>${L('الإدارات','Departments')}</span><b>${departments.length}</b></div>
+        <div><span>${L('الموظفون','Employees')}</span><b>${employees.length}</b></div>
+        <div><span>${L('المسميات','Positions')}</span><b>${positions.length}</b></div>
+        <div><span>${L('المسميات الشاغرة','Vacant positions')}</span><b>${vacant}</b></div>
+        <div><span>${L('اكتمال خطوط التقارير','Reporting lines')}</span><b>${employees.length>1?completion+'%':'—'}</b></div>
+      </div>`;
+  }
+
+  function emptyState(){
+    const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
+    return `
+      <div class="org293-empty">
+        <div class="org293-empty-icon"><svg><use href="#i-git-branch"/></svg></div>
+        <h4>${L('ابدأ ببناء الهيكل التنظيمي','Start building the organization chart')}</h4>
+        <p>${L(
+          'أنشئ إدارة ثم أضف المسميات واربط الموظفين بمديرهم المباشر. سيظهر الهيكل تلقائيًا بخطوط التقارير.',
+          'Create a department, add positions, and assign direct managers. The reporting chart will build automatically.'
+        )}</p>
+        ${canManage?`<div class="org293-empty-actions">
+          <button class="chip-btn" onclick="hrOpenFormV72('department')">+ ${L('إدارة','Department')}</button>
+          <button class="primary-btn" onclick="hrOpenFormV72('position')">+ ${L('مسمى وظيفي','Position')}</button>
+        </div>`:''}
+      </div>`;
+  }
+
+  function template(){
+    const employees=activeEmployees();
+    const departments=window.hrV72?.departments||[];
+    const positions=window.hrV72?.positions||[];
+    const hasAnything=employees.length||departments.length||positions.length;
+    const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
+
+    const actualTree=employees.length?employeeReportingTree():departmentPositionTree();
+
+    return `
+      <div class="org293-shell">
+        <div class="org293-top">
+          <div>
+            <span class="org293-eyebrow">ORG CHART</span>
+            <h3>${L('الهيكل التنظيمي','Organization chart')}</h3>
+            <p>${L(
+              'عرض بصري فعلي لخطوط التقارير والإدارات والمسميات. يعتمد ترتيب الموظفين على المدير المباشر المسجل في ملف الموظف.',
+              'A real visual view of reporting lines, departments and positions. Employee hierarchy follows the direct manager saved in each profile.'
+            )}</p>
+          </div>
+          <div class="org293-actions">
+            ${canManage?`<button class="chip-btn" onclick="hrOpenFormV72('department')">+ ${L('إدارة','Department')}</button>
+            <button class="chip-btn" onclick="hrOpenFormV72('position')">+ ${L('مسمى','Position')}</button>`:''}
+            <div class="org293-zoom">
+              <button type="button" onclick="taskyOrgZoomV293(-0.1)">−</button>
+              <span id="org293ZoomLabel">${Math.round(zoom*100)}%</span>
+              <button type="button" onclick="taskyOrgZoomV293(0.1)">+</button>
+              <button type="button" class="fit" onclick="taskyOrgZoomResetV293()">100%</button>
+            </div>
+          </div>
+        </div>
+
+        ${metrics()}
+
+        <div class="org293-panel">
+          ${hasAnything?`
+            <div class="org293-tree-scroll">
+              <div class="org293-tree" id="org293Tree" style="--org293-scale:${zoom}">
+                <ul class="org293-root">
+                  <li>
+                    ${companyCard()}
+                    ${actualTree}
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="org293-legend">
+              <span><i class="company"></i>${L('المنظمة','Organization')}</span>
+              <span><i class="department"></i>${L('إدارة','Department')}</span>
+              <span><i class="person"></i>${L('موظف','Employee')}</span>
+              <span><i class="position"></i>${L('مسمى شاغر','Vacant position')}</span>
+            </div>
+          `:emptyState()}
+        </div>
+
+        ${employees.length?`
+          <div class="org293-note">
+            <svg><use href="#i-info"/></svg>
+            <div>
+              <b>${L('كيف يتم ترتيب الهيكل؟','How is the hierarchy built?')}</b>
+              <span>${L(
+                'المدير المباشر هو المرجع الأساسي. الموظف بدون مدير مباشر يظهر في المستوى الأعلى، وأي موظفين يتبعون له يظهرون تحته تلقائيًا.',
+                'Direct manager is the primary hierarchy source. Employees without a manager appear at the top level, and their direct reports appear beneath them automatically.'
+              )}</span>
+            </div>
+          </div>`:''}
+      </div>`;
+  }
+
+  window.taskyOrgZoomV293=function(delta){
+    zoom=Math.max(.65,Math.min(1.35,Math.round((zoom+Number(delta||0))*100)/100));
+    const tree=document.getElementById('org293Tree');
+    if(tree)tree.style.setProperty('--org293-scale',zoom);
+    const label=document.getElementById('org293ZoomLabel');
+    if(label)label.textContent=Math.round(zoom*100)+'%';
+  };
+
+  window.taskyOrgZoomResetV293=function(){
+    zoom=1;
+    const tree=document.getElementById('org293Tree');
+    if(tree)tree.style.setProperty('--org293-scale',1);
+    const label=document.getElementById('org293ZoomLabel');
+    if(label)label.textContent='100%';
+  };
+
+  window.taskyInstallOrgChartV293=function(){
+    if(installed)return true;
+
+    let available=false;
+    try{available=typeof hrOrgV72==='function'}catch(_){}
+    if(!available && typeof window.hrOrgV72!=='function')return false;
+
+    window.hrOrgV72=template;
+    try{hrOrgV72=template}catch(_){}
+
+    installed=true;
+    window.TASKY_HR_ORG_CHART_V293=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V293 — hierarchical HR organization chart installed');
+    return true;
+  };
+
+  if(typeof window.setActiveNav==='function' && !window.setActiveNav.__taskyOrgV293){
+    const baseSetActiveNav=window.setActiveNav;
+    const wrapped=async function(id,...args){
+      const result=await baseSetActiveNav(id,...args);
+
+      if(id==='hr'){
+        taskyInstallOrgChartV293();
+        try{
+          if(typeof hrActiveTabV72!=='undefined' && hrActiveTabV72==='org' && typeof renderModule==='function'){
+            renderModule();
+          }
+        }catch(_){}
+      }
+
+      return result;
+    };
+    wrapped.__taskyOrgV293=true;
+    window.setActiveNav=wrapped;
+    try{setActiveNav=wrapped}catch(_){}
+  }
+
+  setTimeout(()=>taskyInstallOrgChartV293(),0);
+
+  if(!document.getElementById('tasky-v293-org-chart-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v293-org-chart-css';
+    style.textContent=`
+      .org293-shell{display:flex;flex-direction:column;gap:12px}
+      .org293-top{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding:2px 2px 0}
+      .org293-top h3{margin:3px 0 5px;font-size:18px;color:var(--ink)}
+      .org293-top p{margin:0;max-width:720px;font-size:9.5px;line-height:1.7;color:var(--muted)}
+      .org293-eyebrow{display:block;color:var(--green);font-size:7.5px;font-weight:900;letter-spacing:.08em}
+      .org293-actions{display:flex;gap:7px;align-items:center;justify-content:flex-end;flex-wrap:wrap}
+      .org293-zoom{display:inline-flex;align-items:center;gap:2px;padding:3px;border:1px solid var(--border);border-radius:10px;background:var(--card)}
+      .org293-zoom button{min-width:28px;height:28px;border:0;border-radius:7px;background:transparent;color:var(--ink);font:inherit;font-weight:900}
+      .org293-zoom button:hover{background:var(--paper)}
+      .org293-zoom button.fit{font-size:8px;padding-inline:8px}
+      .org293-zoom span{min-width:40px;text-align:center;font-size:8px;color:var(--muted);font-weight:800}
+
+      .org293-metrics{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:8px}
+      .org293-metrics>div{border:1px solid var(--border);border-radius:12px;background:var(--card);padding:10px 12px}
+      .org293-metrics span{display:block;color:var(--muted);font-size:7.5px;margin-bottom:4px}
+      .org293-metrics b{display:block;color:var(--ink);font-size:15px}
+
+      .org293-panel{border:1px solid var(--border);border-radius:18px;background:var(--card);overflow:hidden}
+      .org293-tree-scroll{overflow:auto;overscroll-behavior:contain;padding:28px 18px 34px;min-height:360px;background:
+        radial-gradient(circle at 50% 0,color-mix(in srgb,var(--green) 5%,transparent),transparent 38%),var(--card)}
+      .org293-tree{width:max-content;min-width:100%;transform-origin:top center;zoom:var(--org293-scale,1)}
+      @supports not (zoom:1){.org293-tree{transform:scale(var(--org293-scale,1));transform-origin:top center}}
+
+      .org293-tree ul{padding-top:28px;position:relative;display:flex;justify-content:center;margin:0;list-style:none}
+      .org293-tree li{position:relative;padding:28px 8px 0;text-align:center;list-style:none}
+      .org293-tree li::before,.org293-tree li::after{
+        content:'';position:absolute;top:0;width:50%;height:28px;border-top:1.5px solid color-mix(in srgb,var(--green) 32%,var(--border))
+      }
+      .org293-tree li::before{right:50%}
+      .org293-tree li::after{left:50%;border-left:1.5px solid color-mix(in srgb,var(--green) 32%,var(--border))}
+      .org293-tree li:only-child::before,.org293-tree li:only-child::after{display:none}
+      .org293-tree li:only-child{padding-top:0}
+      .org293-tree li:first-child::before,.org293-tree li:last-child::after{border:0}
+      .org293-tree li:last-child::before{border-right:1.5px solid color-mix(in srgb,var(--green) 32%,var(--border));border-radius:0 7px 0 0}
+      .org293-tree li:first-child::after{border-radius:7px 0 0 0}
+      .org293-tree ul ul::before{
+        content:'';position:absolute;top:0;left:50%;width:0;height:28px;border-left:1.5px solid color-mix(in srgb,var(--green) 32%,var(--border))
+      }
+      .org293-root{padding-top:0!important}
+      .org293-root>li{padding-top:0!important}
+      .org293-root>li::before,.org293-root>li::after{display:none!important}
+
+      .org293-node{width:178px;min-height:72px;margin:0 auto;border:1px solid var(--border);border-radius:15px;background:var(--paper);
+        box-shadow:0 7px 22px rgba(12,49,37,.055);text-align:start;position:relative}
+      .org293-node button{width:100%;height:100%;min-height:70px;border:0;background:transparent;color:inherit;text-align:inherit;padding:10px;display:flex;align-items:center;gap:9px;border-radius:inherit}
+      .org293-node button:hover{background:color-mix(in srgb,var(--green-tint) 42%,transparent)}
+      .org293-node.company{width:220px;display:flex;align-items:center;gap:10px;padding:12px 13px;border-color:color-mix(in srgb,var(--green) 36%,var(--border));
+        background:linear-gradient(145deg,color-mix(in srgb,var(--green) 9%,var(--card)),var(--paper))}
+      .org293-node.department{border-color:color-mix(in srgb,var(--blue) 22%,var(--border))}
+      .org293-node.person{border-color:color-mix(in srgb,var(--green) 20%,var(--border))}
+      .org293-node.position{border-style:dashed}
+      .org293-node.position.lead{border-style:solid;border-color:color-mix(in srgb,var(--amber) 38%,var(--border));background:color-mix(in srgb,var(--amber-tint) 32%,var(--paper))}
+
+      .org293-company-icon,.org293-dept-icon,.org293-position-mark,.org293-person-avatar{
+        width:38px;height:38px;flex:0 0 38px;border-radius:11px;display:grid;place-items:center;overflow:hidden
+      }
+      .org293-company-icon{background:var(--green);color:white}
+      .org293-company-icon svg,.org293-dept-icon svg{width:17px;height:17px}
+      .org293-dept-icon{background:var(--blue-tint);color:var(--blue)}
+      .org293-position-mark{background:var(--card);color:var(--green);font-size:9px;font-weight:900;border:1px solid var(--border)}
+      .org293-person-avatar{background:var(--green-tint);color:var(--green);font-size:9px;font-weight:900}
+      .org293-person-avatar img{width:100%;height:100%;object-fit:cover}
+      .org293-node-copy{min-width:0;flex:1}
+      .org293-node-copy span,.org293-node-copy b,.org293-node-copy small{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+      .org293-node-copy span{font-size:6.9px;color:var(--muted);font-weight:850;letter-spacing:.02em}
+      .org293-node-copy b{font-size:10.5px;color:var(--ink);margin-top:2px}
+      .org293-node-copy small{font-size:7.7px;color:var(--muted);margin-top:3px}
+      .org293-report-count{position:absolute;inset-inline-end:7px;top:7px;min-width:20px;height:20px;border-radius:999px;display:grid;place-items:center;
+        background:var(--green-tint);color:var(--green);font-size:7px;font-weight:900}
+
+      .org293-legend{display:flex;align-items:center;justify-content:center;gap:16px;flex-wrap:wrap;padding:10px 14px;border-top:1px solid var(--border);background:var(--paper)}
+      .org293-legend span{display:inline-flex;align-items:center;gap:5px;font-size:7.5px;color:var(--muted)}
+      .org293-legend i{width:8px;height:8px;border-radius:3px;background:var(--border)}
+      .org293-legend i.company{background:var(--green)}
+      .org293-legend i.department{background:var(--blue)}
+      .org293-legend i.person{background:color-mix(in srgb,var(--green) 55%,white)}
+      .org293-legend i.position{background:var(--amber)}
+
+      .org293-note{display:flex;align-items:flex-start;gap:9px;border:1px solid var(--border);border-radius:13px;background:var(--paper);padding:11px}
+      .org293-note svg{width:16px;height:16px;color:var(--green);flex:none;margin-top:1px}
+      .org293-note b{display:block;font-size:9px;color:var(--ink)}
+      .org293-note span{display:block;font-size:8px;color:var(--muted);line-height:1.65;margin-top:2px}
+
+      .org293-empty{text-align:center;padding:42px 18px}
+      .org293-empty-icon{width:54px;height:54px;border-radius:16px;background:var(--green-tint);color:var(--green);display:grid;place-items:center;margin:0 auto 10px}
+      .org293-empty-icon svg{width:22px;height:22px}
+      .org293-empty h4{margin:0;font-size:13px}
+      .org293-empty p{max-width:520px;margin:6px auto 13px;color:var(--muted);font-size:9px;line-height:1.7}
+      .org293-empty-actions{display:flex;justify-content:center;gap:7px;flex-wrap:wrap}
+
+      @media(max-width:980px){
+        .org293-metrics{grid-template-columns:repeat(3,minmax(0,1fr))}
+        .org293-top{flex-direction:column}
+        .org293-actions{width:100%;justify-content:flex-start}
+      }
+      @media(max-width:640px){
+        .org293-metrics{grid-template-columns:1fr 1fr}
+        .org293-tree-scroll{padding:22px 8px 28px}
+        .org293-node{width:160px}
+        .org293-node.company{width:190px}
+        .org293-zoom{margin-inline-start:auto}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.TASKY_HR_ORG_UI_V293=true;
+  window.TASKY_BUILD=BUILD;
 })();
 </script>
 
