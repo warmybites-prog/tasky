@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV283" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V283</div>
+    <div id="taskyBootBuildV284" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V284</div>
   </div>
 </div>
 
@@ -3414,68 +3414,43 @@ html body .sidebar .main-nav,
 </div>
 
 
-<script id="tasky-v283-early-auth-gate">
+<script id="tasky-v284-session-first-paint">
 (function(){
-  const PROJECT_REF='ghzgmrnqididkmocuzrf';
-  const AUTH_KEY=`sb-${PROJECT_REF}-auth-token`;
+  const STORAGE_KEY='sb-ghzgmrnqididkmocuzrf-auth-token';
 
-  function readStoredSession(){
+  function hasStoredSession(){
     try{
-      const raw=localStorage.getItem(AUTH_KEY);
-      if(!raw)return null;
+      const raw=localStorage.getItem(STORAGE_KEY);
+      if(!raw)return false;
       const parsed=JSON.parse(raw);
-
-      /* supabase-js may store either the session object directly or inside
-         currentSession depending on storage/runtime version. */
       const session=parsed?.currentSession||parsed?.session||parsed;
-      const access=session?.access_token||null;
-      const refresh=session?.refresh_token||null;
-
-      if(!access&&!refresh)return null;
-      return session;
+      return !!(session?.access_token||session?.refresh_token);
     }catch(_){
-      return null;
+      return false;
     }
   }
 
-  window.taskyHasLocalSessionHintV283=function(){
-    try{
-      if(typeof currentUserId!=='undefined'&&currentUserId)return true;
-      if(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)return true;
-    }catch(_){}
-    return !!readStoredSession();
-  };
+  window.taskyHasStoredSessionV284=hasStoredSession;
+  window.__taskyStoredSessionAtPaintV284=hasStoredSession();
 
   const boot=document.getElementById('taskyBootV83');
   const auth=document.getElementById('authScreen');
 
-  const publicParams=new URLSearchParams(location.search);
-  const publicLaunch=
-    publicParams.has('quote')||
-    publicParams.has('invite')||
-    publicParams.has('survey')||
-    publicParams.has('salesquote')||
-    publicParams.has('invoice')||
-    (publicParams.has('meeting')&&publicParams.has('guest'));
-
-  const hasSession=window.taskyHasLocalSessionHintV283();
-
-  window.__taskyInitialSessionHintV283=hasSession;
-  window.__taskyPublicLaunchHintV283=publicLaunch;
-
-  if(boot){
-    if(hasSession&&!publicLaunch){
+  if(window.__taskyStoredSessionAtPaintV284){
+    if(boot){
       boot.style.display='flex';
       boot.classList.remove('hidden');
-    }else{
+    }
+    if(auth)auth.style.display='none';
+  }else{
+    if(boot){
       boot.style.display='none';
       boot.classList.add('hidden');
     }
-  }
-
-  if(auth){
-    auth.style.display=publicLaunch?'none':'flex';
-    auth.style.visibility='visible';
+    if(auth){
+      auth.style.display='flex';
+      auth.style.visibility='visible';
+    }
   }
 })();
 </script>
@@ -3485,17 +3460,17 @@ html body .sidebar .main-nav,
 /* ================= V83 FAST BOOT HELPERS — MERGED FROM V75.2 REQUIREMENTS ================= */
 const taskyModuleLoadStateV83={workspaceId:null,loaded:new Set(),loading:new Map()};
 function taskyBootLangV83(ar,en){try{return (typeof lang!=='undefined'?lang:(document.documentElement.lang||'ar'))==='en'?en:ar}catch(_){return ar}}
-function taskyBootAllowedV283(){
+function taskyBootMayShowV284(){
   try{
-    if(window.__taskyPublicLaunchHintV283)return false;
-    if(typeof window.taskyHasLocalSessionHintV283==='function')return !!window.taskyHasLocalSessionHintV283();
+    if(typeof currentUserId!=='undefined'&&currentUserId)return true;
+    if(typeof window.taskyHasStoredSessionV284==='function')return !!window.taskyHasStoredSessionV284();
   }catch(_){}
   return false;
 }
 function taskyBootSetV83(percent,ar,en){
   const root=document.getElementById('taskyBootV83'),bar=document.getElementById('taskyBootBarV83'),pct=document.getElementById('taskyBootPctV83'),label=document.getElementById('taskyBootLabelV83');
   if(!root)return;
-  if(!taskyBootAllowedV283()){
+  if(!taskyBootMayShowV284()){
     root.classList.add('hidden');
     root.style.display='none';
     return;
@@ -3508,15 +3483,20 @@ function taskyBootSetV83(percent,ar,en){
   if(label&&(ar||en))label.textContent=taskyBootLangV83(ar,en);
 }
 function taskyBootShowV83(){
-  if(!taskyBootAllowedV283()){taskyBootHideV83();return}
+  if(!taskyBootMayShowV284()){taskyBootHideV83();return}
   taskyBootSetV83(8,'جارٍ التحقق من الجلسة…','Checking session…')
 }
 function taskyBootHideV83(){const root=document.getElementById('taskyBootV83');if(root){root.classList.add('hidden');setTimeout(()=>{if(root.classList.contains('hidden'))root.style.display='none';},120)}}
 function taskyBootReopenV83(){
   const root=document.getElementById('taskyBootV83');
   if(!root)return;
-  if(!taskyBootAllowedV283()){root.classList.add('hidden');root.style.display='none';return}
-  root.style.display='flex';root.classList.remove('hidden')
+  if(!taskyBootMayShowV284()){
+    root.classList.add('hidden');
+    root.style.display='none';
+    return;
+  }
+  root.style.display='flex';
+  root.classList.remove('hidden')
 }
 
 /* V244 EARLY STARTUP WATCHDOG
@@ -3912,7 +3892,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V283',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V284',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3996,9 +3976,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V283',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V284',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V283'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V284'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -4855,14 +4835,6 @@ async function handleAuthSubmit(){
 
     const {data,error}=await taskySignInReliableV273(email,password);
     if(error)throw error;
-
-    if(window.__taskyLoggedOutCompatV283&&data?.session?.user){
-      try{
-        sessionStorage.setItem('tasky_v283_post_login_reload','1');
-        location.reload();
-        return;
-      }catch(_){}
-    }
 
     if(!data?.session?.user){
       const {data:sessionData,error:sessionError}=await sb.auth.getSession();
@@ -11099,7 +11071,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V283',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V284',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -20103,15 +20075,30 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return true;
   }
 
+  const taskySdkClassicPendingV284=new Set();
+
+  function taskyCancelClassicSdkV284(){
+    for(const script of [...taskySdkClassicPendingV284]){
+      try{
+        script.onload=null;
+        script.onerror=null;
+        script.remove();
+      }catch(_){}
+      taskySdkClassicPendingV284.delete(script);
+    }
+  }
+
   function taskyLoadClassicSdkV274(url,sourceName,timeoutMs=12000){
     return new Promise((resolve)=>{
       const script=document.createElement('script');
+      taskySdkClassicPendingV284.add(script);
       let settled=false;
 
       const finish=(ok,detail='')=>{
         if(settled)return;
         settled=true;
         clearTimeout(timer);
+        taskySdkClassicPendingV284.delete(script);
 
         if(ok&&window.supabase?.createClient){
           window.__taskySupabaseSdkSourceV247=sourceName;
@@ -20162,19 +20149,19 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       return true;
     }
 
-    /*
-      V283 logged-out fast path:
-      no stored Tasky session => no reason to block first paint on an SDK CDN.
-      Use the embedded client immediately. After a successful sign-in Tasky
-      reloads once so authenticated startup can prefer the official SDK.
-    */
-    const hasStoredSession=
-      typeof window.taskyHasLocalSessionHintV283==='function' &&
-      window.taskyHasLocalSessionHintV283();
+    const storedSession=
+      typeof window.taskyHasStoredSessionV284==='function' &&
+      window.taskyHasStoredSessionV284();
 
-    if(!hasStoredSession){
-      taskyInstallSupabaseCompatV275('v283-logged-out-fast-auth');
-      window.__taskyLoggedOutCompatV283=true;
+    /*
+      V284 login-first path:
+      a logged-out visitor does not need an external SDK before the login form.
+      Use V275's embedded client immediately and start zero CDN script requests.
+    */
+    if(!storedSession){
+      taskyInstallSupabaseCompatV275('v284-logged-out-login-first');
+      window.__taskyLoggedOutFastPathV284=true;
+      window.__taskySupabaseSdkSourceV247='embedded-login-first-v284';
       return true;
     }
 
@@ -20222,11 +20209,13 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     ]);
 
     if(winner?.ok&&window.supabase?.createClient){
+      taskyCancelClassicSdkV284();
       window.__taskySupabaseCompatActiveV275=false;
       updateBoot(11,'تم تحميل الاتصال…','Connection component loaded…');
       return true;
     }
 
+    taskyCancelClassicSdkV284();
     taskyInstallSupabaseCompatV275('external-sdk-not-ready-within-2500ms');
     updateBoot(11,'تم تجهيز الاتصال المحلي…','Embedded connection ready…');
     return true;
@@ -20252,7 +20241,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V283';
+    window.TASKY_BUILD='V284';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -20269,13 +20258,6 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     console.info('Tasky build V248 — single-file bootstrap + stable HR photo RPC');
   }
 
-  function taskyWaitForDocumentParsedV283(){
-    if(document.readyState!=='loading')return Promise.resolve(true);
-    return new Promise(resolve=>{
-      document.addEventListener('DOMContentLoaded',()=>resolve(true),{once:true});
-    });
-  }
-
   /*
     This timer starts before any external SDK call. It is independent from
     Tasky's historical auth code and therefore cannot be blocked by the CDN.
@@ -20290,14 +20272,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   (async()=>{
     try{
-      /*
-        V283: load the connection and finish parsing the full single-file HTML
-        in parallel. Only then activate deferred scripts exactly once.
-      */
-      const [ready]=await Promise.all([
-        loadSupabase(),
-        taskyWaitForDocumentParsedV283()
-      ]);
+      const ready=await loadSupabase();
       if(!ready)throw new Error('All Supabase SDK sources failed');
 
       activateApplicationScripts();
@@ -25339,8 +25314,165 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 </script>
 
 
+<script id="tasky-v280-late-deferred-activator-js">
+(function(){
+  const PATCH_IDS=[
+    'tasky-v276-modular-plans-hr-js',
+    'tasky-v277-customer-plans-apps-js',
+    'tasky-v278-plans-apps-visible-page-js',
+    'tasky-v279-plans-apps-sidebar-root-fix-js'
+  ];
 
+  let running=false;
+  let done=false;
+  let attempts=0;
 
+  function taskyV280CoreReady(){
+    return !!window.supabase?.createClient &&
+      typeof taskyRenderNavV233==='function' &&
+      typeof taskySharedHtmlV233==='function' &&
+      typeof renderModule==='function' &&
+      typeof taskyAvailableAppsV233==='function';
+  }
+
+  function taskyV280ActivateOne(id){
+    const old=document.getElementById(id);
+    if(!old)return {id,found:false,activated:false,reason:'missing'};
+    if(old.dataset.taskyV280Activated==='1'){
+      return {id,found:true,activated:true,reason:'already-activated'};
+    }
+
+    const type=(old.getAttribute('type')||'').toLowerCase();
+    if(type!=='text/tasky-deferred-v247'){
+      old.dataset.taskyV280Activated='1';
+      return {id,found:true,activated:true,reason:'already-live'};
+    }
+
+    const run=document.createElement('script');
+    for(const attr of [...old.attributes]){
+      if(attr.name.toLowerCase()==='type')continue;
+      run.setAttribute(attr.name,attr.value);
+    }
+    run.dataset.taskyV280Activated='1';
+    run.text=old.textContent||'';
+
+    old.parentNode.insertBefore(run,old);
+    old.remove();
+
+    return {
+      id,
+      found:true,
+      activated:true,
+      marker:
+        id.includes('v276')?!!window.TASKY_MODULAR_PLANS_V276:
+        id.includes('v277')?!!window.TASKY_CUSTOMER_PLANS_APPS_V277:
+        id.includes('v278')?!!window.TASKY_PLANS_APPS_VISIBLE_V278:
+        id.includes('v279')?!!window.TASKY_PLANS_APPS_ROOT_FIX_V279:
+        null
+    };
+  }
+
+  async function taskyV280RefreshCommercialUi(){
+    try{
+      if(typeof taskyFetchEntitlementsV165==='function'&&currentWorkspaceId){
+        await taskyFetchEntitlementsV165({render:false,force:true});
+      }
+    }catch(err){
+      console.warn('V280 entitlements refresh',err);
+    }
+
+    try{taskyApplyPackageStateV276?.({navigate:false})}catch(_){}
+    try{taskyRenderNavV233?.()}catch(_){}
+    try{taskyRenderAppSwitcherV233?.()}catch(_){}
+    try{
+      if(activeNav==='plans_apps'||activeNav==='billing')renderModule?.();
+    }catch(_){}
+  }
+
+  async function taskyV280Run(){
+    if(done||running)return;
+    attempts++;
+
+    if(!taskyV280CoreReady()){
+      if(attempts<180){
+        setTimeout(taskyV280Run,100);
+      }else{
+        window.__taskyV280LatePatchStatus={
+          ok:false,
+          reason:'core-not-ready',
+          attempts
+        };
+        console.error('Tasky V280 — core did not become ready for late patches');
+      }
+      return;
+    }
+
+    running=true;
+    const results=[];
+
+    try{
+      for(const id of PATCH_IDS){
+        results.push(taskyV280ActivateOne(id));
+      }
+
+      const markers={
+        v276:!!window.TASKY_MODULAR_PLANS_V276,
+        v277:!!window.TASKY_CUSTOMER_PLANS_APPS_V277,
+        v278:!!window.TASKY_PLANS_APPS_VISIBLE_V278,
+        v279:!!window.TASKY_PLANS_APPS_ROOT_FIX_V279
+      };
+
+      done=Object.values(markers).every(Boolean);
+
+      window.__taskyV280LatePatchStatus={
+        ok:done,
+        attempts,
+        results,
+        markers,
+        shared_route:typeof TASKY_SHARED_V233!=='undefined'
+          ?TASKY_SHARED_V233.has('plans_apps')
+          :false
+      };
+
+      if(done){
+        await taskyV280RefreshCommercialUi();
+        window.TASKY_BUILD='V280';
+        window.TASKY_LATE_DEFERRED_ACTIVATOR_V280=true;
+        console.info('Tasky V280 — late deferred commercial patches activated');
+      }else{
+        console.error('Tasky V280 — one or more commercial patches did not activate',markers);
+      }
+    }catch(err){
+      window.__taskyV280LatePatchStatus={
+        ok:false,
+        attempts,
+        results,
+        error:err?.message||String(err)
+      };
+      console.error('Tasky V280 late patch activator failed',err);
+    }finally{
+      running=false;
+    }
+  }
+
+  window.taskyLatePatchAuditV280=function(){
+    return {
+      build:window.TASKY_BUILD||null,
+      status:window.__taskyV280LatePatchStatus||null,
+      core_ready:taskyV280CoreReady(),
+      plans_nav_visible:!![...document.querySelectorAll('#mainNav button,#mainNav a')]
+        .find(x=>String(x.textContent||'').includes(
+          (typeof lang!=='undefined'&&lang==='en')?'Plans & Subscriptions':'الباقات والاشتراكات'
+        )),
+      plans_page:typeof window.taskyPlansAppsTemplateV278==='function',
+      quote_flow:typeof window.taskyOpenQuoteV277==='function',
+      addon_flow:typeof window.taskyRequestAddonV276==='function'
+    };
+  };
+
+  setTimeout(taskyV280Run,0);
+})();
+</script>
 
 
 <script id="tasky-v281-merged-plan-apps-js">
@@ -25360,7 +25492,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   let taskyV281Attempts=0;
 
   function taskyV281Ready(){
-    return !!window.TASKY_PLANS_APPS_ROOT_FIX_V279 &&
+    return !!window.TASKY_LATE_DEFERRED_ACTIVATOR_V280 &&
+      !!window.TASKY_PLANS_APPS_ROOT_FIX_V279 &&
       typeof taskySharedHtmlV233==='function' &&
       typeof taskyPlansAppsTemplateV278==='function' &&
       typeof billingTemplate==='function' &&
@@ -25712,7 +25845,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     taskyV281Applied=true;
     window.TASKY_MERGED_PLAN_APPS_V281=true;
-    window.TASKY_BUILD='V283';
+    window.TASKY_BUILD='V284';
 
     try{taskyRenderNavV233()}catch(_){}
     try{taskyRenderAppSwitcherV233?.()}catch(_){}
@@ -25883,70 +26016,64 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLANS_SUBSCRIPTIONS_V282=true;
-  window.TASKY_BUILD='V283';
+  window.TASKY_BUILD='V284';
 
   setTimeout(taskyV282ApplyLabels,0);
 })();
 </script>
 
 
-<script id="tasky-v283-final-runtime-js">
+<script id="tasky-v284-final-login-guard">
 (function(){
   let attempts=0;
 
   function finalize(){
     attempts++;
 
-    const coreReady=
+    const ready=
       typeof checkSession==='function' &&
       typeof taskyRenderNavV233==='function';
 
-    if(!coreReady){
-      if(attempts<160)setTimeout(finalize,50);
+    if(!ready){
+      if(attempts<200)setTimeout(finalize,50);
       return;
     }
 
-    window.TASKY_BUILD='V283';
-    window.TASKY_FAST_AUTH_BOOT_V283=true;
+    window.TASKY_BUILD='V284';
+    window.TASKY_LOGIN_FIRST_V284=true;
 
-    /* Re-assert the requested merged label after all historical wrappers. */
     try{
-      STR.ar.nav_plans_apps='الباقات والاشتراكات';
-      STR.en.nav_plans_apps='Plans & Subscriptions';
-    }catch(_){}
-
-    /* Logged-out state must never be covered by the green boot screen. */
-    try{
-      if(!window.taskyHasLocalSessionHintV283?.()){
-        taskyBootHideV83?.();
+      const hasSession=window.taskyHasStoredSessionV284?.()||false;
+      if(!hasSession){
+        const boot=document.getElementById('taskyBootV83');
         const auth=document.getElementById('authScreen');
-        if(auth&&!window.__taskyPublicLaunchHintV283){
+
+        if(boot){
+          boot.classList.add('hidden');
+          boot.style.display='none';
+        }
+        if(auth){
           auth.style.display='flex';
           auth.style.visibility='visible';
         }
       }
     }catch(_){}
 
-    console.info('Tasky V283 — deterministic bootstrap + instant logged-out auth');
+    console.info('Tasky V284 — login-first hotfix active');
   }
 
-  window.taskyBootAuditV283=function(){
+  window.taskyStartupAuditV284=function(){
     const boot=document.getElementById('taskyBootV83');
     const auth=document.getElementById('authScreen');
     return {
       build:window.TASKY_BUILD||null,
-      stored_session_hint:!!window.taskyHasLocalSessionHintV283?.(),
-      logged_out_fast_compat:!!window.__taskyLoggedOutCompatV283,
+      session_hint:!!window.taskyHasStoredSessionV284?.(),
+      logged_out_fast_path:!!window.__taskyLoggedOutFastPathV284,
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
-      deferred_remaining:document.querySelectorAll('script[type="text/tasky-deferred-v247"]').length,
       boot_visible:!!boot && getComputedStyle(boot).display!=='none' && !boot.classList.contains('hidden'),
       auth_visible:!!auth && getComputedStyle(auth).display!=='none',
-      v276:!!window.TASKY_MODULAR_PLANS_V276,
-      v277:!!window.TASKY_CUSTOMER_PLANS_APPS_V277,
-      v278:!!window.TASKY_PLANS_APPS_VISIBLE_V278,
-      v279:!!window.TASKY_PLANS_APPS_ROOT_FIX_V279,
-      v281:!!window.TASKY_MERGED_PLAN_APPS_V281,
-      v282:!!window.TASKY_PLANS_SUBSCRIPTIONS_V282
+      late_commercial_layer:!!window.TASKY_LATE_DEFERRED_ACTIVATOR_V280,
+      plans_subscriptions:!!window.TASKY_PLANS_SUBSCRIPTIONS_V282
     };
   };
 
