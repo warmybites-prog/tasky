@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV298" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V298</div>
+    <div id="taskyBootBuildV299" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V299</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V298';
+    window.TASKY_BUILD='V299';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V298';
+  window.TASKY_BUILD='V299';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V298';
+    window.TASKY_BUILD='V299';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V298';
+  window.TASKY_BUILD='V299';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V298';
+    window.TASKY_BUILD='V299';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27461,6 +27461,28 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return hrPositions().find(p=>String(p.id)===String(id));
   }
 
+  function departmentHeadId(deptId){
+    const id=String(deptId||'');
+    if(!id)return null;
+
+    const people=activeEmployees().filter(e=>String(empDeptId(e)||'')===id);
+    if(!people.length)return null;
+
+    const ids=new Set(people.map(e=>String(e.id)));
+    const roots=people.filter(e=>{
+      const mgr=String(empManagerId(e)||'');
+      return !mgr||!ids.has(mgr)||mgr===String(e.id);
+    });
+
+    const candidates=(roots.length?roots:people).slice().sort((a,b)=>{
+      const pa=positionRank(positionById(empPositionId(a)));
+      const pb=positionRank(positionById(empPositionId(b)));
+      return pa-pb||employeeName(a).localeCompare(employeeName(b),typeof lang!=='undefined'&&lang==='en'?'en':'ar');
+    });
+
+    return candidates[0]?.id||null;
+  }
+
   function positionRank(p){
     const grade=String(p?.grade||'').trim();
     const numeric=Number(grade.replace(/[^\d.]/g,''));
@@ -27497,6 +27519,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   function employeeCard(e,childrenCount=0){
     const dept=departmentById(empDeptId(e));
     const pos=positionById(empPositionId(e));
+    const isDeptHead=String(departmentHeadId(empDeptId(e))||'')===String(e.id);
     return nodeShell(`
       <button type="button" class="org293-person-btn" onclick="hrOpenEmployeeV72('${esc(e.id)}')">
         <div class="org293-person-avatar">
@@ -27506,10 +27529,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
           <span>${esc(deptName(dept))}</span>
           <b>${esc(employeeName(e))}</b>
           <small>${esc(posName(pos))}</small>
+          ${isDeptHead?`<em class="org293-head-label"><svg><use href="#i-crown"/></svg>${L('رئيس الإدارة','Department head')}</em>`:''}
         </div>
         ${childrenCount?`<div class="org293-report-count" title="${L('تقارير مباشرة','Direct reports')}">${childrenCount}</div>`:''}
       </button>
-    `,'person');
+    `,`person ${isDeptHead?'dept-head':''}`);
   }
 
   function positionCard(p,employeeCount=0,isLead=false){
@@ -27571,8 +27595,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
     const sortPeople=arr=>arr.sort((a,b)=>{
-      const da=deptName(departmentById(a.department_id));
-      const db=deptName(departmentById(b.department_id));
+      const da=deptName(departmentById(empDeptId(a)));
+      const db=deptName(departmentById(empDeptId(b)));
       return da.localeCompare(db,locale)||employeeName(a).localeCompare(employeeName(b),locale);
     });
     for(const arr of children.values())sortPeople(arr);
@@ -27859,6 +27883,28 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         background:linear-gradient(145deg,color-mix(in srgb,var(--green) 9%,var(--card)),var(--paper))}
       .org293-node.department{border-color:color-mix(in srgb,var(--blue) 22%,var(--border))}
       .org293-node.person{border-color:color-mix(in srgb,var(--green) 20%,var(--border))}
+      .org293-node.person.dept-head{
+        border:1.5px solid color-mix(in srgb,var(--green) 56%,var(--border));
+        background:linear-gradient(145deg,color-mix(in srgb,var(--green-tint) 56%,var(--paper)),var(--paper));
+        box-shadow:0 10px 26px rgba(42,108,46,.10);
+      }
+      .org293-head-label{
+        display:inline-flex!important;
+        align-items:center;
+        gap:4px;
+        width:max-content;
+        max-width:100%;
+        margin-top:5px;
+        padding:3px 6px;
+        border-radius:999px;
+        background:color-mix(in srgb,var(--green) 12%,var(--paper));
+        color:var(--green);
+        font-style:normal;
+        font-size:6.8px;
+        font-weight:900;
+        line-height:1.2;
+      }
+      .org293-head-label svg{width:9px;height:9px;flex:none}
       .org293-node.position{border-style:dashed}
       .org293-node.position.lead{border-style:solid;border-color:color-mix(in srgb,var(--amber) 38%,var(--border));background:color-mix(in srgb,var(--amber-tint) 32%,var(--paper))}
 
@@ -28456,7 +28502,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return `<div class="brand-word">${esc(orgName)}</div>`;
   }
 
-  function printIssuance(id){
+  function printIssuance(id,mode='branded'){
     let state=null;
     try{
       if(typeof hrV72!=='undefined')state=hrV72;
@@ -28482,6 +28528,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const orgName=issuance.organization_name||
       (typeof currentWorkspaceName!=='undefined'?currentWorkspaceName:'')||
       'Tasky';
+
+    const preprintedLetterhead=mode==='letterhead';
 
     const subject=issuance.subject_snapshot||
       (requestedLanguage==='en'?'Employee Letter':'خطاب موظف');
@@ -28581,6 +28629,13 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
   .signature-box b{display:block;font-size:12.5px}
   .signature-box span{display:block;color:#66736b;font-size:10.5px}
+  .page.preprinted{
+    padding-top:42mm;
+    padding-bottom:30mm;
+  }
+  .page.preprinted .subject{
+    margin-top:0;
+  }
   .foot{
     margin-top:auto;
     padding-top:11px;
@@ -28599,19 +28654,22 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       padding:15mm 17mm 13mm;
       box-shadow:none;
     }
+    .page.preprinted{
+      padding:42mm 17mm 30mm;
+    }
     @page{size:A4;margin:0}
   }
 </style>
 </head>
 <body>
-  <main class="page">
-    <header class="head">
+  <main class="page ${preprintedLetterhead?'preprinted':''}">
+    ${preprintedLetterhead?'':`<header class="head">
       <div class="brand">${logoHtml(orgName)}</div>
       <div class="meta">
         <div class="meta-row"><span>${requestedLanguage==='en'?'Reference':'المرجع'}</span><b>${esc(issuance.reference_no||'—')}</b></div>
         <div class="meta-row"><span>${requestedLanguage==='en'?'Issue date':'تاريخ الإصدار'}</span><b>${displayDate(issuance.issued_at)}</b></div>
       </div>
-    </header>
+    </header>`}
 
     <h1 class="subject">${esc(subject)}</h1>
 
@@ -28625,11 +28683,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         </div>
       </section>`:''}
 
-    <footer class="foot">${
+    ${preprintedLetterhead?'':`<footer class="foot">${
       requestedLanguage==='en'
         ?'Generated from the internal Tasky HR record. It is not a government authentication or electronic signature unless a separate official integration is implemented.'
         :'تم إنشاء هذه النسخة من سجل الموارد البشرية الداخلي في تاسكي. لا تمثل توثيقًا حكوميًا أو توقيعًا إلكترونيًا ما لم تتم إضافة تكامل رسمي مستقل.'
-    }</footer>
+    }</footer>`}
   </main>
 
   <script>
@@ -28656,6 +28714,43 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     w.document.close();
   }
 
+  function choosePrintMode(id){
+    const body=document.getElementById('addModalBody');
+    const overlay=document.getElementById('addModalOverlay');
+
+    if(!body||!overlay){
+      printIssuance(id,'branded');
+      return;
+    }
+
+    body.innerHTML=`
+      <div class="modal-head">
+        <div>
+          <h3>${L('طريقة طباعة الخطاب','Letter print mode')}</h3>
+          <div class="subtle">${L('اختر التنسيق المناسب قبل فتح نافذة الطباعة.','Choose the format before opening print preview.')}</div>
+        </div>
+        <button class="modal-close" type="button" onclick="closeAddModal()"><svg style="width:18px;height:18px"><use href="#i-x"/></svg></button>
+      </div>
+      <div class="tasky-v299-print-modes">
+        <button type="button" class="tasky-v299-print-mode" onclick="taskyPrintIssuanceModeV299('${esc(id)}','branded')">
+          <span class="tasky-v299-print-icon"><svg><use href="#i-file"/></svg></span>
+          <span><b>${L('نسخة بترويسة المنشأة','Branded digital letter')}</b><small>${L('يتم تضمين الشعار والمرجع والهيدر والفوتر داخل الورقة.','Includes logo, reference, header and footer in the document.')}</small></span>
+        </button>
+        <button type="button" class="tasky-v299-print-mode recommended" onclick="taskyPrintIssuanceModeV299('${esc(id)}','letterhead')">
+          <span class="tasky-v299-print-icon"><svg><use href="#i-printer"/></svg></span>
+          <span><b>${L('طباعة على ورق رسمي جاهز','Print on pre-printed letterhead')}</b><small>${L('يتم طباعة محتوى الخطاب فقط مع ترك مساحة آمنة للهيدر والفوتر المطبوعين مسبقًا.','Prints content only and reserves safe space for the pre-printed header and footer.')}</small></span>
+        </button>
+      </div>`;
+
+    body.className='modal tasky-v299-print-mode-modal';
+    overlay.classList.remove('hidden');
+  }
+
+  window.taskyPrintIssuanceModeV299=function(id,mode){
+    try{closeAddModal()}catch(_){}
+    setTimeout(()=>printIssuance(id,mode==='letterhead'?'letterhead':'branded'),40);
+  };
+
   function install(){
     attempts++;
 
@@ -28667,8 +28762,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       return;
     }
 
-    window.hrPrintIssuanceV78=printIssuance;
-    try{hrPrintIssuanceV78=printIssuance}catch(_){}
+    window.hrPrintIssuanceV78=choosePrintMode;
+    try{hrPrintIssuanceV78=choosePrintMode}catch(_){}
 
     installed=true;
     window.TASKY_HR_LETTER_PRINT_FIX_V296=true;
@@ -29271,6 +29366,812 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   setTimeout(install,0);
+})();
+</script>
+
+
+<script id="tasky-v299-hr-batch-js">
+(function(){
+  'use strict';
+
+  const BUILD='V299';
+  const state={
+    hrInstallAttempts:0,
+    employeeFormContext:null,
+    employeeProfileId:null,
+    formObserver:null,
+    homeInflight:null,
+    homeCache:null,
+    homeCacheAt:0
+  };
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function esc(v){
+    const s=String(v??'');
+    try{return typeof escapeHtml==='function'?escapeHtml(s):s}catch(_){return s}
+  }
+
+  function hrState(){
+    try{
+      if(typeof hrV72!=='undefined'&&hrV72)return hrV72;
+    }catch(_){}
+    return window.hrV72||window.__taskyHrDataV295||{};
+  }
+
+  function employees(){
+    const s=hrState();
+    return Array.isArray(s?.employees)?s.employees:
+      Array.isArray(s?.employee_rows)?s.employee_rows:
+      Array.isArray(s?.employeeRows)?s.employeeRows:[];
+  }
+
+  function positions(){
+    const s=hrState();
+    return Array.isArray(s?.positions)?s.positions:
+      Array.isArray(s?.position_rows)?s.position_rows:
+      Array.isArray(s?.positionRows)?s.positionRows:[];
+  }
+
+  function positionDeptId(p){
+    return p?.department_id??p?.departmentId??p?.dept_id??p?.department?.id??null;
+  }
+
+  function positionLabel(p){
+    if(!p)return '—';
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(p.title_en||p.title_ar||p.title||p.name_en||p.name_ar||p.name||'—')
+      :(p.title_ar||p.title_en||p.title||p.name_ar||p.name_en||p.name||'—');
+  }
+
+  function findFieldSelect(root,labelRx,idRx){
+    const labels=[...root.querySelectorAll('label')];
+    const label=labels.find(x=>labelRx.test(String(x.textContent||'').trim()));
+    if(label){
+      const field=label.closest('.field,div');
+      const select=field?.querySelector('select');
+      if(select)return select;
+    }
+    return [...root.querySelectorAll('select')].find(sel=>{
+      const key=`${sel.id||''} ${sel.name||''} ${sel.getAttribute('aria-label')||''}`;
+      return idRx.test(key);
+    })||null;
+  }
+
+  // ---------- Employee form: department -> position ----------
+  function filterPositionsForDepartment(root){
+    const deptSelect=findFieldSelect(root,/^(الإدارة|Department)$/i,/department|dept/i);
+    const posSelect=findFieldSelect(root,/(المسمى|المسمى الوظيفي|Position|Job title)/i,/position|job.*title|title/i);
+    if(!deptSelect||!posSelect)return false;
+
+    const selectedDept=String(deptSelect.value||'');
+    const current=String(posSelect.value||'');
+    const all=positions();
+    if(!all.length)return false;
+
+    const allowed=selectedDept
+      ?all.filter(p=>{
+          const d=String(positionDeptId(p)||'');
+          return !d||d===selectedDept;
+        })
+      :all;
+
+    posSelect.innerHTML=`<option value="">${L('— اختر المسمى الوظيفي —','— Select position —')}</option>`+
+      allowed.map(p=>`<option value="${esc(p.id)}">${esc(positionLabel(p))}</option>`).join('');
+
+    if(current&&allowed.some(p=>String(p.id)===current))posSelect.value=current;
+    else posSelect.value='';
+
+    if(!deptSelect.dataset.taskyV299PositionFilter){
+      deptSelect.dataset.taskyV299PositionFilter='1';
+      deptSelect.addEventListener('change',()=>filterPositionsForDepartment(root));
+    }
+
+    let info=root.querySelector('#taskyV299PositionScopeNote');
+    if(!info){
+      info=document.createElement('small');
+      info.id='taskyV299PositionScopeNote';
+      info.className='tasky-v299-position-note';
+      posSelect.closest('.field,div')?.appendChild(info);
+    }
+    if(info){
+      info.textContent=selectedDept
+        ?L('يعرض فقط المسميات التابعة للإدارة المختارة.','Only positions in the selected department are shown.')
+        :L('اختر الإدارة أولًا لتصفية المسميات الوظيفية.','Choose a department first to filter positions.');
+    }
+    return true;
+  }
+
+  // ---------- Compensation in employee create/edit ----------
+  function compensationPayload(root){
+    const get=id=>root.querySelector(`#${id}`)?.value;
+    const raw={
+      base_salary:get('taskyV299BaseSalary'),
+      housing_allowance:get('taskyV299Housing'),
+      transport_allowance:get('taskyV299Transport'),
+      other_allowance:get('taskyV299OtherAllowance'),
+      currency:get('taskyV299Currency')||'SAR',
+      effective_from:get('taskyV299EffectiveFrom')||new Date().toISOString().slice(0,10),
+      notes:get('taskyV299CompNotes')||null
+    };
+    const hasAny=[raw.base_salary,raw.housing_allowance,raw.transport_allowance,raw.other_allowance]
+      .some(v=>String(v??'').trim()!=='');
+    return {
+      hasAny,
+      base_salary:Number(raw.base_salary||0),
+      housing_allowance:Number(raw.housing_allowance||0),
+      transport_allowance:Number(raw.transport_allowance||0),
+      other_allowance:Number(raw.other_allowance||0),
+      currency:String(raw.currency||'SAR'),
+      effective_from:raw.effective_from,
+      notes:raw.notes
+    };
+  }
+
+  function updateCompTotal(root){
+    const p=compensationPayload(root);
+    const total=Number(p.base_salary||0)+Number(p.housing_allowance||0)+Number(p.transport_allowance||0)+Number(p.other_allowance||0);
+    const el=root.querySelector('#taskyV299CompTotal');
+    if(el)el.textContent=`${total.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${p.currency||'SAR'}`;
+  }
+
+  async function loadCompensation(employeeId,root){
+    if(!employeeId||!root)return null;
+    try{
+      const {data,error}=await sb
+        .from('tasky_hr_employee_compensation_v299')
+        .select('*')
+        .eq('workspace_id',currentWorkspaceId)
+        .eq('employee_id',employeeId)
+        .order('effective_from',{ascending:false})
+        .limit(1);
+      if(error)throw error;
+      const row=(data||[])[0]||null;
+      if(!row)return null;
+      const set=(id,v)=>{
+        const el=root.querySelector(`#${id}`);
+        if(el&&v!==null&&v!==undefined)el.value=String(v);
+      };
+      set('taskyV299BaseSalary',row.base_salary);
+      set('taskyV299Housing',row.housing_allowance);
+      set('taskyV299Transport',row.transport_allowance);
+      set('taskyV299OtherAllowance',row.other_allowance);
+      set('taskyV299Currency',row.currency||'SAR');
+      set('taskyV299EffectiveFrom',row.effective_from);
+      set('taskyV299CompNotes',row.notes||'');
+      updateCompTotal(root);
+      return row;
+    }catch(err){
+      console.warn('Tasky V299 compensation load',err);
+      return null;
+    }
+  }
+
+  async function saveCompensation(employeeId,payload){
+    if(!employeeId||!payload?.hasAny)return true;
+    const {error}=await sb.rpc('tasky_hr_compensation_upsert_v299',{
+      p_workspace_id:currentWorkspaceId,
+      p_employee_id:employeeId,
+      p_base_salary:payload.base_salary,
+      p_housing_allowance:payload.housing_allowance,
+      p_transport_allowance:payload.transport_allowance,
+      p_other_allowance:payload.other_allowance,
+      p_currency:payload.currency,
+      p_effective_from:payload.effective_from,
+      p_notes:payload.notes
+    });
+    if(error)throw error;
+    return true;
+  }
+
+  function waitForEmployeeSave(context,payload){
+    if(!payload?.hasAny)return;
+    const start=Date.now();
+    const timer=setInterval(async()=>{
+      if(Date.now()-start>15000){clearInterval(timer);return}
+      const overlay=document.getElementById('addModalOverlay');
+      if(overlay&&!overlay.classList.contains('hidden'))return;
+
+      let employeeId=context?.id||null;
+      if(!employeeId){
+        const before=context?.beforeIds||new Set();
+        const created=employees().filter(e=>!before.has(String(e.id)));
+        if(created.length===1)employeeId=created[0].id;
+        else if(created.length>1){
+          created.sort((a,b)=>String(b.created_at||'').localeCompare(String(a.created_at||'')));
+          employeeId=created[0]?.id||null;
+        }
+      }
+      if(!employeeId)return;
+
+      clearInterval(timer);
+      try{
+        await saveCompensation(employeeId,payload);
+        taskyToast(L('تم حفظ بيانات الموظف والراتب والبدلات معًا.','Employee and compensation data were saved together.'),{tone:'success'});
+      }catch(err){
+        showTaskyDialog({
+          title:L('تم حفظ الموظف لكن تعذّر حفظ الراتب والبدلات','Employee saved, compensation was not saved'),
+          message:err?.message||String(err),
+          tone:'warning'
+        });
+      }
+    },300);
+  }
+
+  function addCompensationSection(root){
+    if(root.querySelector('.tasky-v299-comp-section'))return true;
+    const form=root.querySelector('form');
+    if(!form)return false;
+    if(!/موظف|Employee/i.test(String(form.textContent||'')))return false;
+
+    const section=document.createElement('section');
+    section.className='tasky-v299-comp-section';
+    section.innerHTML=`
+      <div class="tasky-v299-section-head">
+        <div>
+          <span>${L('التعويضات','COMPENSATION')}</span>
+          <h4>${L('الراتب والبدلات من بداية ملف الموظف','Salary & allowances from employee setup')}</h4>
+          <p>${L('تُحفظ بيانات التعويض الحالية مع ملف الموظف ويمكن الرجوع لها من Employee 360.','Current compensation is saved with the employee profile and appears in Employee 360.')}</p>
+        </div>
+        <div class="tasky-v299-comp-total">
+          <small>${L('الإجمالي الشهري','Monthly total')}</small>
+          <b id="taskyV299CompTotal">0.00 SAR</b>
+        </div>
+      </div>
+      <div class="tasky-v299-comp-grid">
+        <div class="field"><label>${L('الراتب الأساسي','Base salary')}</label><input id="taskyV299BaseSalary" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>${L('بدل السكن','Housing allowance')}</label><input id="taskyV299Housing" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>${L('بدل النقل','Transport allowance')}</label><input id="taskyV299Transport" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>${L('بدلات أخرى','Other allowances')}</label><input id="taskyV299OtherAllowance" type="number" min="0" step="0.01" placeholder="0.00"></div>
+        <div class="field"><label>${L('العملة','Currency')}</label><select id="taskyV299Currency"><option value="SAR">SAR</option><option value="USD">USD</option><option value="AED">AED</option><option value="BHD">BHD</option><option value="KWD">KWD</option><option value="QAR">QAR</option></select></div>
+        <div class="field"><label>${L('ساري من','Effective from')}</label><input id="taskyV299EffectiveFrom" type="date" value="${new Date().toISOString().slice(0,10)}"></div>
+        <div class="field full"><label>${L('ملاحظات التعويض','Compensation notes')}</label><textarea id="taskyV299CompNotes" rows="2"></textarea></div>
+      </div>`;
+
+    const submit=form.querySelector('button[type="submit"],.submit-btn');
+    if(submit?.parentElement)submit.parentElement.insertBefore(section,submit);
+    else form.appendChild(section);
+
+    section.querySelectorAll('input,select').forEach(el=>{
+      el.addEventListener('input',()=>updateCompTotal(root));
+      el.addEventListener('change',()=>updateCompTotal(root));
+    });
+
+    const context=state.employeeFormContext||{
+      type:'employee',id:null,beforeIds:new Set(employees().map(e=>String(e.id)))
+    };
+    state.employeeFormContext=context;
+
+    if(!form.dataset.taskyV299CompSubmit){
+      form.dataset.taskyV299CompSubmit='1';
+      form.addEventListener('submit',()=>{
+        const payload=compensationPayload(root);
+        waitForEmployeeSave(
+          {
+            id:state.employeeFormContext?.id||null,
+            beforeIds:state.employeeFormContext?.beforeIds||new Set()
+          },
+          payload
+        );
+      },true);
+    }
+    if(context.id)loadCompensation(context.id,root);
+    return true;
+  }
+
+  function enhanceEmployeeForm(){
+    const root=document.getElementById('addModalBody');
+    if(!root)return false;
+    const txt=String(root.textContent||'');
+    if(!/إضافة موظف|تعديل موظف|New employee|Edit employee|الرقم الوظيفي/i.test(txt))return false;
+    root.classList.add('tasky-v299-employee-form');
+    filterPositionsForDepartment(root);
+    addCompensationSection(root);
+    return true;
+  }
+
+  // ---------- Unified Employee 360 ----------
+  const MATTER_RULES=[
+    [/attendance|حضور/i,'attendance','الحضور','Attendance'],
+    [/leave|إجاز/i,'leaves','الإجازات','Leave'],
+    [/request|طلب/i,'requests','الطلبات','Requests'],
+    [/document|مستند|خطاب/i,'documents','المستندات والخطابات','Documents & letters'],
+    [/compensation|salary|payroll|تعويض|راتب/i,'compensation','الراتب والتعويضات','Compensation'],
+    [/performance|أداء/i,'performance','الأداء','Performance'],
+    [/benefit|ميزة|مزايا/i,'benefits83','المزايا','Benefits'],
+    [/expense|مصروف/i,'expenses84','المصروفات','Expenses'],
+    [/training|تدريب/i,'training','التدريب','Training'],
+    [/onboarding|تهيئة/i,'onboarding','التهيئة','Onboarding'],
+    [/offboarding|مغادرة/i,'offboarding','المغادرة','Offboarding'],
+    [/change|تغيير/i,'changes','التغييرات الوظيفية','Employee changes'],
+    [/case|حالة/i,'cases','حالات الموظف','Cases'],
+    [/asset|عهدة|أصل/i,'assets','العهد والأصول','Assets']
+  ];
+
+  function recordMatchesEmployee(item,employeeId){
+    if(!item||typeof item!=='object')return false;
+    const id=String(employeeId||'');
+    if(!id)return false;
+    const keys=[
+      'employee_id','employeeId','target_employee_id','targetEmployeeId',
+      'subject_employee_id','subjectEmployeeId','requested_for_employee_id',
+      'requestedForEmployeeId','owner_employee_id','ownerEmployeeId',
+      'assignee_employee_id','assigneeEmployeeId'
+    ];
+    return keys.some(key=>String(item?.[key]??'')===id);
+  }
+
+  function collectMatters(employeeId){
+    const buckets=new Map();
+    for(const [key,value] of Object.entries(hrState()||{})){
+      if(!Array.isArray(value)||!value.length)continue;
+      const matched=value.filter(item=>recordMatchesEmployee(item,employeeId));
+      if(!matched.length)continue;
+      const rule=MATTER_RULES.find(([rx])=>rx.test(key));
+      if(!rule)continue;
+      const [,tab,ar,en]=rule;
+      const old=buckets.get(tab)||{tab,ar,en,count:0};
+      old.count+=matched.length;
+      buckets.set(tab,old);
+    }
+    return [...buckets.values()].sort((a,b)=>b.count-a.count);
+  }
+
+  async function currentCompensation(employeeId){
+    try{
+      const {data,error}=await sb
+        .from('tasky_hr_employee_compensation_v299')
+        .select('*')
+        .eq('workspace_id',currentWorkspaceId)
+        .eq('employee_id',employeeId)
+        .order('effective_from',{ascending:false})
+        .limit(1);
+      if(error)throw error;
+      return (data||[])[0]||null;
+    }catch(err){
+      console.warn('Tasky V299 Employee360 compensation',err);
+      return null;
+    }
+  }
+
+  function money(v,currency='SAR'){
+    return `${Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${currency}`;
+  }
+
+  async function enhanceEmployee360(employeeId){
+    const root=document.getElementById('addModalBody');
+    if(!root||!employeeId)return false;
+    const txt=String(root.textContent||'');
+    if(!/Employee\s*360|ملف الموظف|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(txt))return false;
+
+    root.querySelector('.tasky-v299-employee-hub')?.remove();
+
+    const comp=await currentCompensation(employeeId);
+    const matters=collectMatters(employeeId);
+    const currency=comp?.currency||'SAR';
+    const total=comp?Number(comp.base_salary||0)+Number(comp.housing_allowance||0)+Number(comp.transport_allowance||0)+Number(comp.other_allowance||0):0;
+
+    const hub=document.createElement('section');
+    hub.className='tasky-v299-employee-hub';
+    hub.innerHTML=`
+      <div class="tasky-v299-hub-head">
+        <div>
+          <span>EMPLOYEE HUB</span>
+          <h4>${L('ملف الموظف الموحد','Unified employee file')}</h4>
+          <p>${L('الراتب والبدلات والطلبات والعمليات المرتبطة بالموظف في مكان واحد.','Compensation, requests and employee-related activity in one place.')}</p>
+        </div>
+        <button type="button" class="chip-btn" onclick="hrOpenFormV72('employee','${esc(employeeId)}')">${L('تعديل الملف','Edit profile')}</button>
+      </div>
+
+      <div class="tasky-v299-hub-comp">
+        <div class="tasky-v299-hub-comp-main">
+          <span>${L('إجمالي التعويض الشهري','Monthly compensation')}</span>
+          <b>${comp?money(total,currency):L('غير مسجل','Not recorded')}</b>
+          <small>${comp?`${L('ساري من','Effective')} ${esc(comp.effective_from||'—')}`:L('يمكن إضافته من شاشة تعديل الموظف.','Add it from the employee edit screen.')}</small>
+        </div>
+        <div><span>${L('الراتب الأساسي','Base salary')}</span><b>${comp?money(comp.base_salary,currency):'—'}</b></div>
+        <div><span>${L('بدل السكن','Housing')}</span><b>${comp?money(comp.housing_allowance,currency):'—'}</b></div>
+        <div><span>${L('بدل النقل','Transport')}</span><b>${comp?money(comp.transport_allowance,currency):'—'}</b></div>
+        <div><span>${L('بدلات أخرى','Other allowances')}</span><b>${comp?money(comp.other_allowance,currency):'—'}</b></div>
+      </div>
+
+      <div class="tasky-v299-matters-head">
+        <div>
+          <b>${L('أمور الموظف وطلباته','Employee matters & requests')}</b>
+          <span>${L('يتم التجميع تلقائيًا من سجلات الموارد البشرية المرتبطة بهذا الموظف.','Automatically aggregated from HR records linked to this employee.')}</span>
+        </div>
+      </div>
+
+      <div class="tasky-v299-matters">
+        ${matters.length?matters.map(x=>`
+          <button type="button" onclick="closeAddModal();setHrTabV72('${esc(x.tab)}')">
+            <span>${L(x.ar,x.en)}</span><b>${x.count}</b>
+          </button>`).join(''):
+          `<div class="tasky-v299-no-matters">${L('لا توجد طلبات أو عمليات مرتبطة بالموظف حتى الآن.','No linked employee requests or activity yet.')}</div>`}
+      </div>
+
+      <div class="tasky-v299-hub-actions">
+        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('requests')">${L('الطلبات','Requests')}</button>
+        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('documents')">${L('المستندات','Documents')}</button>
+        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('compensation')">${L('التعويضات','Compensation')}</button>
+      </div>`;
+
+    const detail=root.querySelector('.tasky-v258-detail-list,.tasky-v258-lock-hero');
+    if(detail?.parentElement)detail.insertAdjacentElement('afterend',hub);
+    else root.querySelector('.modal-head')?.insertAdjacentElement('afterend',hub);
+    return true;
+  }
+
+  // ---------- Home attendance ----------
+  function homeAttendanceHost(){
+    const home=document.getElementById('shell98HomeHost');
+    if(!home)return null;
+    let host=document.getElementById('taskyHomeAttendanceV299');
+    if(!host){
+      host=document.createElement('section');
+      host.id='taskyHomeAttendanceV299';
+      host.className='tasky-v299-home-attendance';
+      home.insertAdjacentElement('afterbegin',host);
+    }
+    return host;
+  }
+
+  function formatTime(iso){
+    if(!iso)return '—';
+    try{
+      return new Intl.DateTimeFormat(
+        typeof lang!=='undefined'&&lang==='en'?'en-US':'ar-SA',
+        {hour:'2-digit',minute:'2-digit',timeZone:'Asia/Riyadh'}
+      ).format(new Date(iso));
+    }catch(_){return '—'}
+  }
+
+  async function fetchHomeAttendance(force=false){
+    if(!currentWorkspaceId||!currentUserId)return null;
+    if(!force&&state.homeCache&&Date.now()-state.homeCacheAt<30000)return state.homeCache;
+    if(state.homeInflight)return state.homeInflight;
+
+    state.homeInflight=(async()=>{
+      try{
+        const {data:employee,error:employeeError}=await sb
+          .from('tasky_hr_employees')
+          .select('id,full_name_ar,full_name_en,status')
+          .eq('workspace_id',currentWorkspaceId)
+          .eq('user_id',currentUserId)
+          .limit(1);
+        if(employeeError)throw employeeError;
+
+        const emp=(employee||[])[0];
+        if(!emp)return {available:false};
+
+        const rec=await sb.rpc('tasky_hr_reconcile_attendance_v298',{p_workspace_id:currentWorkspaceId});
+        if(rec.error)throw rec.error;
+
+        const workDate=String(rec.data?.work_date||new Date().toISOString().slice(0,10));
+        const {data:rows,error}=await sb
+          .from('tasky_hr_attendance')
+          .select('*')
+          .eq('workspace_id',currentWorkspaceId)
+          .eq('employee_id',emp.id)
+          .eq('attendance_date',workDate)
+          .order('check_in',{ascending:false})
+          .limit(1);
+        if(error)throw error;
+
+        const row=(rows||[])[0]||null;
+        const result={
+          available:true,employee:emp,workDate,row,
+          open:!!(row?.check_in&&!row?.check_out),
+          completed:!!row?.check_out
+        };
+        state.homeCache=result;
+        state.homeCacheAt=Date.now();
+        return result;
+      }catch(err){
+        const msg=String(err?.message||err||'');
+        if(/not linked to an active employee profile|no rows|permission/i.test(msg))return {available:false};
+        console.warn('Tasky V299 home attendance',err);
+        return {available:false,error:msg};
+      }finally{
+        state.homeInflight=null;
+      }
+    })();
+
+    return state.homeInflight;
+  }
+
+  function renderHomeAttendance(data){
+    const host=homeAttendanceHost();
+    if(!host)return;
+    if(!data?.available){host.remove();return}
+
+    const row=data.row;
+    const open=data.open;
+    const completed=data.completed;
+
+    const status=open
+      ?L('أنت الآن في الدوام','You are clocked in')
+      :completed?L('تم إنهاء دوام اليوم','Today’s attendance is complete')
+      :L('ابدأ يوم عملك','Start your workday');
+
+    const sub=open
+      ?`${L('الحضور','Clock in')}: ${formatTime(row?.check_in)}`
+      :completed
+        ?`${L('الحضور','In')}: ${formatTime(row?.check_in)} · ${L('الانصراف','Out')}: ${formatTime(row?.check_out)}`
+        :L('سجّل حضورك من الصفحة الرئيسية بدون فتح قسم الموارد البشرية.','Clock in directly from Home without opening Human Resources.');
+
+    host.innerHTML=`
+      <div class="tasky-v299-home-att-head">
+        <div class="tasky-v299-home-att-icon"><svg><use href="#i-clock"/></svg></div>
+        <div>
+          <span>${L('دوامي اليوم','MY ATTENDANCE')}</span>
+          <h4>${status}</h4>
+          <p>${sub}</p>
+        </div>
+        <div class="tasky-v299-home-att-date">${esc(data.workDate||'')}</div>
+      </div>
+      <div class="tasky-v299-home-att-actions">
+        ${completed
+          ?`<span class="tasky-v299-att-done"><svg><use href="#i-check"/></svg>${L('مكتمل','Complete')}</span>`
+          :`<button type="button" class="${open?'tasky-v299-clock-out':'primary-btn'}" onclick="taskyHomeClockV299('${open?'out':'in'}',this)">
+              <svg><use href="#${open?'i-log-out':'i-check'}"/></svg>
+              ${open?L('تسجيل الانصراف','Clock out'):L('تسجيل الحضور','Clock in')}
+            </button>`}
+        <button type="button" class="chip-btn" onclick="setActiveNav('hr');setTimeout(()=>{try{setHrTabV72('attendance')}catch(_){}},120)">${L('تفاصيل الحضور','Attendance details')}</button>
+      </div>`;
+  }
+
+  async function refreshHomeAttendance(force=false){
+    if(typeof activeNav!=='undefined'&&activeNav!=='home')return;
+    const data=await fetchHomeAttendance(force);
+    if(typeof activeNav!=='undefined'&&activeNav==='home')renderHomeAttendance(data);
+  }
+
+  window.taskyHomeClockV299=async function(action,button){
+    if(button){
+      button.disabled=true;
+      button.dataset.oldText=button.innerHTML;
+      button.textContent=L('جاري التسجيل...','Saving...');
+    }
+    try{
+      const {error}=await sb.rpc('tasky_hr_clock_v298',{
+        p_workspace_id:currentWorkspaceId,p_action:action,p_mode:'office',p_note:null
+      });
+      if(error)throw error;
+
+      state.homeCache=null;
+      state.homeCacheAt=0;
+      await refreshHomeAttendance(true);
+      taskyToast(
+        action==='in'?L('تم تسجيل الحضور من الصفحة الرئيسية.','Clock-in recorded from Home.'):L('تم تسجيل الانصراف من الصفحة الرئيسية.','Clock-out recorded from Home.'),
+        {tone:'success'}
+      );
+    }catch(err){
+      showTaskyDialog({
+        title:L('تعذّر تسجيل الدوام','Could not record attendance'),
+        message:err?.message||String(err),
+        tone:'error'
+      });
+      if(button){
+        button.disabled=false;
+        button.innerHTML=button.dataset.oldText||L('إعادة المحاولة','Retry');
+      }
+    }
+  };
+
+  function installHomeAttendance(){
+    let current=null;
+    try{current=typeof shell98RenderHome==='function'?shell98RenderHome:null}catch(_){}
+    if(!current)return false;
+    if(current.__taskyV299)return true;
+
+    const base=current;
+    const wrapped=function(...args){
+      const result=base.apply(this,args);
+      if(typeof activeNav!=='undefined'&&activeNav==='home')setTimeout(()=>refreshHomeAttendance(false),0);
+      return result;
+    };
+    wrapped.__taskyV299=true;
+    window.shell98RenderHome=wrapped;
+    try{shell98RenderHome=wrapped}catch(_){}
+    return true;
+  }
+
+  // ---------- HR hooks ----------
+  function installHrHooks(){
+    state.hrInstallAttempts++;
+    let openForm=null,openEmployee=null;
+    try{openForm=typeof hrOpenFormV72==='function'?hrOpenFormV72:null}catch(_){}
+    try{openEmployee=typeof hrOpenEmployeeV72==='function'?hrOpenEmployeeV72:null}catch(_){}
+
+    if(openForm&&!openForm.__taskyV299){
+      const base=openForm;
+      const wrapped=function(type,id,...args){
+        if(type==='employee'){
+          state.employeeFormContext={
+            type,id:id||null,beforeIds:new Set(employees().map(e=>String(e.id)))
+          };
+        }
+        const result=base.call(this,type,id,...args);
+        if(type==='employee'){
+          setTimeout(enhanceEmployeeForm,0);
+          setTimeout(enhanceEmployeeForm,120);
+        }
+        return result;
+      };
+      wrapped.__taskyV299=true;
+      window.hrOpenFormV72=wrapped;
+      try{hrOpenFormV72=wrapped}catch(_){}
+    }
+
+    if(openEmployee&&!openEmployee.__taskyV299){
+      const base=openEmployee;
+      const wrapped=function(id,...args){
+        state.employeeProfileId=id||null;
+        const result=base.call(this,id,...args);
+        setTimeout(()=>enhanceEmployee360(id),80);
+        setTimeout(()=>enhanceEmployee360(id),300);
+        return result;
+      };
+      wrapped.__taskyV299=true;
+      window.hrOpenEmployeeV72=wrapped;
+      try{hrOpenEmployeeV72=wrapped}catch(_){}
+    }
+
+    if((!openForm||!openEmployee)&&state.hrInstallAttempts<180)setTimeout(installHrHooks,60);
+    return !!openForm||!!openEmployee;
+  }
+
+  document.addEventListener('click',event=>{
+    const el=event.target?.closest?.('[onclick]');
+    if(!el)return;
+    const code=String(el.getAttribute('onclick')||'');
+
+    const formMatch=code.match(/hrOpenFormV72\(['"]employee['"](?:\s*,\s*['"]([^'"]+)['"])?/);
+    if(formMatch){
+      state.employeeFormContext={
+        type:'employee',id:formMatch[1]||null,
+        beforeIds:new Set(employees().map(e=>String(e.id)))
+      };
+      setTimeout(enhanceEmployeeForm,30);
+      setTimeout(enhanceEmployeeForm,160);
+    }
+
+    const profileMatch=code.match(/hrOpenEmployeeV72\(['"]([^'"]+)['"]/);
+    if(profileMatch){
+      state.employeeProfileId=profileMatch[1];
+      setTimeout(()=>enhanceEmployee360(profileMatch[1]),100);
+      setTimeout(()=>enhanceEmployee360(profileMatch[1]),320);
+    }
+  },true);
+
+  const modal=document.getElementById('addModalBody');
+  if(modal){
+    const observer=new MutationObserver(()=>{
+      clearTimeout(observer._taskyV299);
+      observer._taskyV299=setTimeout(()=>{
+        enhanceEmployeeForm();
+        if(state.employeeProfileId)enhanceEmployee360(state.employeeProfileId);
+      },90);
+    });
+    observer.observe(modal,{childList:true,subtree:true});
+    state.formObserver=observer;
+  }
+
+  if(!document.getElementById('tasky-v299-hr-batch-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v299-hr-batch-css';
+    style.textContent=`
+      #addModalBody.tasky-v299-print-mode-modal{width:min(620px,calc(100vw - 24px));padding:0}
+      .tasky-v299-print-modes{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:15px}
+      .tasky-v299-print-mode{display:flex;align-items:flex-start;gap:10px;text-align:start;border:1px solid var(--border);background:var(--paper);border-radius:14px;padding:13px;color:var(--ink)}
+      .tasky-v299-print-mode:hover{border-color:color-mix(in srgb,var(--green) 38%,var(--border));background:var(--green-tint)}
+      .tasky-v299-print-mode.recommended{border-color:color-mix(in srgb,var(--green) 34%,var(--border))}
+      .tasky-v299-print-icon{width:38px;height:38px;border-radius:11px;display:grid;place-items:center;background:var(--green-tint);color:var(--green);flex:none}
+      .tasky-v299-print-icon svg{width:18px;height:18px}
+      .tasky-v299-print-mode b{display:block;font-size:10.5px}
+      .tasky-v299-print-mode small{display:block;margin-top:4px;color:var(--muted);font-size:8px;line-height:1.6}
+
+      .tasky-v299-position-note{display:block;margin-top:4px;color:var(--green);font-size:7.5px;line-height:1.5}
+
+      .tasky-v299-comp-section{grid-column:1/-1;border:1px solid color-mix(in srgb,var(--green) 24%,var(--border));border-radius:15px;background:color-mix(in srgb,var(--green-tint) 25%,var(--paper));padding:12px;margin-top:4px}
+      .tasky-v299-section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:10px}
+      .tasky-v299-section-head>div:first-child{min-width:0}
+      .tasky-v299-section-head span{display:block;color:var(--green);font-size:7px;font-weight:900;letter-spacing:.06em}
+      .tasky-v299-section-head h4{margin:3px 0 3px;font-size:11.5px}
+      .tasky-v299-section-head p{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+      .tasky-v299-comp-total{min-width:140px;padding:8px 10px;border-radius:11px;background:var(--card);border:1px solid var(--border)}
+      .tasky-v299-comp-total small{display:block;color:var(--muted);font-size:7.5px}
+      .tasky-v299-comp-total b{display:block;margin-top:3px;font-size:12px;color:var(--green)}
+      .tasky-v299-comp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+      .tasky-v299-comp-grid .field{margin:0}
+      .tasky-v299-comp-grid .field.full{grid-column:1/-1}
+
+      .tasky-v299-employee-hub{margin:12px 18px!important;border:1px solid var(--border);border-radius:15px;background:var(--paper);padding:12px}
+      .tasky-v299-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
+      .tasky-v299-hub-head span{display:block;color:var(--green);font-size:7px;font-weight:900}
+      .tasky-v299-hub-head h4{margin:3px 0;font-size:12px}
+      .tasky-v299-hub-head p{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+      .tasky-v299-hub-comp{display:grid;grid-template-columns:1.3fr repeat(4,minmax(0,1fr));gap:7px;margin-top:10px}
+      .tasky-v299-hub-comp>div{border:1px solid var(--border);border-radius:11px;padding:8px;background:var(--card)}
+      .tasky-v299-hub-comp span{display:block;color:var(--muted);font-size:7px}
+      .tasky-v299-hub-comp b{display:block;margin-top:3px;font-size:9px}
+      .tasky-v299-hub-comp-main{background:var(--green-tint)!important;border-color:color-mix(in srgb,var(--green) 24%,var(--border))!important}
+      .tasky-v299-hub-comp-main b{font-size:12px!important;color:var(--green)}
+      .tasky-v299-hub-comp-main small{display:block;margin-top:3px;color:var(--muted);font-size:7px}
+      .tasky-v299-matters-head{margin-top:11px}
+      .tasky-v299-matters-head b{display:block;font-size:10px}
+      .tasky-v299-matters-head span{display:block;margin-top:2px;color:var(--muted);font-size:7.5px}
+      .tasky-v299-matters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:7px;margin-top:8px}
+      .tasky-v299-matters button{display:flex;align-items:center;justify-content:space-between;gap:8px;border:1px solid var(--border);border-radius:10px;background:var(--card);padding:8px;text-align:start;color:var(--ink)}
+      .tasky-v299-matters button:hover{background:var(--green-tint)}
+      .tasky-v299-matters button span{font-size:7.5px}
+      .tasky-v299-matters button b{min-width:22px;height:22px;border-radius:999px;display:grid;place-items:center;background:var(--green-tint);color:var(--green);font-size:7px}
+      .tasky-v299-no-matters{grid-column:1/-1;padding:10px;border:1px dashed var(--border);border-radius:10px;color:var(--muted);font-size:8px}
+      .tasky-v299-hub-actions{display:flex;gap:6px;flex-wrap:wrap;margin-top:9px}
+
+      .tasky-v299-home-attendance{border:1px solid color-mix(in srgb,var(--green) 28%,var(--border));border-radius:16px;background:linear-gradient(145deg,color-mix(in srgb,var(--green-tint) 46%,var(--paper)),var(--paper));padding:12px 14px;margin-bottom:12px}
+      .tasky-v299-home-att-head{display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center}
+      .tasky-v299-home-att-icon{width:42px;height:42px;border-radius:13px;display:grid;place-items:center;background:var(--green);color:white}
+      .tasky-v299-home-att-icon svg{width:18px;height:18px}
+      .tasky-v299-home-att-head span{display:block;color:var(--green);font-size:7px;font-weight:900;letter-spacing:.04em}
+      .tasky-v299-home-att-head h4{margin:2px 0;font-size:12.5px}
+      .tasky-v299-home-att-head p{margin:0;color:var(--muted);font-size:8px;line-height:1.55}
+      .tasky-v299-home-att-date{font-size:8px;color:var(--muted);white-space:nowrap}
+      .tasky-v299-home-att-actions{display:flex;justify-content:flex-end;gap:7px;align-items:center;margin-top:10px}
+      .tasky-v299-home-att-actions button svg,.tasky-v299-att-done svg{width:14px;height:14px}
+      .tasky-v299-clock-out{display:inline-flex;align-items:center;gap:6px;border:1px solid color-mix(in srgb,var(--danger) 35%,var(--border));background:color-mix(in srgb,var(--danger) 9%,var(--paper));color:var(--danger);border-radius:9px;padding:8px 11px;font:inherit;font-weight:900}
+      .tasky-v299-att-done{display:inline-flex;align-items:center;gap:5px;color:var(--green);font-size:8px;font-weight:900}
+
+      @media(max-width:760px){
+        .tasky-v299-print-modes{grid-template-columns:1fr}
+        .tasky-v299-comp-grid{grid-template-columns:1fr 1fr}
+        .tasky-v299-hub-comp{grid-template-columns:1fr 1fr}
+        .tasky-v299-hub-comp-main{grid-column:1/-1}
+        .tasky-v299-matters{grid-template-columns:1fr 1fr}
+      }
+      @media(max-width:520px){
+        .tasky-v299-comp-grid{grid-template-columns:1fr}
+        .tasky-v299-section-head{flex-direction:column}
+        .tasky-v299-comp-total{width:100%}
+        .tasky-v299-home-att-head{grid-template-columns:38px minmax(0,1fr)}
+        .tasky-v299-home-att-date{grid-column:2}
+        .tasky-v299-home-att-actions{justify-content:stretch;flex-wrap:wrap}
+        .tasky-v299-home-att-actions>*{flex:1;justify-content:center}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  installHomeAttendance();
+  installHrHooks();
+
+  let homeAttempts=0;
+  const homeTimer=setInterval(()=>{
+    homeAttempts++;
+    if(installHomeAttendance()||homeAttempts>80)clearInterval(homeTimer);
+  },80);
+
+  window.taskyHrBatchAuditV299=function(){
+    const root=document.getElementById('addModalBody');
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:true,
+      home_attendance_host:!!document.getElementById('taskyHomeAttendanceV299'),
+      employee_form_enhanced:!!root?.classList.contains('tasky-v299-employee-form'),
+      compensation_section:!!root?.querySelector('.tasky-v299-comp-section'),
+      unified_employee_hub:!!root?.querySelector('.tasky-v299-employee-hub'),
+      department_position_filter:!!root?.querySelector('[data-tasky-v299-position-filter="1"]'),
+      employee_form_context:state.employeeFormContext,
+      employee_profile_id:state.employeeProfileId
+    };
+  };
+
+  window.TASKY_HR_BATCH_V299=true;
+  window.TASKY_BUILD=BUILD;
+  console.info('Tasky V299 — HR batch improvements active');
 })();
 </script>
 
