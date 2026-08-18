@@ -7043,7 +7043,7 @@ function exportEventPdf(eventId){
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V288';
+  window.TASKY_BUILD='V289';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -7336,6 +7336,245 @@ function exportEventPdf(eventId){
   };
 
   taskyV288Apply();
+})();
+</script>
+
+
+<script id="tasky-v289-login-submit-fix-js">
+(function(){
+  'use strict';
+
+  const V='V289';
+  let loginSubmitting=false;
+
+  function L(ar,en){
+    try{return lang==='ar'?ar:en}catch(_){return ar}
+  }
+
+  function showError(message){
+    try{
+      if(typeof taskyAuthMessageV97==='function'){
+        taskyAuthMessageV97(message,'error');
+        return;
+      }
+    }catch(_){}
+
+    try{
+      if(typeof taskyAuthShowErrorV751==='function'){
+        taskyAuthShowErrorV751(message);
+        return;
+      }
+    }catch(_){}
+
+    const box=document.getElementById('authError');
+    if(box){
+      box.textContent=message;
+      box.style.display='block';
+    }
+  }
+
+  function setBusy(busy){
+    loginSubmitting=!!busy;
+
+    try{
+      if(typeof taskyAuthSetBusyV751==='function'){
+        taskyAuthSetBusyV751(!!busy,busy?L('جاري تسجيل الدخول...','Signing in...'):null);
+      }
+    }catch(_){}
+
+    const btn=document.getElementById('authSubmitBtn');
+    if(btn){
+      btn.disabled=!!busy;
+      btn.style.pointerEvents=busy?'none':'auto';
+      if(!busy && (typeof authMode==='undefined'||authMode==='signin')){
+        btn.textContent=L('تسجيل الدخول','Sign in');
+      }
+    }
+  }
+
+  async function withTimeout(promise,ms){
+    let timer;
+    try{
+      return await Promise.race([
+        Promise.resolve(promise),
+        new Promise((_,reject)=>{
+          timer=setTimeout(()=>{
+            const err=new Error(L(
+              'استغرق تسجيل الدخول وقتًا أطول من المتوقع. تحقق من الإنترنت ثم حاول مرة أخرى.',
+              'Sign in took longer than expected. Check your connection and try again.'
+            ));
+            err.code='TASKY_LOGIN_TIMEOUT_V289';
+            reject(err);
+          },ms);
+        })
+      ]);
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function sessionAfterLogin(result){
+    if(result?.data?.session?.user)return result.data.session;
+
+    try{
+      if(typeof taskyGetSessionSafeV243==='function'){
+        const checked=await withTimeout(taskyGetSessionSafeV243(),5000);
+        if(checked?.error)throw checked.error;
+        if(checked?.data?.session?.user)return checked.data.session;
+      }
+    }catch(err){
+      console.warn('Tasky V289 session verification helper',err);
+    }
+
+    try{
+      const checked=await withTimeout(sb.auth.getSession(),5000);
+      if(checked?.error)throw checked.error;
+      if(checked?.data?.session?.user)return checked.data.session;
+    }catch(err){
+      console.warn('Tasky V289 session verification auth.getSession',err);
+    }
+
+    return null;
+  }
+
+  async function signInV289(){
+    if(loginSubmitting)return false;
+
+    const email=String(document.getElementById('authEmail')?.value||'').trim().toLowerCase();
+    const password=String(document.getElementById('authPassword')?.value||'');
+
+    if(!email||!password){
+      showError(L('عبّي البريد وكلمة المرور','Enter your email and password'));
+      return false;
+    }
+
+    setBusy(true);
+
+    try{
+      const result=await withTimeout(
+        taskySignInReliableV273(email,password),
+        15000
+      );
+
+      if(result?.error)throw result.error;
+
+      const session=await sessionAfterLogin(result);
+      if(!session?.user){
+        throw new Error(L(
+          'تم قبول بيانات الدخول لكن لم تُحفظ الجلسة. حاول تسجيل الدخول مرة أخرى.',
+          'Credentials were accepted but the session was not saved. Please sign in again.'
+        ));
+      }
+
+      /*
+        Important V289 change:
+        Do NOT call checkSession() inside the same logged-out fast-path runtime.
+        V284 intentionally boots logged-out users with the embedded auth client.
+        Running the entire workspace loader immediately in that same runtime could
+        stall the login button. The Supabase session is already persisted, so reload
+        once and let Tasky start through its normal authenticated boot path.
+      */
+      try{
+        sessionStorage.setItem('tasky_v289_login_success','1');
+      }catch(_){}
+
+      const btn=document.getElementById('authSubmitBtn');
+      if(btn)btn.textContent=L('تم الدخول، جاري فتح تاسكي...','Signed in, opening Tasky...');
+
+      setTimeout(()=>{
+        try{
+          location.reload();
+        }catch(_){
+          location.href=location.href;
+        }
+      },60);
+
+      return true;
+    }catch(err){
+      console.error('Tasky V289 sign in',err);
+      showError(err?.message||String(err));
+
+      const auth=document.getElementById('authScreen');
+      const app=document.querySelector('.app');
+      if(auth){
+        auth.style.display='flex';
+        auth.style.visibility='visible';
+      }
+      if(app)app.style.display='none';
+
+      setBusy(false);
+      return false;
+    }
+  }
+
+  function install(){
+    const base=window.handleAuthSubmit;
+
+    window.handleAuthSubmit=async function(){
+      try{
+        if(typeof authMode!=='undefined' && authMode==='signup'){
+          return typeof base==='function' ? base() : false;
+        }
+      }catch(_){}
+
+      return signInV289();
+    };
+    window.handleAuthSubmit.__taskyV289=true;
+
+    /* Recover from a button that may have been left busy by an interrupted
+       previous runtime. */
+    loginSubmitting=false;
+    try{
+      if(typeof taskyAuthBusyV751!=='undefined')taskyAuthBusyV751=false;
+    }catch(_){}
+    setBusy(false);
+
+    const btn=document.getElementById('authSubmitBtn');
+    if(btn){
+      btn.type='button';
+      btn.onclick=()=>window.handleAuthSubmit();
+    }
+
+    ['authEmail','authPassword'].forEach(id=>{
+      const input=document.getElementById(id);
+      if(!input||input.dataset.taskyV289Enter==='1')return;
+      input.dataset.taskyV289Enter='1';
+      input.addEventListener('keydown',event=>{
+        if(event.key==='Enter'){
+          event.preventDefault();
+          window.handleAuthSubmit();
+        }
+      });
+    });
+
+    window.TASKY_LOGIN_SUBMIT_FIX_V289=true;
+    window.TASKY_BUILD=V;
+
+    console.info('Tasky V289 — login submit and post-login reload fixed');
+  }
+
+  window.taskyLoginAuditV289=function(){
+    const btn=document.getElementById('authSubmitBtn');
+    return {
+      build:window.TASKY_BUILD||null,
+      patch:!!window.TASKY_LOGIN_SUBMIT_FIX_V289,
+      handler:typeof window.handleAuthSubmit==='function',
+      handler_v289:!!window.handleAuthSubmit?.__taskyV289,
+      button_exists:!!btn,
+      button_disabled:!!btn?.disabled,
+      auth_visible:!!document.getElementById('authScreen') &&
+        getComputedStyle(document.getElementById('authScreen')).display!=='none',
+      supabase_client:!!window.sb?.auth,
+      reliable_signin:typeof window.taskySignInReliableV273==='function',
+      v284_login_first:!!window.TASKY_LOGIN_FIRST_V284
+    };
+  };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});
+  }else{
+    setTimeout(install,0);
+  }
 })();
 </script>
 
