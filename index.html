@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV296" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V296</div>
+    <div id="taskyBootBuildV297" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V297</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V296';
+    window.TASKY_BUILD='V297';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V296';
+  window.TASKY_BUILD='V297';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V296';
+    window.TASKY_BUILD='V297';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V296';
+  window.TASKY_BUILD='V297';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V296';
+    window.TASKY_BUILD='V297';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -28700,6 +28700,271 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       paragraph_test:
         bodyHtml('أول\\n\\nثاني').includes('<p>أول</p>')&&
         bodyHtml('أول\\n\\nثاني').includes('<p>ثاني</p>')
+    };
+  };
+
+  setTimeout(install,0);
+})();
+</script>
+
+
+<script id="tasky-v297-attendance-session-fix-js">
+(function(){
+  'use strict';
+
+  const BUILD='V297';
+  let attempts=0;
+  let installed=false;
+  let busy=false;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function currentEmployeeId(){
+    try{return hrContextV72?.employee_id||null}catch(_){return null}
+  }
+
+  function state(){
+    try{return typeof hrV72!=='undefined'?hrV72:(window.hrV72||window.__taskyHrDataV295||{})}
+    catch(_){return window.hrV72||window.__taskyHrDataV295||{}}
+  }
+
+  async function authoritativeRows(){
+    const employeeId=currentEmployeeId();
+    if(!currentWorkspaceId||!employeeId)return {open:null,today:null,rows:[]};
+
+    const today=(()=>{
+      try{return typeof hrTodayV73==='function'?hrTodayV73():new Date().toISOString().slice(0,10)}
+      catch(_){return new Date().toISOString().slice(0,10)}
+    })();
+
+    const {data,error}=await sb
+      .from('tasky_hr_attendance')
+      .select('*')
+      .eq('workspace_id',currentWorkspaceId)
+      .eq('employee_id',employeeId)
+      .order('check_in',{ascending:false})
+      .limit(50);
+
+    if(error)throw error;
+
+    const rows=data||[];
+    const open=rows.find(r=>r.check_in&&!r.check_out)||null;
+    const todayRow=rows.find(r=>String(r.attendance_date||'')===String(today))||null;
+
+    return {open,today:todayRow,rows};
+  }
+
+  function syncRows(fresh){
+    const s=state();
+    if(!Array.isArray(s.attendance))s.attendance=[];
+
+    const employeeId=currentEmployeeId();
+    const foreign=s.attendance.filter(r=>String(r.employee_id)!==String(employeeId));
+    const mine=fresh?.rows||[];
+    s.attendance=[...foreign,...mine];
+
+    try{
+      window.__taskyHrDataV295=s;
+      window.__taskyAttendanceTruthV297={
+        at:Date.now(),
+        employee_id:employeeId,
+        open_id:fresh?.open?.id||null,
+        today_id:fresh?.today?.id||null,
+        today_check_out:fresh?.today?.check_out||null
+      };
+    }catch(_){}
+  }
+
+  async function refreshTruth({render=true}={}){
+    const fresh=await authoritativeRows();
+    syncRows(fresh);
+
+    if(render && typeof activeNav!=='undefined'&&activeNav==='hr'){
+      try{renderModule()}catch(_){}
+    }
+
+    return fresh;
+  }
+
+  function isMissingV297(err){
+    const t=String(err?.message||err||'').toLowerCase();
+    return /tasky_hr_clock_v297|schema cache|function.*does not exist|pgrst202|42883/.test(t);
+  }
+
+  function isNoOpen(err){
+    return /no open attendance session|لا توجد جلسة دوام مفتوحة/i.test(String(err?.message||err||''));
+  }
+
+  async function callClockRpc(action,mode,note){
+    const args={
+      p_workspace_id:currentWorkspaceId,
+      p_action:action,
+      p_mode:mode,
+      p_note:note
+    };
+
+    const v297=await sb.rpc('tasky_hr_clock_v297',args);
+    if(!v297.error)return v297;
+
+    if(!isMissingV297(v297.error))return v297;
+
+    /*
+      Deployment compatibility only. V297 SQL is the real root fix.
+      Falling back keeps Clock-in usable if the HTML is uploaded a few seconds
+      before the SQL migration is run.
+    */
+    return sb.rpc('tasky_hr_clock_v73',args);
+  }
+
+  async function clock(action,mode='office',note=null){
+    if(busy)return false;
+    busy=true;
+
+    try{
+      /*
+        Reconcile the card with the database BEFORE acting.
+        This prevents a stale local row from showing "Clock out" after the
+        server has already closed that session.
+      */
+      let before=await refreshTruth({render:false});
+
+      if(action==='out'&&!before.open){
+        if(before.today?.check_out){
+          await refreshTruth({render:true});
+          taskyToast(
+            L('تمت مزامنة الدوام — الانصراف مسجل مسبقًا','Attendance synced — clock-out was already recorded'),
+            {tone:'success'}
+          );
+          return true;
+        }
+
+        await refreshTruth({render:true});
+        showTaskyDialog({
+          title:L('تمت مزامنة حالة الدوام','Attendance status synced'),
+          message:L(
+            'لا توجد جلسة دوام مفتوحة على الخادم. تم تحديث البطاقة حتى لا تعرض زر الانصراف بشكل غير صحيح.',
+            'There is no open attendance session on the server. The attendance card was refreshed so it no longer shows an incorrect Clock out action.'
+          ),
+          tone:'info'
+        });
+        return false;
+      }
+
+      const {data,error}=await callClockRpc(action,mode,note);
+
+      if(error){
+        /*
+          Clock-out is idempotent from the user's perspective. If another request
+          or server transaction already closed it, a second click must not become
+          an error modal.
+        */
+        if(action==='out'&&isNoOpen(error)){
+          const after=await refreshTruth({render:true});
+          if(after.today?.check_out||!after.open){
+            taskyToast(
+              L('تم تحديث الدوام — لا توجد جلسة مفتوحة الآن','Attendance updated — there is no open session now'),
+              {tone:'success'}
+            );
+            return true;
+          }
+        }
+
+        if(isMissingV297(error)){
+          throw new Error(L(
+            'تحديث الحضور V297 غير مثبت في Supabase. شغّل ملف SQL المرفق ثم حاول مرة أخرى.',
+            'Attendance V297 is not installed in Supabase. Run the included SQL file and try again.'
+          ));
+        }
+
+        throw error;
+      }
+
+      await refreshTruth({render:true});
+
+      taskyToast(
+        action==='in'
+          ?L('تم تسجيل الحضور باستخدام وقت الخادم','Clock-in recorded using server time')
+          :L('تم تسجيل الانصراف وحساب ساعات العمل','Clock-out recorded and work time calculated'),
+        {tone:'success'}
+      );
+
+      return data||true;
+    }catch(err){
+      console.error('Tasky V297 attendance',err);
+      try{await refreshTruth({render:true})}catch(_){}
+
+      showTaskyDialog({
+        title:L('تعذّر تسجيل الدوام','Could not record attendance'),
+        message:err?.message||String(err),
+        tone:'error'
+      });
+      return false;
+    }finally{
+      busy=false;
+    }
+  }
+
+  function install(){
+    attempts++;
+
+    let available=false;
+    try{available=typeof hrClockV73==='function'}catch(_){}
+
+    if(!available){
+      if(attempts<180)setTimeout(install,60);
+      return;
+    }
+
+    window.hrClockV73=clock;
+    try{hrClockV73=clock}catch(_){}
+
+    installed=true;
+    window.TASKY_HR_ATTENDANCE_SESSION_FIX_V297=true;
+    window.TASKY_BUILD=BUILD;
+
+    /*
+      When the attendance page is already open, reconcile it once immediately.
+      No interval/polling is added, so this does not reintroduce HR flashing.
+    */
+    try{
+      if(activeNav==='hr'&&typeof hrActiveTabV72!=='undefined'&&hrActiveTabV72==='attendance'){
+        refreshTruth({render:true}).catch(err=>console.warn('Tasky V297 initial attendance sync',err));
+      }
+    }catch(_){}
+
+    console.info('Tasky V297 — attendance server truth + idempotent clock-out installed');
+  }
+
+  if(typeof window.setActiveNav==='function'&&!window.setActiveNav.__taskyAttendanceV297){
+    const base=window.setActiveNav;
+    const wrapped=async function(id,...args){
+      const result=await base.call(this,id,...args);
+      if(id==='hr')setTimeout(install,0);
+      return result;
+    };
+    wrapped.__taskyAttendanceV297=true;
+    window.setActiveNav=wrapped;
+    try{setActiveNav=wrapped}catch(_){}
+  }
+
+  window.taskyAttendanceAuditV297=async function(){
+    let fresh=null,error=null;
+    try{fresh=await authoritativeRows()}catch(err){error=err?.message||String(err)}
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_HR_ATTENDANCE_SESSION_FIX_V297,
+      installed,
+      employee_id:currentEmployeeId(),
+      server_open_id:fresh?.open?.id||null,
+      server_today_id:fresh?.today?.id||null,
+      server_today_check_in:fresh?.today?.check_in||null,
+      server_today_check_out:fresh?.today?.check_out||null,
+      local_open_id:(()=>{
+        try{return typeof hrOwnAttendanceV73==='function'?hrOwnAttendanceV73()?.open?.id||null:null}catch(_){return null}
+      })(),
+      query_error:error
     };
   };
 
