@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV280" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V280</div>
+    <div id="taskyBootBuildV281" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V281</div>
   </div>
 </div>
 
@@ -3816,7 +3816,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V280',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V281',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3900,9 +3900,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V280',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V281',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V280'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V281'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10995,7 +10995,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V280',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V281',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -20132,7 +20132,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V280';
+    window.TASKY_BUILD='V281';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -25362,6 +25362,494 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   setTimeout(taskyV280Run,0);
+})();
+</script>
+
+
+<script id="tasky-v281-merged-plan-apps-js">
+(function(){
+  /* ==========================================================
+     TASKY V281 — MERGED SUBSCRIPTION + APPS
+     ----------------------------------------------------------
+     User-facing changes:
+     - one sidebar item only: "الباقة والتطبيقات"
+     - old separate "الباقة والاشتراك" row is removed
+     - subscription/billing is embedded in the same page
+     - Tasky HR is no longer displayed inside the package grid
+       and gets its own standalone product section
+     ========================================================== */
+
+  let taskyV281Applied=false;
+  let taskyV281Attempts=0;
+
+  function taskyV281Ready(){
+    return !!window.TASKY_LATE_DEFERRED_ACTIVATOR_V280 &&
+      !!window.TASKY_PLANS_APPS_ROOT_FIX_V279 &&
+      typeof taskySharedHtmlV233==='function' &&
+      typeof taskyPlansAppsTemplateV278==='function' &&
+      typeof billingTemplate==='function' &&
+      typeof renderModule==='function';
+  }
+
+  function taskyV281PackageAudit(){
+    try{
+      return typeof taskyPlansAuditV276==='function' ? taskyPlansAuditV276() : {};
+    }catch(_){
+      return {};
+    }
+  }
+
+  function taskyV281PackageCode(){
+    return taskyV281PackageAudit()?.package_code || currentPlan || 'free';
+  }
+
+  function taskyV281Pending(){
+    return taskyV281PackageAudit()?.pending || null;
+  }
+
+  function taskyV281PackageLabel(code){
+    if(code==='hr')return 'Tasky HR';
+    const key='plan_'+code+'_name';
+    return STR?.[lang]?.[key] || code || '—';
+  }
+
+  function taskyV281HrPending(){
+    const req=taskyV281Pending()?.package_request;
+    return req?.status==='pending' && req?.target_code==='hr' ? req : null;
+  }
+
+  function taskyV281CleanBillingHtml(){
+    const host=document.createElement('div');
+    host.innerHTML=billingTemplate();
+
+    host.querySelectorAll(
+      '.tasky-v279-plans-launcher,'+
+      '.tasky-v277-request-status,'+
+      '.tasky-v276-package-status,'+
+      '.tasky-v276-addons-section,'+
+      '.tasky-v276-hr-card'
+    ).forEach(el=>el.remove());
+
+    /* If V276 inserted HR before a grid but a CSS class changed, remove by content. */
+    [...host.querySelectorAll('.bplan-card')].forEach(card=>{
+      if(String(card.textContent||'').includes('Tasky HR'))card.remove();
+    });
+
+    return host.innerHTML;
+  }
+
+  function taskyV281RequestRows(){
+    const pending=taskyV281Pending();
+    const rows=[];
+
+    const pkg=pending?.package_request;
+    if(pkg?.status==='pending'){
+      const label=taskyV281PackageLabel(pkg.target_code);
+      rows.push(`
+        <div class="tasky-v281-request-row">
+          <div class="tasky-v281-request-icon">${pkg.target_code==='hr'?'HR':'PKG'}</div>
+          <div class="tasky-v281-request-copy">
+            <b>${escapeHtml(label)}</b>
+            <span>${lang==='ar'?'طلب باقة/عرض':'Package / quote request'}</span>
+            ${pkg.employee_count
+              ?`<small>${lang==='ar'?'عدد الموظفين':'Employees'}: ${Number(pkg.employee_count)}</small>`
+              :''}
+          </div>
+          <span class="tasky-v281-pending">${lang==='ar'?'قيد المراجعة':'Under review'}</span>
+        </div>`);
+    }
+
+    (pending?.addon_requests||[]).filter(x=>x.status==='pending').forEach(req=>{
+      const labels={
+        tasky_work:'Tasky Work',
+        tasky_documents:'Tasky Documents',
+        tasky_meetings:'Tasky Meetings'
+      };
+      rows.push(`
+        <div class="tasky-v281-request-row">
+          <div class="tasky-v281-request-icon">+</div>
+          <div class="tasky-v281-request-copy">
+            <b>${escapeHtml(labels[req.target_code]||req.target_code)}</b>
+            <span>${lang==='ar'?'طلب إضافة تطبيق':'App add-on request'}</span>
+          </div>
+          <span class="tasky-v281-pending">${lang==='ar'?'قيد المراجعة':'Under review'}</span>
+        </div>`);
+    });
+
+    if(!rows.length)return '';
+
+    return `
+      <section class="tasky-v281-section">
+        <div class="tasky-v281-section-head">
+          <div>
+            <h3>${lang==='ar'?'طلباتك الحالية':'Your current requests'}</h3>
+            <p>${lang==='ar'
+              ?'حالة طلبات الباقات والتطبيقات المرسلة لفريق تاسكي.'
+              :'Status of package and app requests sent to Tasky.'}</p>
+          </div>
+        </div>
+        <div class="tasky-v281-request-list">${rows.join('')}</div>
+      </section>`;
+  }
+
+  function taskyV281HrStandalone(){
+    const current=taskyV281PackageCode()==='hr';
+    const pending=!!taskyV281HrPending();
+
+    return `
+      <section class="tasky-v281-hr-section">
+        <div class="tasky-v281-hr-intro">
+          <div class="tasky-v281-hr-mark">HR</div>
+          <div>
+            <span class="tasky-v281-product-kicker">${lang==='ar'?'منتج مستقل':'STANDALONE PRODUCT'}</span>
+            <h3>Tasky HR</h3>
+            <p>${lang==='ar'
+              ?'حل الموارد البشرية ودورة حياة الموظف كمنتج مستقل عن باقات إدارة العمل.'
+              :'HR and employee lifecycle as a standalone Tasky product, separate from work-management plans.'}</p>
+          </div>
+        </div>
+
+        <div class="tasky-v281-hr-offer">
+          <div class="tasky-v281-price">
+            <b>${lang==='ar'?'حسب العرض':'Custom quote'}</b>
+            <span>${lang==='ar'
+              ?'تسعير لكل موظف — يتم تحديد السعر التجاري في العرض'
+              :'Per-employee pricing — commercial rate is defined in the quote'}</span>
+          </div>
+
+          <div class="tasky-v281-hr-features">
+            <span>✓ ${lang==='ar'?'ملفات الموظفين والهيكل التنظيمي':'Employee files and organization'}</span>
+            <span>✓ ${lang==='ar'?'الحضور والوقت والإجازات':'Attendance, time and leave'}</span>
+            <span>✓ ${lang==='ar'?'Onboarding وOffboarding وتغييرات الموظف':'Onboarding, offboarding and employee changes'}</span>
+            <span>✓ ${lang==='ar'?'الأداء والمزايا والتدريب':'Performance, benefits and training'}</span>
+            <span>✓ ${lang==='ar'?'تقارير الموارد البشرية وتجربة الموظف':'HR reporting and employee experience'}</span>
+          </div>
+
+          ${current
+            ?`<button class="chip-btn tasky-v281-full-btn" disabled>✓ ${lang==='ar'?'Tasky HR مفعلة':'Tasky HR is active'}</button>`
+            :pending
+              ?`<button class="chip-btn tasky-v281-full-btn" disabled>${lang==='ar'?'الطلب تحت المراجعة':'Request under review'}</button>`
+              :`<button class="primary-btn tasky-v281-full-btn" onclick="taskyOpenQuoteV277('hr')">${lang==='ar'?'طلب عرض Tasky HR':'Request a Tasky HR quote'}</button>`}
+        </div>
+      </section>`;
+  }
+
+  function taskyV281AddonCards(){
+    const items=[
+      {
+        code:'tasky_work',module:'tasks',icon:'W',
+        ar:'Tasky Work',en:'Tasky Work',
+        descAr:'المهام والمشاريع وإدارة العمل.',
+        descEn:'Tasks, projects and work management.'
+      },
+      {
+        code:'tasky_documents',module:'documents',icon:'DOC',
+        ar:'Tasky Documents',en:'Tasky Documents',
+        descAr:'المستندات والخطابات والتوقيع والتصدير.',
+        descEn:'Documents, letters, signatures and export.'
+      },
+      {
+        code:'tasky_meetings',module:'meetings',icon:'MTG',
+        ar:'Tasky Meetings',en:'Tasky Meetings',
+        descAr:'الاجتماعات المرئية والتعاون داخل الاجتماع.',
+        descEn:'Video meetings and in-meeting collaboration.'
+      }
+    ];
+
+    const pending=taskyV281Pending();
+
+    return items.map(item=>{
+      const enabled=taskyModuleAvailableV165(item.module);
+      const isPending=(pending?.addon_requests||[])
+        .some(x=>x.target_code===item.code && x.status==='pending');
+      const label=lang==='ar'?item.ar:item.en;
+      const desc=lang==='ar'?item.descAr:item.descEn;
+
+      return `
+        <article class="tasky-v281-addon ${enabled?'active':''}">
+          <div class="tasky-v281-addon-top">
+            <div class="tasky-v281-addon-icon">${escapeHtml(item.icon)}</div>
+            ${enabled
+              ?`<span class="tasky-v281-active">${lang==='ar'?'مفعلة':'Enabled'}</span>`
+              :''}
+          </div>
+          <h4>${escapeHtml(label)}</h4>
+          <p>${escapeHtml(desc)}</p>
+          ${enabled
+            ?`<button class="chip-btn" disabled>✓ ${lang==='ar'?'مفعلة':'Enabled'}</button>`
+            :isPending
+              ?`<button class="chip-btn" disabled>${lang==='ar'?'قيد المراجعة':'Under review'}</button>`
+              :`<button class="chip-btn" onclick="taskyRequestAddonV276('${item.code}')">+ ${lang==='ar'?'طلب الإضافة':'Request add-on'}</button>`}
+        </article>`;
+    }).join('');
+  }
+
+  window.taskyPlansAppsTemplateV281=function(){
+    const code=taskyV281PackageCode();
+
+    return `
+      <div class="tasky-v281-page">
+        <header class="tasky-v281-hero">
+          <div>
+            <span class="tasky-v281-eyebrow">${lang==='ar'?'الاشتراك والتطبيقات':'SUBSCRIPTION & APPS'}</span>
+            <h2>${lang==='ar'?'الباقة والتطبيقات':'Plan & Apps'}</h2>
+            <p>${lang==='ar'
+              ?'إدارة اشتراك مساحة العمل، الفوترة، وطلب منتجات وتطبيقات تاسكي من مكان واحد.'
+              :'Manage workspace subscription, billing, and Tasky products from one place.'}</p>
+          </div>
+          <div class="tasky-v281-current-plan">
+            <span>${lang==='ar'?'الباقة الحالية':'Current plan'}</span>
+            <b>${escapeHtml(taskyV281PackageLabel(code))}</b>
+          </div>
+        </header>
+
+        ${taskyV281RequestRows()}
+
+        <section class="tasky-v281-section">
+          <div class="tasky-v281-section-head">
+            <div>
+              <h3>${lang==='ar'?'اشتراكك والفوترة':'Subscription & billing'}</h3>
+              <p>${lang==='ar'
+                ?'إدارة الباقة الأساسية ودورة الفوترة وإعدادات الاشتراك الحالية.'
+                :'Manage the base plan, billing cycle and current subscription settings.'}</p>
+            </div>
+          </div>
+          <div class="tasky-v281-billing-host">
+            ${taskyV281CleanBillingHtml()}
+          </div>
+        </section>
+
+        ${taskyV281HrStandalone()}
+
+        <section class="tasky-v281-section">
+          <div class="tasky-v281-section-head">
+            <div>
+              <h3>${lang==='ar'?'تطبيقات تاسكي الإضافية':'Tasky add-ons'}</h3>
+              <p>${lang==='ar'
+                ?'أضف التطبيقات التي تحتاجها لمساحة العمل بدون تغيير المنتج الأساسي.'
+                :'Add the apps your workspace needs without changing the core product.'}</p>
+            </div>
+          </div>
+          <div class="tasky-v281-addon-grid">${taskyV281AddonCards()}</div>
+        </section>
+      </div>`;
+  };
+
+  function taskyV281Apply(){
+    if(taskyV281Applied)return;
+    taskyV281Attempts++;
+
+    if(!taskyV281Ready()){
+      if(taskyV281Attempts<200){
+        setTimeout(taskyV281Apply,100);
+      }else{
+        console.error('Tasky V281 — V280 commercial layer did not become ready');
+      }
+      return;
+    }
+
+    /* One sidebar row only. Remove old separate Billing row from the actual V233 source. */
+    if(!taskySharedHtmlV233.__taskyV281){
+      const base=taskySharedHtmlV233;
+      const wrapped=function(){
+        const host=document.createElement('div');
+        host.innerHTML=base();
+
+        [...host.querySelectorAll('button,a')].forEach(row=>{
+          const text=String(row.textContent||'').trim();
+          if(
+            text.includes('الباقة والاشتراك') ||
+            text.includes('Plan & Billing')
+          ){
+            row.remove();
+          }
+        });
+
+        /* Rename the retained merged row. */
+        [...host.querySelectorAll('button,a')].forEach(row=>{
+          const text=String(row.textContent||'').trim();
+          if(
+            text.includes('الباقات والتطبيقات') ||
+            text.includes('Plans & Apps')
+          ){
+            const labelNode=[...row.childNodes].find(n=>n.nodeType===Node.TEXT_NODE);
+            if(labelNode){
+              labelNode.nodeValue=lang==='ar'?'الباقة والتطبيقات':'Plan & Apps';
+            }else{
+              /* Preserve icon markup and replace only visible text if structure is simple. */
+              const svg=row.querySelector('svg');
+              row.innerHTML=(svg?svg.outerHTML:'')+
+                `<span>${lang==='ar'?'الباقة والتطبيقات':'Plan & Apps'}</span>`;
+            }
+          }
+        });
+
+        return host.innerHTML;
+      };
+      wrapped.__taskyV281=true;
+      taskySharedHtmlV233=wrapped;
+    }
+
+    /* Use the merged page for the existing plans_apps route. */
+    if(!renderModule.__taskyV281){
+      const baseRender=renderModule;
+      const wrappedRender=function(...args){
+        if(activeNav==='plans_apps'){
+          const area=document.getElementById('moduleArea');
+          if(area)area.innerHTML=taskyPlansAppsTemplateV281();
+          updateBreadcrumb?.();
+          return;
+        }
+        return baseRender.apply(this,args);
+      };
+      wrappedRender.__taskyV281=true;
+      renderModule=wrappedRender;
+    }
+
+    /* Breadcrumb wording matches merged destination. */
+    if(typeof taskyCurrentLabelV233==='function'&&!taskyCurrentLabelV233.__taskyV281){
+      const baseLabel=taskyCurrentLabelV233;
+      const wrappedLabel=function(){
+        if(activeNav==='plans_apps'){
+          return lang==='ar'?'الباقة والتطبيقات':'Plan & Apps';
+        }
+        return baseLabel();
+      };
+      wrappedLabel.__taskyV281=true;
+      taskyCurrentLabelV233=wrappedLabel;
+    }
+
+    /* Remove V279 Billing fallback because Billing is now merged and hidden from sidebar. */
+    if(typeof billingTemplate==='function'&&!billingTemplate.__taskyV281){
+      const baseBilling=billingTemplate;
+      const wrappedBilling=function(){
+        const host=document.createElement('div');
+        host.innerHTML=baseBilling();
+        host.querySelectorAll('.tasky-v279-plans-launcher').forEach(el=>el.remove());
+        return host.innerHTML;
+      };
+      wrappedBilling.__taskyV281=true;
+      billingTemplate=wrappedBilling;
+    }
+
+    taskyV281Applied=true;
+    window.TASKY_MERGED_PLAN_APPS_V281=true;
+    window.TASKY_BUILD='V281';
+
+    try{taskyRenderNavV233()}catch(_){}
+    try{taskyRenderAppSwitcherV233?.()}catch(_){}
+    if(activeNav==='plans_apps'){
+      try{renderModule()}catch(_){}
+    }
+
+    console.info('Tasky V281 — Plan & Apps merged; Tasky HR separated');
+  }
+
+  window.taskyMergedPlanAppsAuditV281=function(){
+    const nav=document.getElementById('mainNav');
+    const text=nav?.textContent||'';
+    return {
+      build:window.TASKY_BUILD,
+      applied:taskyV281Applied,
+      merged_nav:
+        text.includes(lang==='ar'?'الباقة والتطبيقات':'Plan & Apps'),
+      old_billing_nav_hidden:
+        !text.includes(lang==='ar'?'الباقة والاشتراك':'Plan & Billing'),
+      page_template:typeof window.taskyPlansAppsTemplateV281==='function',
+      hr_quote_flow:typeof window.taskyOpenQuoteV277==='function',
+      addon_flow:typeof window.taskyRequestAddonV276==='function'
+    };
+  };
+
+  if(!document.getElementById('tasky-v281-merged-plan-apps-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v281-merged-plan-apps-css';
+    style.textContent=`
+      .tasky-v281-page{display:flex;flex-direction:column;gap:14px}
+      .tasky-v281-hero{
+        display:flex;justify-content:space-between;align-items:center;gap:18px;
+        padding:22px;border:1px solid var(--border);border-radius:18px;
+        background:linear-gradient(135deg,var(--card),color-mix(in srgb,var(--green-tint) 62%,var(--card)));
+      }
+      .tasky-v281-eyebrow,.tasky-v281-product-kicker{
+        display:block;font-size:8px;font-weight:900;color:var(--green);
+        letter-spacing:.07em;margin-bottom:6px
+      }
+      .tasky-v281-hero h2{margin:0;font-size:22px}
+      .tasky-v281-hero p{margin:7px 0 0;max-width:720px;color:var(--muted);font-size:10px;line-height:1.65}
+      .tasky-v281-current-plan{
+        min-width:180px;padding:14px 16px;border:1px solid var(--border);
+        border-radius:14px;background:var(--card)
+      }
+      .tasky-v281-current-plan span{display:block;color:var(--muted);font-size:8px;margin-bottom:5px}
+      .tasky-v281-current-plan b{display:block;font-size:15px;color:var(--green-deep)}
+      .tasky-v281-section,.tasky-v281-hr-section{
+        padding:18px;border:1px solid var(--border);border-radius:16px;background:var(--card)
+      }
+      .tasky-v281-section-head h3{margin:0;font-size:14px}
+      .tasky-v281-section-head p{margin:4px 0 0;color:var(--muted);font-size:9px;line-height:1.55}
+      .tasky-v281-billing-host{margin-top:14px}
+      .tasky-v281-hr-section{
+        display:grid;grid-template-columns:minmax(0,1fr) minmax(310px,420px);
+        gap:18px;align-items:stretch;
+        border-color:color-mix(in srgb,#7F6AA8 38%,var(--border));
+        background:linear-gradient(135deg,color-mix(in srgb,#7F6AA8 6%,var(--card)),var(--card));
+      }
+      .tasky-v281-hr-intro{display:flex;gap:14px;align-items:flex-start;padding:4px}
+      .tasky-v281-hr-mark{
+        width:54px;height:54px;display:grid;place-items:center;flex:0 0 54px;
+        border-radius:15px;background:#7F6AA8;color:#fff;font-weight:900
+      }
+      .tasky-v281-hr-intro h3{margin:0;font-size:18px}
+      .tasky-v281-hr-intro p{margin:7px 0 0;color:var(--muted);font-size:10px;line-height:1.65;max-width:560px}
+      .tasky-v281-hr-offer{
+        padding:15px;border:1px solid color-mix(in srgb,#7F6AA8 24%,var(--border));
+        border-radius:14px;background:var(--paper)
+      }
+      .tasky-v281-price b{display:block;font-size:18px}
+      .tasky-v281-price span{display:block;color:var(--muted);font-size:8.5px;margin-top:3px}
+      .tasky-v281-hr-features{display:flex;flex-direction:column;gap:7px;margin:14px 0;font-size:9px}
+      .tasky-v281-hr-features span{color:var(--ink-soft)}
+      .tasky-v281-full-btn{width:100%;justify-content:center}
+      .tasky-v281-addon-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:13px}
+      .tasky-v281-addon{padding:14px;border:1px solid var(--border);border-radius:13px;background:var(--paper)}
+      .tasky-v281-addon.active{box-shadow:0 0 0 2px color-mix(in srgb,var(--green) 18%,transparent)}
+      .tasky-v281-addon-top{display:flex;justify-content:space-between;gap:8px;align-items:center}
+      .tasky-v281-addon-icon,.tasky-v281-request-icon{
+        width:42px;height:42px;display:grid;place-items:center;border-radius:11px;
+        background:var(--green-tint);color:var(--green-deep);font-size:7px;font-weight:900
+      }
+      .tasky-v281-addon h4{margin:10px 0 0;font-size:11px}
+      .tasky-v281-addon p{min-height:30px;color:var(--muted);font-size:8.5px;line-height:1.5}
+      .tasky-v281-active,.tasky-v281-pending{
+        display:inline-flex;align-items:center;min-height:25px;padding:0 9px;border-radius:999px;
+        font-size:7.5px;font-weight:900;white-space:nowrap
+      }
+      .tasky-v281-active{background:var(--green-tint);color:var(--green-deep)}
+      .tasky-v281-pending{background:var(--amber-tint,#fff4df);color:var(--amber,#9a6a08)}
+      .tasky-v281-request-list{display:flex;flex-direction:column;gap:8px;margin-top:13px}
+      .tasky-v281-request-row{
+        display:grid;grid-template-columns:42px minmax(0,1fr) auto;gap:10px;align-items:center;
+        padding:10px;border:1px solid var(--border);border-radius:12px;background:var(--paper)
+      }
+      .tasky-v281-request-copy b{display:block;font-size:10px}
+      .tasky-v281-request-copy span,.tasky-v281-request-copy small{display:block;color:var(--muted);font-size:8px;margin-top:2px}
+      @media(max-width:900px){
+        .tasky-v281-hero{flex-direction:column;align-items:stretch}
+        .tasky-v281-current-plan{min-width:0}
+        .tasky-v281-hr-section{grid-template-columns:1fr}
+        .tasky-v281-addon-grid{grid-template-columns:1fr}
+      }
+      @media(max-width:600px){
+        .tasky-v281-hero,.tasky-v281-section,.tasky-v281-hr-section{padding:14px}
+        .tasky-v281-request-row{grid-template-columns:38px minmax(0,1fr)}
+        .tasky-v281-request-row>.tasky-v281-pending{grid-column:1/-1;justify-self:start}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  setTimeout(taskyV281Apply,0);
 })();
 </script>
 
