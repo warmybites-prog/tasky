@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV303" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V303</div>
+    <div id="taskyBootBuildV304" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V304</div>
   </div>
 </div>
 
@@ -20320,7 +20320,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V303';
+    window.TASKY_BUILD='V304';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26628,7 +26628,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V303';
+  window.TASKY_BUILD='V304';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27204,7 +27204,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V303';
+    window.TASKY_BUILD='V304';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27418,7 +27418,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V303';
+  window.TASKY_BUILD='V304';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27438,7 +27438,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V303';
+    window.TASKY_BUILD='V304';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27746,14 +27746,28 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   function departmentCard(d,employeeCount,positionCount){
     const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
+    const headId=departmentHeadId(d?.id);
+    const head=headId?activeEmployees().find(e=>String(e.id)===String(headId)):null;
+
     return nodeShell(`
-      <button type="button" class="org293-dept-btn" ${canManage?`onclick="hrOpenFormV72('department','${esc(d.id)}')"`:''}>
-        <div class="org293-dept-icon"><svg><use href="#i-users"/></svg></div>
+      <button
+        type="button"
+        class="org293-dept-btn"
+        ${canManage?`onclick="hrOpenFormV72('department','${esc(d.id)}')"`:''}
+        title="${canManage?L('تعديل الإدارة','Edit department'):esc(deptName(d))}"
+      >
+        <div class="org293-dept-icon"><svg><use href="#i-building"/></svg></div>
         <div class="org293-node-copy">
           <span>${L('إدارة','DEPARTMENT')}</span>
           <b>${esc(deptName(d))}</b>
           <small>${employeeCount} ${L('موظف','employees')} · ${positionCount} ${L('مسمى','positions')}</small>
+          ${head?`
+            <em class="org304-dept-head-summary">
+              <svg><use href="#i-crown"/></svg>
+              ${L('رئيس الإدارة','Department head')}: ${esc(employeeName(head))}
+            </em>`:''}
         </div>
+        ${canManage?`<span class="org304-dept-edit"><svg><use href="#i-edit"/></svg></span>`:''}
       </button>
     `,'department');
   }
@@ -27772,92 +27786,223 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return `${employeeCard(e,kids.length)}${kids.length?treeList(kids.map(k=>renderEmployeeBranch(k,map,seen))):''}`;
   }
 
-  function employeeReportingTree(){
-    const employees=scopedEmployeesV302();
-    if(!employees.length)return '';
+  function sortPeopleV304(arr){
+    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
+    return arr.sort((a,b)=>{
+      const pa=positionRank(positionById(empPositionId(a)));
+      const pb=positionRank(positionById(empPositionId(b)));
+      return pa-pb||employeeName(a).localeCompare(employeeName(b),locale);
+    });
+  }
+
+  function vacantPositionsForDepartmentV304(d){
+    const deptId=String(d?.id||'');
+    const employees=scopedEmployeesV302()
+      .filter(e=>String(empDeptId(e)||'')===deptId);
+
+    const occupied=new Set(
+      employees
+        .map(e=>String(empPositionId(e)||''))
+        .filter(Boolean)
+    );
+
+    const vacant=[...scopedPositionsV302()]
+      .filter(p=>
+        String(positionDeptId(p)||'')===deptId &&
+        !occupied.has(String(p.id))
+      )
+      .sort((a,b)=>
+        positionRank(a)-positionRank(b)||
+        posName(a).localeCompare(posName(b))
+      );
+
+    if(!vacant.length)return '';
+
+    return treeList(vacant.map(p=>positionCard(p,0,false)));
+  }
+
+  function employeeChildrenForDepartmentV304(d){
+    const deptId=String(d?.id||'');
+    const employees=sortPeopleV304(
+      scopedEmployeesV302()
+        .filter(e=>String(empDeptId(e)||'')===deptId)
+        .slice()
+    );
+
+    if(!employees.length){
+      return vacantPositionsForDepartmentV304(d);
+    }
 
     const ids=new Set(employees.map(e=>String(e.id)));
     const children=new Map();
 
     employees.forEach(e=>{
       const manager=String(empManagerId(e)||'');
-      if(manager && ids.has(manager)){
+
+      /*
+        Reporting lines are kept only when both employees are in this
+        department. A manager in another department does not remove the
+        employee from this department's structural branch.
+      */
+      if(manager&&ids.has(manager)&&manager!==String(e.id)){
         if(!children.has(manager))children.set(manager,[]);
         children.get(manager).push(e);
       }
     });
 
-    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
-    const sortPeople=arr=>arr.sort((a,b)=>{
-      const da=deptName(departmentById(empDeptId(a)));
-      const db=deptName(departmentById(empDeptId(b)));
-      return da.localeCompare(db,locale)||employeeName(a).localeCompare(employeeName(b),locale);
-    });
-    for(const arr of children.values())sortPeople(arr);
+    for(const list of children.values())sortPeopleV304(list);
 
-    let roots=employees.filter(e=>{
-      const manager=String(empManagerId(e)||'');
-      return !manager || !ids.has(manager) || manager===String(e.id);
-    });
-    sortPeople(roots);
+    const explicitHeadId=String(departmentHeadId(deptId)||'');
+    const explicitHead=explicitHeadId
+      ?employees.find(e=>String(e.id)===explicitHeadId)||null
+      :null;
 
     const seen=new Set();
-    const nodes=roots.map(e=>renderEmployeeBranch(e,children,seen));
+    const nodes=[];
 
-    employees.filter(e=>!seen.has(String(e.id))).forEach(e=>{
-      nodes.push(renderEmployeeBranch(e,children,seen));
+    /*
+      An explicitly assigned department head is always the first employee
+      level under the Department node. This is a business assignment, not
+      a title inference. Its direct reports still use manager_employee_id.
+    */
+    if(explicitHead){
+      nodes.push(renderEmployeeBranch(explicitHead,children,seen));
+    }
+
+    const roots=sortPeopleV304(
+      employees.filter(e=>{
+        if(explicitHead&&String(e.id)===String(explicitHead.id))return false;
+
+        const manager=String(empManagerId(e)||'');
+        return !manager||!ids.has(manager)||manager===String(e.id);
+      })
+    );
+
+    roots.forEach(e=>{
+      if(!seen.has(String(e.id))){
+        nodes.push(renderEmployeeBranch(e,children,seen));
+      }
     });
+
+    /*
+      Protect against cyclic/broken reporting data: no employee disappears.
+      Any employee not reachable from an explicit head/root becomes another
+      branch under the Department node.
+    */
+    employees.forEach(e=>{
+      if(!seen.has(String(e.id))){
+        nodes.push(renderEmployeeBranch(e,children,seen));
+      }
+    });
+
+    const vacant=vacantPositionsForDepartmentV304(d);
+    if(vacant)nodes.push(vacant);
 
     return treeList(nodes);
   }
 
-  function departmentPositionTree(){
-    const depts=[...scopedDepartmentsV302()];
-    const positions=[...scopedPositionsV302()];
-    const employees=scopedEmployeesV302();
+  function unassignedDepartmentCardV304(employeeCount){
+    return nodeShell(`
+      <div class="org304-unassigned-card">
+        <div class="org293-dept-icon"><svg><use href="#i-users"/></svg></div>
+        <div class="org293-node-copy">
+          <span>${L('بحاجة إلى تنظيم','NEEDS ASSIGNMENT')}</span>
+          <b>${L('بدون إدارة','No department')}</b>
+          <small>${employeeCount} ${L('موظف','employees')}</small>
+        </div>
+      </div>
+    `,'department org304-unassigned');
+  }
 
-    if(!depts.length)return '';
+  function unassignedEmployeesTreeV304(){
+    const knownDepartments=new Set(
+      hrDepartments().map(d=>String(d.id))
+    );
 
-    const deptNodes=depts.map(d=>{
-      const de=employees.filter(e=>String(empDeptId(e)||'')===String(d.id));
-      const dp=positions
-        .filter(p=>String(positionDeptId(p)||'')===String(d.id))
-        .sort((a,b)=>positionRank(a)-positionRank(b)||posName(a).localeCompare(posName(b)));
+    const people=sortPeopleV304(
+      scopedEmployeesV302().filter(e=>{
+        const d=String(empDeptId(e)||'');
+        return !d||!knownDepartments.has(d);
+      }).slice()
+    );
 
-      let children='';
+    if(!people.length)return '';
 
-      if(de.length){
-        const deIds=new Set(de.map(e=>String(e.id)));
-        const childMap=new Map();
-        de.forEach(e=>{
-          const mgr=String(empManagerId(e)||'');
-          if(mgr&&deIds.has(mgr)){
-            if(!childMap.has(mgr))childMap.set(mgr,[]);
-            childMap.get(mgr).push(e);
-          }
-        });
-        const roots=de.filter(e=>{
-          const mgr=String(empManagerId(e)||'');
-          return !mgr||!deIds.has(mgr)||mgr===String(e.id);
-        });
-        const seen=new Set();
-        children=treeList(roots.map(e=>renderEmployeeBranch(e,childMap,seen)));
-      }else if(dp.length){
-        const lead=dp[0];
-        const leadCount=employees.filter(e=>String(empPositionId(e)||'')===String(lead.id)).length;
-        const rest=dp.slice(1);
-        children=treeList([
-          `${positionCard(lead,leadCount,true)}${rest.length?treeList(rest.map(p=>{
-            const n=employees.filter(e=>String(empPositionId(e)||'')===String(p.id)).length;
-            return positionCard(p,n,false);
-          })):''}`
-        ]);
+    const ids=new Set(people.map(e=>String(e.id)));
+    const children=new Map();
+
+    people.forEach(e=>{
+      const manager=String(empManagerId(e)||'');
+      if(manager&&ids.has(manager)&&manager!==String(e.id)){
+        if(!children.has(manager))children.set(manager,[]);
+        children.get(manager).push(e);
       }
-
-      return `${departmentCard(d,de.length,dp.length)}${children}`;
     });
 
-    return treeList(deptNodes);
+    const seen=new Set();
+    const roots=people.filter(e=>{
+      const manager=String(empManagerId(e)||'');
+      return !manager||!ids.has(manager)||manager===String(e.id);
+    });
+
+    const branches=sortPeopleV304(roots).map(
+      e=>renderEmployeeBranch(e,children,seen)
+    );
+
+    people.forEach(e=>{
+      if(!seen.has(String(e.id))){
+        branches.push(renderEmployeeBranch(e,children,seen));
+      }
+    });
+
+    return `${unassignedDepartmentCardV304(people.length)}${treeList(branches)}`;
+  }
+
+  function departmentBranchV304(d){
+    const deptId=String(d?.id||'');
+
+    const employees=scopedEmployeesV302()
+      .filter(e=>String(empDeptId(e)||'')===deptId);
+
+    const positions=scopedPositionsV302()
+      .filter(p=>String(positionDeptId(p)||'')===deptId);
+
+    return `${departmentCard(d,employees.length,positions.length)}${employeeChildrenForDepartmentV304(d)}`;
+  }
+
+  function departmentOrgTreeV304(){
+    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
+
+    const depts=[...scopedDepartmentsV302()]
+      .sort((a,b)=>deptName(a).localeCompare(deptName(b),locale));
+
+    const nodes=depts.map(d=>departmentBranchV304(d));
+
+    /*
+      In the complete organization view, employees without a valid department
+      remain visible under a clearly labeled maintenance branch.
+    */
+    if(!selectedDeptV302()){
+      const unassigned=unassignedEmployeesTreeV304();
+      if(unassigned)nodes.push(unassigned);
+    }
+
+    return treeList(nodes);
+  }
+
+  function employeeReportingTree(){
+    const selected=selectedDeptV302();
+
+    if(selected){
+      const d=departmentById(selected);
+      return d?employeeChildrenForDepartmentV304(d):'';
+    }
+
+    return departmentOrgTreeV304();
+  }
+
+  function departmentPositionTree(){
+    return departmentOrgTreeV304();
   }
 
   function metrics(){
@@ -27926,8 +28071,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             <span class="org293-eyebrow">ORG CHART</span>
             <h3>${L('الهيكل التنظيمي','Organization chart')}</h3>
             <p>${L(
-              'يعتمد ترتيب الموظفين على المدير المباشر. أما «رئيس الإدارة» فلا يتم استنتاجه تلقائيًا؛ لا يظهر إلا إذا تم تحديده صراحةً في إعدادات الإدارة.',
-              'Employee hierarchy follows the direct manager. Department head is never inferred automatically; it appears only when explicitly assigned in department settings.'
+              'يبدأ الهيكل بالمنظمة ثم الإدارات كبطاقات مستقلة، وبعد كل إدارة يظهر رئيسها المحدد صراحةً وخطوط التقارير داخلها. «رئيس الإدارة» لا يتم استنتاجه من المسمى الوظيفي.',
+              'The chart starts with the organization, then structural Department nodes. Each department contains its explicitly assigned head and internal reporting lines. Department head is never inferred from a job title.'
             )}</p>
           </div>
 
@@ -27990,8 +28135,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             <div>
               <b>${L('كيف يتم ترتيب الهيكل؟','How is the hierarchy built?')}</b>
               <span>${L(
-                'خطوط التقارير تعتمد على «المدير المباشر» في ملف الموظف. علامة «رئيس الإدارة» تعتمد فقط على الموظف الذي تم اختياره صراحةً داخل إعدادات الإدارة.',
-                'Reporting lines use the direct manager saved in the employee profile. The Department head badge is based only on the employee explicitly selected in department settings.'
+                'المنظمة تتفرع أولًا إلى الإدارات. داخل كل إدارة تُستخدم علاقة «المدير المباشر» لترتيب الموظفين، بينما علامة «رئيس الإدارة» لا تظهر إلا للموظف المحدد صراحةً في إعدادات الإدارة.',
+                'The organization branches into Departments first. Inside each department, direct-manager relationships arrange employees; the Department head badge appears only for the employee explicitly assigned in department settings.'
               )}</span>
             </div>
           </div>`:''}
@@ -28026,9 +28171,10 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     installed=true;
     window.TASKY_HR_ORG_CHART_V293=true;
+    window.TASKY_ORG_DEPARTMENT_FIRST_V304=true;
     window.TASKY_BUILD=BUILD;
 
-    console.info('Tasky V293 — hierarchical HR organization chart installed');
+    console.info('Tasky V304 — department-first HR organization chart installed');
     return true;
   };
 
@@ -28107,7 +28253,58 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       .org293-node button:hover{background:color-mix(in srgb,var(--green-tint) 42%,transparent)}
       .org293-node.company{width:220px;display:flex;align-items:center;gap:10px;padding:12px 13px;border-color:color-mix(in srgb,var(--green) 36%,var(--border));
         background:linear-gradient(145deg,color-mix(in srgb,var(--green) 9%,var(--card)),var(--paper))}
-      .org293-node.department{border-color:color-mix(in srgb,var(--blue) 22%,var(--border))}
+      .org293-node.department{
+        width:194px;
+        border:1.5px solid color-mix(in srgb,var(--blue) 30%,var(--border));
+        background:linear-gradient(145deg,color-mix(in srgb,var(--blue-tint) 44%,var(--paper)),var(--paper));
+      }
+      .org293-node.department .org293-dept-btn{position:relative}
+      .org304-dept-head-summary{
+        display:flex!important;
+        align-items:center;
+        gap:3px;
+        width:max-content;
+        max-width:100%;
+        margin-top:5px;
+        padding:3px 6px;
+        border-radius:999px;
+        background:color-mix(in srgb,var(--green) 10%,var(--paper));
+        color:var(--green);
+        font-style:normal;
+        font-size:6.6px;
+        font-weight:900;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .org304-dept-head-summary svg{width:8px;height:8px;flex:none}
+      .org304-dept-edit{
+        position:absolute;
+        inset-inline-end:7px;
+        top:7px;
+        width:20px;
+        height:20px;
+        display:grid;
+        place-items:center;
+        border-radius:7px;
+        background:var(--card);
+        border:1px solid var(--border);
+        color:var(--muted);
+      }
+      .org304-dept-edit svg{width:10px;height:10px}
+      .org293-node.org304-unassigned{
+        border-style:dashed;
+        border-color:color-mix(in srgb,var(--amber) 40%,var(--border));
+        background:color-mix(in srgb,var(--amber-tint) 28%,var(--paper));
+      }
+      .org304-unassigned-card{
+        width:100%;
+        min-height:70px;
+        padding:10px;
+        display:flex;
+        align-items:center;
+        gap:9px;
+      }
       .org293-node.person{border-color:color-mix(in srgb,var(--green) 20%,var(--border))}
       .org293-node.person.dept-head{
         border:1.5px solid color-mix(in srgb,var(--green) 56%,var(--border));
@@ -30683,7 +30880,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.TASKY_HR_BATCH_V299=true;
   window.TASKY_EMPLOYEE360_SINGLE_PAINT_V300=true;
-  window.TASKY_BUILD='V303';
+  window.TASKY_BUILD='V304';
   console.info('Tasky V300 — Employee360 single-paint + V299 HR batch active');
 })();
 </script>
@@ -31914,6 +32111,9 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   .org293-node-copy b{font-size:10.5px;color:#172019;margin-top:2px}
   .org293-node-copy small{font-size:7.5px;color:#758078;margin-top:3px}
   .org293-head-label{display:inline-flex!important;align-items:center;gap:3px;margin-top:5px;padding:3px 6px;border-radius:999px;background:#dfeeda;color:#2A6C2E;font-style:normal;font-size:6.5px;font-weight:900}
+  .org304-dept-head-summary{display:block!important;margin-top:4px;padding:3px 5px;border-radius:999px;background:#e3f0df;color:#2A6C2E;font-style:normal;font-size:6.2px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .org304-dept-edit{display:none!important}
+  .org293-node.org304-unassigned{border-style:dashed!important;border-color:#c5a85d!important;background:#fbf7ec!important}
   .org293-report-count{position:absolute;inset-inline-end:7px;top:7px;min-width:20px;height:20px;border-radius:999px;display:grid;place-items:center;background:#dfeeda;color:#2A6C2E;font-size:7px;font-weight:900}
   svg{display:none!important}
   .print-foot{margin-top:8mm;padding-top:4mm;border-top:1px solid #dfe4df;font-size:8px;color:#7a847c;text-align:center}
@@ -31937,8 +32137,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     ${clone.outerHTML}
 
     <footer class="print-foot">${L(
-      'تم استخراج هذا الهيكل من تاسكي حسب البيانات الحالية وخطوط المدير المباشر.',
-      'This chart was exported from Tasky using the current employee data and direct reporting lines.'
+      'تم استخراج هذا الهيكل من تاسكي حسب الإدارات الحالية، ورؤساء الإدارات المحددين صراحةً، وخطوط المدير المباشر.',
+      'This chart was exported from Tasky using the current departments, explicitly assigned department heads, and direct reporting lines.'
     )}</footer>
   </main>
   <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script>
@@ -32500,6 +32700,37 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }else{
     setTimeout(install,0);
   }
+})();
+</script>
+
+
+<script id="tasky-v304-org-department-first-audit-js">
+(function(){
+  'use strict';
+
+  window.taskyOrgAuditV304=function(){
+    const tree=document.getElementById('org293Tree');
+    const selected=String(window.__taskyOrgDepartmentV302||'');
+
+    return {
+      build:window.TASKY_BUILD||'V304',
+      patch:!!window.TASKY_ORG_DEPARTMENT_FIRST_V304,
+      selected_department_id:selected||null,
+      company_nodes:tree?.querySelectorAll('.org293-node.company').length||0,
+      department_nodes:tree?.querySelectorAll('.org293-node.department:not(.org304-unassigned)').length||0,
+      unassigned_nodes:tree?.querySelectorAll('.org304-unassigned').length||0,
+      employee_nodes:tree?.querySelectorAll('.org293-node.person').length||0,
+      explicit_department_heads:tree?.querySelectorAll('.org293-node.person.dept-head').length||0,
+      department_head_summaries:tree?.querySelectorAll('.org304-dept-head-summary').length||0,
+      pdf_button:!!document.querySelector('.org302-pdf-btn'),
+      department_filter:!!document.querySelector('.org302-dept-filter select')
+    };
+  };
+
+  window.TASKY_ORG_DEPARTMENT_FIRST_V304=true;
+  window.TASKY_BUILD='V304';
+
+  console.info('Tasky V304 — organization now renders Company → Department → Employees');
 })();
 </script>
 
