@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV278" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V278</div>
+    <div id="taskyBootBuildV279" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V279</div>
   </div>
 </div>
 
@@ -3816,7 +3816,7 @@ let currentWorkspaceLogoUrl = null;
 let currentUserId = null;
 let currentUserEmail = null;
 let platformRuntime = {modules:{},announcements:[],workspace_status:'active',maintenance_mode:false,is_platform_admin:false};
-let platformReleaseRuntime={current_build:'V278',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+let platformReleaseRuntime={current_build:'V279',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
 let onboardingStateV68=null;
 let onboardingCompletedCelebratedV68=false;
 let pendingPlanRequest = null;
@@ -3900,9 +3900,9 @@ async function fetchPlatformRuntime(){
 }
 
 async function fetchPlatformReleaseRuntimeV66(){
-  platformReleaseRuntime={current_build:'V278',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
+  platformReleaseRuntime={current_build:'V279',latest_stable_build:null,minimum_supported_build:null,hard_block:false,outdated:false,update_available:false,release:null};
   if(!currentWorkspaceId)return platformReleaseRuntime;
-  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V278'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
+  try{const {data,error}=await sb.rpc('tasky_platform_release_runtime_v66',{p_workspace_id:currentWorkspaceId,p_build:'V279'});if(error){console.warn('V66 release runtime unavailable',error);return platformReleaseRuntime;}platformReleaseRuntime={...platformReleaseRuntime,...(data||{})};}catch(err){console.warn('V66 release runtime failed',err);}return platformReleaseRuntime;
 }
 function ensurePlatformReleaseElementsV66(){let gate=document.getElementById('platformReleaseGate');if(!gate){gate=document.createElement('div');gate.id='platformReleaseGate';gate.className='platform-gate platform-release-gate hidden';document.body.appendChild(gate);}let notice=document.getElementById('platformReleaseNotice');if(!notice){notice=document.createElement('div');notice.id='platformReleaseNotice';notice.className='platform-release-notice hidden';const content=document.querySelector('.app .content');if(content){const ann=document.getElementById('platformAnnouncementBanner');if(ann&&ann.parentNode===content)content.insertBefore(notice,ann.nextSibling);else content.insertBefore(notice,content.firstChild);}}return {gate,notice};}
 function platformReleaseDismissKeyV66(r){return `tasky_release_dismissed_${r?.id||''}_${r?.version||''}`;}
@@ -10995,7 +10995,7 @@ async function rateSupportTicket(id,rating){const feedback=window.prompt(lang===
 let __taskyClientErrorLoggingV67=false;
 function ensureTaskyNetworkBannerV67(){let el=document.getElementById('taskyNetworkBannerV67');if(!el){el=document.createElement('div');el.id='taskyNetworkBannerV67';el.className='launch-network-banner';document.body.appendChild(el);}return el;}
 function updateTaskyNetworkBannerV67(){const el=ensureTaskyNetworkBannerV67();if(!navigator.onLine){el.innerHTML=`${lang==='ar'?'الاتصال بالإنترنت مقطوع — قد لا تُحفظ التغييرات':'You are offline — changes may not be saved'} <button class="launch-connection-retry" onclick="location.reload()">${lang==='ar'?'إعادة المحاولة':'Retry'}</button>`;el.className='launch-network-banner show';return;}if(el.classList.contains('show')){el.textContent=lang==='ar'?'عاد الاتصال بالإنترنت':'Connection restored';el.className='launch-network-banner show online';setTimeout(()=>el.className='launch-network-banner',1800);}}
-async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V278',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
+async function logTaskyClientErrorV67(type,message,stack){if(__taskyClientErrorLoggingV67)return;if(typeof currentUserId==='undefined'||!currentUserId)return;__taskyClientErrorLoggingV67=true;try{await sb.rpc('tasky_platform_log_client_error_v67',{p_app:'tasky',p_build:'V279',p_workspace_id:(typeof currentWorkspaceId!=='undefined'&&currentWorkspaceId)||null,p_error_type:type,p_message:String(message||'Unknown client error').slice(0,900),p_stack:String(stack||'').slice(0,4500),p_page_path:(()=>{const u=new URL(location.href);['guest','survey','participant','quote','invite','salesquote','invoice'].forEach(k=>u.searchParams.delete(k));const q=u.searchParams.toString();return u.pathname+(q?'?'+q:'')})()});}catch(_){}finally{__taskyClientErrorLoggingV67=false;}}
 window.addEventListener('error',e=>{logTaskyClientErrorV67('error',e.message,e.error?.stack||'');});
 window.addEventListener('unhandledrejection',e=>{const r=e.reason;logTaskyClientErrorV67('unhandledrejection',r?.message||String(r||'Unhandled promise rejection'),r?.stack||'');});
 window.addEventListener('offline',updateTaskyNetworkBannerV67);
@@ -20132,7 +20132,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V278';
+    window.TASKY_BUILD='V279';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -20837,7 +20837,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyUiAuditV258=function(){
     return {
-      build:'V278',
+      build:'V279',
       employee360_active:document.getElementById('addModalBody')?.classList.contains('tasky-employee360-v258')||false,
       normalized_large_icons:document.querySelectorAll('svg.tasky-auto-icon-v258').length
     };
@@ -20881,7 +20881,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyHrLoaderAuditV259=function(){
     const c=window.TASKY_LAZY_CHUNKS_V1681?.hr;
     return {
-      build:'V278',
+      build:'V279',
       hr_url:c?.url||null,
       hr_loaded:!!c?.loaded,
       leave_addon_ready:window.TASKY_HR_LEAVE_V257===true,
@@ -21231,7 +21231,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployeeEditUiAuditV260=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V278',
+      build:'V279',
       active:modal?.classList.contains('tasky-employee-edit-v260')||false,
       status_value:document.getElementById('hrStatus')?.value||null,
       employment_value:document.getElementById('hrEmployment')?.value||null
@@ -21375,7 +21375,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyHrStabilityAuditV261=function(){
     return {
-      build:'V278',
+      build:'V279',
       hr_hydrating:document.body.classList.contains('tasky-hr-hydrating-v261'),
       employee_edit:document.getElementById('addModalBody')?.classList.contains('tasky-employee-edit-v261')||false
     };
@@ -21740,7 +21740,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyEmployee360AuditV262=function(){
     const modal=document.getElementById('addModalBody');
     return {
-      build:'V278',
+      build:'V279',
       active:modal?.classList.contains('tasky-employee360-v262')||false,
       scroll_height:modal?.scrollHeight||0,
       client_height:modal?.clientHeight||0,
@@ -22398,7 +22398,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const modal=document.getElementById('addModalBody');
     const scroll=modal?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V278',
+      build:'V279',
       hr_transaction:window.__taskyHrRenderTxnV263===true,
       hr_suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
       hr_commit_count:hrCommitCountV263,
@@ -22910,7 +22910,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       .sort((a,b)=>a.order-b.order);
 
     return {
-      build:'V278',
+      build:'V279',
       modal:{
         stack,
         sync_count:modalManagerV265.syncCount,
@@ -22932,7 +22932,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLATFORM_QA_V265=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V265 — stable modal stack + Page Unresponsive fix ready');
 })();
 </script>
@@ -22942,7 +22942,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV266=function(){
     return {
-      build:'V278',
+      build:'V279',
       sdk_version:'2.112.2',
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
       sdk_ready:!!window.supabase?.createClient,
@@ -22950,7 +22950,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_BOOTSTRAP_SDK_FIX_V266=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V266 — valid Supabase SDK bootstrap ready');
 })();
 </script>
@@ -23400,7 +23400,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const emp=document.getElementById('addModalBody');
     const credits=document.getElementById('eventCreditModalOverlayV269');
     return {
-      build:'V278',
+      build:'V279',
       base:'V266',
       employee360_v263_active:emp?.classList.contains('tasky-employee360-v263')||false,
       employee360_scroll_wrapper:!!emp?.querySelector('.tasky-v263-employee360-scroll'),
@@ -23413,7 +23413,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_V269_STABLE_EMPLOYEE_CREDIT=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V269 — V266 stable base + Employee360 CSS + dedicated credit modal');
 })();
 </script>
@@ -23530,7 +23530,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const body=document.getElementById('addModalBody');
     const scroll=body?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V278',
+      build:'V279',
       active:body?.classList.contains('tasky-employee360-v263')||false,
       giant_lock_hidden:!!body?.querySelector('.tasky-v270-large-lock-hide'),
       privacy_note:!!body?.querySelector('.tasky-v270-privacy-note'),
@@ -23541,7 +23541,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_EMPLOYEE360_DIRECT_FIX_V270=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V270 — Employee 360 direct V263 fix ready');
 })();
 </script>
@@ -23931,7 +23931,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const body=document.getElementById('addModalBody');
     const scroll=body?.querySelector('.tasky-v263-employee360-scroll');
     return {
-      build:'V278',
+      build:'V279',
       active:body?.classList.contains('tasky-employee360-v263')||false,
       wide_modal:body?.getBoundingClientRect().width||0,
       close_inside:!!body?.querySelector(':scope>.modal-head .modal-close'),
@@ -23944,7 +23944,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_EMPLOYEE360_RESTORED_STYLE_V273=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V273 — restored wide Employee 360 style + V270 fixes');
 })();
 </script>
@@ -23953,7 +23953,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyStableAuditV273=async function(){
     return {
-      build:'V278',
+      build:'V279',
       sdk_version:TASKY_SUPABASE_SDK_V244,
       sdk_ready:!!window.supabase?.createClient,
       auth_connectivity:await taskyAuthConnectivityAuditV273(),
@@ -23963,7 +23963,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_AUTH_STABLE_V273=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
 })();
 </script>
 
@@ -23972,7 +23972,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV274=function(){
     return {
-      build:'V278',
+      build:'V279',
       sdk_version:'2.112.2',
       sdk_ready:!!window.supabase?.createClient,
       sdk_source:window.__taskySupabaseSdkSourceV247||null,
@@ -23982,7 +23982,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_BOOTSTRAP_RACE_FIX_V274=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
 })();
 </script>
 
@@ -23991,7 +23991,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 (function(){
   window.taskyBootstrapAuditV275=function(){
     return {
-      build:'V278',
+      build:'V279',
       sdk_version:'2.112.2',
       sdk_ready:!!window.supabase?.createClient,
       source:window.__taskySupabaseSdkSourceV247||null,
@@ -24002,7 +24002,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     };
   };
   window.TASKY_SDK_INDEPENDENT_BOOT_V275=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
 })();
 </script>
 
@@ -24207,9 +24207,9 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     `;document.head.appendChild(style);
   }
 
-  window.taskyPlansAuditV276=function(){return {build:'V278',contract:taskyEntitlementsV165?.contract||null,enforced:taskyEntitlementsEnforcedV165(),package_code:taskyPackageCodeV276(),current_plan:currentPlan,current_app:typeof taskyCurrentAppV233!=='undefined'?taskyCurrentAppV233:null,available_apps:typeof taskyAvailableAppsV233==='function'?taskyAvailableAppsV233():[],hr_enabled:taskyModuleAvailableV165('hr'),experience_enabled:taskyModuleAvailableV165('experience'),tasks_enabled:taskyModuleAvailableV165('tasks'),documents_enabled:taskyModuleAvailableV165('documents'),meetings_enabled:taskyModuleAvailableV165('meetings'),team_enabled:taskyModuleAvailableV165('team'),billing_enabled:taskyModuleAvailableV165('billing'),pending:taskyPendingCommercialV276}};
+  window.taskyPlansAuditV276=function(){return {build:'V279',contract:taskyEntitlementsV165?.contract||null,enforced:taskyEntitlementsEnforcedV165(),package_code:taskyPackageCodeV276(),current_plan:currentPlan,current_app:typeof taskyCurrentAppV233!=='undefined'?taskyCurrentAppV233:null,available_apps:typeof taskyAvailableAppsV233==='function'?taskyAvailableAppsV233():[],hr_enabled:taskyModuleAvailableV165('hr'),experience_enabled:taskyModuleAvailableV165('experience'),tasks_enabled:taskyModuleAvailableV165('tasks'),documents_enabled:taskyModuleAvailableV165('documents'),meetings_enabled:taskyModuleAvailableV165('meetings'),team_enabled:taskyModuleAvailableV165('team'),billing_enabled:taskyModuleAvailableV165('billing'),pending:taskyPendingCommercialV276}};
 
-  window.TASKY_MODULAR_PLANS_V276=true;window.TASKY_BUILD='V278';console.info('Tasky V276 — modular plans + Tasky HR package ready');
+  window.TASKY_MODULAR_PLANS_V276=true;window.TASKY_BUILD='V279';console.info('Tasky V276 — modular plans + Tasky HR package ready');
 })();
 </script>
 
@@ -24607,7 +24607,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   window.taskyCustomerPlansAuditV277=function(){
     const menu=document.getElementById('taskyAppMenuV217');
     return {
-      build:'V278',
+      build:'V279',
       package_code:taskyV277CurrentPackage(),
       package_pending:taskyV277PackagePending(),
       addon_pending:(taskyV277PendingState()?.addon_requests||[]).filter(x=>x.status==='pending'),
@@ -24618,7 +24618,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_CUSTOMER_PLANS_APPS_V277=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V277 — customer plans, quote requests and app discovery ready');
 })();
 </script>
@@ -24976,7 +24976,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.taskyPlansAppsAuditV278=function(){
     return {
-      build:'V278',
+      build:'V279',
       nav_registered:NAV_ITEMS.some(x=>x.id==='plans_apps'),
       page_active:activeNav==='plans_apps',
       quote_flow:typeof taskyOpenQuoteV277==='function',
@@ -24987,8 +24987,220 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_PLANS_APPS_VISIBLE_V278=true;
-  window.TASKY_BUILD='V278';
+  window.TASKY_BUILD='V279';
   console.info('Tasky V278 — visible Plans & Apps customer page ready');
+})();
+</script>
+
+
+<script id="tasky-v279-plans-apps-sidebar-root-fix-js" type="text/tasky-deferred-v247">
+(function(){
+  /* ==========================================================
+     TASKY V279 — ROOT FIX FOR CUSTOMER PLANS & APPS VISIBILITY
+     ----------------------------------------------------------
+     Root cause:
+     Since V233, Tasky's real sidebar no longer renders NAV_ITEMS.
+     renderNav is permanently replaced by taskyRenderNavV233(),
+     which builds Account rows from taskySharedHtmlV233().
+
+     Therefore V278 correctly registered plans_apps in NAV_ITEMS,
+     but that alone could never make the row appear in the actual
+     customer sidebar.
+
+     V279 patches the REAL V233 sidebar source.
+     ========================================================== */
+
+  STR.ar.nav_plans_apps='الباقات والتطبيقات';
+  STR.en.nav_plans_apps='Plans & Apps';
+
+  /* Treat this route exactly like Support / Settings / Team / Billing.
+     This prevents setActiveNav() from interpreting it as an app module. */
+  try{
+    TASKY_SHARED_V233.add('plans_apps');
+  }catch(err){
+    console.warn('V279 shared route registration',err);
+  }
+
+  /* Keep the metadata route as well for breadcrumbs / legacy lookups. */
+  if(!NAV_ITEMS.some(x=>x.id==='plans_apps')){
+    const billingIndex=NAV_ITEMS.findIndex(x=>x.id==='billing');
+    const item={
+      id:'plans_apps',
+      key:'nav_plans_apps',
+      icon:'i-crown',
+      group:'grp_account',
+      adminOnly:true,
+      always:true
+    };
+    if(billingIndex>=0)NAV_ITEMS.splice(billingIndex,0,item);
+    else NAV_ITEMS.push(item);
+  }
+
+  /* Patch the actual Account section used by the V233 sidebar renderer. */
+  if(typeof taskySharedHtmlV233==='function'&&!taskySharedHtmlV233.__taskyV279){
+    const sharedBaseV279=taskySharedHtmlV233;
+
+    const wrapped=function(){
+      let out=sharedBaseV279();
+
+      if(currentUserRole==='admin'){
+        const row=taskyRowV233(
+          lang==='ar'?'الباقات والتطبيقات':'Plans & Apps',
+          'i-crown',
+          "setActiveNav('plans_apps');taskyAfterNavV233();return false",
+          activeNav==='plans_apps'
+        );
+
+        /*
+          Put the new destination immediately before Plan & Billing when
+          possible, otherwise append it to the Account section.
+        */
+        const billingText=lang==='ar'?'الباقة والاشتراك':'Plan & Billing';
+        const billingPos=out.lastIndexOf(billingText);
+
+        if(billingPos>=0){
+          const rowStart=out.lastIndexOf('<button',billingPos);
+          if(rowStart>=0)out=out.slice(0,rowStart)+row+out.slice(rowStart);
+          else out+=row;
+        }else{
+          out+=row;
+        }
+      }
+
+      return out;
+    };
+
+    wrapped.__taskyV279=true;
+    taskySharedHtmlV233=wrapped;
+  }
+
+  /* Breadcrumb: shared routes are now handled without changing the active app. */
+  if(typeof taskyCurrentLabelV233==='function'&&!taskyCurrentLabelV233.__taskyV279){
+    const labelBaseV279=taskyCurrentLabelV233;
+    const wrappedLabel=function(){
+      if(activeNav==='plans_apps'){
+        return lang==='ar'?'الباقات والتطبيقات':'Plans & Apps';
+      }
+      return labelBaseV279();
+    };
+    wrappedLabel.__taskyV279=true;
+    taskyCurrentLabelV233=wrappedLabel;
+  }
+
+  /* Make the existing Billing page advertise the new destination as a fallback.
+     This is intentionally redundant: even if a future sidebar refactor occurs,
+     admins can still reach Plans & Apps from Billing. */
+  if(typeof billingTemplate==='function'&&!billingTemplate.__taskyV279){
+    const billingBaseV279=billingTemplate;
+
+    const wrappedBilling=function(){
+      const content=billingBaseV279();
+
+      const launcher=`
+        <div class="tasky-v279-plans-launcher">
+          <div class="tasky-v279-plans-launcher-icon">
+            <svg><use href="#i-crown"/></svg>
+          </div>
+          <div class="tasky-v279-plans-launcher-copy">
+            <b>${lang==='ar'?'الباقات والتطبيقات':'Plans & Apps'}</b>
+            <span>${lang==='ar'
+              ?'اطلب Tasky HR، تابع طلباتك، وأضف تطبيقات تاسكي لمساحة العمل.'
+              :'Request Tasky HR, track requests, and add Tasky apps to this workspace.'}</span>
+          </div>
+          <button class="primary-btn" type="button" onclick="setActiveNav('plans_apps')">
+            ${lang==='ar'?'فتح الباقات والتطبيقات':'Open Plans & Apps'}
+          </button>
+        </div>`;
+
+      return launcher+content;
+    };
+
+    wrappedBilling.__taskyV279=true;
+    billingTemplate=wrappedBilling;
+  }
+
+  if(!document.getElementById('tasky-v279-plans-apps-root-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v279-plans-apps-root-css';
+    style.textContent=`
+      .tasky-v279-plans-launcher{
+        display:grid;
+        grid-template-columns:46px minmax(0,1fr) auto;
+        gap:12px;
+        align-items:center;
+        margin:0 0 14px;
+        padding:13px;
+        border:1px solid color-mix(in srgb,var(--green) 28%,var(--border));
+        border-radius:14px;
+        background:color-mix(in srgb,var(--green-tint) 48%,var(--card));
+      }
+      .tasky-v279-plans-launcher-icon{
+        width:46px;
+        height:46px;
+        display:grid;
+        place-items:center;
+        border-radius:12px;
+        background:var(--green);
+        color:#fff;
+      }
+      .tasky-v279-plans-launcher-icon svg{
+        width:20px;
+        height:20px;
+      }
+      .tasky-v279-plans-launcher-copy b{
+        display:block;
+        font-size:12px;
+      }
+      .tasky-v279-plans-launcher-copy span{
+        display:block;
+        margin-top:3px;
+        color:var(--muted);
+        font-size:8.5px;
+        line-height:1.5;
+      }
+      @media(max-width:700px){
+        .tasky-v279-plans-launcher{
+          grid-template-columns:42px minmax(0,1fr);
+        }
+        .tasky-v279-plans-launcher>button{
+          grid-column:1/-1;
+          width:100%;
+          justify-content:center;
+        }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  /* Re-render the ACTUAL V233 sidebar, not the old NAV_ITEMS renderer. */
+  setTimeout(()=>{
+    try{taskyRenderNavV233()}catch(err){console.warn('V279 sidebar render',err)}
+    try{taskyRenderAppSwitcherV233?.()}catch(_){}
+    if(activeNav==='plans_apps'){
+      try{renderModule()}catch(err){console.warn('V279 plans page render',err)}
+    }
+  },0);
+
+  window.taskyPlansAppsAuditV279=function(){
+    const navText=document.getElementById('mainNav')?.textContent||'';
+    return {
+      build:'V279',
+      shared_route:TASKY_SHARED_V233.has('plans_apps'),
+      nav_metadata:NAV_ITEMS.some(x=>x.id==='plans_apps'),
+      actual_sidebar_visible:
+        navText.includes(lang==='ar'?'الباقات والتطبيقات':'Plans & Apps'),
+      plans_page_available:typeof taskyPlansAppsTemplateV278==='function',
+      quote_flow:typeof taskyOpenQuoteV277==='function',
+      addon_flow:typeof taskyRequestAddonV276==='function',
+      billing_fallback:
+        typeof billingTemplate==='function' &&
+        billingTemplate().includes('tasky-v279-plans-launcher')
+    };
+  };
+
+  window.TASKY_PLANS_APPS_ROOT_FIX_V279=true;
+  window.TASKY_BUILD='V279';
+  console.info('Tasky V279 — Plans & Apps patched into the real V233 sidebar');
 })();
 </script>
 
