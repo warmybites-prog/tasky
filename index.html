@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV293" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V293</div>
+    <div id="taskyBootBuildV294" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V294</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V293';
+    window.TASKY_BUILD='V294';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V293';
+  window.TASKY_BUILD='V294';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V293';
+    window.TASKY_BUILD='V294';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V293';
+  window.TASKY_BUILD='V294';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V293';
+    window.TASKY_BUILD='V294';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27857,6 +27857,341 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.TASKY_HR_ORG_UI_V293=true;
   window.TASKY_BUILD=BUILD;
+})();
+</script>
+
+
+<script id="tasky-v294-hr-render-stability-js">
+(function(){
+  'use strict';
+
+  const BUILD='V294';
+
+  const state={
+    calls:0,
+    commits:0,
+    skippedSame:0,
+    coalesced:0,
+    timer:null,
+    lastHtml:null,
+    lastTab:null,
+    lastCommitAt:0,
+    lastReason:null
+  };
+
+  function hrActive(){
+    try{return activeNav==='hr'}catch(_){return false}
+  }
+
+  function moduleArea(){
+    return document.getElementById('moduleArea');
+  }
+
+  function currentHrTab(){
+    try{return String(hrActiveTabV72||'')}catch(_){return ''}
+  }
+
+  function renderNow(reason='unknown'){
+    if(!hrActive())return false;
+    if(typeof hrTemplateV72!=='function')return false;
+
+    const area=moduleArea();
+    if(!area)return false;
+
+    state.calls++;
+    const tab=currentHrTab();
+
+    let nextHtml='';
+    try{
+      nextHtml=String(hrTemplateV72()||'');
+    }catch(err){
+      console.error('Tasky V294 HR template',err);
+      return false;
+    }
+
+    /*
+      Root anti-flash rule:
+      if HR's generated HTML is identical to what is already committed,
+      do not replace moduleArea.innerHTML again.
+      Replacing the whole HR DOM was the visible "flash".
+    */
+    if(
+      state.lastHtml===nextHtml &&
+      state.lastTab===tab &&
+      area.childElementCount>0
+    ){
+      state.skippedSame++;
+      state.lastReason='skip:'+reason;
+      return true;
+    }
+
+    const scrollTop=area.scrollTop;
+    const pageY=window.scrollY;
+
+    area.innerHTML=nextHtml;
+    state.lastHtml=nextHtml;
+    state.lastTab=tab;
+    state.commits++;
+    state.lastCommitAt=performance.now();
+    state.lastReason=reason;
+
+    /*
+      Keep the viewport stable when an actual data change requires a new HR DOM.
+    */
+    requestAnimationFrame(()=>{
+      try{
+        area.scrollTop=scrollTop;
+        if(Math.abs(window.scrollY-pageY)>2)window.scrollTo({top:pageY,left:window.scrollX,behavior:'instant'});
+      }catch(_){}
+    });
+
+    return true;
+  }
+
+  function schedule(reason='scheduled',delay=80){
+    if(!hrActive())return false;
+
+    clearTimeout(state.timer);
+    state.coalesced++;
+    state.timer=setTimeout(()=>{
+      state.timer=null;
+      renderNow(reason);
+    },delay);
+    return true;
+  }
+
+  /*
+    Final render authority.
+    Non-HR modules keep the existing renderer untouched.
+    HR renders are content-deduped and rapid calls are coalesced.
+  */
+  const baseRender=window.renderModule;
+  if(typeof baseRender==='function'&&!baseRender.__taskyV294){
+    const wrapped=function(...args){
+      if(!hrActive())return baseRender.apply(this,args);
+
+      const area=moduleArea();
+      const noCommittedHr=
+        !area ||
+        area.childElementCount===0 ||
+        area.querySelector('.tasky-module-loading-v83,.tasky-module-error-v83');
+
+      if(noCommittedHr){
+        return renderNow('renderModule:first');
+      }
+
+      /*
+        User tab changes need quick feedback; background refreshes do not need
+        repeated full-DOM replacements.
+      */
+      const tab=currentHrTab();
+      if(tab!==state.lastTab){
+        return renderNow('renderModule:tab');
+      }
+
+      schedule('renderModule:burst',70);
+      return true;
+    };
+    wrapped.__taskyV294=true;
+    window.renderModule=wrapped;
+    try{renderModule=wrapped}catch(_){}
+  }
+
+  /*
+    V263 previously bypassed every later render wrapper by calling a captured
+    renderModuleBaseV263 directly. That is one of the main reasons HR could keep
+    repainting even after newer anti-flash guards were installed.
+    V294 replaces that commit endpoint with the single render authority above.
+  */
+  window.__taskyCommitHrRenderV263=function(reason='commit'){
+    window.__taskyHrRenderTxnV263=false;
+    window.__taskyHrRenderDeferredV263=false;
+    window.__taskyHrSuppressUntilV263=0;
+
+    if(!hrActive())return false;
+
+    const area=moduleArea();
+    if(area){
+      area.classList.remove('tasky-hr-stable-v263','tasky-hr-visible-v263');
+    }
+
+    return renderNow('commit:'+reason);
+  };
+
+  /*
+    Do not replace an already-visible HR page with a skeleton during a refresh.
+    Skeleton is allowed only on the very first HR load.
+  */
+  const baseLoading=window.taskyRenderModuleLoadingV83;
+  if(typeof baseLoading==='function'&&!baseLoading.__taskyV294){
+    const wrappedLoading=function(...args){
+      if(hrActive()){
+        const area=moduleArea();
+        const hasRealContent=
+          !!area &&
+          area.childElementCount>0 &&
+          !area.querySelector('.tasky-module-loading-v83,.tasky-module-error-v83');
+
+        if(hasRealContent)return true;
+      }
+      return baseLoading.apply(this,args);
+    };
+    wrappedLoading.__taskyV294=true;
+    window.taskyRenderModuleLoadingV83=wrappedLoading;
+    try{taskyRenderModuleLoadingV83=wrappedLoading}catch(_){}
+  }
+
+  /*
+    HR fetches are coalesced more aggressively after the lazy HR chunk is ready.
+    This does not block explicit force=true refreshes after writes.
+  */
+  let fetchInstallAttempts=0;
+  const fetchState={
+    base:null,
+    wrapped:null,
+    inflight:null,
+    workspace:null,
+    lastSuccessAt:0,
+    calls:0,
+    coalesced:0
+  };
+
+  function installFetchGuard(){
+    fetchInstallAttempts++;
+
+    let current=null;
+    try{current=typeof fetchHrDataV72==='function'?fetchHrDataV72:null}catch(_){}
+    if(!current){
+      if(fetchInstallAttempts<160)setTimeout(installFetchGuard,60);
+      return false;
+    }
+
+    if(current===fetchState.wrapped || current.__taskyV294)return true;
+
+    fetchState.base=current;
+
+    const wrapped=async function(...args){
+      const ws=String(typeof currentWorkspaceId!=='undefined'?currentWorkspaceId:'');
+      const force=args[0]===true;
+      fetchState.calls++;
+
+      if(fetchState.inflight&&fetchState.workspace===ws){
+        fetchState.coalesced++;
+        return fetchState.inflight;
+      }
+
+      /*
+        Realtime/add-on wrappers can ask for the same HR dataset several times
+        during one UI cycle. 2 seconds is long enough to collapse that burst,
+        while force=true remains immediate after a real write.
+      */
+      if(!force && fetchState.workspace===ws && Date.now()-fetchState.lastSuccessAt<2000){
+        fetchState.coalesced++;
+        return true;
+      }
+
+      const p=Promise.resolve()
+        .then(()=>fetchState.base(...args))
+        .then(result=>{
+          fetchState.workspace=ws;
+          fetchState.lastSuccessAt=Date.now();
+          return result;
+        })
+        .finally(()=>{
+          if(fetchState.inflight===p)fetchState.inflight=null;
+        });
+
+      fetchState.inflight=p;
+      fetchState.workspace=ws;
+      return p;
+    };
+
+    wrapped.__taskyV294=true;
+    fetchState.wrapped=wrapped;
+    window.fetchHrDataV72=wrapped;
+    try{fetchHrDataV72=wrapped}catch(_){}
+    return true;
+  }
+
+  installFetchGuard();
+
+  /*
+    New org-chart V293 used to request one extra render immediately after HR
+    navigation. The render authority above dedupes it, but reset the snapshot
+    only when leaving HR so returning later can paint from fresh state once.
+  */
+  if(typeof window.setActiveNav==='function'&&!window.setActiveNav.__taskyHrStableV294){
+    const baseNav=window.setActiveNav;
+    const wrappedNav=async function(id,...args){
+      const leavingHr=hrActive()&&id!=='hr';
+      if(leavingHr){
+        clearTimeout(state.timer);
+        state.timer=null;
+        state.lastHtml=null;
+        state.lastTab=null;
+      }
+
+      return baseNav.call(this,id,...args);
+    };
+    wrappedNav.__taskyHrStableV294=true;
+    window.setActiveNav=wrappedNav;
+    try{setActiveNav=wrappedNav}catch(_){}
+  }
+
+  if(!document.getElementById('tasky-v294-hr-render-stability-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v294-hr-render-stability-css';
+    style.textContent=`
+      /* HR is never faded out as a loading technique. */
+      #moduleArea.tasky-hr-stable-v263,
+      #moduleArea.tasky-hr-stable-v263.tasky-hr-visible-v263{
+        opacity:1!important;
+        transition:none!important;
+      }
+
+      body.tasky-hr-hydrating-v261 #moduleArea,
+      body.tasky-hr-hydrating-v261 #moduleContent{
+        opacity:1!important;
+        visibility:visible!important;
+        transition:none!important;
+      }
+
+      body.tasky-hr-hydrating-v261 #moduleArea::after,
+      body.tasky-hr-hydrating-v261 #moduleContent::after{
+        display:none!important;
+      }
+
+      #moduleArea{
+        overflow-anchor:auto;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.taskyHrFlashAuditV294=function(){
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:true,
+      active_nav:typeof activeNav!=='undefined'?activeNav:null,
+      hr_tab:currentHrTab(),
+      render_calls:state.calls,
+      dom_commits:state.commits,
+      identical_renders_skipped:state.skippedSame,
+      render_calls_coalesced:state.coalesced,
+      last_render_reason:state.lastReason,
+      fetch_calls:fetchState.calls,
+      fetches_coalesced:fetchState.coalesced,
+      fetch_inflight:!!fetchState.inflight,
+      hr_transaction:window.__taskyHrRenderTxnV263===true,
+      suppress_until:Number(window.__taskyHrSuppressUntilV263||0),
+      loading_skeleton:!!moduleArea()?.querySelector('.tasky-module-loading-v83')
+    };
+  };
+
+  window.TASKY_HR_RENDER_STABILITY_V294=true;
+  window.TASKY_BUILD=BUILD;
+
+  console.info('Tasky V294 — HR single render authority + fetch coalescing active');
 })();
 </script>
 
