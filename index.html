@@ -7043,7 +7043,7 @@ function exportEventPdf(eventId){
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V289';
+  window.TASKY_BUILD='V290';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -7567,6 +7567,311 @@ function exportEventPdf(eventId){
       supabase_client:!!window.sb?.auth,
       reliable_signin:typeof window.taskySignInReliableV273==='function',
       v284_login_first:!!window.TASKY_LOGIN_FIRST_V284
+    };
+  };
+
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',()=>setTimeout(install,0),{once:true});
+  }else{
+    setTimeout(install,0);
+  }
+})();
+</script>
+
+
+<script id="tasky-v290-self-contained-login-js">
+(function(){
+  'use strict';
+
+  const BUILD='V290';
+  const SUPABASE_URL='https://ghzgmrnqididkmocuzrf.supabase.co';
+  const SUPABASE_KEY='sb_publishable_Buo2ZaOvpcmeiot45B4g-w_C6lYza6A';
+
+  let submitting=false;
+  let authClient=null;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function showError(message){
+    const box=document.getElementById('authError');
+    if(box){
+      box.textContent=message||L('تعذّر تسجيل الدخول','Sign in failed');
+      box.style.display='block';
+    }
+  }
+
+  function clearError(){
+    const box=document.getElementById('authError');
+    if(box){
+      box.textContent='';
+      box.style.display='none';
+    }
+  }
+
+  function setBusy(busy){
+    submitting=!!busy;
+    const btn=document.getElementById('authSubmitBtn');
+    if(!btn)return;
+    btn.disabled=!!busy;
+    btn.style.pointerEvents=busy?'none':'auto';
+    btn.textContent=busy
+      ?L('جاري تسجيل الدخول...','Signing in...')
+      :L('تسجيل الدخول','Sign in');
+  }
+
+  async function waitForSupabase(ms=5000){
+    const started=Date.now();
+    while(Date.now()-started<ms){
+      if(window.supabase?.createClient)return true;
+      await new Promise(r=>setTimeout(r,50));
+    }
+    return false;
+  }
+
+  async function withTimeout(promise,ms,label){
+    let timer;
+    try{
+      return await Promise.race([
+        Promise.resolve(promise),
+        new Promise((_,reject)=>{
+          timer=setTimeout(()=>{
+            const err=new Error(label||L('انتهت مهلة الاتصال','Connection timed out'));
+            err.code='TASKY_V290_TIMEOUT';
+            reject(err);
+          },ms);
+        })
+      ]);
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function getClient(){
+    if(authClient)return authClient;
+
+    const ready=await waitForSupabase();
+    if(!ready){
+      throw new Error(L(
+        'تعذّر تجهيز الاتصال. حدّث الصفحة ثم حاول مرة أخرى.',
+        'Could not prepare the connection. Refresh the page and try again.'
+      ));
+    }
+
+    authClient=window.supabase.createClient(
+      SUPABASE_URL,
+      SUPABASE_KEY,
+      {
+        auth:{
+          persistSession:true,
+          autoRefreshToken:true,
+          detectSessionInUrl:true
+        }
+      }
+    );
+
+    window.__taskyAuthClientV290=authClient;
+    return authClient;
+  }
+
+  function isNetworkError(err){
+    const text=String(err?.message||err||'').toLowerCase();
+    return err?.name==='TypeError' ||
+      err?.code==='TASKY_V290_TIMEOUT' ||
+      /failed to fetch|network|load failed|timeout|timed out/.test(text);
+  }
+
+  async function directPasswordGrant(client,email,password){
+    const controller=new AbortController();
+    const timer=setTimeout(()=>controller.abort(),10000);
+
+    try{
+      const response=await fetch(
+        `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
+        {
+          method:'POST',
+          headers:{
+            apikey:SUPABASE_KEY,
+            'Content-Type':'application/json'
+          },
+          body:JSON.stringify({email,password}),
+          signal:controller.signal,
+          cache:'no-store'
+        }
+      );
+
+      const payload=await response.json().catch(()=>({}));
+
+      if(!response.ok){
+        throw new Error(
+          payload?.msg||
+          payload?.message||
+          payload?.error_description||
+          payload?.error||
+          L('بيانات الدخول غير صحيحة','Invalid login credentials')
+        );
+      }
+
+      if(!payload?.access_token||!payload?.refresh_token){
+        throw new Error(L(
+          'استجاب خادم الدخول بدون جلسة صالحة.',
+          'The auth server returned no valid session.'
+        ));
+      }
+
+      const result=await withTimeout(
+        client.auth.setSession({
+          access_token:payload.access_token,
+          refresh_token:payload.refresh_token
+        }),
+        6000,
+        L('تعذّر حفظ جلسة الدخول','Could not save the login session')
+      );
+
+      if(result?.error)throw result.error;
+      return result;
+    }finally{
+      clearTimeout(timer);
+    }
+  }
+
+  async function signIn(email,password){
+    const client=await getClient();
+
+    try{
+      const result=await withTimeout(
+        client.auth.signInWithPassword({email,password}),
+        10000,
+        L('استغرق تسجيل الدخول وقتًا أطول من المتوقع','Sign in took longer than expected')
+      );
+      if(result?.error)throw result.error;
+      if(result?.data?.session?.user)return result;
+      throw new Error(L('لم يتم إنشاء جلسة دخول','No login session was created'));
+    }catch(err){
+      if(!isNetworkError(err))throw err;
+      console.warn('Tasky V290 primary auth failed; using direct auth fallback',err);
+      return directPasswordGrant(client,email,password);
+    }
+  }
+
+  async function verifySession(client){
+    const result=await withTimeout(
+      client.auth.getSession(),
+      5000,
+      L('تعذّر التحقق من جلسة الدخول','Could not verify the login session')
+    );
+    if(result?.error)throw result.error;
+    return result?.data?.session||null;
+  }
+
+  async function submitSignin(){
+    if(submitting)return false;
+
+    const email=String(document.getElementById('authEmail')?.value||'').trim().toLowerCase();
+    const password=String(document.getElementById('authPassword')?.value||'');
+
+    clearError();
+
+    if(!email||!password){
+      showError(L('عبّئ البريد وكلمة المرور','Enter your email and password'));
+      return false;
+    }
+
+    setBusy(true);
+
+    try{
+      const result=await signIn(email,password);
+      const client=await getClient();
+
+      let session=result?.data?.session||null;
+      if(!session?.user)session=await verifySession(client);
+
+      if(!session?.user){
+        throw new Error(L(
+          'تم قبول بيانات الدخول لكن لم يتم إنشاء جلسة. حاول مرة أخرى.',
+          'Credentials were accepted but no session was created. Please try again.'
+        ));
+      }
+
+      try{sessionStorage.setItem('tasky_v290_login_success','1')}catch(_){}
+
+      const btn=document.getElementById('authSubmitBtn');
+      if(btn){
+        btn.disabled=true;
+        btn.textContent=L('تم الدخول، جاري فتح تاسكي...','Signed in, opening Tasky...');
+      }
+
+      setTimeout(()=>{
+        try{location.reload()}
+        catch(_){location.href=location.href}
+      },80);
+
+      return true;
+    }catch(err){
+      console.error('Tasky V290 sign in',err);
+      showError(err?.message||String(err));
+      setBusy(false);
+      return false;
+    }
+  }
+
+  function install(){
+    const previous=window.handleAuthSubmit;
+
+    window.handleAuthSubmit=async function(){
+      try{
+        if(typeof authMode!=='undefined'&&authMode==='signup'){
+          if(typeof previous==='function')return previous();
+          showError(L(
+            'إنشاء الحساب غير متاح حاليًا. حدّث الصفحة وحاول مرة أخرى.',
+            'Account creation is temporarily unavailable. Refresh and try again.'
+          ));
+          return false;
+        }
+      }catch(_){}
+
+      return submitSignin();
+    };
+
+    window.handleAuthSubmit.__taskyV290=true;
+
+    const btn=document.getElementById('authSubmitBtn');
+    if(btn){
+      btn.type='button';
+      btn.disabled=false;
+      btn.style.pointerEvents='auto';
+      btn.textContent=L('تسجيل الدخول','Sign in');
+      btn.onclick=()=>window.handleAuthSubmit();
+    }
+
+    ['authEmail','authPassword'].forEach(id=>{
+      const input=document.getElementById(id);
+      if(!input||input.dataset.taskyV290Enter==='1')return;
+      input.dataset.taskyV290Enter='1';
+      input.addEventListener('keydown',event=>{
+        if(event.key==='Enter'){
+          event.preventDefault();
+          window.handleAuthSubmit();
+        }
+      });
+    });
+
+    window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V290 — self-contained login ready');
+  }
+
+  window.taskyLoginAuditV290=function(){
+    return {
+      build:window.TASKY_BUILD||null,
+      patch:!!window.TASKY_SELF_CONTAINED_LOGIN_V290,
+      handler_v290:!!window.handleAuthSubmit?.__taskyV290,
+      supabase_factory:!!window.supabase?.createClient,
+      dedicated_auth_client:!!window.__taskyAuthClientV290,
+      old_reliable_helper:typeof window.taskySignInReliableV273,
+      login_button_disabled:!!document.getElementById('authSubmitBtn')?.disabled
     };
   };
 
