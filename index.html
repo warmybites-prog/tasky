@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV295" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V295</div>
+    <div id="taskyBootBuildV296" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V296</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V295';
+    window.TASKY_BUILD='V296';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V295';
+  window.TASKY_BUILD='V296';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V295';
+    window.TASKY_BUILD='V296';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V295';
+  window.TASKY_BUILD='V296';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V295';
+    window.TASKY_BUILD='V296';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -28381,6 +28381,328 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   /* HR is lazy-loaded; poll only until the real HR fetch API exists. */
+  setTimeout(install,0);
+})();
+</script>
+
+
+<script id="tasky-v296-hr-letter-print-fix-js">
+(function(){
+  'use strict';
+
+  const BUILD='V296';
+  let attempts=0;
+  let installed=false;
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function esc(v){
+    const s=String(v??'');
+    try{return typeof escapeHtml==='function'?escapeHtml(s):s}catch(_){return s}
+  }
+
+  function normalizeBreaks(value){
+    let s=String(value??'');
+
+    /*
+      Some HR document snapshots contain the two literal characters "\n"
+      instead of an actual line break. The old print renderer only replaced
+      real newline characters, which is why "\n\n" appeared visibly in the PDF.
+    */
+    s=s
+      .replace(/\\r\\n/g,'\n')
+      .replace(/\\n/g,'\n')
+      .replace(/\\r/g,'\n')
+      .replace(/\r\n?/g,'\n');
+
+    return s;
+  }
+
+  function bodyHtml(value){
+    const text=normalizeBreaks(value).trim();
+    if(!text)return '';
+
+    return text
+      .split(/\n{2,}/)
+      .map(block=>{
+        const safe=esc(block.trim()).replace(/\n/g,'<br>');
+        return safe?`<p>${safe}</p>`:'';
+      })
+      .join('');
+  }
+
+  function displayDate(value){
+    const raw=String(value||'').slice(0,10);
+    if(!raw)return '—';
+    const m=raw.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if(!m)return esc(raw);
+    return `${m[3]}-${m[2]}-${m[1]}`;
+  }
+
+  function logoHtml(orgName){
+    let logo='';
+    try{
+      if(typeof currentWorkspaceLogoUrl!=='undefined'&&currentWorkspaceLogoUrl){
+        logo=String(currentWorkspaceLogoUrl);
+      }
+    }catch(_){}
+
+    if(logo){
+      return `<img class="brand-logo" src="${esc(logo)}" alt="${esc(orgName)}">`;
+    }
+
+    return `<div class="brand-word">${esc(orgName)}</div>`;
+  }
+
+  function printIssuance(id){
+    let state=null;
+    try{
+      if(typeof hrV72!=='undefined')state=hrV72;
+    }catch(_){}
+    state=state||window.hrV72||window.__taskyHrDataV295||{};
+
+    const list=
+      Array.isArray(state.documentIssuances78)?state.documentIssuances78:
+      Array.isArray(state.document_issuances78)?state.document_issuances78:[];
+
+    const issuance=list.find(x=>String(x.id)===String(id));
+    if(!issuance)return;
+
+    try{
+      sb?.rpc?.('tasky_hr_document_viewed_v78',{
+        p_target_type:'issuance',
+        p_target_id:issuance.id
+      })?.catch?.(()=>{});
+    }catch(_){}
+
+    const requestedLanguage=issuance.requested_language==='en'?'en':'ar';
+    const dir=requestedLanguage==='en'?'ltr':'rtl';
+    const orgName=issuance.organization_name||
+      (typeof currentWorkspaceName!=='undefined'?currentWorkspaceName:'')||
+      'Tasky';
+
+    const subject=issuance.subject_snapshot||
+      (requestedLanguage==='en'?'Employee Letter':'خطاب موظف');
+
+    const body=bodyHtml(issuance.body_snapshot||'');
+    const signatory=String(issuance.signatory_name||'').trim();
+    const signatoryTitle=String(issuance.signatory_title||'').trim();
+
+    const html=`<!doctype html>
+<html lang="${requestedLanguage}" dir="${dir}">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${esc(issuance.reference_no||subject)}</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:#eef1ed;color:#182018}
+  body{
+    font-family:${requestedLanguage==='en'?'Arial,Helvetica,sans-serif':'Tahoma,Arial,sans-serif'};
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
+  .page{
+    width:210mm;
+    min-height:297mm;
+    margin:12mm auto;
+    background:#fff;
+    padding:18mm 18mm 16mm;
+    box-shadow:0 8px 34px rgba(20,40,28,.09);
+    display:flex;
+    flex-direction:column;
+  }
+  .head{
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:22px;
+    align-items:center;
+    padding-bottom:13px;
+    border-bottom:2.5px solid #2A6C2E;
+  }
+  .brand{min-width:0}
+  .brand-logo{
+    display:block;
+    max-width:46mm;
+    max-height:16mm;
+    object-fit:contain;
+    object-position:${dir==='rtl'?'right':'left'} center;
+  }
+  .brand-word{
+    font-size:24px;
+    line-height:1.2;
+    font-weight:900;
+    color:#226529;
+    overflow-wrap:anywhere;
+  }
+  .meta{
+    min-width:58mm;
+    font-size:10.5px;
+    color:#5f6e65;
+    line-height:1.75;
+    text-align:${dir==='rtl'?'left':'right'};
+    direction:${dir};
+  }
+  .meta-row{display:flex;justify-content:space-between;gap:10px}
+  .meta-row span:first-child{color:#7b867f}
+  .meta-row b{font-weight:700;color:#425048}
+  .subject{
+    margin:24px 0 20px;
+    text-align:center;
+    font-size:20px;
+    line-height:1.5;
+    font-weight:900;
+    color:#182018;
+  }
+  .letter-body{
+    font-size:14px;
+    line-height:2.15;
+    text-align:justify;
+    text-justify:inter-word;
+    overflow-wrap:anywhere;
+  }
+  .letter-body p{
+    margin:0 0 12px;
+    unicode-bidi:plaintext;
+  }
+  .letter-body p:last-child{margin-bottom:0}
+  .signature{
+    margin-top:34px;
+    display:flex;
+    justify-content:${dir==='rtl'?'flex-start':'flex-end'};
+  }
+  .signature-box{
+    min-width:58mm;
+    padding-top:10px;
+    border-top:1px solid #cfd8d0;
+    line-height:1.7;
+  }
+  .signature-box b{display:block;font-size:12.5px}
+  .signature-box span{display:block;color:#66736b;font-size:10.5px}
+  .foot{
+    margin-top:auto;
+    padding-top:11px;
+    border-top:1px solid #dde5dc;
+    color:#7b857e;
+    font-size:8.5px;
+    line-height:1.7;
+    text-align:center;
+  }
+  @media print{
+    html,body{background:#fff}
+    .page{
+      width:auto;
+      min-height:297mm;
+      margin:0;
+      padding:15mm 17mm 13mm;
+      box-shadow:none;
+    }
+    @page{size:A4;margin:0}
+  }
+</style>
+</head>
+<body>
+  <main class="page">
+    <header class="head">
+      <div class="brand">${logoHtml(orgName)}</div>
+      <div class="meta">
+        <div class="meta-row"><span>${requestedLanguage==='en'?'Reference':'المرجع'}</span><b>${esc(issuance.reference_no||'—')}</b></div>
+        <div class="meta-row"><span>${requestedLanguage==='en'?'Issue date':'تاريخ الإصدار'}</span><b>${displayDate(issuance.issued_at)}</b></div>
+      </div>
+    </header>
+
+    <h1 class="subject">${esc(subject)}</h1>
+
+    <section class="letter-body">${body}</section>
+
+    ${(signatory||signatoryTitle)?`
+      <section class="signature">
+        <div class="signature-box">
+          ${signatory?`<b>${esc(signatory)}</b>`:''}
+          ${signatoryTitle?`<span>${esc(signatoryTitle)}</span>`:''}
+        </div>
+      </section>`:''}
+
+    <footer class="foot">${
+      requestedLanguage==='en'
+        ?'Generated from the internal Tasky HR record. It is not a government authentication or electronic signature unless a separate official integration is implemented.'
+        :'تم إنشاء هذه النسخة من سجل الموارد البشرية الداخلي في تاسكي. لا تمثل توثيقًا حكوميًا أو توقيعًا إلكترونيًا ما لم تتم إضافة تكامل رسمي مستقل.'
+    }</footer>
+  </main>
+
+  <script>
+    window.addEventListener('load',()=>setTimeout(()=>window.print(),250));
+  <\/script>
+</body>
+</html>`;
+
+    const w=window.open('','_blank');
+    if(!w){
+      if(typeof showTaskyDialog==='function'){
+        showTaskyDialog({
+          title:'HR',
+          message:L('اسمح بالنوافذ المنبثقة لفتح الخطاب.','Allow pop-ups to open the letter.'),
+          tone:'warning'
+        });
+      }
+      return;
+    }
+
+    w.opener=null;
+    w.document.open();
+    w.document.write(html);
+    w.document.close();
+  }
+
+  function install(){
+    attempts++;
+
+    let available=false;
+    try{available=typeof hrPrintIssuanceV78==='function'}catch(_){}
+
+    if(!available){
+      if(attempts<180)setTimeout(install,60);
+      return;
+    }
+
+    window.hrPrintIssuanceV78=printIssuance;
+    try{hrPrintIssuanceV78=printIssuance}catch(_){}
+
+    installed=true;
+    window.TASKY_HR_LETTER_PRINT_FIX_V296=true;
+    window.TASKY_BUILD=BUILD;
+
+    console.info('Tasky V296 — HR issued-letter print renderer fixed');
+  }
+
+  if(typeof window.setActiveNav==='function'&&!window.setActiveNav.__taskyLetterV296){
+    const base=window.setActiveNav;
+    const wrapped=async function(id,...args){
+      const result=await base.call(this,id,...args);
+      if(id==='hr')setTimeout(install,0);
+      return result;
+    };
+    wrapped.__taskyLetterV296=true;
+    window.setActiveNav=wrapped;
+    try{setActiveNav=wrapped}catch(_){}
+  }
+
+  window.taskyHrLetterAuditV296=function(){
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_HR_LETTER_PRINT_FIX_V296,
+      installed,
+      print_function:typeof window.hrPrintIssuanceV78==='function',
+      normalize_literal_newlines:
+        normalizeBreaks('سطر 1\\n\\nسطر 2')==='سطر 1\n\nسطر 2',
+      paragraph_test:
+        bodyHtml('أول\\n\\nثاني').includes('<p>أول</p>')&&
+        bodyHtml('أول\\n\\nثاني').includes('<p>ثاني</p>')
+    };
+  };
+
   setTimeout(install,0);
 })();
 </script>
