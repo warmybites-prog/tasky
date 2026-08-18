@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV299" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V299</div>
+    <div id="taskyBootBuildV300" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V300</div>
   </div>
 </div>
 
@@ -20192,7 +20192,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V299';
+    window.TASKY_BUILD='V300';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26498,7 +26498,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V299';
+  window.TASKY_BUILD='V300';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27074,7 +27074,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V299';
+    window.TASKY_BUILD='V300';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27277,7 +27277,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V299';
+  window.TASKY_BUILD='V300';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27297,7 +27297,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V299';
+    window.TASKY_BUILD='V300';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -29382,7 +29382,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     formObserver:null,
     homeInflight:null,
     homeCache:null,
-    homeCacheAt:0
+    homeCacheAt:0,
+    employee360RenderToken:0,
+    employee360Rendering:false,
+    employee360ReadyId:null,
+    employee360RevealTimer:null
   };
 
   function L(ar,en){
@@ -29672,6 +29676,66 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return true;
   }
 
+  // ---------- Employee 360 single-paint lifecycle (V300) ----------
+  function employee360Overlay(){
+    return document.getElementById('addModalOverlay');
+  }
+
+  function employee360Body(){
+    return document.getElementById('addModalBody');
+  }
+
+  function beginEmployee360Paint(employeeId){
+    const id=String(employeeId||'');
+    state.employeeProfileId=id||null;
+    state.employee360ReadyId=null;
+    state.employee360RenderToken++;
+    state.employee360Rendering=false;
+
+    document.body.classList.add('tasky-employee360-preparing-v300');
+    document.body.classList.remove('tasky-employee360-ready-v300');
+
+    clearTimeout(state.employee360RevealTimer);
+
+    /*
+      Hard safety boundary:
+      even if a future data source fails, never leave the modal hidden.
+    */
+    state.employee360RevealTimer=setTimeout(()=>{
+      revealEmployee360V300(id,'fallback-timeout');
+    },900);
+  }
+
+  function revealEmployee360V300(employeeId,reason='ready'){
+    if(employeeId && state.employeeProfileId && String(employeeId)!==String(state.employeeProfileId))return;
+
+    clearTimeout(state.employee360RevealTimer);
+    state.employee360RevealTimer=null;
+    state.employee360ReadyId=String(employeeId||state.employeeProfileId||'');
+
+    document.body.classList.remove('tasky-employee360-preparing-v300');
+    document.body.classList.add('tasky-employee360-ready-v300');
+
+    const body=employee360Body();
+    if(body){
+      body.dataset.taskyEmployee360ReadyV300='1';
+      body.dataset.taskyEmployee360ReadyReasonV300=reason;
+    }
+  }
+
+  function resetEmployee360Paint(){
+    clearTimeout(state.employee360RevealTimer);
+    state.employee360RevealTimer=null;
+    state.employee360Rendering=false;
+    state.employee360ReadyId=null;
+    state.employeeProfileId=null;
+
+    document.body.classList.remove(
+      'tasky-employee360-preparing-v300',
+      'tasky-employee360-ready-v300'
+    );
+  }
+
   // ---------- Unified Employee 360 ----------
   const MATTER_RULES=[
     [/attendance|حضور/i,'attendance','الحضور','Attendance'],
@@ -29740,68 +29804,172 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return `${Number(v||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2})} ${currency}`;
   }
 
-  async function enhanceEmployee360(employeeId){
-    const root=document.getElementById('addModalBody');
-    if(!root||!employeeId)return false;
+  async function enhanceEmployee360(employeeId,{force=false}={}){
+    const root=employee360Body();
+    const id=String(employeeId||'');
+    if(!root||!id)return false;
+
     const txt=String(root.textContent||'');
-    if(!/Employee\s*360|ملف الموظف|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(txt))return false;
+    if(!/Employee\s*360|ملف الموظف|المدير المباشر|آخر 4 من الهوية|جهة اتصال الطوارئ/i.test(txt)){
+      return false;
+    }
 
-    root.querySelector('.tasky-v299-employee-hub')?.remove();
+    /*
+      V300 ROOT FIX:
+      V299 used to remove .tasky-v299-employee-hub on every MutationObserver pass.
+      Removing it triggered another mutation, which called this function again,
+      creating an endless old/new/old/new repaint loop.
 
-    const comp=await currentCompensation(employeeId);
-    const matters=collectMatters(employeeId);
-    const currency=comp?.currency||'SAR';
-    const total=comp?Number(comp.base_salary||0)+Number(comp.housing_allowance||0)+Number(comp.transport_allowance||0)+Number(comp.other_allowance||0):0;
+      If this employee's hub is already mounted, it is authoritative and we do
+      nothing unless an explicit force refresh is requested.
+    */
+    const existing=root.querySelector('.tasky-v299-employee-hub');
+    if(
+      !force &&
+      existing &&
+      String(existing.dataset.employeeId||'')===id
+    ){
+      revealEmployee360V300(id,'existing-hub');
+      return true;
+    }
 
-    const hub=document.createElement('section');
-    hub.className='tasky-v299-employee-hub';
-    hub.innerHTML=`
-      <div class="tasky-v299-hub-head">
-        <div>
-          <span>EMPLOYEE HUB</span>
-          <h4>${L('ملف الموظف الموحد','Unified employee file')}</h4>
-          <p>${L('الراتب والبدلات والطلبات والعمليات المرتبطة بالموظف في مكان واحد.','Compensation, requests and employee-related activity in one place.')}</p>
+    if(state.employee360Rendering&&!force)return false;
+
+    const token=++state.employee360RenderToken;
+    state.employee360Rendering=true;
+
+    try{
+      const [comp] = await Promise.all([
+        currentCompensation(id)
+      ]);
+
+      /*
+        Another employee may have been opened while the async data was loading.
+        Never paint stale data into the new employee modal.
+      */
+      if(
+        token!==state.employee360RenderToken ||
+        String(state.employeeProfileId||'')!==id
+      ){
+        return false;
+      }
+
+      const matters=collectMatters(id);
+      const currency=comp?.currency||'SAR';
+      const total=comp
+        ?Number(comp.base_salary||0)+
+         Number(comp.housing_allowance||0)+
+         Number(comp.transport_allowance||0)+
+         Number(comp.other_allowance||0)
+        :0;
+
+      let hub=root.querySelector('.tasky-v299-employee-hub');
+
+      if(!hub){
+        hub=document.createElement('section');
+        hub.className='tasky-v299-employee-hub';
+        hub.dataset.employeeId=id;
+
+        const detail=root.querySelector(
+          '.tasky-v263-employee360-scroll .tasky-v263-details-grid,'+
+          '.tasky-v263-employee360-scroll .hr721-private-grid,'+
+          '.tasky-v263-employee360-scroll .tasky-v258-detail-list,'+
+          '.tasky-v263-employee360-scroll .tasky-v258-lock-hero,'+
+          '.tasky-v263-details-grid,.hr721-private-grid,.tasky-v258-detail-list,.tasky-v258-lock-hero'
+        );
+
+        if(detail?.parentElement){
+          detail.insertAdjacentElement('afterend',hub);
+        }else{
+          const scroll=root.querySelector('.tasky-v263-employee360-scroll');
+          if(scroll)scroll.insertAdjacentElement('afterbegin',hub);
+          else root.querySelector('.modal-head')?.insertAdjacentElement('afterend',hub);
+        }
+      }
+
+      /*
+        Update the SAME node instead of remove/recreate.
+        Mutation observers may still see child updates, but the next call exits
+        immediately because this authoritative hub already exists.
+      */
+      hub.dataset.employeeId=id;
+      hub.innerHTML=`
+        <div class="tasky-v299-hub-head">
+          <div>
+            <span>EMPLOYEE HUB</span>
+            <h4>${L('ملف الموظف الموحد','Unified employee file')}</h4>
+            <p>${L(
+              'الراتب والبدلات والطلبات والعمليات المرتبطة بالموظف في مكان واحد.',
+              'Compensation, requests and employee-related activity in one place.'
+            )}</p>
+          </div>
+          <button type="button" class="chip-btn" onclick="hrOpenFormV72('employee','${esc(id)}')">${L('تعديل الملف','Edit profile')}</button>
         </div>
-        <button type="button" class="chip-btn" onclick="hrOpenFormV72('employee','${esc(employeeId)}')">${L('تعديل الملف','Edit profile')}</button>
-      </div>
 
-      <div class="tasky-v299-hub-comp">
-        <div class="tasky-v299-hub-comp-main">
-          <span>${L('إجمالي التعويض الشهري','Monthly compensation')}</span>
-          <b>${comp?money(total,currency):L('غير مسجل','Not recorded')}</b>
-          <small>${comp?`${L('ساري من','Effective')} ${esc(comp.effective_from||'—')}`:L('يمكن إضافته من شاشة تعديل الموظف.','Add it from the employee edit screen.')}</small>
+        <div class="tasky-v299-hub-comp">
+          <div class="tasky-v299-hub-comp-main">
+            <span>${L('إجمالي التعويض الشهري','Monthly compensation')}</span>
+            <b>${comp?money(total,currency):L('غير مسجل','Not recorded')}</b>
+            <small>${comp?`${L('ساري من','Effective')} ${esc(comp.effective_from||'—')}`:L('يمكن إضافته من شاشة تعديل الموظف.','Add it from the employee edit screen.')}</small>
+          </div>
+          <div><span>${L('الراتب الأساسي','Base salary')}</span><b>${comp?money(comp.base_salary,currency):'—'}</b></div>
+          <div><span>${L('بدل السكن','Housing')}</span><b>${comp?money(comp.housing_allowance,currency):'—'}</b></div>
+          <div><span>${L('بدل النقل','Transport')}</span><b>${comp?money(comp.transport_allowance,currency):'—'}</b></div>
+          <div><span>${L('بدلات أخرى','Other allowances')}</span><b>${comp?money(comp.other_allowance,currency):'—'}</b></div>
         </div>
-        <div><span>${L('الراتب الأساسي','Base salary')}</span><b>${comp?money(comp.base_salary,currency):'—'}</b></div>
-        <div><span>${L('بدل السكن','Housing')}</span><b>${comp?money(comp.housing_allowance,currency):'—'}</b></div>
-        <div><span>${L('بدل النقل','Transport')}</span><b>${comp?money(comp.transport_allowance,currency):'—'}</b></div>
-        <div><span>${L('بدلات أخرى','Other allowances')}</span><b>${comp?money(comp.other_allowance,currency):'—'}</b></div>
-      </div>
 
-      <div class="tasky-v299-matters-head">
-        <div>
-          <b>${L('أمور الموظف وطلباته','Employee matters & requests')}</b>
-          <span>${L('يتم التجميع تلقائيًا من سجلات الموارد البشرية المرتبطة بهذا الموظف.','Automatically aggregated from HR records linked to this employee.')}</span>
+        <div class="tasky-v299-matters-head">
+          <div>
+            <b>${L('أمور الموظف وطلباته','Employee matters & requests')}</b>
+            <span>${L(
+              'يتم التجميع تلقائيًا من سجلات الموارد البشرية المرتبطة بهذا الموظف.',
+              'Automatically aggregated from HR records linked to this employee.'
+            )}</span>
+          </div>
         </div>
-      </div>
 
-      <div class="tasky-v299-matters">
-        ${matters.length?matters.map(x=>`
-          <button type="button" onclick="closeAddModal();setHrTabV72('${esc(x.tab)}')">
-            <span>${L(x.ar,x.en)}</span><b>${x.count}</b>
-          </button>`).join(''):
-          `<div class="tasky-v299-no-matters">${L('لا توجد طلبات أو عمليات مرتبطة بالموظف حتى الآن.','No linked employee requests or activity yet.')}</div>`}
-      </div>
+        <div class="tasky-v299-matters">
+          ${matters.length?matters.map(x=>`
+            <button type="button" onclick="closeAddModal();setHrTabV72('${esc(x.tab)}')">
+              <span>${L(x.ar,x.en)}</span><b>${x.count}</b>
+            </button>`).join(''):
+            `<div class="tasky-v299-no-matters">${L(
+              'لا توجد طلبات أو عمليات مرتبطة بالموظف حتى الآن.',
+              'No linked employee requests or activity yet.'
+            )}</div>`}
+        </div>
 
-      <div class="tasky-v299-hub-actions">
-        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('requests')">${L('الطلبات','Requests')}</button>
-        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('documents')">${L('المستندات','Documents')}</button>
-        <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('compensation')">${L('التعويضات','Compensation')}</button>
-      </div>`;
+        <div class="tasky-v299-hub-actions">
+          <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('requests')">${L('الطلبات','Requests')}</button>
+          <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('documents')">${L('المستندات','Documents')}</button>
+          <button type="button" class="chip-btn" onclick="closeAddModal();setHrTabV72('compensation')">${L('التعويضات','Compensation')}</button>
+        </div>`;
 
-    const detail=root.querySelector('.tasky-v258-detail-list,.tasky-v258-lock-hero');
-    if(detail?.parentElement)detail.insertAdjacentElement('afterend',hub);
-    else root.querySelector('.modal-head')?.insertAdjacentElement('afterend',hub);
-    return true;
+      state.employee360ReadyId=id;
+
+      /*
+        Give the older V263/V270 DOM normalizers one animation frame to finish
+        their layout classes before revealing the modal. The user gets one
+        settled Employee360 paint instead of watching the transformations.
+      */
+      requestAnimationFrame(()=>{
+        requestAnimationFrame(()=>{
+          if(String(state.employeeProfileId||'')===id){
+            revealEmployee360V300(id,'enhanced');
+          }
+        });
+      });
+
+      return true;
+    }catch(err){
+      console.warn('Tasky V300 Employee360 enhancement',err);
+      revealEmployee360V300(id,'enhancement-error');
+      return false;
+    }finally{
+      if(token===state.employee360RenderToken){
+        state.employee360Rendering=false;
+      }
+    }
   }
 
   // ---------- Home attendance ----------
@@ -30009,10 +30177,10 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     if(openEmployee&&!openEmployee.__taskyV299){
       const base=openEmployee;
       const wrapped=function(id,...args){
-        state.employeeProfileId=id||null;
+        beginEmployee360Paint(id);
         const result=base.call(this,id,...args);
-        setTimeout(()=>enhanceEmployee360(id),80);
-        setTimeout(()=>enhanceEmployee360(id),300);
+        setTimeout(()=>enhanceEmployee360(id),20);
+        setTimeout(()=>enhanceEmployee360(id),120);
         return result;
       };
       wrapped.__taskyV299=true;
@@ -30041,21 +30209,54 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     const profileMatch=code.match(/hrOpenEmployeeV72\(['"]([^'"]+)['"]/);
     if(profileMatch){
-      state.employeeProfileId=profileMatch[1];
-      setTimeout(()=>enhanceEmployee360(profileMatch[1]),100);
-      setTimeout(()=>enhanceEmployee360(profileMatch[1]),320);
+      beginEmployee360Paint(profileMatch[1]);
+      setTimeout(()=>enhanceEmployee360(profileMatch[1]),20);
+      setTimeout(()=>enhanceEmployee360(profileMatch[1]),120);
     }
   },true);
 
   const modal=document.getElementById('addModalBody');
   if(modal){
-    const observer=new MutationObserver(()=>{
+    const observer=new MutationObserver(mutations=>{
+      /*
+        Ignore our own stable Employee360 hub and compensation subtree.
+        V299 previously observed its own remove/add cycle, causing infinite
+        repaint. V300 reacts only to changes outside authoritative V299 UI.
+      */
+      const relevant=mutations.some(m=>{
+        const target=m.target?.nodeType===1?m.target:m.target?.parentElement;
+        if(!target)return true;
+        if(target.closest?.('.tasky-v299-employee-hub,.tasky-v299-comp-section'))return false;
+
+        const nodes=[...(m.addedNodes||[]),...(m.removedNodes||[])];
+        if(nodes.length&&nodes.every(node=>
+          node?.nodeType===1 &&
+          node.matches?.('.tasky-v299-employee-hub,.tasky-v299-comp-section')
+        ))return false;
+
+        return true;
+      });
+
+      if(!relevant)return;
+
       clearTimeout(observer._taskyV299);
       observer._taskyV299=setTimeout(()=>{
         enhanceEmployeeForm();
-        if(state.employeeProfileId)enhanceEmployee360(state.employeeProfileId);
-      },90);
+
+        if(state.employeeProfileId){
+          const hub=modal.querySelector('.tasky-v299-employee-hub');
+          if(
+            !hub ||
+            String(hub.dataset.employeeId||'')!==String(state.employeeProfileId)
+          ){
+            enhanceEmployee360(state.employeeProfileId);
+          }else{
+            revealEmployee360V300(state.employeeProfileId,'observer-stable');
+          }
+        }
+      },70);
     });
+
     observer.observe(modal,{childList:true,subtree:true});
     state.formObserver=observer;
   }
@@ -30088,6 +30289,23 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       .tasky-v299-comp-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
       .tasky-v299-comp-grid .field{margin:0}
       .tasky-v299-comp-grid .field.full{grid-column:1/-1}
+
+      /*
+         V300 Employee360 single-paint barrier.
+         The backdrop may appear immediately, but the old Employee360 card is
+         never shown while V263/V270/V299 are still transforming the DOM.
+      */
+      body.tasky-employee360-preparing-v300 #addModalOverlay:not(.hidden) #addModalBody{
+        visibility:hidden!important;
+        opacity:0!important;
+        pointer-events:none!important;
+      }
+      body.tasky-employee360-ready-v300 #addModalOverlay:not(.hidden) #addModalBody{
+        visibility:visible!important;
+        opacity:1!important;
+        pointer-events:auto!important;
+        transition:opacity .10s ease!important;
+      }
 
       .tasky-v299-employee-hub{margin:12px 18px!important;border:1px solid var(--border);border-radius:15px;background:var(--paper);padding:12px}
       .tasky-v299-hub-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px}
@@ -30154,6 +30372,17 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     if(installHomeAttendance()||homeAttempts>80)clearInterval(homeTimer);
   },80);
 
+  if(typeof window.closeAddModal==='function'&&!window.closeAddModal.__taskyV300){
+    const closeBaseV300=window.closeAddModal;
+    const closeWrappedV300=function(...args){
+      resetEmployee360Paint();
+      return closeBaseV300.apply(this,args);
+    };
+    closeWrappedV300.__taskyV300=true;
+    window.closeAddModal=closeWrappedV300;
+    try{closeAddModal=closeWrappedV300}catch(_){}
+  }
+
   window.taskyHrBatchAuditV299=function(){
     const root=document.getElementById('addModalBody');
     return {
@@ -30165,13 +30394,19 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       unified_employee_hub:!!root?.querySelector('.tasky-v299-employee-hub'),
       department_position_filter:!!root?.querySelector('[data-tasky-v299-position-filter="1"]'),
       employee_form_context:state.employeeFormContext,
-      employee_profile_id:state.employeeProfileId
+      employee_profile_id:state.employeeProfileId,
+      employee360_rendering:state.employee360Rendering,
+      employee360_ready_id:state.employee360ReadyId,
+      employee360_hub_count:root?.querySelectorAll('.tasky-v299-employee-hub').length||0,
+      employee360_preparing:document.body.classList.contains('tasky-employee360-preparing-v300'),
+      employee360_ready:document.body.classList.contains('tasky-employee360-ready-v300')
     };
   };
 
   window.TASKY_HR_BATCH_V299=true;
-  window.TASKY_BUILD=BUILD;
-  console.info('Tasky V299 — HR batch improvements active');
+  window.TASKY_EMPLOYEE360_SINGLE_PAINT_V300=true;
+  window.TASKY_BUILD='V300';
+  console.info('Tasky V300 — Employee360 single-paint + V299 HR batch active');
 })();
 </script>
 
