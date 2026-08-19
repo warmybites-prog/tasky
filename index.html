@@ -3140,7 +3140,7 @@ html body .sidebar .main-nav,
     <div id="taskyBootLabelV83" class="tasky-boot83-sub">جارٍ التحقق من الجلسة…</div>
     <div class="tasky-boot83-track"><div id="taskyBootBarV83" class="tasky-boot83-bar"></div></div>
     <div id="taskyBootPctV83" class="tasky-boot83-pct">8%</div>
-    <div id="taskyBootBuildV304" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V304</div>
+    <div id="taskyBootBuildV305" style="margin-top:6px;font:700 8px/1.2 Inter,Arial,sans-serif;color:#779276;letter-spacing:.08em">V305</div>
   </div>
 </div>
 
@@ -20320,7 +20320,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
     /* Historical patches may set earlier build values while executing.
        V247 is the final customer build. */
-    window.TASKY_BUILD='V304';
+    window.TASKY_BUILD='V305';
     window.TASKY_BOOT_ARCHITECTURE='single-file-deferred-scripts';
     window.taskyBootstrapAuditV247=function(){
       return {
@@ -26628,7 +26628,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_APPS_SIDEBAR_CATALOG_V288=true;
-  window.TASKY_BUILD='V304';
+  window.TASKY_BUILD='V305';
 
   function taskyV288L(ar,en){
     try{return lang==='ar'?ar:en}catch(_){return document.documentElement.dir==='rtl'?ar:en}
@@ -27204,7 +27204,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     window.TASKY_SELF_CONTAINED_LOGIN_V290=true;
-    window.TASKY_BUILD='V304';
+    window.TASKY_BUILD='V305';
 
     console.info('Tasky V290 — self-contained login ready');
   }
@@ -27418,7 +27418,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   'use strict';
 
   window.TASKY_EMBEDDED_CONNECTION_V292=true;
-  window.TASKY_BUILD='V304';
+  window.TASKY_BUILD='V305';
 
   function bootVisible(){
     const el=document.getElementById('taskyBootV83');
@@ -27438,7 +27438,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   }
 
   function finalize(){
-    window.TASKY_BUILD='V304';
+    window.TASKY_BUILD='V305';
 
     const badge=document.getElementById('taskyBootBuildV292');
     if(badge)badge.textContent='V292';
@@ -27626,6 +27626,23 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     }
   }
 
+  function ceoIdV305(){
+    try{return String(window.taskyOrgCeoIdV305?.()||'')}catch(_){return ''}
+  }
+
+  function departmentReferenceIdV305(deptId){
+    try{return String(window.taskyDepartmentReferenceIdV305?.(deptId)||'')}catch(_){return ''}
+  }
+
+  function departmentReferenceEmployeeV305(deptId){
+    const id=departmentReferenceIdV305(deptId);
+    return id?activeEmployees().find(e=>String(e.id)===id)||null:null;
+  }
+
+  function isCeoV305(e){
+    return !!e&&!!ceoIdV305()&&String(e.id)===ceoIdV305();
+  }
+
   function selectedDeptV302(){
     const requested=String(window.__taskyOrgDepartmentV302||'');
     if(!requested)return '';
@@ -27714,20 +27731,23 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const dept=departmentById(empDeptId(e));
     const pos=positionById(empPositionId(e));
     const isDeptHead=String(departmentHeadId(empDeptId(e))||'')===String(e.id);
+    const isCeo=isCeoV305(e);
+
     return nodeShell(`
       <button type="button" class="org293-person-btn" onclick="hrOpenEmployeeV72('${esc(e.id)}')">
         <div class="org293-person-avatar">
           ${e.avatar_url?`<img src="${esc(e.avatar_url)}" alt="">`:`<span>${esc(employeeInitial(e))}</span>`}
         </div>
         <div class="org293-node-copy">
-          <span>${esc(deptName(dept))}</span>
+          <span>${isCeo?L('القيادة العليا','EXECUTIVE LEADERSHIP'):esc(deptName(dept))}</span>
           <b>${esc(employeeName(e))}</b>
           <small>${esc(posName(pos))}</small>
-          ${isDeptHead?`<em class="org293-head-label"><svg><use href="#i-crown"/></svg>${L('رئيس الإدارة','Department head')}</em>`:''}
+          ${isCeo?`<em class="org305-ceo-label"><svg><use href="#i-crown"/></svg>${L('الرئيس التنفيذي','Chief Executive Officer')}</em>`:''}
+          ${isDeptHead&&!isCeo?`<em class="org293-head-label"><svg><use href="#i-crown"/></svg>${L('رئيس الإدارة','Department head')}</em>`:''}
         </div>
-        ${childrenCount?`<div class="org293-report-count" title="${L('تقارير مباشرة','Direct reports')}">${childrenCount}</div>`:''}
+        ${childrenCount?`<div class="org293-report-count" title="${L('تقارير مباشرة / فروع تنظيمية','Direct reports / branches')}">${childrenCount}</div>`:''}
       </button>
-    `,`person ${isDeptHead?'dept-head':''}`);
+    `,`person ${isDeptHead?'dept-head':''} ${isCeo?'org305-ceo':''}`);
   }
 
   function positionCard(p,employeeCount=0,isLead=false){
@@ -27748,6 +27768,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
     const headId=departmentHeadId(d?.id);
     const head=headId?activeEmployees().find(e=>String(e.id)===String(headId)):null;
+    const reference=departmentReferenceEmployeeV305(d?.id);
+    const referenceIsCeo=reference&&isCeoV305(reference);
 
     return nodeShell(`
       <button
@@ -27761,6 +27783,18 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
           <span>${L('إدارة','DEPARTMENT')}</span>
           <b>${esc(deptName(d))}</b>
           <small>${employeeCount} ${L('موظف','employees')} · ${positionCount} ${L('مسمى','positions')}</small>
+
+          ${reference?`
+            <em class="org305-reference-summary">
+              <svg><use href="#i-git-branch"/></svg>
+              ${L('ترفع إلى','Reports to')}: ${esc(employeeName(reference))}${referenceIsCeo?` · ${L('الرئيس التنفيذي','CEO')}`:''}
+            </em>`:
+            `<em class="org305-reference-summary missing">
+              <svg><use href="#i-alert-triangle"/></svg>
+              ${L('بحاجة إلى مرجع تنظيمي','Reporting reference required')}
+            </em>`
+          }
+
           ${head?`
             <em class="org304-dept-head-summary">
               <svg><use href="#i-crown"/></svg>
@@ -27795,10 +27829,23 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
   }
 
+  function employeesForDepartmentV305(deptId){
+    const id=String(deptId||'');
+    const ceoId=ceoIdV305();
+
+    return sortPeopleV304(
+      activeEmployees()
+        .filter(e=>
+          String(empDeptId(e)||'')===id &&
+          (!ceoId||String(e.id)!==ceoId)
+        )
+        .slice()
+    );
+  }
+
   function vacantPositionsForDepartmentV304(d){
     const deptId=String(d?.id||'');
-    const employees=scopedEmployeesV302()
-      .filter(e=>String(empDeptId(e)||'')===deptId);
+    const employees=employeesForDepartmentV305(deptId);
 
     const occupied=new Set(
       employees
@@ -27806,7 +27853,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         .filter(Boolean)
     );
 
-    const vacant=[...scopedPositionsV302()]
+    const vacant=[...hrPositions()]
       .filter(p=>
         String(positionDeptId(p)||'')===deptId &&
         !occupied.has(String(p.id))
@@ -27817,22 +27864,23 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       );
 
     if(!vacant.length)return '';
-
     return treeList(vacant.map(p=>positionCard(p,0,false)));
   }
 
-  function employeeChildrenForDepartmentV304(d){
-    const deptId=String(d?.id||'');
-    const employees=sortPeopleV304(
-      scopedEmployeesV302()
-        .filter(e=>String(empDeptId(e)||'')===deptId)
-        .slice()
-    );
+  function departmentsReferencingEmployeeV305(employeeId){
+    const id=String(employeeId||'');
+    if(!id)return [];
 
-    if(!employees.length){
-      return vacantPositionsForDepartmentV304(d);
-    }
+    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
 
+    return hrDepartments()
+      .filter(d=>departmentReferenceIdV305(d.id)===id)
+      .slice()
+      .sort((a,b)=>deptName(a).localeCompare(deptName(b),locale));
+  }
+
+  function employeeChildrenMapForDepartmentV305(deptId){
+    const employees=employeesForDepartmentV305(deptId);
     const ids=new Set(employees.map(e=>String(e.id)));
     const children=new Map();
 
@@ -27840,9 +27888,9 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
       const manager=String(empManagerId(e)||'');
 
       /*
-        Reporting lines are kept only when both employees are in this
-        department. A manager in another department does not remove the
-        employee from this department's structural branch.
+        Direct-manager lines are internal to the department.
+        Cross-department structure is represented by the explicit
+        Department -> reference employee mapping instead.
       */
       if(manager&&ids.has(manager)&&manager!==String(e.id)){
         if(!children.has(manager))children.set(manager,[]);
@@ -27851,22 +27899,95 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     });
 
     for(const list of children.values())sortPeopleV304(list);
+    return {employees,ids,children};
+  }
+
+  function renderEmployeeBranchV305(
+    e,
+    departmentId,
+    childrenMap,
+    seenEmployees,
+    seenDepartments,
+    {includeReferencedDepartments=true}={}
+  ){
+    const id=String(e.id);
+
+    if(seenEmployees.has(id)){
+      return employeeCard(e,0);
+    }
+    seenEmployees.add(id);
+
+    const direct=(childrenMap.get(id)||[])
+      .filter(child=>!seenEmployees.has(String(child.id)));
+
+    const childNodes=direct.map(child=>
+      renderEmployeeBranchV305(
+        child,
+        departmentId,
+        childrenMap,
+        seenEmployees,
+        seenDepartments,
+        {includeReferencedDepartments}
+      )
+    );
+
+    if(includeReferencedDepartments){
+      const attached=departmentsReferencingEmployeeV305(id);
+
+      for(const d of attached){
+        const dId=String(d.id);
+        if(seenDepartments.has(dId))continue;
+
+        childNodes.push(
+          renderDepartmentBranchV305(
+            d,
+            seenDepartments,
+            seenEmployees,
+            {includeReferencedDepartments:true}
+          )
+        );
+      }
+    }
+
+    return `${employeeCard(e,childNodes.length)}${treeList(childNodes)}`;
+  }
+
+  function departmentEmployeeTreeV305(
+    d,
+    seenDepartments,
+    seenEmployees,
+    {includeReferencedDepartments=true}={}
+  ){
+    const deptId=String(d?.id||'');
+    const {employees,ids,children}=employeeChildrenMapForDepartmentV305(deptId);
+
+    if(!employees.length){
+      return vacantPositionsForDepartmentV304(d);
+    }
 
     const explicitHeadId=String(departmentHeadId(deptId)||'');
     const explicitHead=explicitHeadId
       ?employees.find(e=>String(e.id)===explicitHeadId)||null
       :null;
 
-    const seen=new Set();
     const nodes=[];
 
     /*
-      An explicitly assigned department head is always the first employee
-      level under the Department node. This is a business assignment, not
-      a title inference. Its direct reports still use manager_employee_id.
+      Department head remains an explicit business role. It becomes the first
+      internal employee branch, but does not control the department's parent.
+      The department parent is controlled by the V305 reporting reference.
     */
-    if(explicitHead){
-      nodes.push(renderEmployeeBranch(explicitHead,children,seen));
+    if(explicitHead&&!seenEmployees.has(String(explicitHead.id))){
+      nodes.push(
+        renderEmployeeBranchV305(
+          explicitHead,
+          deptId,
+          children,
+          seenEmployees,
+          seenDepartments,
+          {includeReferencedDepartments}
+        )
+      );
     }
 
     const roots=sortPeopleV304(
@@ -27879,19 +28000,35 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     );
 
     roots.forEach(e=>{
-      if(!seen.has(String(e.id))){
-        nodes.push(renderEmployeeBranch(e,children,seen));
+      if(!seenEmployees.has(String(e.id))){
+        nodes.push(
+          renderEmployeeBranchV305(
+            e,
+            deptId,
+            children,
+            seenEmployees,
+            seenDepartments,
+            {includeReferencedDepartments}
+          )
+        );
       }
     });
 
     /*
-      Protect against cyclic/broken reporting data: no employee disappears.
-      Any employee not reachable from an explicit head/root becomes another
-      branch under the Department node.
+      Broken/cyclic direct-manager data must never hide an employee.
     */
     employees.forEach(e=>{
-      if(!seen.has(String(e.id))){
-        nodes.push(renderEmployeeBranch(e,children,seen));
+      if(!seenEmployees.has(String(e.id))){
+        nodes.push(
+          renderEmployeeBranchV305(
+            e,
+            deptId,
+            children,
+            seenEmployees,
+            seenDepartments,
+            {includeReferencedDepartments}
+          )
+        );
       }
     });
 
@@ -27901,127 +28038,205 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     return treeList(nodes);
   }
 
-  function unassignedDepartmentCardV304(employeeCount){
-    return nodeShell(`
-      <div class="org304-unassigned-card">
-        <div class="org293-dept-icon"><svg><use href="#i-users"/></svg></div>
-        <div class="org293-node-copy">
-          <span>${L('بحاجة إلى تنظيم','NEEDS ASSIGNMENT')}</span>
-          <b>${L('بدون إدارة','No department')}</b>
-          <small>${employeeCount} ${L('موظف','employees')}</small>
-        </div>
-      </div>
-    `,'department org304-unassigned');
-  }
-
-  function unassignedEmployeesTreeV304(){
-    const knownDepartments=new Set(
-      hrDepartments().map(d=>String(d.id))
-    );
-
-    const people=sortPeopleV304(
-      scopedEmployeesV302().filter(e=>{
-        const d=String(empDeptId(e)||'');
-        return !d||!knownDepartments.has(d);
-      }).slice()
-    );
-
-    if(!people.length)return '';
-
-    const ids=new Set(people.map(e=>String(e.id)));
-    const children=new Map();
-
-    people.forEach(e=>{
-      const manager=String(empManagerId(e)||'');
-      if(manager&&ids.has(manager)&&manager!==String(e.id)){
-        if(!children.has(manager))children.set(manager,[]);
-        children.get(manager).push(e);
-      }
-    });
-
-    const seen=new Set();
-    const roots=people.filter(e=>{
-      const manager=String(empManagerId(e)||'');
-      return !manager||!ids.has(manager)||manager===String(e.id);
-    });
-
-    const branches=sortPeopleV304(roots).map(
-      e=>renderEmployeeBranch(e,children,seen)
-    );
-
-    people.forEach(e=>{
-      if(!seen.has(String(e.id))){
-        branches.push(renderEmployeeBranch(e,children,seen));
-      }
-    });
-
-    return `${unassignedDepartmentCardV304(people.length)}${treeList(branches)}`;
-  }
-
-  function departmentBranchV304(d){
+  function renderDepartmentBranchV305(
+    d,
+    seenDepartments,
+    seenEmployees,
+    {includeReferencedDepartments=true}={}
+  ){
     const deptId=String(d?.id||'');
 
-    const employees=scopedEmployeesV302()
-      .filter(e=>String(empDeptId(e)||'')===deptId);
+    if(seenDepartments.has(deptId)){
+      return departmentCard(d,0,0);
+    }
+    seenDepartments.add(deptId);
 
-    const positions=scopedPositionsV302()
+    const employees=employeesForDepartmentV305(deptId);
+    const positions=hrPositions()
       .filter(p=>String(positionDeptId(p)||'')===deptId);
 
-    return `${departmentCard(d,employees.length,positions.length)}${employeeChildrenForDepartmentV304(d)}`;
+    return `${departmentCard(d,employees.length,positions.length)}${
+      departmentEmployeeTreeV305(
+        d,
+        seenDepartments,
+        seenEmployees,
+        {includeReferencedDepartments}
+      )
+    }`;
   }
 
-  function departmentOrgTreeV304(){
-    const locale=typeof lang!=='undefined'&&lang==='en'?'en':'ar';
+  function unlinkedGroupCardV305(count){
+    return nodeShell(`
+      <div class="org305-unlinked-card">
+        <div class="org293-dept-icon"><svg><use href="#i-alert-triangle"/></svg></div>
+        <div class="org293-node-copy">
+          <span>${L('بحاجة إلى تنظيم','STRUCTURE REQUIRED')}</span>
+          <b>${L('إدارات بدون مرجع تنظيمي','Departments without reporting reference')}</b>
+          <small>${count} ${L('إدارة','departments')}</small>
+        </div>
+      </div>
+    `,'department org305-unlinked');
+  }
 
-    const depts=[...scopedDepartmentsV302()]
-      .sort((a,b)=>deptName(a).localeCompare(deptName(b),locale));
+  function noCeoCardV305(){
+    const canManage=typeof hrCanManage72==='function'&&hrCanManage72();
 
-    const nodes=depts.map(d=>departmentBranchV304(d));
+    return nodeShell(`
+      <div class="org305-no-ceo-card">
+        <div class="org293-company-icon"><svg><use href="#i-crown"/></svg></div>
+        <div class="org293-node-copy">
+          <span>${L('إعداد مطلوب','SETUP REQUIRED')}</span>
+          <b>${L('حدد الرئيس التنفيذي','Select the CEO')}</b>
+          <small>${L('الرئيس التنفيذي هو نقطة البداية للهيكل المرجعي.','The CEO is the root of the reporting structure.')}</small>
+        </div>
+        ${canManage?`
+          <button type="button" class="org305-inline-setup" onclick="taskyOpenOrgStructureSettingsV305()">
+            ${L('إعداد الهيكل','Configure')}
+          </button>`:''}
+      </div>
+    `,'person org305-no-ceo');
+  }
 
-    /*
-      In the complete organization view, employees without a valid department
-      remain visible under a clearly labeled maintenance branch.
-    */
-    if(!selectedDeptV302()){
-      const unassigned=unassignedEmployeesTreeV304();
-      if(unassigned)nodes.push(unassigned);
+  function fullOrgTreeV305(){
+    const ceoId=ceoIdV305();
+    const ceo=ceoId
+      ?activeEmployees().find(e=>String(e.id)===ceoId)||null
+      :null;
+
+    const seenDepartments=new Set();
+    const seenEmployees=new Set();
+
+    const rootNodes=[];
+
+    if(ceo){
+      seenEmployees.add(String(ceo.id));
+
+      const attached=departmentsReferencingEmployeeV305(ceo.id);
+      const ceoChildren=[];
+
+      for(const d of attached){
+        ceoChildren.push(
+          renderDepartmentBranchV305(
+            d,
+            seenDepartments,
+            seenEmployees,
+            {includeReferencedDepartments:true}
+          )
+        );
+      }
+
+      rootNodes.push(`${employeeCard(ceo,ceoChildren.length)}${treeList(ceoChildren)}`);
+    }else{
+      rootNodes.push(noCeoCardV305());
     }
 
-    return treeList(nodes);
+    /*
+      Departments that are not reachable from the CEO graph remain visible
+      in a maintenance branch. This exposes missing references and cycles
+      instead of silently dropping organizational units.
+    */
+    const unresolved=hrDepartments().filter(d=>!seenDepartments.has(String(d.id)));
+
+    if(unresolved.length){
+      const unresolvedNodes=[];
+
+      for(const d of unresolved){
+        if(seenDepartments.has(String(d.id)))continue;
+
+        unresolvedNodes.push(
+          renderDepartmentBranchV305(
+            d,
+            seenDepartments,
+            seenEmployees,
+            {includeReferencedDepartments:true}
+          )
+        );
+      }
+
+      rootNodes.push(
+        `${unlinkedGroupCardV305(unresolved.length)}${treeList(unresolvedNodes)}`
+      );
+    }
+
+    return treeList(rootNodes);
+  }
+
+  function selectedDepartmentTreeV305(){
+    const selected=selectedDeptV302();
+    if(!selected)return '';
+
+    const d=departmentById(selected);
+    if(!d)return '';
+
+    const seenDepartments=new Set([String(d.id)]);
+    const seenEmployees=new Set();
+
+    /*
+      Department filter intentionally shows that department only.
+      Its card still displays "Reports to", giving the parent reference
+      without pulling downstream departments into the filtered view.
+    */
+    return departmentEmployeeTreeV305(
+      d,
+      seenDepartments,
+      seenEmployees,
+      {includeReferencedDepartments:false}
+    );
   }
 
   function employeeReportingTree(){
-    const selected=selectedDeptV302();
-
-    if(selected){
-      const d=departmentById(selected);
-      return d?employeeChildrenForDepartmentV304(d):'';
-    }
-
-    return departmentOrgTreeV304();
+    return selectedDeptV302()
+      ?selectedDepartmentTreeV305()
+      :fullOrgTreeV305();
   }
 
   function departmentPositionTree(){
-    return departmentOrgTreeV304();
+    return selectedDeptV302()
+      ?selectedDepartmentTreeV305()
+      :fullOrgTreeV305();
   }
 
   function metrics(){
     const employees=scopedEmployeesV302();
     const departments=scopedDepartmentsV302();
     const positions=scopedPositionsV302();
+
     const validIds=new Set(employees.map(e=>String(e.id)));
-    const linked=employees.filter(e=>empManagerId(e)&&validIds.has(String(empManagerId(e)))).length;
-    const occupied=new Set(employees.map(e=>String(empPositionId(e)||'')).filter(Boolean));
+    const linked=employees
+      .filter(e=>empManagerId(e)&&validIds.has(String(empManagerId(e))))
+      .length;
+
+    const occupied=new Set(
+      employees.map(e=>String(empPositionId(e)||'')).filter(Boolean)
+    );
     const vacant=positions.filter(p=>!occupied.has(String(p.id))).length;
-    const completion=employees.length>1?Math.round((linked/(employees.length-1))*100):0;
+
+    const reportingCompletion=employees.length>1
+      ?Math.round((linked/(employees.length-1))*100)
+      :0;
+
+    const refs=departments
+      .filter(d=>!!departmentReferenceIdV305(d.id))
+      .length;
+
+    const refCompletion=departments.length
+      ?Math.round((refs/departments.length)*100)
+      :100;
 
     return `
-      <div class="org293-metrics">
+      <div class="org293-metrics org305-metrics">
         <div><span>${L('الإدارات','Departments')}</span><b>${departments.length}</b></div>
         <div><span>${L('الموظفون','Employees')}</span><b>${employees.length}</b></div>
         <div><span>${L('المسميات','Positions')}</span><b>${positions.length}</b></div>
         <div><span>${L('المسميات الشاغرة','Vacant positions')}</span><b>${vacant}</b></div>
-        <div><span>${L('اكتمال خطوط التقارير','Reporting lines')}</span><b>${employees.length>1?completion+'%':'—'}</b></div>
+        <div class="${refCompletion<100?'warn':''}">
+          <span>${L('مراجع الإدارات','Department references')}</span>
+          <b>${refCompletion}%</b>
+        </div>
+        <div>
+          <span>${L('خطوط المدير المباشر','Direct-manager lines')}</span>
+          <b>${employees.length>1?reportingCompletion+'%':'—'}</b>
+        </div>
       </div>`;
   }
 
@@ -28071,8 +28286,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             <span class="org293-eyebrow">ORG CHART</span>
             <h3>${L('الهيكل التنظيمي','Organization chart')}</h3>
             <p>${L(
-              'يبدأ الهيكل بالمنظمة ثم الإدارات كبطاقات مستقلة، وبعد كل إدارة يظهر رئيسها المحدد صراحةً وخطوط التقارير داخلها. «رئيس الإدارة» لا يتم استنتاجه من المسمى الوظيفي.',
-              'The chart starts with the organization, then structural Department nodes. Each department contains its explicitly assigned head and internal reporting lines. Department head is never inferred from a job title.'
+              'يعتمد الهيكل على مراجع صريحة: تحدد الرئيس التنفيذي أولًا، ثم تحدد لكل إدارة الموظف الذي ترفع إليه. يمكن لإدارة أن ترفع مباشرة للرئيس التنفيذي أو لشخص في إدارة أخرى، بينما تستخدم علاقة «المدير المباشر» لترتيب الموظفين داخل الإدارة.',
+              'The chart uses explicit reporting references: select the CEO first, then choose the employee each department reports to. A department may report directly to the CEO or to a person in another department; direct-manager relationships organize employees inside each department.'
             )}</p>
           </div>
 
@@ -28092,6 +28307,10 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             </button>
 
             ${canManage?`
+              <button type="button" class="org305-structure-btn" onclick="taskyOpenOrgStructureSettingsV305()">
+                <svg><use href="#i-git-branch"/></svg>
+                ${L('إعداد المراجع','Reporting setup')}
+              </button>
               <button class="chip-btn" onclick="hrOpenFormV72('department')">+ ${L('إدارة','Department')}</button>
               <button class="chip-btn" onclick="hrOpenFormV72('position')">+ ${L('مسمى','Position')}</button>
             `:''}
@@ -28135,8 +28354,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
             <div>
               <b>${L('كيف يتم ترتيب الهيكل؟','How is the hierarchy built?')}</b>
               <span>${L(
-                'المنظمة تتفرع أولًا إلى الإدارات. داخل كل إدارة تُستخدم علاقة «المدير المباشر» لترتيب الموظفين، بينما علامة «رئيس الإدارة» لا تظهر إلا للموظف المحدد صراحةً في إعدادات الإدارة.',
-                'The organization branches into Departments first. Inside each department, direct-manager relationships arrange employees; the Department head badge appears only for the employee explicitly assigned in department settings.'
+                'المسار التنظيمي الخارجي تحدده «مراجع الإدارات»: مثال، التسويق ← موظف في الإدارة التنفيذية ← الإدارة التنفيذية ← الرئيس التنفيذي. داخل الإدارة نفسها تستمر علاقة «المدير المباشر». رئيس الإدارة والمرجع التنظيمي وظيفتان منفصلتان.',
+                'Cross-department hierarchy follows Department reporting references: for example Marketing → an Executive employee → Executive Department → CEO. Direct-manager relationships continue inside each department. Department head and reporting reference are separate concepts.'
               )}</span>
             </div>
           </div>`:''}
@@ -28172,9 +28391,10 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     installed=true;
     window.TASKY_HR_ORG_CHART_V293=true;
     window.TASKY_ORG_DEPARTMENT_FIRST_V304=true;
+    window.TASKY_ORG_REPORTING_REFERENCES_V305=true;
     window.TASKY_BUILD=BUILD;
 
-    console.info('Tasky V304 — department-first HR organization chart installed');
+    console.info('Tasky V305 — employee-referenced organization hierarchy installed');
     return true;
   };
 
@@ -28304,6 +28524,105 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
         display:flex;
         align-items:center;
         gap:9px;
+      }
+      .org305-ceo-label{
+        display:inline-flex!important;
+        align-items:center;
+        gap:4px;
+        width:max-content;
+        max-width:100%;
+        margin-top:5px;
+        padding:3px 7px;
+        border-radius:999px;
+        background:var(--green);
+        color:white;
+        font-style:normal;
+        font-size:6.8px;
+        font-weight:950;
+      }
+      .org305-ceo-label svg{width:9px;height:9px;flex:none}
+      .org293-node.person.org305-ceo{
+        width:202px;
+        border:2px solid color-mix(in srgb,var(--green) 58%,var(--border));
+        background:linear-gradient(145deg,color-mix(in srgb,var(--green-tint) 60%,var(--paper)),var(--paper));
+        box-shadow:0 13px 30px rgba(42,108,46,.13);
+      }
+      .org305-reference-summary{
+        display:flex!important;
+        align-items:center;
+        gap:4px;
+        width:max-content;
+        max-width:100%;
+        margin-top:5px;
+        padding:3px 6px;
+        border-radius:999px;
+        background:color-mix(in srgb,var(--blue) 9%,var(--paper));
+        color:var(--blue);
+        font-style:normal;
+        font-size:6.5px;
+        font-weight:900;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .org305-reference-summary svg{width:8px;height:8px;flex:none}
+      .org305-reference-summary.missing{
+        background:color-mix(in srgb,var(--amber) 12%,var(--paper));
+        color:var(--amber);
+      }
+      .org305-structure-btn{
+        min-height:34px;
+        display:inline-flex;
+        align-items:center;
+        gap:6px;
+        padding:0 10px;
+        border:1px solid color-mix(in srgb,var(--green) 34%,var(--border));
+        border-radius:10px;
+        background:var(--green);
+        color:white;
+        font:inherit;
+        font-size:8px;
+        font-weight:900;
+      }
+      .org305-structure-btn svg{width:14px;height:14px}
+      .org305-metrics .warn{
+        border-color:color-mix(in srgb,var(--amber) 40%,var(--border));
+        background:color-mix(in srgb,var(--amber-tint) 40%,var(--paper));
+      }
+      .org305-metrics .warn b{color:var(--amber)}
+      .org293-node.org305-unlinked{
+        width:220px;
+        border-style:dashed;
+        border-color:color-mix(in srgb,var(--amber) 50%,var(--border));
+        background:color-mix(in srgb,var(--amber-tint) 40%,var(--paper));
+      }
+      .org305-unlinked-card,.org305-no-ceo-card{
+        width:100%;
+        min-height:76px;
+        display:flex;
+        align-items:center;
+        gap:9px;
+        padding:10px;
+        position:relative;
+      }
+      .org293-node.org305-no-ceo{
+        width:224px;
+        border-style:dashed;
+        border-color:color-mix(in srgb,var(--amber) 48%,var(--border));
+        background:color-mix(in srgb,var(--amber-tint) 35%,var(--paper));
+      }
+      .org305-inline-setup{
+        position:absolute;
+        inset-inline-end:7px;
+        bottom:7px;
+        border:1px solid color-mix(in srgb,var(--green) 30%,var(--border));
+        border-radius:7px;
+        background:var(--green-tint);
+        color:var(--green);
+        padding:4px 6px;
+        font:inherit;
+        font-size:6.8px;
+        font-weight:900;
       }
       .org293-node.person{border-color:color-mix(in srgb,var(--green) 20%,var(--border))}
       .org293-node.person.dept-head{
@@ -30880,7 +31199,7 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
 
   window.TASKY_HR_BATCH_V299=true;
   window.TASKY_EMPLOYEE360_SINGLE_PAINT_V300=true;
-  window.TASKY_BUILD='V304';
+  window.TASKY_BUILD='V305';
   console.info('Tasky V300 — Employee360 single-paint + V299 HR batch active');
 })();
 </script>
@@ -32112,6 +32431,11 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   .org293-node-copy small{font-size:7.5px;color:#758078;margin-top:3px}
   .org293-head-label{display:inline-flex!important;align-items:center;gap:3px;margin-top:5px;padding:3px 6px;border-radius:999px;background:#dfeeda;color:#2A6C2E;font-style:normal;font-size:6.5px;font-weight:900}
   .org304-dept-head-summary{display:block!important;margin-top:4px;padding:3px 5px;border-radius:999px;background:#e3f0df;color:#2A6C2E;font-style:normal;font-size:6.2px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .org305-reference-summary{display:block!important;margin-top:4px;padding:3px 5px;border-radius:999px;background:#eef5f7;color:#346878;font-style:normal;font-size:6.1px;font-weight:900;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .org305-reference-summary.missing{background:#fbf1dc;color:#9a6a12}
+  .org305-ceo-label{display:block!important;margin-top:4px;padding:3px 5px;border-radius:999px;background:#2A6C2E;color:#fff;font-style:normal;font-size:6.2px;font-weight:900}
+  .org293-node.person.org305-ceo{border:2px solid #2A6C2E!important;background:#eef7ec!important}
+  .org293-node.org305-unlinked,.org293-node.org305-no-ceo{border-style:dashed!important;border-color:#c7a35b!important;background:#fcf7eb!important}
   .org304-dept-edit{display:none!important}
   .org293-node.org304-unassigned{border-style:dashed!important;border-color:#c5a85d!important;background:#fbf7ec!important}
   .org293-report-count{position:absolute;inset-inline-end:7px;top:7px;min-width:20px;height:20px;border-radius:999px;display:grid;place-items:center;background:#dfeeda;color:#2A6C2E;font-size:7px;font-weight:900}
@@ -32137,8 +32461,8 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
     ${clone.outerHTML}
 
     <footer class="print-foot">${L(
-      'تم استخراج هذا الهيكل من تاسكي حسب الإدارات الحالية، ورؤساء الإدارات المحددين صراحةً، وخطوط المدير المباشر.',
-      'This chart was exported from Tasky using the current departments, explicitly assigned department heads, and direct reporting lines.'
+      'تم استخراج هذا الهيكل من تاسكي حسب الرئيس التنفيذي المحدد، ومراجع الإدارات، ورؤساء الإدارات، وخطوط المدير المباشر.',
+      'This chart was exported from Tasky using the selected CEO, department reporting references, explicit department heads, and direct reporting lines.'
     )}</footer>
   </main>
   <script>window.addEventListener('load',()=>setTimeout(()=>window.print(),250));<\/script>
@@ -32728,9 +33052,802 @@ console.info('Tasky build V234 — generation-safe native navigation + fixed sid
   };
 
   window.TASKY_ORG_DEPARTMENT_FIRST_V304=true;
-  window.TASKY_BUILD='V304';
+  window.TASKY_BUILD='V305';
 
   console.info('Tasky V304 — organization now renders Company → Department → Employees');
+})();
+</script>
+
+
+<script id="tasky-v305-org-reporting-references-js">
+(function(){
+  'use strict';
+
+  const BUILD='V305';
+
+  const state={
+    ceoId:null,
+    references:new Map(),
+    loadedWorkspace:null,
+    loadPromise:null,
+    saving:false
+  };
+
+  function L(ar,en){
+    try{return typeof lang!=='undefined'&&lang==='en'?en:ar}catch(_){return ar}
+  }
+
+  function esc(v){
+    const s=String(v??'');
+    try{return typeof escapeHtml==='function'?escapeHtml(s):s}catch(_){return s}
+  }
+
+  function client(){
+    try{
+      if(typeof sb!=='undefined'&&sb)return sb;
+    }catch(_){}
+    return window.sb||null;
+  }
+
+  function hrState(){
+    try{
+      if(typeof hrV72!=='undefined'&&hrV72)return hrV72;
+    }catch(_){}
+    return window.hrV72||window.__taskyHrDataV295||{};
+  }
+
+  function employees(){
+    const s=hrState();
+    const rows=Array.isArray(s?.employees)?s.employees:
+      Array.isArray(s?.employee_rows)?s.employee_rows:
+      Array.isArray(s?.employeeRows)?s.employeeRows:[];
+
+    return rows.filter(e=>{
+      const status=String(e?.status||e?.employment_status||'active').toLowerCase();
+      return !['terminated','offboarded','deleted'].includes(status);
+    });
+  }
+
+  function departments(){
+    const s=hrState();
+    return Array.isArray(s?.departments)?s.departments:
+      Array.isArray(s?.department_rows)?s.department_rows:
+      Array.isArray(s?.departmentRows)?s.departmentRows:[];
+  }
+
+  function empDeptId(e){
+    return e?.department_id??e?.departmentId??e?.dept_id??e?.department?.id??null;
+  }
+
+  function employeeName(e){
+    if(!e)return '—';
+    try{
+      if(typeof hrName72==='function')return hrName72(e);
+    }catch(_){}
+
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(e.full_name_en||e.full_name_ar||e.name||e.email||'—')
+      :(e.full_name_ar||e.full_name_en||e.name||e.email||'—');
+  }
+
+  function departmentName(d){
+    if(!d)return '—';
+    return typeof lang!=='undefined'&&lang==='en'
+      ?(d.name_en||d.name_ar||d.name||'—')
+      :(d.name_ar||d.name_en||d.name||'—');
+  }
+
+  function departmentById(id){
+    return departments().find(d=>String(d.id)===String(id))||null;
+  }
+
+  function employeeById(id){
+    return employees().find(e=>String(e.id)===String(id))||null;
+  }
+
+  window.taskyOrgCeoIdV305=function(){
+    const id=String(state.ceoId||'');
+    return id&&employeeById(id)?id:null;
+  };
+
+  window.taskyDepartmentReferenceIdV305=function(departmentId){
+    const id=String(departmentId||'');
+    const employeeId=String(state.references.get(id)||'');
+
+    if(!employeeId||!employeeById(employeeId))return null;
+    return employeeId;
+  };
+
+  async function load({force=false,render=false}={}){
+    const ws=String(currentWorkspaceId||'');
+    if(!ws)return false;
+
+    if(!force&&state.loadedWorkspace===ws&&!state.loadPromise)return true;
+    if(state.loadPromise)return state.loadPromise;
+
+    const c=client();
+    if(!c)return false;
+
+    state.loadPromise=(async()=>{
+      const [settingsRes,refsRes]=await Promise.all([
+        c.from('tasky_hr_org_settings_v305')
+          .select('ceo_employee_id')
+          .eq('workspace_id',currentWorkspaceId)
+          .maybeSingle(),
+
+        c.from('tasky_hr_department_reporting_v305')
+          .select('department_id,reports_to_employee_id')
+          .eq('workspace_id',currentWorkspaceId)
+      ]);
+
+      if(settingsRes.error)throw settingsRes.error;
+      if(refsRes.error)throw refsRes.error;
+
+      state.ceoId=settingsRes.data?.ceo_employee_id||null;
+      state.references.clear();
+
+      for(const row of refsRes.data||[]){
+        state.references.set(
+          String(row.department_id),
+          String(row.reports_to_employee_id)
+        );
+      }
+
+      state.loadedWorkspace=ws;
+
+      if(render){
+        try{
+          if(activeNav==='hr'&&typeof hrActiveTabV72!=='undefined'&&hrActiveTabV72==='org'){
+            renderModule();
+          }
+        }catch(_){}
+      }
+
+      return true;
+    })().catch(err=>{
+      console.warn('Tasky V305 org structure load',err);
+      return false;
+    }).finally(()=>{
+      state.loadPromise=null;
+    });
+
+    return state.loadPromise;
+  }
+
+  function optionLabel(e){
+    const dept=departmentById(empDeptId(e));
+    const suffix=dept?` — ${departmentName(dept)}`:'';
+    return `${employeeName(e)}${suffix}`;
+  }
+
+  function referenceOptions(departmentId,selectedEmployeeId,ceoId){
+    const deptId=String(departmentId||'');
+    const ceo=String(ceoId||'');
+
+    return employees()
+      .slice()
+      .sort((a,b)=>employeeName(a).localeCompare(
+        employeeName(b),
+        typeof lang!=='undefined'&&lang==='en'?'en':'ar'
+      ))
+      .map(e=>{
+        const employeeId=String(e.id);
+        const sameDepartment=String(empDeptId(e)||'')===deptId;
+        const allowed=!sameDepartment||employeeId===ceo;
+        const isSelected=employeeId===String(selectedEmployeeId||'');
+
+        return `<option
+          value="${esc(employeeId)}"
+          ${isSelected?'selected':''}
+          ${!allowed&&!isSelected?'disabled':''}
+        >${esc(optionLabel(e))}${employeeId===ceo?` · ${L('الرئيس التنفيذي','CEO')}`:''}</option>`;
+      })
+      .join('');
+  }
+
+  function structureDraft(){
+    const root=document.getElementById('addModalBody');
+    const ceoId=String(root?.querySelector('#taskyV305Ceo')?.value||'');
+
+    const links=[...root?.querySelectorAll('[data-v305-department-reference]')||[]]
+      .map(select=>({
+        department_id:String(select.dataset.departmentId||''),
+        reports_to_employee_id:String(select.value||'')
+      }));
+
+    return {ceoId,links};
+  }
+
+  function detectCycle(draft){
+    const ceoId=String(draft.ceoId||'');
+
+    /*
+      Department dependency:
+      department A -> department of the employee A reports to.
+      CEO is the terminal root and therefore has no parent department.
+    */
+    const parentByDepartment=new Map();
+
+    for(const link of draft.links){
+      const deptId=String(link.department_id||'');
+      const refId=String(link.reports_to_employee_id||'');
+
+      if(!deptId||!refId)continue;
+
+      if(refId===ceoId){
+        parentByDepartment.set(deptId,null);
+        continue;
+      }
+
+      const ref=employeeById(refId);
+      const parentDept=String(empDeptId(ref)||'');
+
+      parentByDepartment.set(deptId,parentDept||null);
+    }
+
+    for(const deptId of parentByDepartment.keys()){
+      const path=[];
+      const seen=new Set();
+      let current=deptId;
+
+      while(current){
+        if(seen.has(current)){
+          path.push(current);
+          return path;
+        }
+
+        seen.add(current);
+        path.push(current);
+        current=parentByDepartment.get(current)||null;
+      }
+    }
+
+    return null;
+  }
+
+  function validateDraft(draft){
+    if(!draft.ceoId){
+      return L(
+        'حدد الرئيس التنفيذي أولًا؛ فهو نقطة البداية للهيكل التنظيمي.',
+        'Select the CEO first; the CEO is the root of the organization chart.'
+      );
+    }
+
+    if(!employeeById(draft.ceoId)){
+      return L(
+        'الرئيس التنفيذي المحدد غير موجود ضمن الموظفين النشطين.',
+        'The selected CEO is not an active employee.'
+      );
+    }
+
+    const missing=draft.links
+      .filter(link=>!link.reports_to_employee_id)
+      .map(link=>departmentName(departmentById(link.department_id)));
+
+    if(missing.length){
+      return L(
+        `حدد المرجع التنظيمي لكل إدارة. الإدارات الناقصة: ${missing.join('، ')}`,
+        `Select a reporting reference for every department. Missing: ${missing.join(', ')}`
+      );
+    }
+
+    for(const link of draft.links){
+      const deptId=String(link.department_id);
+      const ref=employeeById(link.reports_to_employee_id);
+
+      if(!ref){
+        return L(
+          'أحد المراجع المحددة لم يعد موظفًا نشطًا.',
+          'One of the selected reporting references is no longer an active employee.'
+        );
+      }
+
+      const sameDepartment=String(empDeptId(ref)||'')===deptId;
+
+      /*
+        A normal employee cannot be the parent of their own department.
+        CEO is the only exception because the renderer places the CEO once
+        at the global root, even if their employee profile belongs to the
+        Executive department.
+      */
+      if(sameDepartment&&String(ref.id)!==String(draft.ceoId)){
+        return L(
+          `إدارة «${departmentName(departmentById(deptId))}» لا يمكن أن ترفع إلى موظف داخل نفس الإدارة. اختر شخصًا من إدارة أعلى أو الرئيس التنفيذي.`,
+          `“${departmentName(departmentById(deptId))}” cannot report to an employee in the same department. Select a person in a higher department or the CEO.`
+        );
+      }
+    }
+
+    const cycle=detectCycle(draft);
+    if(cycle){
+      const names=cycle.map(id=>departmentName(departmentById(id))).join(' ← ');
+      return L(
+        `يوجد مسار دائري بين الإدارات: ${names}. عدّل المراجع قبل الحفظ.`,
+        `A circular department path was found: ${names}. Change the reporting references before saving.`
+      );
+    }
+
+    return null;
+  }
+
+  function refreshReferenceSelectRules(){
+    const root=document.getElementById('addModalBody');
+    const ceoId=String(root?.querySelector('#taskyV305Ceo')?.value||'');
+
+    for(const select of root?.querySelectorAll('[data-v305-department-reference]')||[]){
+      const current=String(select.value||'');
+      const departmentId=String(select.dataset.departmentId||'');
+
+      select.innerHTML=`
+        <option value="">${L('— اختر المرجع التنظيمي —','— Select reporting reference —')}</option>
+        ${referenceOptions(departmentId,current,ceoId)}
+      `;
+
+      if(current)select.value=current;
+    }
+  }
+
+  window.taskyOrgSettingsCeoChangedV305=function(){
+    refreshReferenceSelectRules();
+  };
+
+  window.taskySaveOrgStructureV305=async function(button){
+    if(state.saving)return false;
+
+    const draft=structureDraft();
+    const validation=validateDraft(draft);
+
+    if(validation){
+      showTaskyDialog({
+        title:L('راجع الهيكل التنظيمي','Review organization structure'),
+        message:validation,
+        tone:'warning'
+      });
+      return false;
+    }
+
+    state.saving=true;
+
+    const old=button?.innerHTML;
+    if(button){
+      button.disabled=true;
+      button.textContent=L('جاري الحفظ...','Saving...');
+    }
+
+    try{
+      const c=client();
+
+      const {data,error}=await c.rpc('tasky_hr_org_structure_save_v305',{
+        p_workspace_id:currentWorkspaceId,
+        p_ceo_employee_id:draft.ceoId,
+        p_department_links:draft.links
+      });
+
+      if(error)throw error;
+
+      state.ceoId=draft.ceoId;
+      state.references.clear();
+
+      for(const link of draft.links){
+        state.references.set(
+          String(link.department_id),
+          String(link.reports_to_employee_id)
+        );
+      }
+
+      try{closeAddModal()}catch(_){}
+
+      try{
+        if(activeNav==='hr'&&typeof hrActiveTabV72!=='undefined'&&hrActiveTabV72==='org'){
+          renderModule();
+        }
+      }catch(_){}
+
+      taskyToast(
+        L('تم حفظ مراجع الهيكل التنظيمي.','Organization reporting references were saved.'),
+        {tone:'success'}
+      );
+
+      return data||true;
+    }catch(err){
+      showTaskyDialog({
+        title:L('تعذّر حفظ الهيكل التنظيمي','Could not save organization structure'),
+        message:err?.message||String(err),
+        tone:'error'
+      });
+      return false;
+    }finally{
+      state.saving=false;
+
+      if(button){
+        button.disabled=false;
+        button.innerHTML=old||L('حفظ الهيكل','Save structure');
+      }
+    }
+  };
+
+  window.taskyOpenOrgStructureSettingsV305=async function(){
+    await load({force:false,render:false});
+
+    const root=document.getElementById('addModalBody');
+    const overlay=document.getElementById('addModalOverlay');
+
+    if(!root||!overlay)return;
+
+    const ceoId=String(state.ceoId||'');
+
+    const employeeOptions=employees()
+      .slice()
+      .sort((a,b)=>employeeName(a).localeCompare(
+        employeeName(b),
+        typeof lang!=='undefined'&&lang==='en'?'en':'ar'
+      ))
+      .map(e=>`
+        <option value="${esc(e.id)}" ${String(e.id)===ceoId?'selected':''}>
+          ${esc(optionLabel(e))}
+        </option>`)
+      .join('');
+
+    const departmentRows=departments()
+      .slice()
+      .sort((a,b)=>departmentName(a).localeCompare(
+        departmentName(b),
+        typeof lang!=='undefined'&&lang==='en'?'en':'ar'
+      ))
+      .map(d=>{
+        const current=String(state.references.get(String(d.id))||'');
+        const headId=String(window.taskyDepartmentHeadIdV302?.(d.id)||'');
+        const head=employeeById(headId);
+
+        return `
+          <div class="org305-settings-row">
+            <div class="org305-settings-dept">
+              <div class="org305-settings-dept-icon"><svg><use href="#i-building"/></svg></div>
+              <div>
+                <b>${esc(departmentName(d))}</b>
+                <span>${
+                  head
+                    ?`${L('رئيس الإدارة','Department head')}: ${esc(employeeName(head))}`
+                    :L('لا يوجد رئيس إدارة محدد','No department head assigned')
+                }</span>
+              </div>
+            </div>
+
+            <div class="field">
+              <label>${L('ترفع إلى','Reports to')}</label>
+              <select
+                data-v305-department-reference
+                data-department-id="${esc(d.id)}"
+              >
+                <option value="">${L('— اختر المرجع التنظيمي —','— Select reporting reference —')}</option>
+                ${referenceOptions(d.id,current,ceoId)}
+              </select>
+            </div>
+          </div>`;
+      })
+      .join('');
+
+    root.className='modal org305-settings-modal';
+    root.innerHTML=`
+      <div class="modal-head">
+        <div>
+          <span class="org305-settings-kicker">ORG STRUCTURE</span>
+          <h3>${L('إعداد مراجع الهيكل التنظيمي','Organization reporting setup')}</h3>
+          <div class="subtle">${L(
+            'حدد الرئيس التنفيذي ثم حدد الموظف الذي ترفع إليه كل إدارة. المسمى الوظيفي لا ينشئ أي علاقة تلقائية.',
+            'Select the CEO, then choose the employee each department reports to. Job titles never create reporting links automatically.'
+          )}</div>
+        </div>
+
+        <button class="modal-close" type="button" onclick="closeAddModal()">
+          <svg><use href="#i-x"/></svg>
+        </button>
+      </div>
+
+      <div class="org305-settings-body">
+        <section class="org305-ceo-setting">
+          <div class="org305-ceo-setting-icon"><svg><use href="#i-crown"/></svg></div>
+          <div class="field">
+            <label>${L('الرئيس التنفيذي','Chief Executive Officer')}</label>
+            <select id="taskyV305Ceo" onchange="taskyOrgSettingsCeoChangedV305()">
+              <option value="">${L('— اختر الرئيس التنفيذي —','— Select CEO —')}</option>
+              ${employeeOptions}
+            </select>
+            <small>${L(
+              'يظهر مرة واحدة في أعلى الهيكل حتى لو كان ملفه الوظيفي مرتبطًا بالإدارة التنفيذية.',
+              'The CEO appears once at the top of the chart even if their employee profile belongs to the Executive department.'
+            )}</small>
+          </div>
+        </section>
+
+        <div class="org305-settings-explanation">
+          <svg><use href="#i-git-branch"/></svg>
+          <div>
+            <b>${L('مثال على المسار','Example')}</b>
+            <span>${L(
+              'التسويق ← مدير/مسؤول في الإدارة التنفيذية ← الإدارة التنفيذية ← الرئيس التنفيذي. ويمكن جعل المالية أو أي إدارة أخرى ← الرئيس التنفيذي مباشرة.',
+              'Marketing → an Executive manager → Executive Department → CEO. Finance or any other department may report directly to the CEO.'
+            )}</span>
+          </div>
+        </div>
+
+        <section class="org305-settings-list">
+          <div class="org305-settings-list-head">
+            <div>
+              <b>${L('مراجع الإدارات','Department reporting references')}</b>
+              <span>${L('يجب تحديد مرجع لكل إدارة.','Every department requires a reporting reference.')}</span>
+            </div>
+            <em>${departments().length}</em>
+          </div>
+
+          ${departmentRows||`
+            <div class="org305-settings-empty">
+              ${L('لا توجد إدارات بعد.','No departments yet.')}
+            </div>`
+          }
+        </section>
+      </div>
+
+      <div class="org305-settings-footer">
+        <button type="button" class="chip-btn" onclick="closeAddModal()">${L('إلغاء','Cancel')}</button>
+        <button type="button" class="primary-btn" onclick="taskySaveOrgStructureV305(this)">
+          ${L('حفظ الهيكل','Save structure')}
+        </button>
+      </div>`;
+
+    overlay.classList.remove('hidden');
+  };
+
+  function install(){
+    load({
+      render:(()=>{
+        try{return activeNav==='hr'&&hrActiveTabV72==='org'}catch(_){return false}
+      })()
+    });
+  }
+
+  if(typeof window.setActiveNav==='function'&&!window.setActiveNav.__taskyOrgV305){
+    const base=window.setActiveNav;
+
+    const wrapped=async function(id,...args){
+      const result=await base.call(this,id,...args);
+
+      if(id==='hr'){
+        await load({force:false,render:true});
+      }
+
+      return result;
+    };
+
+    wrapped.__taskyOrgV305=true;
+    window.setActiveNav=wrapped;
+    try{setActiveNav=wrapped}catch(_){}
+  }
+
+  if(!document.getElementById('tasky-v305-org-reporting-css')){
+    const style=document.createElement('style');
+    style.id='tasky-v305-org-reporting-css';
+    style.textContent=`
+      #addModalBody.org305-settings-modal{
+        width:min(920px,calc(100vw - 24px));
+        max-width:920px;
+        max-height:min(850px,calc(100dvh - 28px));
+        display:flex;
+        flex-direction:column;
+        overflow:hidden;
+        padding:0;
+      }
+
+      .org305-settings-modal .modal-head{
+        flex:none;
+        padding:14px 16px;
+        border-bottom:1px solid var(--border);
+      }
+      .org305-settings-kicker{
+        display:block;
+        margin-bottom:3px;
+        color:var(--green);
+        font-size:7px;
+        font-weight:950;
+        letter-spacing:.07em;
+      }
+
+      .org305-settings-body{
+        min-height:0;
+        overflow:auto;
+        overscroll-behavior:contain;
+        padding:13px 15px;
+      }
+
+      .org305-ceo-setting{
+        display:grid;
+        grid-template-columns:46px minmax(0,1fr);
+        gap:10px;
+        align-items:start;
+        padding:12px;
+        border:1px solid color-mix(in srgb,var(--green) 34%,var(--border));
+        border-radius:14px;
+        background:linear-gradient(145deg,color-mix(in srgb,var(--green-tint) 58%,var(--paper)),var(--paper));
+      }
+      .org305-ceo-setting-icon{
+        width:46px;
+        height:46px;
+        display:grid;
+        place-items:center;
+        border-radius:13px;
+        background:var(--green);
+        color:white;
+      }
+      .org305-ceo-setting-icon svg{width:20px;height:20px}
+      .org305-ceo-setting .field{margin:0}
+      .org305-ceo-setting small{
+        display:block;
+        margin-top:5px;
+        color:var(--muted);
+        font-size:7.5px;
+        line-height:1.55;
+      }
+
+      .org305-settings-explanation{
+        display:flex;
+        align-items:flex-start;
+        gap:8px;
+        margin-top:10px;
+        padding:9px 10px;
+        border:1px solid color-mix(in srgb,var(--blue) 22%,var(--border));
+        border-radius:11px;
+        background:color-mix(in srgb,var(--blue-tint) 28%,var(--paper));
+      }
+      .org305-settings-explanation>svg{
+        width:16px;height:16px;flex:none;color:var(--blue)
+      }
+      .org305-settings-explanation b{
+        display:block;font-size:8.5px
+      }
+      .org305-settings-explanation span{
+        display:block;
+        margin-top:2px;
+        color:var(--muted);
+        font-size:7.5px;
+        line-height:1.55;
+      }
+
+      .org305-settings-list{
+        margin-top:11px;
+        border:1px solid var(--border);
+        border-radius:14px;
+        overflow:hidden;
+        background:var(--paper);
+      }
+      .org305-settings-list-head{
+        display:flex;
+        align-items:center;
+        justify-content:space-between;
+        gap:10px;
+        padding:10px 12px;
+        border-bottom:1px solid var(--border);
+        background:var(--card);
+      }
+      .org305-settings-list-head b{
+        display:block;font-size:9px
+      }
+      .org305-settings-list-head span{
+        display:block;
+        margin-top:2px;
+        color:var(--muted);
+        font-size:7px
+      }
+      .org305-settings-list-head em{
+        min-width:26px;height:26px;
+        display:grid;place-items:center;
+        border-radius:999px;
+        background:var(--green-tint);
+        color:var(--green);
+        font-size:7.5px;
+        font-style:normal;
+        font-weight:900;
+      }
+
+      .org305-settings-row{
+        display:grid;
+        grid-template-columns:minmax(180px,.8fr) minmax(280px,1.2fr);
+        gap:12px;
+        align-items:center;
+        padding:10px 12px;
+        border-bottom:1px solid var(--border);
+      }
+      .org305-settings-row:last-child{border-bottom:0}
+      .org305-settings-dept{
+        display:flex;
+        align-items:center;
+        gap:8px;
+        min-width:0;
+      }
+      .org305-settings-dept-icon{
+        width:36px;height:36px;flex:0 0 36px;
+        display:grid;place-items:center;
+        border-radius:10px;
+        background:var(--blue-tint);
+        color:var(--blue);
+      }
+      .org305-settings-dept-icon svg{width:15px;height:15px}
+      .org305-settings-dept>div:last-child{min-width:0}
+      .org305-settings-dept b{
+        display:block;
+        font-size:9px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .org305-settings-dept span{
+        display:block;
+        margin-top:2px;
+        color:var(--muted);
+        font-size:7px;
+        white-space:nowrap;
+        overflow:hidden;
+        text-overflow:ellipsis;
+      }
+      .org305-settings-row .field{margin:0}
+      .org305-settings-row label{font-size:7.5px}
+
+      .org305-settings-footer{
+        flex:none;
+        display:flex;
+        align-items:center;
+        justify-content:flex-end;
+        gap:7px;
+        padding:11px 15px;
+        border-top:1px solid var(--border);
+        background:var(--card);
+      }
+
+      .org305-settings-empty{
+        padding:18px;
+        text-align:center;
+        color:var(--muted);
+        font-size:8px;
+      }
+
+      @media(max-width:650px){
+        #addModalBody.org305-settings-modal{
+          width:calc(100vw - 12px);
+          max-height:calc(100dvh - 12px);
+        }
+        .org305-settings-row{
+          grid-template-columns:1fr;
+          gap:7px;
+        }
+        .org305-settings-footer>*{flex:1}
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  window.taskyOrgAuditV305=function(){
+    const tree=document.getElementById('org293Tree');
+    const ceoId=window.taskyOrgCeoIdV305();
+
+    return {
+      build:window.TASKY_BUILD||BUILD,
+      patch:!!window.TASKY_ORG_REPORTING_REFERENCES_V305,
+      ceo_employee_id:ceoId,
+      ceo_visible:!!tree?.querySelector('.org305-ceo'),
+      departments_total:departments().length,
+      department_references:state.references.size,
+      references_complete:departments().length===state.references.size,
+      missing_reference_cards:tree?.querySelectorAll('.org305-reference-summary.missing').length||0,
+      unresolved_structure_branch:!!tree?.querySelector('.org305-unlinked'),
+      structure_settings_available:typeof window.taskyOpenOrgStructureSettingsV305==='function'
+    };
+  };
+
+  window.TASKY_ORG_REPORTING_REFERENCES_V305=true;
+  window.TASKY_BUILD=BUILD;
+
+  setTimeout(install,0);
+
+  console.info('Tasky V305 — explicit CEO and department reporting references active');
 })();
 </script>
 
